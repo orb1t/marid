@@ -31,11 +31,11 @@ import org.marid.runtime.beans.BeanMethodArg;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.stream.Stream;
 
 import static java.util.logging.Level.WARNING;
+import static org.marid.annotation.MetaLiteral.l;
 import static org.marid.logging.Log.log;
 import static org.marid.misc.Urls.lines;
 
@@ -69,41 +69,35 @@ public class LibraryBeanDao {
             log(WARNING, "Class {0} is not found", x, type);
             return Stream.empty();
         }
-        final MaridBean maridBean = c.getAnnotation(MaridBean.class);
-        if (maridBean == null) {
+        if (!c.isAnnotationPresent(MaridBean.class)) {
             log(WARNING, "{0} is not annotated with {1}", c, MaridBean.class.getName());
             return Stream.empty();
         }
         final Stream.Builder<LibraryBean> builder = Stream.builder();
         for (final Constructor<?> constructor: c.getConstructors()) {
-            final Annotation annotation = constructor.getParameterCount() == 0
-                    ? maridBean
-                    : constructor.getAnnotation(MaridBeanProducer.class);
-            if (annotation == null) {
+            if (constructor.getParameterCount() > 0 && !constructor.isAnnotationPresent(MaridBeanProducer.class)) {
                 continue;
             }
-            final MetaLiteral literal = new MetaLiteral(c, "D_SERVER_NETWORK", maridBean, annotation);
+            final MetaLiteral literal = l("Bean", "Other", c, "D_SERVER_NETWORK", constructor);
             final Bean bean = new Bean(literal.name, c.getName(), new BeanMethod(constructor, args(constructor)));
             builder.accept(new LibraryBean(bean, literal));
         }
         for (final Method method : c.getMethods()) {
             if (Modifier.isStatic(method.getModifiers())) {
-                final MaridBeanProducer annotation = method.getAnnotation(MaridBeanProducer.class);
-                if (annotation == null) {
+                if (!method.isAnnotationPresent(MaridBeanProducer.class)) {
                     continue;
                 }
-                final MetaLiteral literal = new MetaLiteral(c, "D_SERVER_NETWORK", maridBean, annotation);
+                final MetaLiteral literal = l("Bean", "Other", c, "D_SERVER_NETWORK", method);
                 final Bean bean = new Bean(literal.name, c.getName(), new BeanMethod(method, args(method)));
                 builder.accept(new LibraryBean(bean, literal));
             }
         }
         for (final Field field : c.getFields()) {
             if (Modifier.isStatic(field.getModifiers())) {
-                final MaridBeanProducer annotation = field.getAnnotation(MaridBeanProducer.class);
-                if (annotation == null) {
+                if (!field.isAnnotationPresent(MaridBeanProducer.class)) {
                     continue;
                 }
-                final MetaLiteral literal = new MetaLiteral(c, "D_SERVER_NETWORK", maridBean, annotation);
+                final MetaLiteral literal = l("Bean", "Other", c, "D_SERVER_NETWORK", field);
                 final Bean bean = new Bean(literal.name, c.getName(), new BeanMethod(field));
                 builder.accept(new LibraryBean(bean, literal));
             }

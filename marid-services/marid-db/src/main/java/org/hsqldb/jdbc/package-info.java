@@ -1,6 +1,6 @@
 /*-
  * #%L
- * marid-util
+ * marid-db
  * %%
  * Copyright (C) 2012 - 2017 MARID software development group
  * %%
@@ -19,25 +19,10 @@
  * #L%
  */
 
-package org.marid.annotation;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 /**
  * @author Dmitry Ovchinnikov
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.TYPE, ElementType.METHOD, ElementType.PACKAGE})
-public @interface MetaInfo {
+@MaridBeanPackage(group = "HSQLDB/JDBC")
+package org.hsqldb.jdbc;
 
-    String group() default "";
-
-    String name() default "";
-
-    String description() default "";
-
-    String icon() default "";
-}
+import org.marid.runtime.annotation.MaridBeanPackage;

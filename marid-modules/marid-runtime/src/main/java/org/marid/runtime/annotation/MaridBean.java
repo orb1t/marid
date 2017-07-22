@@ -21,6 +21,8 @@
 
 package org.marid.runtime.annotation;
 
+import org.marid.annotation.MetaInfoType;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -31,6 +33,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
+@MetaInfoType("Bean")
 public @interface MaridBean {
 
     String group() default "";

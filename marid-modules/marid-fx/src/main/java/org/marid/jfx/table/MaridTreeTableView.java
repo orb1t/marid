@@ -26,7 +26,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
@@ -67,13 +66,13 @@ public class MaridTreeTableView<T> extends TreeTableView<T> {
             final TreeTableRow<T> row = rowSupplier.get().get();
             row.addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> {
                 final Collection<FxAction> fxActions = actions(row.getTreeItem());
-                row.setContextMenu(fxActions.isEmpty() ? null : new ContextMenu(FxAction.grouped(fxActions)));
+                row.setContextMenu(fxActions.isEmpty() ? null : FxAction.grouped(fxActions));
             });
             return row;
         });
         addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> {
             final Collection<FxAction> fxActions = actions(new TreeItem<>());
-            setContextMenu(fxActions.isEmpty() ? null : new ContextMenu(FxAction.grouped(fxActions)));
+            setContextMenu(fxActions.isEmpty() ? null : FxAction.grouped(fxActions));
         });
         getSelectionModel().selectedItemProperty().addListener(this::onInvalidate);
         focusedProperty().addListener((o, oV, nV) -> {

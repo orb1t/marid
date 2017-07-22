@@ -21,8 +21,12 @@
 
 package org.marid.annotation;
 
+import javax.annotation.Nonnull;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Member;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import static java.util.stream.Stream.of;
 
@@ -43,11 +47,11 @@ public class MetaLiteral {
         this.description = description;
     }
 
-    public MetaLiteral(MetaInfo metaInfo) {
+    public MetaLiteral(@Nonnull MetaInfo metaInfo) {
         this(metaInfo.group(), metaInfo.name(), metaInfo.icon(), metaInfo.description());
     }
 
-    public MetaLiteral(Annotation annotation) {
+    public MetaLiteral(@Nonnull Annotation annotation) {
         final Class<? extends Annotation> type = annotation.annotationType();
         try {
             group = type.getMethod("group").invoke(annotation).toString();
@@ -57,22 +61,6 @@ public class MetaLiteral {
         } catch (ReflectiveOperationException x) {
             throw new IllegalStateException(x);
         }
-    }
-
-    public MetaLiteral(String name, String icon, String desc, Annotation... annotations) {
-        final MetaLiteral[] v = of(annotations).map(MetaLiteral::new).toArray(MetaLiteral[]::new);
-        this.group = of(v).map(l -> l.group).filter(s -> !s.isEmpty()).reduce((s1, s2) -> s2).orElse("");
-        this.name = of(v).map(l -> l.name).filter(s -> !s.isEmpty()).reduce((s1, s2) -> s2).orElse(name);
-        this.icon = of(v).map(l -> l.icon).filter(s -> !s.isEmpty()).reduce((s1, s2) -> s2).orElse(icon);
-        description = of(v).map(l -> l.description).filter(s -> !s.isEmpty()).reduce((s1, s2) -> s2).orElse(desc);
-    }
-
-    public MetaLiteral(Class<?> type, String icon, Annotation... annotations) {
-        final MetaLiteral[] v = of(annotations).map(MetaLiteral::new).toArray(MetaLiteral[]::new);
-        this.group = of(v).map(l -> l.group).filter(s -> !s.isEmpty()).reduce((s1, s2) -> s2).orElse("");
-        this.name = of(v).map(l -> l.name).filter(s -> !s.isEmpty()).reduce((s1, s2) -> s2).orElse(type.getSimpleName());
-        this.icon = of(v).map(l -> l.icon).filter(s -> !s.isEmpty()).reduce((s1, s2) -> s2).orElse(icon);
-        description = of(v).map(l -> l.description).filter(s -> !s.isEmpty()).reduce((s1, s2) -> s2).orElse(type.getName());
     }
 
     @Override
@@ -93,6 +81,38 @@ public class MetaLiteral {
         return new MetaLiteral(group, name, icon, description);
     }
 
+    @SafeVarargs
+    public static <E extends AnnotatedElement & Member> MetaLiteral l(@Nonnull String metaType,
+                                                                      @Nonnull String group,
+                                                                      @Nonnull String name,
+                                                                      @Nonnull String icon,
+                                                                      @Nonnull String description,
+                                                                      @Nonnull E... elements) {
+        final MetaLiteral[] v = of(elements)
+                .flatMap(e -> of(e.getDeclaringClass().getPackage(), e.getDeclaringClass(), e))
+                .flatMap(Stream::of)
+                .flatMap(e -> of(e.getAnnotations()))
+                .filter(a -> a.annotationType().isAnnotationPresent(MetaInfoType.class))
+                .filter(a -> a.annotationType().getAnnotation(MetaInfoType.class).value().equals(metaType))
+                .map(MetaLiteral::new)
+                .toArray(MetaLiteral[]::new);
+        return new MetaLiteral(
+                of(v).map(e -> e.group).filter(e -> !e.isEmpty()).reduce((a, b) -> b).orElse(group),
+                of(v).map(e -> e.name).filter(e -> !e.isEmpty()).reduce((a, b) -> b).orElse(name),
+                of(v).map(e -> e.icon).filter(e -> !e.isEmpty()).reduce((a, b) -> b).orElse(icon),
+                of(v).map(e -> e.description).filter(e -> !e.isEmpty()).reduce((a, b) -> b).orElse(description)
+        );
+    }
+
+    @SafeVarargs
+    public static <E extends AnnotatedElement & Member> MetaLiteral l(@Nonnull String metaType,
+                                                                      @Nonnull String group,
+                                                                      @Nonnull Class<?> type,
+                                                                      @Nonnull String icon,
+                                                                      @Nonnull E... elements) {
+        return l(metaType, group, type.getSimpleName(), icon, type.getName(), elements);
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(name, icon, description);
@@ -100,6 +120,6 @@ public class MetaLiteral {
 
     @Override
     public String toString() {
-        return String.format("Meta(%s,%s,%s)", name, icon, description);
+        return String.format("Meta(%s,%s,%s,%s)", group, name, icon, description);
     }
 }

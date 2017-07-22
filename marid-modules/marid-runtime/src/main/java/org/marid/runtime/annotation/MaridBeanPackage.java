@@ -1,6 +1,6 @@
 /*-
  * #%L
- * marid-util
+ * marid-runtime
  * %%
  * Copyright (C) 2012 - 2017 MARID software development group
  * %%
@@ -19,7 +19,9 @@
  * #L%
  */
 
-package org.marid.annotation;
+package org.marid.runtime.annotation;
+
+import org.marid.annotation.MetaInfoType;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -29,15 +31,16 @@ import java.lang.annotation.Target;
 /**
  * @author Dmitry Ovchinnikov
  */
+@Target({ElementType.PACKAGE})
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.TYPE, ElementType.METHOD, ElementType.PACKAGE})
-public @interface MetaInfo {
+@MetaInfoType("Bean")
+public @interface MaridBeanPackage {
 
     String group() default "";
 
     String name() default "";
 
-    String description() default "";
-
     String icon() default "";
+
+    String description() default "";
 }

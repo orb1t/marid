@@ -22,8 +22,10 @@ package org.marid.dependant.beaneditor;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
+import javafx.scene.control.Menu;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.TextFieldTableCell;
+import org.marid.dependant.beaneditor.model.LibraryBean;
 import org.marid.ide.model.BeanData;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
@@ -35,6 +37,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.*;
 import static org.marid.jfx.LocalizedStrings.ls;
 
 /**
@@ -107,12 +117,24 @@ public class BeanTable extends MaridTableView<BeanData> {
                 .setIcon("D_SERVER_PLUS")
                 .setDisabled(false);
         final InvalidationListener listener = o -> {
-            final FxAction[] childen = context.discoveredBeans.stream()
-                    .map(bean -> new FxAction("bean", bean.literal.group)
-                            .setIcon(bean.literal.icon)
-                            .bindText(ls("%s: %s", ls(bean.literal.name), ls(bean.literal.description))))
-                    .toArray(FxAction[]::new);
-            action.setChildren(childen);
+            final Function<LibraryBean, FxAction> function = bean -> new FxAction("bean", bean.literal.group)
+                    .setIcon(bean.literal.icon)
+                    .bindText(ls("%s: %s", ls(bean.literal.name), ls(bean.literal.description)));
+            final Map<String, List<FxAction>> grouped = context.discoveredBeans.stream()
+                    .collect(groupingBy(b -> b.literal.group, TreeMap::new, mapping(function, toList())));
+            switch (grouped.size()) {
+                case 1:
+                    action.setChildren(grouped.values().stream().flatMap(Collection::stream).collect(toList()));
+                    break;
+                default:
+                    action.setChildren(grouped.entrySet().stream().map(e -> {
+                        final FxAction a = new FxAction("", "");
+                        a.bindText(e.getKey());
+                        a.setChildren(e.getValue());
+                        return a;
+                    }).collect(Collectors.toList()));
+                    break;
+            }
         };
         context.discoveredBeans.addListener(listener);
         listener.invalidated(null);

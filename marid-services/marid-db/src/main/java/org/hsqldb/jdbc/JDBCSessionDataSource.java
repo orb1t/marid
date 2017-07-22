@@ -22,6 +22,8 @@
 package org.hsqldb.jdbc;
 
 import org.hsqldb.Database;
+import org.marid.runtime.annotation.MaridBean;
+import org.marid.runtime.annotation.MaridBeanProducer;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -29,11 +31,13 @@ import java.sql.SQLException;
 /**
  * @author Dmitry Ovchinnikov.
  */
+@MaridBean
 public class JDBCSessionDataSource extends JDBCDataSource {
 
     private final Database database;
     private final String schema;
 
+    @MaridBeanProducer(name = "HSQLDB JDBC Session Data Source", icon = "F_DATABASE")
     public JDBCSessionDataSource(Database database, String schema) {
         this.database = database;
         this.schema = schema;

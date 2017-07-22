@@ -32,7 +32,6 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.beans.value.WeakChangeListener;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -183,7 +182,7 @@ public class FxAction implements Observable {
         }, icon);
     }
 
-    public static MenuItem[] grouped(Collection<FxAction> actions) {
+    public static MenuItem[] grouped(List<MenuItem> list, Collection<FxAction> actions) {
         final Map<String, List<FxAction>> map = actions.stream()
                 .collect(Collectors.groupingBy(a -> a.group, TreeMap::new, Collectors.toList()));
         return map.values().stream()
@@ -191,16 +190,22 @@ public class FxAction implements Observable {
                     if (!a.isEmpty()) {
                         a.add(new SeparatorMenuItem());
                     }
-                    a.addAll(e.stream().map(FxAction::menuItem).collect(Collectors.toList()));
+                    a.addAll(e.stream().map(ac -> ac.menuItem(list)).collect(Collectors.toList()));
                     return a;
                 }, (a1, a2) -> a2).toArray(new MenuItem[0]);
     }
 
-    public MenuItem[] grouped() {
-        return grouped(children);
+    public static ContextMenu grouped(Collection<FxAction> actions) {
+        final ContextMenu contextMenu = new ContextMenu();
+        contextMenu.getItems().setAll(grouped(contextMenu.getItems(), actions));
+        return contextMenu;
     }
 
-    public MenuItem menuItem() {
+    public MenuItem[] grouped(List<MenuItem> list) {
+        return grouped(list, children);
+    }
+
+    public MenuItem menuItem(List<MenuItem> list) {
         final MenuItem item;
         if (selected != null) {
             final CheckMenuItem checkMenuItem = new CheckMenuItem();
@@ -215,7 +220,7 @@ public class FxAction implements Observable {
         } else if (!children.isEmpty()) {
             final Menu menu = new Menu();
             item = menu;
-            menu.getItems().setAll(grouped(children));
+            menu.getItems().setAll(grouped(list, children));
         } else {
             item = new MenuItem();
             if (eventHandler != null) item.onActionProperty().bind(eventHandler);
@@ -227,14 +232,9 @@ public class FxAction implements Observable {
         final AtomicReference<WeakInvalidationListener> listener = new AtomicReference<>();
         final InvalidationListener updater = o -> {
             removeListener(listener.get());
-            final ObservableList<MenuItem> items = item.getParentMenu() != null
-                    ? item.getParentMenu().getItems()
-                    : item.getParentPopup() != null
-                    ? item.getParentPopup().getItems()
-                    : FXCollections.emptyObservableList();
-            final int index = items.indexOf(item);
+            final int index = list.indexOf(item);
             if (index >= 0) {
-                items.set(index, menuItem());
+                list.set(index, menuItem(list));
             }
         };
         item.setUserData(updater);
@@ -255,7 +255,7 @@ public class FxAction implements Observable {
             } else {
                 button.disableProperty().unbind(); button.disableProperty().set(false);
                 button.onActionProperty().unbind(); button.setOnAction(event -> {
-                    final ContextMenu contextMenu = new ContextMenu(grouped());
+                    final ContextMenu contextMenu = grouped(children);
                     contextMenu.show(button, Side.BOTTOM, 0, 0);
                 });
             }

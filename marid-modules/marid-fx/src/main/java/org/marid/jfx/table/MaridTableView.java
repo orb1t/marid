@@ -26,7 +26,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.input.ContextMenuEvent;
@@ -66,13 +65,13 @@ public class MaridTableView<T> extends TableView<T> {
             final TableRow<T> row = rowSupplier.get().get();
             row.addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> {
                 final Collection<FxAction> fxActions = actions(row.getItem());
-                row.setContextMenu(fxActions.isEmpty() ? null : new ContextMenu(FxAction.grouped(fxActions)));
+                row.setContextMenu(fxActions.isEmpty() ? null : FxAction.grouped(fxActions));
             });
             return row;
         });
         addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> {
             final Collection<FxAction> fxActions = actions(null);
-            setContextMenu(fxActions.isEmpty() ? null : new ContextMenu(FxAction.grouped(fxActions)));
+            setContextMenu(fxActions.isEmpty() ? null : FxAction.grouped(fxActions));
         });
         getSelectionModel().selectedItemProperty().addListener(this::onInvalidate);
         focusedProperty().addListener((o, oV, nV) -> {

@@ -29,15 +29,9 @@ import java.lang.annotation.Target;
 /**
  * @author Dmitry Ovchinnikov
  */
+@Target({ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.TYPE, ElementType.METHOD, ElementType.PACKAGE})
-public @interface MetaInfo {
+public @interface MetaInfoType {
 
-    String group() default "";
-
-    String name() default "";
-
-    String description() default "";
-
-    String icon() default "";
+    String value();
 }

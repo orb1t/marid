@@ -22,6 +22,8 @@
 package org.hsqldb.jdbc;
 
 import org.hsqldb.Database;
+import org.marid.runtime.annotation.MaridBean;
+import org.marid.runtime.annotation.MaridBeanProducer;
 
 import javax.annotation.Nonnull;
 import java.sql.SQLException;
@@ -32,8 +34,10 @@ import static org.marid.logging.Log.log;
 /**
  * @author Dmitry Ovchinnikov.
  */
+@MaridBean
 public class JDBCSessionConnection extends JDBCConnection {
 
+    @MaridBeanProducer(name = "HSQLDB JDBC Session Connection", icon = "D_DISK_ALERT")
     public JDBCSessionConnection(@Nonnull Database database, @Nonnull String schema) throws SQLException {
         super(database.getSessionManager().newSysSession());
         setSchema(schema);

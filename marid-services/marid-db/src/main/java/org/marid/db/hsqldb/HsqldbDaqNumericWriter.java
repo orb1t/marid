@@ -22,6 +22,8 @@
 package org.marid.db.hsqldb;
 
 import org.marid.db.dao.NumericWriter;
+import org.marid.runtime.annotation.MaridBean;
+import org.marid.runtime.annotation.MaridBeanProducer;
 
 import javax.annotation.Nonnull;
 import javax.sql.DataSource;
@@ -33,8 +35,10 @@ import java.sql.SQLException;
 /**
  * @author Dmitry Ovchinnikov.
  */
+@MaridBean(group = "DAQ")
 public class HsqldbDaqNumericWriter extends HsqldbDaqAbstractWriter<Double> implements NumericWriter {
 
+    @MaridBeanProducer(name = "HSQLDB DAQ Numeric Writer", icon = "D_WINDOW_RESTORE")
     public HsqldbDaqNumericWriter(DataSource dataSource, String table) {
         super(dataSource, table);
     }

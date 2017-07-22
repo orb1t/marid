@@ -35,6 +35,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.net.URLConnection;
+
 import static org.marid.jfx.LocalizedStrings.ls;
 
 /**
@@ -134,5 +138,16 @@ public class ProjectConfiguration {
                             .start();
                 })
                 .bindDisabled(projectDisabled);
+    }
+
+    @PostConstruct
+    private void disableUrlCache() throws Exception {
+        final URLConnection connection = new URLConnection(null) {
+            @Override
+            public void connect() throws IOException {
+
+            }
+        };
+        connection.setDefaultUseCaches(false);
     }
 }

@@ -55,7 +55,7 @@ public interface MaridActions {
                 .map(e -> {
                     final Menu menu = new Menu();
                     menu.textProperty().bind(ls(e.getKey()));
-                    menu.getItems().addAll(grouped(e.getValue()));
+                    menu.getItems().setAll(grouped(menu.getItems(), e.getValue()));
                     return menu;
                 })
                 .toArray(Menu[]::new);
