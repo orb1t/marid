@@ -1,6 +1,6 @@
 /*-
  * #%L
- * marid-util
+ * marid-runtime
  * %%
  * Copyright (C) 2012 - 2017 MARID software development group
  * %%
@@ -19,12 +19,30 @@
  * #L%
  */
 
-package org.marid.misc;
+package org.marid.runtime.exception;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface Initializable {
+public class MaridBeanInitializationException extends RuntimeException {
 
-    void init();
+    private final String beanName;
+
+    public MaridBeanInitializationException(String beanName, Throwable cause) {
+        super(cause);
+        this.beanName = beanName;
+    }
+
+    public MaridBeanInitializationException(String beanName) {
+        this.beanName = beanName;
+    }
+
+    @Override
+    public String getMessage() {
+        return beanName;
+    }
+
+    public String getBeanName() {
+        return beanName;
+    }
 }

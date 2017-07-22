@@ -21,7 +21,6 @@
 
 package org.marid.runtime.context;
 
-import org.marid.misc.Initializable;
 import org.marid.runtime.beans.Bean;
 import org.marid.runtime.beans.BeanEvent;
 
@@ -72,21 +71,13 @@ public final class MaridContext implements AutoCloseable {
 
     void initialize(String name, Object bean) {
         fireEvent(l -> l.onEvent(new BeanEvent(bean, name, "PRE_INIT")));
-        if (bean instanceof Initializable) {
-            ((Initializable) bean).init();
-        }
+        fireEvent(l -> l.onInitialize(name, bean));
         fireEvent(l -> l.onEvent(new BeanEvent(bean, name, "POST_INIT")));
     }
 
     private void destroy(String name, Object bean, Consumer<Throwable> errorConsumer) {
         fireEvent(l -> l.onEvent(new BeanEvent(bean, name, "PRE_DESTROY")));
-        if (bean instanceof AutoCloseable) {
-            try {
-                ((AutoCloseable) bean).close();
-            } catch (Throwable x) {
-                errorConsumer.accept(x);
-            }
-        }
+        fireEvent(l -> l.onDestroy(name, bean, errorConsumer));
         fireEvent(l -> l.onEvent(new BeanEvent(bean, name, "POST_DESTROY")));
     }
 

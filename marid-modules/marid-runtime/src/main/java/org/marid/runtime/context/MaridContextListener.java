@@ -24,14 +24,20 @@ package org.marid.runtime.context;
 import org.marid.runtime.beans.BeanEvent;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.EventListener;
+import java.util.function.Consumer;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public interface MaridContextListener extends EventListener, Comparable<MaridContextListener> {
 
-    void onEvent(BeanEvent event);
+    void onEvent(@Nonnull BeanEvent event);
+
+    void onInitialize(@Nonnull String name, @Nullable Object bean);
+
+    void onDestroy(@Nonnull String name, @Nullable Object bean, @Nonnull Consumer<Throwable> throwableConsumer);
 
     void onStart();
 

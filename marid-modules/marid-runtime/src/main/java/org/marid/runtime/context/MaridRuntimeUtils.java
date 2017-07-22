@@ -23,10 +23,19 @@ package org.marid.runtime.context;
 
 import org.marid.runtime.exception.MaridBeanClassLoadingException;
 
+import javax.annotation.Nonnull;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Comparator;
+import java.util.TreeSet;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
+
 /**
  * @author Dmitry Ovchinnikov
  */
-interface MaridRuntimeUtils {
+public interface MaridRuntimeUtils {
 
     static Object defaultValue(Class<?> type) {
         if (type.isPrimitive()) {
@@ -50,5 +59,23 @@ interface MaridRuntimeUtils {
         } catch (Exception x) {
             throw new MaridBeanClassLoadingException(beanName, className, x);
         }
+    }
+
+    static TreeSet<Method> methods(@Nonnull Object bean,
+                                   @Nonnull Predicate<Method> filter,
+                                   @Nonnull Comparator<Method> methodComparator) {
+        final TreeSet<Method> methods = new TreeSet<>(methodComparator);
+        final Consumer<Class<?>> consumer = c -> Stream.of(c.getMethods())
+                .filter(m -> m.getParameterCount() == 0)
+                .filter(m -> Modifier.isPublic(m.getDeclaringClass().getModifiers()))
+                .filter(filter)
+                .forEach(methods::add);
+        for (Class<?> c = bean.getClass(); c != null; c = c.getSuperclass()) {
+            consumer.accept(c);
+        }
+        for (final Class<?> c : bean.getClass().getInterfaces()) {
+            consumer.accept(c);
+        }
+        return methods;
     }
 }

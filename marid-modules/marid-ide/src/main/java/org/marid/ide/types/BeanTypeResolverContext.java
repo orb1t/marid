@@ -60,7 +60,7 @@ public class BeanTypeResolverContext {
         typeInfoMap.remove(name);
     }
 
-    ClassLoader getClassLoader() {
+    public ClassLoader getClassLoader() {
         return converters.getClassLoader();
     }
 }

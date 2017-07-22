@@ -37,5 +37,5 @@ public @interface MaridBean {
 
     String icon();
 
-    String description();
+    String description() default "";
 }

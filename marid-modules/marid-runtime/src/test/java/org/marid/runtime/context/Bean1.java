@@ -23,8 +23,8 @@ package org.marid.runtime.context;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.marid.misc.Initializable;
 
+import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +32,7 @@ import java.util.List;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class Bean1 implements Initializable {
+public class Bean1 {
 
     private final int x;
     public final String y;
@@ -67,7 +67,7 @@ public class Bean1 implements Initializable {
         return this;
     }
 
-    @Override
+    @PostConstruct
     public void init() {
         q = 10;
     }

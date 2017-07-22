@@ -106,8 +106,7 @@ public class BeanTypeResolver {
             return tokens.get(0);
         } else {
             final TypeToken<?>[][] sets = tokens.stream()
-                    .map(TypeToken::getTypes)
-                    .map(s -> s.toArray(new TypeToken<?>[s.size()]))
+                    .map(s -> s.getTypes().toArray(new TypeToken<?>[0]))
                     .toArray(TypeToken<?>[][]::new);
             final int max = Stream.of(sets).mapToInt(s -> s.length).max().orElse(0);
             for (int i = 0; i < max; i++) {

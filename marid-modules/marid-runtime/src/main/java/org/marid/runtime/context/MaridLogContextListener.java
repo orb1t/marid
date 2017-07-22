@@ -23,6 +23,10 @@ package org.marid.runtime.context;
 
 import org.marid.runtime.beans.BeanEvent;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.function.Consumer;
+
 import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.WARNING;
 import static org.marid.logging.Log.log;
@@ -33,8 +37,16 @@ import static org.marid.logging.Log.log;
 public class MaridLogContextListener implements MaridContextListener {
 
     @Override
-    public void onEvent(BeanEvent event) {
+    public void onEvent(@Nonnull BeanEvent event) {
         log(INFO, "{0}", event);
+    }
+
+    @Override
+    public void onInitialize(@Nonnull String name, @Nullable Object bean) {
+    }
+
+    @Override
+    public void onDestroy(@Nonnull String name, @Nullable Object bean, @Nonnull Consumer<Throwable> throwableConsumer) {
     }
 
     @Override
