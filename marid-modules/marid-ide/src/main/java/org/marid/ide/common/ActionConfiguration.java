@@ -18,35 +18,32 @@
  * #L%
  */
 
-package org.marid.ide.panes.main;
+package org.marid.ide.common;
 
-import javafx.scene.control.ToolBar;
 import org.marid.jfx.action.FxAction;
-import org.marid.jfx.action.MaridActions;
 import org.marid.spring.annotation.IdeAction;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ContextStartedEvent;
-import org.springframework.context.event.EventListener;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Spliterator;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class IdeToolbar extends ToolBar {
+public class ActionConfiguration {
 
-    private final Supplier<List<FxAction>> actionsFactory;
-
-    @Autowired
-    public IdeToolbar(@IdeAction Supplier<List<FxAction>> actionsFactory) {
-        this.actionsFactory = actionsFactory;
-    }
-
-    @EventListener
-    private void onIdeStart(ContextStartedEvent event) {
-        MaridActions.initToolbar(actionsFactory.get(), this);
+    @IdeAction
+    public Supplier<List<FxAction>> ideActions(@IdeAction ObjectFactory<List<FxAction>> actions,
+                                               @IdeAction ObjectFactory<List<Spliterator<FxAction>>> actionQueues) {
+        return () -> Stream.concat(
+                actions.getObject().stream(),
+                actionQueues.getObject().stream().flatMap(s -> StreamSupport.stream(s, false))
+        ).collect(Collectors.toList());
     }
 }

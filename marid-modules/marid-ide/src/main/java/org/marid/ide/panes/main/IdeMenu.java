@@ -24,13 +24,13 @@ import javafx.scene.control.MenuBar;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.MaridActions;
 import org.marid.spring.annotation.IdeAction;
-import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -38,15 +38,15 @@ import java.util.List;
 @Component
 public class IdeMenu extends MenuBar {
 
-    private final ObjectFactory<List<FxAction>> menuActionsFactory;
+    private final Supplier<List<FxAction>> actionFactory;
 
     @Autowired
-    public IdeMenu(@IdeAction ObjectFactory<List<FxAction>> menuActionsFactory) {
-        this.menuActionsFactory = menuActionsFactory;
+    public IdeMenu(@IdeAction Supplier<List<FxAction>> actionFactory) {
+        this.actionFactory = actionFactory;
     }
 
     @EventListener
     private void onIdeStart(ContextStartedEvent event) {
-        getMenus().addAll(MaridActions.menus(menuActionsFactory.getObject()));
+        getMenus().addAll(MaridActions.menus(actionFactory.get()));
     }
 }

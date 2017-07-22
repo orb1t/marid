@@ -59,11 +59,6 @@ public class MavenRepositoryService extends IdeService<HBox> {
     @Autowired
     public MavenRepositoryService(MavenRepositoryManager manager) {
         this.manager = manager;
-
-        setOnRunning(event -> manager.updating.set(true));
-        setOnCancelled(event -> manager.updating.set(false));
-        setOnFailed(event -> manager.updating.set(false));
-        setOnSucceeded(event -> manager.updating.set(false));
     }
 
     public MavenRepositoryService setContext(IndexingContext context) {

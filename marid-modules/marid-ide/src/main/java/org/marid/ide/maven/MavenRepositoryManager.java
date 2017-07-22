@@ -21,7 +21,6 @@
 package org.marid.ide.maven;
 
 import com.google.common.collect.ImmutableList;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.maven.index.Indexer;
@@ -35,19 +34,17 @@ import org.apache.maven.model.Dependency;
 import org.codehaus.plexus.DefaultContainerConfiguration;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusConstants;
+import org.marid.jfx.action.FxAction;
+import org.marid.spring.annotation.IdeAction;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.context.event.ContextStartedEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -55,6 +52,7 @@ import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.WARNING;
 import static org.apache.lucene.search.BooleanClause.Occur.SHOULD;
 import static org.apache.maven.index.MAVEN.CLASSIFIER;
+import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.logging.Log.log;
 
 /**
@@ -69,7 +67,6 @@ public class MavenRepositoryManager implements AutoCloseable {
 
     final Indexer indexer;
     final DefaultPlexusContainer container;
-    final BooleanProperty updating = new SimpleBooleanProperty();
     final IndexUpdater indexUpdater;
 
     @Autowired
@@ -100,16 +97,22 @@ public class MavenRepositoryManager implements AutoCloseable {
         }
     }
 
-    public void update() {
+    @IdeAction
+    public Spliterator<FxAction> repositoryActions() {
+        final LinkedList<FxAction> list = new LinkedList<>();
         for (final IndexingContext context : contexts) {
-            service.getObject()
-                    .setContext(context)
-                    .start();
+            final SimpleBooleanProperty disabledProperty = new SimpleBooleanProperty();
+            final FxAction action = new FxAction("repo", "Repositories")
+                    .bindDisabled(disabledProperty)
+                    .bindText(ls("%s repository [%s]", ls("Update"), context.getRepositoryId()))
+                    .setEventHandler(event -> {
+                        final MavenRepositoryService service = this.service.getObject().setContext(context);
+                        disabledProperty.bind(service.runningProperty());
+                        service.start();
+                    });
+            list.add(action);
         }
-    }
-
-    public BooleanProperty updatingProperty() {
-        return updating;
+        return list.spliterator();
     }
 
     public List<Dependency> getMaridArtifacts(@Nonnull String classifier) {
@@ -132,11 +135,6 @@ public class MavenRepositoryManager implements AutoCloseable {
             log(WARNING, "Unable to fetch artifacts", x);
             return Collections.emptyList();
         }
-    }
-
-    @EventListener
-    public void onContextStart(ContextStartedEvent event) {
-        update();
     }
 
     @Override
