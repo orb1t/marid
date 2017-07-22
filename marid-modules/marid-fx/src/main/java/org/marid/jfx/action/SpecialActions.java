@@ -43,10 +43,7 @@ public class SpecialActions {
     }
 
     public void reset() {
-        actionList.forEach(a -> {
-            a.reset();
-            a.update();
-        });
+        actionList.forEach(SpecialAction::reset);
     }
 
     public void assign(Collection<FxAction> actions) {
@@ -59,7 +56,6 @@ public class SpecialActions {
             } else {
                 k.setChildren(v);
             }
-            k.update();
         });
     }
 }

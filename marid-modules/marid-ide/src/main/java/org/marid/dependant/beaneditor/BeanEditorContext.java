@@ -20,6 +20,7 @@
 
 package org.marid.dependant.beaneditor;
 
+import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -92,6 +93,7 @@ public class BeanEditorContext {
         context = new BeanTypeResolverContext(profile);
         discoveredContext = new BeanTypeResolverContext(profile);
 
-        discoveredBeans.setAll(libraryBeanDao.beans());
+        final LibraryBean[] beans = libraryBeanDao.beans();
+        Platform.runLater(() -> discoveredBeans.setAll(beans));
     }
 }

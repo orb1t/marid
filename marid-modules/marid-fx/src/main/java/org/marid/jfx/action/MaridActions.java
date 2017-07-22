@@ -63,8 +63,8 @@ public interface MaridActions {
 
     static void initToolbar(Collection<FxAction> actions, ToolBar toolBar) {
         final Map<String, List<FxAction>> sorted = actions.stream()
-                .filter(e -> e.getToolbarGroup() != null)
-                .collect(groupingBy(FxAction::getToolbarGroup, TreeMap::new, toList()));
+                .filter(e -> e.toolbarGroup != null)
+                .collect(groupingBy(a -> a.toolbarGroup, TreeMap::new, toList()));
         sorted.values().stream()
                 .flatMap(v -> concat(v.stream().map(FxAction::button), of(new Separator())))
                 .forEach(toolBar.getItems()::add);

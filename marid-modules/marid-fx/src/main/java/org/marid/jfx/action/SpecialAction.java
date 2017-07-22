@@ -21,6 +21,9 @@
 
 package org.marid.jfx.action;
 
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -138,33 +141,29 @@ public class SpecialAction extends FxAction {
 
     public void reset() {
         if (sealed) {
-            super.accelerator = accelerator;
-            super.description = description;
-            super.text = text;
-            super.disabled = disabled;
-            super.selected = selected;
-            super.hint = hint;
-            super.icon = icon;
-            super.eventHandler = eventHandler;
+            super.accelerator.bind(accelerator == null ? new SimpleObjectProperty<>() : accelerator);
+            super.description.bind(description == null ? new SimpleStringProperty() : description);
+            super.text.bind(text == null ? new SimpleStringProperty() : text);
+            super.disabled.bind(disabled == null ? new SimpleBooleanProperty() : disabled);
+            super.selected.bind(selected == null ? new SimpleObjectProperty<>() : selected);
+            super.hint.bind(hint == null ? new SimpleObjectProperty<>() : hint);
+            super.icon.bind(icon == null ? new SimpleStringProperty() : icon);
+            super.eventHandler.bind(eventHandler == null ? new SimpleObjectProperty<>() : eventHandler);
 
             children.clear();
         }
     }
 
     public void copy(FxAction action) {
-        if (action.accelerator != null) super.accelerator = action.accelerator;
-        if (action.description != null) super.description = action.description;
-        if (action.text != null) super.text = action.text;
-        if (action.disabled != null) super.disabled = action.disabled;
-        if (action.selected != null) super.selected = action.selected;
-        if (action.hint != null) super.hint = action.hint;
-        if (action.icon != null) super.icon = action.icon;
-        if (action.eventHandler != null) super.eventHandler = action.eventHandler;
+        super.accelerator.bind(action.accelerator);
+        super.description.bind(action.description);
+        super.text.bind(action.text);
+        super.disabled.bind(action.disabled);
+        super.selected.bind(action.selected);
+        super.hint.bind(action.hint);
+        super.icon.bind(action.icon);
+        super.eventHandler.bind(action.eventHandler);
 
         children.addAll(action.children);
-    }
-
-    public void update() {
-        listeners.forEach(l -> l.invalidated(this));
     }
 }

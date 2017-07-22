@@ -28,7 +28,7 @@ import java.nio.ByteBuffer;
 /**
  * @author Dmitry Ovchinnikov
  */
-@MaridBean
+@MaridBean(name = "4-bytes integer codec")
 public class IntCodec implements Codec<Integer> {
 
     @Override

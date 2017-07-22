@@ -145,5 +145,6 @@ public class BeanTable extends MaridTableView<BeanData> {
         context.discoveredBeans.addListener(listener);
         listener.invalidated(null);
         actions.add(data -> action);
+        observables.add(context.discoveredBeans);
     }
 }

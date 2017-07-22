@@ -22,16 +22,11 @@
 package org.marid.jfx.action;
 
 import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.beans.WeakInvalidationListener;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ChangeListener;
+import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;
-import javafx.beans.value.WeakChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -43,7 +38,6 @@ import org.jetbrains.annotations.PropertyKey;
 import org.marid.jfx.LocalizedStrings;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -53,9 +47,7 @@ import static org.marid.jfx.icons.FontIcons.glyphIcon;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class FxAction implements Observable {
-
-    protected final Collection<InvalidationListener> listeners = new ConcurrentLinkedQueue<>();
+public class FxAction {
 
     public final String toolbarGroup;
     public final String group;
@@ -63,14 +55,14 @@ public class FxAction implements Observable {
 
     protected final ObservableList<FxAction> children = observableArrayList();
 
-    protected ObservableValue<String> text;
-    protected ObservableValue<KeyCombination> accelerator;
-    protected ObservableValue<String> icon;
-    protected ObservableValue<String> description;
-    protected ObservableValue<Tooltip> hint;
-    protected ObservableValue<Boolean> disabled;
-    protected ObservableValue<Boolean> selected;
-    protected ObservableValue<EventHandler<ActionEvent>> eventHandler;
+    protected final StringProperty text = new SimpleStringProperty();
+    protected final ObjectProperty<KeyCombination> accelerator = new SimpleObjectProperty<>();
+    protected final StringProperty icon = new SimpleStringProperty();
+    protected final StringProperty description = new SimpleStringProperty();
+    protected final ObjectProperty<Tooltip> hint = new SimpleObjectProperty<>();
+    protected final BooleanProperty disabled = new SimpleBooleanProperty();
+    protected final ObjectProperty<Boolean> selected = new SimpleObjectProperty<>();
+    protected final ObjectProperty<EventHandler<ActionEvent>> eventHandler = new SimpleObjectProperty<>();
 
     public SpecialAction specialAction;
 
@@ -78,8 +70,6 @@ public class FxAction implements Observable {
         this.toolbarGroup = toolbarGroup;
         this.group = group;
         this.menu = menu;
-
-        children.addListener((InvalidationListener) observable -> listeners.forEach(l -> l.invalidated(observable)));
     }
 
     public FxAction(String toolbarGroup) {
@@ -90,24 +80,12 @@ public class FxAction implements Observable {
         this(null, group, menu);
     }
 
-    public String getToolbarGroup() {
-        return toolbarGroup;
-    }
-
-    public String getGroup() {
-        return group;
-    }
-
-    public String getMenu() {
-        return menu;
-    }
-
     public String getText() {
-        return text == null ? null : text.getValue();
+        return text.getValue();
     }
 
     public FxAction bindText(ObservableValue<String> value) {
-        text = value;
+        text.bind(value);
         return this;
     }
 
@@ -120,12 +98,12 @@ public class FxAction implements Observable {
     }
 
     public FxAction bindAccelerator(ObservableValue<KeyCombination> value) {
-        accelerator = value;
+        accelerator.bind(value);
         return this;
     }
 
     public String getIcon() {
-        return icon == null ? null : icon.getValue();
+        return icon.getValue();
     }
 
     public FxAction setIcon(@PropertyKey(resourceBundle = "fonts.meta") String value) {
@@ -133,7 +111,7 @@ public class FxAction implements Observable {
     }
 
     public FxAction bindIcon(ObservableValue<String> value) {
-        icon = value;
+        icon.bind(value);
         return this;
     }
 
@@ -142,22 +120,22 @@ public class FxAction implements Observable {
     }
 
     public FxAction bindDisabled(ObservableValue<Boolean> value) {
-        disabled = value;
+        disabled.bind(value);
         return this;
     }
 
     public FxAction bindDescription(ObservableValue<String> value) {
-        description = value;
+        description.bind(value);
         return this;
     }
 
     public FxAction bindHint(ObservableValue<Tooltip> value) {
-        hint = value;
+        hint.bind(value);
         return this;
     }
 
     public FxAction bindEventHandler(ObservableValue<EventHandler<ActionEvent>> value) {
-        eventHandler = value;
+        eventHandler.bind(value);
         return this;
     }
 
@@ -171,7 +149,7 @@ public class FxAction implements Observable {
     }
 
     public FxAction bindSelected(ObservableValue<Boolean> value) {
-        selected = value;
+        selected.bind(value);
         return this;
     }
 
@@ -207,31 +185,29 @@ public class FxAction implements Observable {
 
     public MenuItem menuItem(List<MenuItem> list) {
         final MenuItem item;
-        if (selected != null) {
+        if (selected.getValue() != null) {
             final CheckMenuItem checkMenuItem = new CheckMenuItem();
             item = checkMenuItem;
-            if (eventHandler != null) item.onActionProperty().bind(eventHandler);
-            if (selected != null) {
-                final ChangeListener<Boolean> selectedListener = (o, oV, nV) -> checkMenuItem.setSelected(nV);
-                checkMenuItem.setUserData(selectedListener);
-                selected.addListener(new WeakChangeListener<>(selectedListener));
-            }
-            if (disabled != null) item.disableProperty().bind(disabled);
+            item.onActionProperty().bind(eventHandler);
+            checkMenuItem.selectedProperty().bindBidirectional(selected);
+            item.disableProperty().bind(disabled);
         } else if (!children.isEmpty()) {
             final Menu menu = new Menu();
             item = menu;
             menu.getItems().setAll(grouped(list, children));
         } else {
             item = new MenuItem();
-            if (eventHandler != null) item.onActionProperty().bind(eventHandler);
-            if (disabled != null) item.disableProperty().bind(disabled);
+            item.onActionProperty().bind(eventHandler);
+            item.disableProperty().bind(disabled);
         }
-        if (accelerator != null) item.acceleratorProperty().bind(accelerator);
-        if (text != null) item.textProperty().bind(text);
-        if (icon != null) item.graphicProperty().bind(icon(16));
+        item.acceleratorProperty().bind(accelerator);
+        item.textProperty().bind(text);
+        item.graphicProperty().bind(icon(16));
+
         final AtomicReference<WeakInvalidationListener> listener = new AtomicReference<>();
         final InvalidationListener updater = o -> {
-            removeListener(listener.get());
+            selected.removeListener(listener.get());
+            children.removeListener(listener.get());
             final int index = list.indexOf(item);
             if (index >= 0) {
                 list.set(index, menuItem(list));
@@ -239,53 +215,35 @@ public class FxAction implements Observable {
         };
         item.setUserData(updater);
         listener.set(new WeakInvalidationListener(updater));
-        addListener(listener.get());
+        selected.addListener(listener.get());
+        children.addListener(listener.get());
         return item;
     }
 
     public Button button() {
         final Button button = new Button();
         button.setFocusTraversable(false);
-        final InvalidationListener updater = o -> {
+        button.graphicProperty().bind(icon(20));
+        button.tooltipProperty().bind(hint);
+        button.setOnAction(event -> {
             if (children.isEmpty()) {
-                button.disableProperty().unbind(); button.disableProperty().set(false);
-                button.onActionProperty().unbind(); button.onActionProperty().set(null);
-                if (disabled != null) button.disableProperty().bind(disabled);
-                if (eventHandler != null) button.onActionProperty().bind(eventHandler);
+                final EventHandler<ActionEvent> h = eventHandler.get();
+                if (h != null) {
+                    h.handle(event);
+                }
             } else {
-                button.disableProperty().unbind(); button.disableProperty().set(false);
-                button.onActionProperty().unbind(); button.setOnAction(event -> {
-                    final ContextMenu contextMenu = grouped(children);
-                    contextMenu.show(button, Side.BOTTOM, 0, 0);
-                });
+                final ContextMenu contextMenu = grouped(children);
+                contextMenu.show(button, Side.BOTTOM, 0, 0);
             }
-            button.graphicProperty().unbind(); button.graphicProperty().set(null);
-            button.tooltipProperty().unbind(); button.tooltipProperty().set(null);
-            if (icon != null) button.graphicProperty().bind(icon(20));
-            if (hint != null) {
-                button.tooltipProperty().bind(hint);
-            } else if (text != null) {
-                button.tooltipProperty().bind(Bindings.createObjectBinding(() -> {
-                    final Tooltip tooltip = new Tooltip();
-                    tooltip.setText(text.getValue());
-                    return tooltip;
-                }, text));
+        });
+        button.disableProperty().bind(Bindings.createBooleanBinding(() -> {
+            if (!children.isEmpty()) {
+                return false;
+            } else {
+                return disabled.get();
             }
-        };
-        button.setUserData(updater);
-        addListener(new WeakInvalidationListener(updater));
-        updater.invalidated(this);
+        }, children, disabled));
         return button;
-    }
-
-    @Override
-    public void addListener(InvalidationListener listener) {
-        listeners.add(listener);
-    }
-
-    @Override
-    public void removeListener(InvalidationListener listener) {
-        listeners.remove(listener);
     }
 
     public List<FxAction> getChildren() {

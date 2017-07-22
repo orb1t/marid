@@ -22,6 +22,7 @@
 package org.marid.proto.io;
 
 import org.marid.io.IOSupplier;
+import org.marid.runtime.annotation.MaridBean;
 
 import java.io.IOException;
 import java.net.ConnectException;
@@ -32,6 +33,7 @@ import java.net.Socket;
 /**
  * @author Dmitry Ovchinnikov
  */
+@MaridBean(name = "Standard Socket I/O Supplier")
 public class StdProtoSocketIOSupplier implements IOSupplier<StdProtoSocketIO> {
 
     private InetSocketAddress socketAddress;

@@ -27,7 +27,7 @@ import org.marid.runtime.annotation.MaridBeanProducer;
 /**
  * @author Dmitry Ovchinnikov
  */
-@MaridBean(description = "Converts a byte array to four bytes")
+@MaridBean(description = "Transforms a four-byte array")
 public enum TwoBytesOrder implements Codec<byte[]> {
 
     @MaridBeanProducer
