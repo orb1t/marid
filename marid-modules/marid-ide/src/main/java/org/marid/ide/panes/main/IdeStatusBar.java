@@ -48,7 +48,7 @@ import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.misc.Builder;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -121,44 +121,48 @@ public class IdeStatusBar extends BorderPane {
     }
 
     @Order(1)
-    @Autowired
-    public void initProfile(ProjectManager manager) {
-        final ComboBox<ProjectProfile> combo = new ComboBox<>(manager.getProfiles());
-        combo.setMinHeight(30);
-        final SelectionModel<ProjectProfile> selection = combo.getSelectionModel();
-        selection.select(manager.getProfile());
-        final ObjectProperty<ProjectProfile> profile = manager.profileProperty();
-        profile.addListener((observable, oldValue, newValue) -> selection.select(newValue));
-        selection.selectedItemProperty().addListener((observable, oldValue, newValue) -> profile.set(newValue));
-        right.getChildren().add(combo);
-        HBox.setMargin(combo, new Insets(5));
+    @Bean(initMethod = "run")
+    public Runnable profileInitializer(ProjectManager manager) {
+        return () -> {
+            final ComboBox<ProjectProfile> combo = new ComboBox<>(manager.getProfiles());
+            combo.setMinHeight(30);
+            final SelectionModel<ProjectProfile> selection = combo.getSelectionModel();
+            selection.select(manager.getProfile());
+            final ObjectProperty<ProjectProfile> profile = manager.profileProperty();
+            profile.addListener((observable, oldValue, newValue) -> selection.select(newValue));
+            selection.selectedItemProperty().addListener((observable, oldValue, newValue) -> profile.set(newValue));
+            right.getChildren().add(combo);
+            HBox.setMargin(combo, new Insets(5));
+        };
     }
 
     @Order(2)
-    @Autowired
-    public void initDateTime(ScheduledExecutorService timer) throws Exception {
-        final Label timeLabel = new Label("", glyphIcon("O_CLOCK", 18));
-        final DateTimeFormatter timeFormatter = new DateTimeFormatterBuilder()
-                .appendValue(ChronoField.YEAR, 4)
-                .appendLiteral('-')
-                .appendValue(ChronoField.MONTH_OF_YEAR, 2)
-                .appendLiteral('-')
-                .appendValue(ChronoField.DAY_OF_MONTH)
-                .appendLiteral(' ')
-                .appendValue(ChronoField.HOUR_OF_DAY, 2)
-                .appendLiteral(':')
-                .appendValue(ChronoField.MINUTE_OF_HOUR, 2)
-                .appendLiteral(':')
-                .appendValue(ChronoField.SECOND_OF_MINUTE, 2)
-                .toFormatter();
-        timeLabel.setMaxHeight(Double.MAX_VALUE);
-        timer.scheduleWithFixedDelay(() -> {
-            final ZonedDateTime now = Instant.now().atZone(ZoneId.systemDefault());
-            final String time = now.format(timeFormatter);
-            Platform.runLater(() -> timeLabel.setText(time));
-        }, 1_000L, 1_000L, TimeUnit.MILLISECONDS);
-        right.getChildren().add(timeLabel);
-        HBox.setMargin(timeLabel, new Insets(5));
+    @Bean(initMethod = "run")
+    public Runnable dateTimeInitializer(ScheduledExecutorService timer) {
+        return () -> {
+            final Label timeLabel = new Label("", glyphIcon("O_CLOCK", 18));
+            final DateTimeFormatter timeFormatter = new DateTimeFormatterBuilder()
+                    .appendValue(ChronoField.YEAR, 4)
+                    .appendLiteral('-')
+                    .appendValue(ChronoField.MONTH_OF_YEAR, 2)
+                    .appendLiteral('-')
+                    .appendValue(ChronoField.DAY_OF_MONTH)
+                    .appendLiteral(' ')
+                    .appendValue(ChronoField.HOUR_OF_DAY, 2)
+                    .appendLiteral(':')
+                    .appendValue(ChronoField.MINUTE_OF_HOUR, 2)
+                    .appendLiteral(':')
+                    .appendValue(ChronoField.SECOND_OF_MINUTE, 2)
+                    .toFormatter();
+            timeLabel.setMaxHeight(Double.MAX_VALUE);
+            timer.scheduleWithFixedDelay(() -> {
+                final ZonedDateTime now = Instant.now().atZone(ZoneId.systemDefault());
+                final String time = now.format(timeFormatter);
+                Platform.runLater(() -> timeLabel.setText(time));
+            }, 1_000L, 1_000L, TimeUnit.MILLISECONDS);
+            right.getChildren().add(timeLabel);
+            HBox.setMargin(timeLabel, new Insets(5));
+        };
     }
 
     public void add(Node button) {

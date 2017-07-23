@@ -23,53 +23,47 @@ package org.marid.dependant.beaneditor;
 import javafx.scene.control.TableColumn;
 import org.marid.ide.model.BeanMethodArgData;
 import org.marid.jfx.table.MaridTableView;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.annotation.Order;
 
 import static org.marid.jfx.LocalizedStrings.ls;
+import static org.marid.misc.Builder.build;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class BeanArgsTable extends MaridTableView<BeanMethodArgData> {
 
-    public BeanArgsTable() {;
+    private final TableColumn<BeanMethodArgData, String> nameColumn;
+    private final TableColumn<BeanMethodArgData, String> typeColumn;
+    private final TableColumn<BeanMethodArgData, String> valueColumn;
+
+    public BeanArgsTable() {
         setEditable(false);
-    }
 
-    @Order(1)
-    @Autowired
-    private void initNameColumn() {
-        final TableColumn<BeanMethodArgData, String> column = new TableColumn<>();
-        column.textProperty().bind(ls("Name"));
-        column.setMinWidth(100);
-        column.setPrefWidth(150);
-        column.setPrefWidth(350);
-        column.setCellValueFactory(param -> param.getValue().name);
-        getColumns().add(column);
-    }
+        nameColumn = build(new TableColumn<>(), column -> {
+            column.textProperty().bind(ls("Name"));
+            column.setMinWidth(100);
+            column.setPrefWidth(150);
+            column.setPrefWidth(350);
+            column.setCellValueFactory(param -> param.getValue().name);
+            getColumns().add(column);
+        });
 
-    @Order(2)
-    @Autowired
-    private void initTypeColumn() {
-        final TableColumn<BeanMethodArgData, String> column = new TableColumn<>();
-        column.textProperty().bind(ls("Type"));
-        column.setMinWidth(100);
-        column.setPrefWidth(150);
-        column.setPrefWidth(350);
-        column.setCellValueFactory(param -> param.getValue().type);
-        getColumns().add(column);
-    }
+        typeColumn = build(new TableColumn<>(), column -> {
+            column.textProperty().bind(ls("Type"));
+            column.setMinWidth(100);
+            column.setPrefWidth(150);
+            column.setPrefWidth(350);
+            column.setCellValueFactory(param -> param.getValue().type);
+            getColumns().add(column);
+        });
 
-    @Order(3)
-    @Autowired
-    private void initValueColumn() {
-        final TableColumn<BeanMethodArgData, String> column = new TableColumn<>();
-        column.textProperty().bind(ls("Value"));
-        column.setMinWidth(200);
-        column.setPrefWidth(350);
-        column.setPrefWidth(1000);
-        column.setCellValueFactory(param -> param.getValue().value);
-        getColumns().add(column);
+        valueColumn = build(new TableColumn<>(), column -> {
+            column.textProperty().bind(ls("Value"));
+            column.setMinWidth(200);
+            column.setPrefWidth(350);
+            column.setPrefWidth(1000);
+            column.setCellValueFactory(param -> param.getValue().value);
+            getColumns().add(column);
+        });
     }
 }

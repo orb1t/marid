@@ -39,7 +39,6 @@ public class IdeAppContext extends AnnotationConfigApplicationContext {
 
     public IdeAppContext() {
         super(Builder.build(new DefaultListableBeanFactory(), beanFactory -> {
-            IdeAutowirePostProcessor.register(beanFactory);
             beanFactory.registerSingleton("ideClassFiltter", new IdeClassFilter());
             beanFactory.addBeanPostProcessor(new MaridCommonPostProcessor());
         }));

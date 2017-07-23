@@ -24,10 +24,10 @@ import javafx.scene.control.Accordion;
 import javafx.scene.control.TitledPane;
 import org.marid.jfx.icons.FontIcons;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import static org.marid.jfx.LocalizedStrings.ls;
+import static org.marid.misc.Builder.build;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -35,23 +35,26 @@ import static org.marid.jfx.LocalizedStrings.ls;
 @Component
 public class BeanDetailsPane extends Accordion {
 
-    @Order(1)
-    @Autowired
-    private void initArgsPane(BeanArgsTable argTable) {
-        final TitledPane pane = new TitledPane();
-        pane.textProperty().bind(ls("Arguments"));
-        pane.setGraphic(FontIcons.glyphIcon("D_DISQUS", 16));
-        pane.setContent(argTable);
-        getPanes().add(pane);
-        setExpandedPane(pane);
+    private final TitledPane argsPane;
+    private final TitledPane initializersPane;
+
+    public BeanDetailsPane() {
+        argsPane = build(new TitledPane(), pane -> {
+            pane.textProperty().bind(ls("Arguments"));
+            pane.setGraphic(FontIcons.glyphIcon("D_DISQUS", 16));
+            getPanes().add(pane);
+            setExpandedPane(pane);
+        });
+
+        initializersPane = build(new TitledPane(), pane -> {
+            pane.textProperty().bind(ls("Initializers"));
+            pane.setGraphic(FontIcons.glyphIcon("D_STAR", 16));
+            getPanes().add(pane);
+        });
     }
 
-    @Order(2)
     @Autowired
-    private void initInitializersPane() {
-        final TitledPane pane = new TitledPane();
-        pane.textProperty().bind(ls("Initializers"));
-        pane.setGraphic(FontIcons.glyphIcon("D_STAR", 16));
-        getPanes().add(pane);
+    private void initArgsPane(BeanArgsTable argTable) {
+        argsPane.setContent(argTable);
     }
 }

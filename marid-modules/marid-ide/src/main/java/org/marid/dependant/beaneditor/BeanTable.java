@@ -27,10 +27,8 @@ import org.marid.ide.model.BeanData;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.SpecialAction;
-import org.marid.jfx.action.SpecialActions;
 import org.marid.jfx.table.MaridTableView;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
@@ -42,6 +40,7 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.*;
 import static org.marid.jfx.LocalizedStrings.ls;
+import static org.marid.misc.Builder.build;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -49,46 +48,41 @@ import static org.marid.jfx.LocalizedStrings.ls;
 @Component
 public class BeanTable extends MaridTableView<BeanData> {
 
+    private final TableColumn<BeanData, String> nameColumn;
+    private final TableColumn<BeanData, String> factoryColumn;
+    private final TableColumn<BeanData, String> producerColumn;
+
     @Autowired
     public BeanTable(ProjectProfile profile) {
         super(profile.getBeanFile().beans);
         setEditable(true);
-    }
 
-    @Order(1)
-    @Autowired
-    private void nameColumn() {
-        final TableColumn<BeanData, String> column = new TableColumn<>();
-        column.textProperty().bind(ls("Name"));
-        column.setMinWidth(150);
-        column.setPrefWidth(200);
-        column.setMaxWidth(700);
-        column.setCellValueFactory(param -> param.getValue().name);
-        getColumns().add(column);
-    }
+        nameColumn = build(new TableColumn<>(), column -> {
+            column.textProperty().bind(ls("Name"));
+            column.setMinWidth(150);
+            column.setPrefWidth(200);
+            column.setMaxWidth(700);
+            column.setCellValueFactory(param -> param.getValue().name);
+            getColumns().add(column);
+        });
 
-    @Order(2)
-    @Autowired
-    private void factoryColumn() {
-        final TableColumn<BeanData, String> column = new TableColumn<>();
-        column.textProperty().bind(ls("Factory"));
-        column.setMinWidth(300);
-        column.setPrefWidth(350);
-        column.setMaxWidth(800);
-        column.setCellValueFactory(param -> param.getValue().factory);
-        getColumns().add(column);
-    }
+        factoryColumn = build(new TableColumn<>(), column -> {
+            column.textProperty().bind(ls("Factory"));
+            column.setMinWidth(300);
+            column.setPrefWidth(350);
+            column.setMaxWidth(800);
+            column.setCellValueFactory(param -> param.getValue().factory);
+            getColumns().add(column);
+        });
 
-    @Order(3)
-    @Autowired
-    private void producerColumn() {
-        final TableColumn<BeanData, String> column = new TableColumn<>();
-        column.textProperty().bind(ls("Producer"));
-        column.setMinWidth(200);
-        column.setPrefWidth(250);
-        column.setMaxWidth(800);
-        column.setCellValueFactory(param -> param.getValue().getProducer().signature);
-        getColumns().add(column);
+        producerColumn = build(new TableColumn<>(), column -> {
+            column.textProperty().bind(ls("Producer"));
+            column.setMinWidth(200);
+            column.setPrefWidth(250);
+            column.setMaxWidth(800);
+            column.setCellValueFactory(param -> param.getValue().getProducer().signature);
+            getColumns().add(column);
+        });
     }
 
     @Autowired

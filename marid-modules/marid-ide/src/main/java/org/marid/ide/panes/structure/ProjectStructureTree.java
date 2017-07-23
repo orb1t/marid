@@ -42,9 +42,9 @@ import org.marid.jfx.LocalizedStrings;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.SpecialActions;
 import org.marid.jfx.table.MaridTreeTableView;
+import org.marid.misc.Builder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -66,68 +66,65 @@ import static org.marid.logging.Log.log;
 @Component
 public class ProjectStructureTree extends MaridTreeTableView<Path> {
 
+    private final TreeTableColumn<Path, Path> nameColumn;
+    private final TreeTableColumn<Path, String> sizeColumn;
+
     @Autowired
-    public ProjectStructureTree(Directories directories, SpecialActions specialActions) {
+    public ProjectStructureTree(Directories directories, SpecialActions specialActions, FileIcons icons) {
         super(new TreeItem<>(directories.getProfiles()), specialActions);
         getRoot().setExpanded(true);
         getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-    }
 
-    @Autowired
-    @Order(1)
-    private void initNameColumn(FileIcons icons) {
-        final TreeTableColumn<Path, Path> column = new TreeTableColumn<>();
-        column.textProperty().bind(ls("Name"));
-        column.setCellValueFactory(e -> e.getValue().valueProperty());
-        column.setCellFactory(e -> new TreeTableCell<Path, Path>() {
-            @Override
-            protected void updateItem(Path item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) {
-                    setGraphic(null);
-                    setText(null);
-                } else {
-                    setText(item.getFileName().toString());
-                    setGraphic(icons.icon(item, 16));
-                }
-            }
-        });
-        column.setMinWidth(300);
-        column.setPrefWidth(600);
-        column.setMaxWidth(2000);
-        getColumns().add(column);
-    }
-
-    @Autowired
-    @Order(2)
-    private void initSizeColumn() {
-        final TreeTableColumn<Path, String> column = new TreeTableColumn<>();
-        column.textProperty().bind(ls("Size"));
-        column.setCellValueFactory(e -> {
-            final Path path = e.getValue().getValue();
-            try {
-                final long size;
-                if (Files.isDirectory(path)) {
-                    try (final Stream<Path> stream = Files.walk(path)) {
-                        size = stream.map(Path::toFile).mapToLong(File::length).sum();
+        nameColumn = Builder.build(new TreeTableColumn<>(), column -> {
+            column.textProperty().bind(ls("Name"));
+            column.setCellValueFactory(e -> e.getValue().valueProperty());
+            column.setCellFactory(e -> new TreeTableCell<Path, Path>() {
+                @Override
+                protected void updateItem(Path item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty) {
+                        setGraphic(null);
+                        setText(null);
+                    } else {
+                        setText(item.getFileName().toString());
+                        setGraphic(icons.icon(item, 16));
                     }
-                } else {
-                    size = path.toFile().length();
                 }
-                return new SimpleStringProperty(NumberFormat.getIntegerInstance().format(size));
-            } catch (Exception x) {
-                return new SimpleStringProperty("-1");
-            }
+            });
+            column.setMinWidth(300);
+            column.setPrefWidth(600);
+            column.setMaxWidth(2000);
+            getColumns().add(column);
         });
-        column.setCellFactory(e -> {
-            final TreeTableCell<Path, String> cell = new TextFieldTreeTableCell<>();
-            cell.setAlignment(Pos.BASELINE_RIGHT);
-            return cell;
+
+        sizeColumn = Builder.build(new TreeTableColumn<>(), column -> {
+            column.textProperty().bind(ls("Size"));
+            column.setCellValueFactory(e -> {
+                final Path path = e.getValue().getValue();
+                try {
+                    final long size;
+                    if (Files.isDirectory(path)) {
+                        try (final Stream<Path> stream = Files.walk(path)) {
+                            size = stream.map(Path::toFile).mapToLong(File::length).sum();
+                        }
+                    } else {
+                        size = path.toFile().length();
+                    }
+                    return new SimpleStringProperty(NumberFormat.getIntegerInstance().format(size));
+                } catch (Exception x) {
+                    return new SimpleStringProperty("-1");
+                }
+            });
+            column.setCellFactory(e -> {
+                final TreeTableCell<Path, String> cell = new TextFieldTreeTableCell<>();
+                cell.setAlignment(Pos.BASELINE_RIGHT);
+                return cell;
+            });
+            column.setPrefWidth(200);
+            column.setMaxWidth(400);
+            column.setMinWidth(200);
+            getColumns().add(column);
         });
-        column.setPrefWidth(200);
-        column.setMaxWidth(400);
-        column.setMinWidth(200);
-        getColumns().add(column);
     }
 
     @Autowired

@@ -27,14 +27,11 @@ import javafx.scene.control.Tab;
 import javafx.stage.Window;
 import org.marid.ide.event.PropagatedEvent;
 import org.marid.ide.tabs.IdeTab;
-import org.marid.misc.Builder;
 import org.marid.spring.dependant.DependantConfiguration;
-import org.marid.spring.postprocessors.IdeAutowirePostProcessor;
 import org.marid.spring.postprocessors.MaridCommonPostProcessor;
 import org.marid.spring.postprocessors.WindowAndDialogPostProcessor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -120,7 +117,6 @@ public class IdeDependants {
         private final ParentListener parentListener;
 
         private DependantContext(GenericApplicationContext parent) {
-            super(Builder.build(new DefaultListableBeanFactory(), IdeAutowirePostProcessor::register));
             parent.addApplicationListener(parentListener = new ParentListener(this, parent));
             setAllowBeanDefinitionOverriding(false);
             setAllowCircularReferences(false);
