@@ -21,16 +21,13 @@
 package org.marid.dependant.beaneditor;
 
 import javafx.beans.InvalidationListener;
-import javafx.beans.binding.Bindings;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.cell.TextFieldTableCell;
 import org.marid.dependant.beaneditor.model.LibraryBean;
 import org.marid.ide.model.BeanData;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.SpecialAction;
 import org.marid.jfx.action.SpecialActions;
-import org.marid.jfx.icons.FontIcons;
 import org.marid.jfx.table.MaridTableView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
@@ -79,20 +76,6 @@ public class BeanTable extends MaridTableView<BeanData> {
         column.setPrefWidth(350);
         column.setMaxWidth(800);
         column.setCellValueFactory(param -> param.getValue().factory);
-        column.setCellFactory(param -> {
-            final TextFieldTableCell<BeanData, String> cell = new TextFieldTableCell<>();
-            cell.graphicProperty().bind(Bindings.createObjectBinding(() -> {
-                final String item = cell.getItem();
-                if (item == null) {
-                    return null;
-                } else if (item.contains(".")) {
-                    return FontIcons.glyphIcon("F_CUBE", 16);
-                } else {
-                    return FontIcons.glyphIcon("F_TREE", 16);
-                }
-            }, cell.itemProperty()));
-            return cell;
-        });
         getColumns().add(column);
     }
 
@@ -125,7 +108,11 @@ public class BeanTable extends MaridTableView<BeanData> {
             };
             final Function<LibraryBean, FxAction> function = bean -> new FxAction("bean", bean.literal.group)
                     .setIcon(bean.literal.icon)
-                    .bindText(ls("%s%s%s", textFunc.apply(bean)));
+                    .bindText(ls("%s%s%s", textFunc.apply(bean)))
+                    .setEventHandler(event -> {
+                        final BeanData beanData = new BeanData(bean.bean);
+                        getItems().add(beanData);
+                    });
             final Map<String, List<FxAction>> grouped = context.discoveredBeans.stream()
                     .collect(groupingBy(b -> b.literal.group, TreeMap::new, mapping(function, toList())));
             switch (grouped.size()) {
