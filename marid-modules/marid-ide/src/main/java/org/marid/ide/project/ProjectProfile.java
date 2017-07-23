@@ -205,16 +205,9 @@ public class ProjectProfile {
             for (final Path dir : asList(srcMainJava, metaDirectory, srcTestJava, srcTestResources)) {
                 Files.createDirectories(dir);
             }
-            final Path loggingProperties = srcMainResources.resolve("logging.properties");
-            if (Files.notExists(loggingProperties)) {
-                final ClassLoader currentLoader = Thread.currentThread().getContextClassLoader();
-                try (final InputStream is = currentLoader.getResourceAsStream("logging/default.properties")) {
-                    Files.copy(is, loggingProperties);
-                }
-            }
-            final Path beansProperties = srcMainResources.resolve("beans.properties");
-            if (Files.notExists(beansProperties)) {
-                Files.createFile(beansProperties);
+            final Path applicationProperties = srcMainResources.resolve("application.properties");
+            if (Files.notExists(applicationProperties)) {
+                Files.createFile(applicationProperties);
             }
             beanFile.load(this);
         } catch (Exception x) {
