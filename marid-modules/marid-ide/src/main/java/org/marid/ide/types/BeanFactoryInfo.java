@@ -79,12 +79,12 @@ public class BeanFactoryInfo {
     @Nonnull
     public final Type returnType;
 
-    public BeanFactoryInfo(BeanData beanData, BeanTypeResolver resolver, BeanTypeResolverContext context) throws Exception {
+    public BeanFactoryInfo(BeanData beanData, BeanTypeResolver resolver, BeanCache context) throws Exception {
         producer = beanData.getProducer();
         bean = beanData.toBean();
         factory = requireNonNull(beanData.getFactory(), () -> m("Factory is null: {0}", bean.name));
         if (ref(factory) != null) {
-            factoryToken = of(resolver.resolve(context, ref(factory)));
+            factoryToken = of(resolver.resolve(context, ref(factory)).getType());
             factoryClass = factoryToken.getRawType();
         } else {
             final String className = requireNonNull(type(factory), () -> m("Factory class is null: {0}", bean.name));

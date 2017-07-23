@@ -22,7 +22,6 @@ package org.marid.ide.types;
 
 import javafx.collections.ListChangeListener.Change;
 import javafx.collections.ObservableList;
-import javafx.collections.WeakListChangeListener;
 import org.marid.function.Suppliers;
 import org.marid.ide.model.BeanData;
 import org.marid.runtime.exception.MaridBeanNotFoundException;
@@ -36,17 +35,20 @@ import static java.util.stream.Collectors.toMap;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class BeanTypeResolverContext {
+public class BeanCache implements AutoCloseable {
+
+    private final ObservableList<BeanData> beanList;
+    private final TreeMap<String, BeanData> beanMap;
 
     final IdeValueConverterManager converters;
-    final TreeMap<String, BeanData> beanMap;
     final LinkedHashSet<String> processing = new LinkedHashSet<>();
     final Map<String, BeanTypeInfo> typeInfoMap = new HashMap<>();
 
-    public BeanTypeResolverContext(ObservableList<BeanData> beans, ClassLoader classLoader) {
+    public BeanCache(ObservableList<BeanData> beans, ClassLoader classLoader) {
+        beanList = beans;
         converters = new IdeValueConverterManager(classLoader);
         beanMap = beans.stream().collect(toMap(BeanData::getName, identity(), (d1, d2) -> d2, TreeMap::new));
-        beans.addListener(new WeakListChangeListener<BeanData>(this::onBeanChange));
+        beans.addListener(this::onBeanChange);
     }
 
     public BeanData getBean(String name) {
@@ -96,5 +98,10 @@ public class BeanTypeResolverContext {
                         .forEach(e -> reset(e.getName()));
             }
         }
+    }
+
+    @Override
+    public void close() {
+        beanList.removeListener(this::onBeanChange);
     }
 }

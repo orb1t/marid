@@ -21,7 +21,6 @@
 package org.marid.dependant.beaneditor;
 
 import javafx.application.Platform;
-import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.marid.dependant.beaneditor.dao.LibraryBeanDao;
@@ -29,9 +28,9 @@ import org.marid.dependant.beaneditor.model.LibraryBean;
 import org.marid.ide.model.BeanData;
 import org.marid.ide.model.BeanMethodArgData;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.ide.types.BeanCache;
 import org.marid.ide.types.BeanTypeInfo;
 import org.marid.ide.types.BeanTypeResolver;
-import org.marid.ide.types.BeanTypeResolverContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -44,7 +43,7 @@ import java.util.stream.Stream;
  * @author Dmitry Ovchinnikov
  */
 @Repository
-public class BeanEditorContext {
+public class BeanEditorContext implements AutoCloseable {
 
     private final ProjectProfile profile;
     private final BeanTypeResolver resolver;
@@ -52,8 +51,7 @@ public class BeanEditorContext {
 
     public final ObservableList<LibraryBean> discoveredBeans = FXCollections.observableArrayList();
 
-    private BeanTypeResolverContext context;
-    private BeanTypeResolverContext discoveredContext;
+    private BeanCache discoveredContext;
 
     @Autowired
     public BeanEditorContext(ProjectProfile profile, BeanTypeResolver resolver, LibraryBeanDao libraryBeanDao) {
@@ -61,17 +59,16 @@ public class BeanEditorContext {
         this.resolver = resolver;
         this.libraryBeanDao = libraryBeanDao;
 
-        profile.enabledProperty().addListener(this::onProfileEnabledChange);
-        CompletableFuture.runAsync(this::onProfileUpdate);
+        profile.addOnUpdate(this::updateAsync);
     }
 
     public Type formalType(BeanMethodArgData arg) {
-        final BeanTypeInfo typeInfo = resolver.resolveInfo(context, arg.parent.parent.getName());
+        final BeanTypeInfo typeInfo = resolver.resolve(profile.getBeanCache(), arg.parent.parent.getName());
         return typeInfo.getParameter(arg);
     }
 
     public Type actualType(BeanMethodArgData arg) {
-        final BeanTypeInfo typeInfo = resolver.resolveInfo(context, arg.parent.parent.getName());
+        final BeanTypeInfo typeInfo = resolver.resolve(profile.getBeanCache(), arg.parent.parent.getName());
         return typeInfo.getArgument(arg);
     }
 
@@ -85,10 +82,8 @@ public class BeanEditorContext {
         }
     }
 
-    private void onProfileEnabledChange(Observable observable, Boolean oldValue, Boolean newValue) {
-        if (newValue) {
-            CompletableFuture.runAsync(this::onProfileUpdate);
-        }
+    private void updateAsync(ProjectProfile profile) {
+        CompletableFuture.runAsync(this::onProfileUpdate);
     }
 
     private void onProfileUpdate() {
@@ -99,8 +94,12 @@ public class BeanEditorContext {
 
         Platform.runLater(() -> {
             discoveredBeans.setAll(libraryBeans);
-            context = new BeanTypeResolverContext(profile.getBeanFile().beans, profile.getClassLoader());
-            discoveredContext = new BeanTypeResolverContext(libraryBeansData, profile.getClassLoader());
+            discoveredContext = new BeanCache(libraryBeansData, profile.getClassLoader());
         });
+    }
+
+    @Override
+    public void close() {
+        profile.removeOnUpdate(this::updateAsync);
     }
 }

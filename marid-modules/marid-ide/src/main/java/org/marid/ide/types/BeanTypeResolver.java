@@ -48,11 +48,7 @@ import static com.google.common.reflect.TypeToken.of;
 @Component
 public class BeanTypeResolver {
 
-    public Type resolve(BeanTypeResolverContext context, String beanName) {
-        return resolveInfo(context, beanName).getType();
-    }
-
-    public BeanTypeInfo resolveInfo(BeanTypeResolverContext context, String beanName) {
+    public BeanTypeInfo resolve(BeanCache context, String beanName) {
         final BeanData beanData = context.getBean(beanName);
         return context.typeInfoMap.computeIfAbsent(beanName, name -> {
             if (!context.processing.add(name)) {
@@ -130,11 +126,11 @@ public class BeanTypeResolver {
                 : ((Executable) m).getGenericParameterTypes();
     }
 
-    private Type actualType(BeanTypeResolverContext context, BeanMethodArgData arg) {
+    private Type actualType(BeanCache context, BeanMethodArgData arg) {
         final Type type;
         switch (arg.getType()) {
             case "ref":
-                type = resolve(context, arg.getValue());
+                type = resolve(context, arg.getValue()).getType();
                 break;
             default:
                 type = context.converters.getType(arg.getType()).orElse(null);

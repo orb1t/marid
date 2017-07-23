@@ -30,6 +30,7 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.marid.ide.model.BeanFile;
+import org.marid.ide.types.BeanCache;
 import org.marid.misc.Urls;
 
 import java.io.IOException;
@@ -40,6 +41,9 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 import static java.util.Arrays.asList;
@@ -68,7 +72,10 @@ public class ProjectProfile {
     private final Logger logger;
     private final BooleanProperty enabled;
     private final BeanFile beanFile;
+    private final List<Consumer<ProjectProfile>> onUpdate = new CopyOnWriteArrayList<>();
+
     private URLClassLoader classLoader;
+    private BeanCache beanCache;
 
     ProjectProfile(Path profilesDir, String name) {
         path = profilesDir.resolve(name);
@@ -243,17 +250,30 @@ public class ProjectProfile {
     }
 
     private void updateClassLoader() {
-        try (final URLClassLoader old = classLoader) {
+        try (final URLClassLoader old = classLoader; final BeanCache oldCache = beanCache) {
             final URL[] urls = Urls.classpath(target.resolve("lib"), target.resolve("classes"));
             final ClassLoader parent = Thread.currentThread().getContextClassLoader();
             classLoader = new URLClassLoader(urls, parent);
+            beanCache = new BeanCache(beanFile.beans, classLoader);
         } catch (Exception x) {
             log(logger, WARNING, "Unable to close class loader", x);
         }
     }
 
+    public BeanCache getBeanCache() {
+        return beanCache;
+    }
+
     public URLClassLoader getClassLoader() {
         return classLoader;
+    }
+
+    public void addOnUpdate(Consumer<ProjectProfile> listener) {
+        onUpdate.add(listener);
+    }
+
+    public void removeOnUpdate(Consumer<ProjectProfile> listener) {
+        onUpdate.remove(listener);
     }
 
     @Override
