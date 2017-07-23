@@ -33,6 +33,8 @@ import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
+import static org.marid.ide.project.ProjectFileType.BEANS_XML;
+
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -46,11 +48,11 @@ public class BeanFile {
             final Element root = d.createElement("beans");
             d.appendChild(root);
             context.writeTo(root);
-        }, profile.getMetaDirectory().resolve("beans.xml"));
+        }, profile.get(BEANS_XML));
     }
 
     public void load(ProjectProfile profile) {
-        final Path file = profile.getMetaDirectory().resolve("beans.xml");
+        final Path file = profile.get(BEANS_XML);
         if (Files.notExists(file)) {
             save(profile);
             return;

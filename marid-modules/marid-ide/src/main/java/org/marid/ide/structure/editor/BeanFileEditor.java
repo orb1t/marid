@@ -33,6 +33,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.nio.file.Path;
 
+import static org.marid.ide.project.ProjectFileType.BEANS_XML;
+
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -45,7 +47,7 @@ public class BeanFileEditor extends AbstractFileEditor<ProjectProfile> {
 
     @Autowired
     public BeanFileEditor(ProjectManager projectManager, IdeDependants dependants, SpecialAction editAction) {
-        super(p -> projectManager.getProfile(p).map(e -> e.getBeansXml().equals(p)).orElse(false));
+        super(p -> projectManager.getProfile(p).map(e -> e.get(BEANS_XML).equals(p)).orElse(false));
         this.projectManager = projectManager;
         this.dependants = dependants;
         this.editAction = editAction;

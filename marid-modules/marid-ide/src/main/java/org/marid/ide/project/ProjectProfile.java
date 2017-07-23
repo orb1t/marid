@@ -41,15 +41,19 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
-import static java.util.Arrays.asList;
+import static java.util.EnumSet.allOf;
 import static java.util.logging.Level.WARNING;
+import static java.util.stream.Collectors.toMap;
+import static org.marid.ide.project.ProjectFileType.*;
 import static org.marid.logging.Log.log;
 import static org.marid.misc.Builder.build;
+import static org.marid.misc.Calls.call;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -58,17 +62,7 @@ public class ProjectProfile {
 
     private final Model model;
     private final Path path;
-    private final Path pomFile;
-    private final Path src;
-    private final Path target;
-    private final Path srcMain;
-    private final Path srcTest;
-    private final Path srcMainJava;
-    private final Path srcMainResources;
-    private final Path srcTestJava;
-    private final Path srcTestResources;
-    private final Path metaDirectory;
-    private final Path repository;
+    private final EnumMap<ProjectFileType, Path> paths;
     private final Logger logger;
     private final BooleanProperty enabled;
     private final BeanFile beanFile;
@@ -79,22 +73,24 @@ public class ProjectProfile {
 
     ProjectProfile(Path profilesDir, String name) {
         path = profilesDir.resolve(name);
-        pomFile = path.resolve("pom.xml");
-        src = path.resolve("src");
-        target = path.resolve("target");
-        srcMain = src.resolve("main");
-        srcTest = src.resolve("test");
-        srcMainJava = srcMain.resolve("java");
-        srcMainResources = srcMain.resolve("resources");
-        srcTestJava = srcTest.resolve("java");
-        srcTestResources = srcTest.resolve("resources");
-        metaDirectory = srcMainResources.resolve("META-INF").resolve("marid");
-        repository = path.resolve(".repo");
+        paths = allOf(ProjectFileType.class).stream().collect(toMap(t -> t, t -> call(() -> {
+            final Path p = t.toFull(path);
+            if (!t.relative.startsWith("target")) {
+                if (t.isDirectory()) {
+                    Files.createDirectories(p);
+                } else {
+                    Files.createDirectories(p.getParent());
+                    if (!Files.isRegularFile(p)) {
+                        Files.createFile(p);
+                    }
+                }
+            }
+            return p;
+        }), (v1, v2) -> v2, () -> new EnumMap<>(ProjectFileType.class)));
         logger = Logger.getLogger(getName());
         model = loadModel();
         model.setModelVersion("4.0.0");
         beanFile = new BeanFile();
-        createFileStructure();
         init();
         enabled = new SimpleBooleanProperty(true);
         enabled.addListener((o, oV, nV) -> {
@@ -113,8 +109,12 @@ public class ProjectProfile {
         }
     }
 
+    public Path get(ProjectFileType type) {
+        return paths.get(type);
+    }
+
     private Model loadModel() {
-        try (final InputStream is = Files.newInputStream(pomFile)) {
+        try (final InputStream is = Files.newInputStream(get(POM))) {
             final MavenXpp3Reader reader = new MavenXpp3Reader();
             return reader.read(is);
         } catch (NoSuchFileException x) {
@@ -141,63 +141,13 @@ public class ProjectProfile {
         return path;
     }
 
-    public Path getPomFile() {
-        return pomFile;
-    }
-
-    public Path getRepository() {
-        return repository;
-    }
-
-    public Path getMetaDirectory() {
-        return metaDirectory;
-    }
-
-    public Path getBeansXml() {
-        return metaDirectory.resolve("beans.xml");
-    }
-
-    public Path getSrc() {
-        return src;
-    }
-
-    public Path getSrcMain() {
-        return srcMain;
-    }
-
-    public Path getSrcMainJava() {
-        return srcMainJava;
-    }
-
-    public Path getSrcMainResources() {
-        return srcMainResources;
-    }
-
-    public Path getSrcTest() {
-        return srcTest;
-    }
-
-    public Path getSrcTestJava() {
-        return srcTestJava;
-    }
-
-    public Path getSrcTestResources() {
-        return srcTestResources;
-    }
-
-    public Path getTarget() {
-        return target;
-    }
-
     public String getName() {
         return path.getFileName().toString();
     }
 
     public Path getJavaBaseDir(Path javaFile) {
-        if (javaFile.startsWith(srcMainJava)) {
-            return srcMainJava;
-        } else if (javaFile.startsWith(srcTestJava)) {
-            return srcTestJava;
+        if (javaFile.startsWith(get(SRC_MAIN_JAVA))) {
+            return get(SRC_MAIN_JAVA);
         } else {
             return null;
         }
@@ -207,32 +157,16 @@ public class ProjectProfile {
         return enabled;
     }
 
-    private void createFileStructure() {
-        try {
-            for (final Path dir : asList(srcMainJava, metaDirectory, srcTestJava, srcTestResources)) {
-                Files.createDirectories(dir);
-            }
-            final Path applicationProperties = srcMainResources.resolve("application.properties");
-            if (Files.notExists(applicationProperties)) {
-                Files.createFile(applicationProperties);
-            }
-            beanFile.load(this);
-        } catch (Exception x) {
-            log(logger, WARNING, "Unable to create file structure", x);
-        }
-    }
-
     private void savePomFile() {
-        try (final OutputStream os = Files.newOutputStream(pomFile)) {
+        try (final OutputStream os = Files.newOutputStream(get(POM))) {
             final MavenXpp3Writer writer = new MavenXpp3Writer();
             writer.write(os, model);
         } catch (IOException x) {
-            log(logger, WARNING, "Unable to save {0}", x, pomFile);
+            log(logger, WARNING, "Unable to save {0}", x, get(POM));
         }
     }
 
     public void save() {
-        createFileStructure();
         savePomFile();
         beanFile.save(this);
     }
@@ -251,7 +185,7 @@ public class ProjectProfile {
 
     private void updateClassLoader() {
         try (final URLClassLoader old = classLoader; final BeanCache oldCache = beanCache) {
-            final URL[] urls = Urls.classpath(target.resolve("lib"), target.resolve("classes"));
+            final URL[] urls = Urls.classpath(get(TARGET_LIB), get(TARGET_CLASSES));
             final ClassLoader parent = Thread.currentThread().getContextClassLoader();
             classLoader = new URLClassLoader(urls, parent);
             beanCache = new BeanCache(beanFile.beans, classLoader);

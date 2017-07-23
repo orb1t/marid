@@ -60,6 +60,7 @@ public class BeanEditorContext implements AutoCloseable {
         this.libraryBeanDao = libraryBeanDao;
 
         profile.addOnUpdate(this::updateAsync);
+        updateAsync(profile);
     }
 
     public Type formalType(BeanMethodArgData arg) {

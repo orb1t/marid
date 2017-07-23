@@ -49,6 +49,7 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.WARNING;
 import static javafx.beans.binding.Bindings.format;
+import static org.marid.ide.project.ProjectFileType.TARGET;
 import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 import static org.marid.l10n.L10n.s;
@@ -201,7 +202,7 @@ public class ProjectRunService extends IdeService<HBox> {
             }
             args.add("-jar");
             args.add(String.format("%s-%s.jar", profile.getModel().getArtifactId(), profile.getModel().getVersion()));
-            final ProcessBuilder processBuilder = new ProcessBuilder(args).directory(profile.getTarget().toFile());
+            final ProcessBuilder processBuilder = new ProcessBuilder(args).directory(profile.get(TARGET).toFile());
             log(INFO, "Running {0} in {1}", String.join(" ", processBuilder.command()), processBuilder.directory());
             try {
                 return processBuilder.start();
