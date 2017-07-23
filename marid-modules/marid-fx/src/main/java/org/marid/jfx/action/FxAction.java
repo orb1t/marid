@@ -194,7 +194,7 @@ public class FxAction {
         } else if (!children.isEmpty()) {
             final Menu menu = new Menu();
             item = menu;
-            menu.getItems().setAll(grouped(list, children));
+            menu.getItems().setAll(grouped(menu.getItems(), children));
         } else {
             item = new MenuItem();
             item.onActionProperty().bind(eventHandler);
