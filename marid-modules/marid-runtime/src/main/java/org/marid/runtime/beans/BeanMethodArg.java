@@ -62,10 +62,14 @@ public final class BeanMethodArg {
     }
 
     public void writeTo(@Nonnull Element element) {
-        element.setAttribute("type", type);
         element.setAttribute("name", name);
-        element.setAttribute("filter", filter);
-        element.setTextContent(value);
+        element.setAttribute("type", type);
+        if (filter != null) {
+            element.setAttribute("filter", filter);
+        }
+        if (value != null) {
+            element.setTextContent(value);
+        }
     }
 
     @Override

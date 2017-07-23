@@ -26,7 +26,10 @@ import org.marid.function.Suppliers;
 import org.marid.ide.model.BeanData;
 import org.marid.runtime.exception.MaridBeanNotFoundException;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.IntStream;
 
 import static java.util.function.Function.identity;
@@ -38,7 +41,7 @@ import static java.util.stream.Collectors.toMap;
 public class BeanCache implements AutoCloseable {
 
     private final ObservableList<BeanData> beanList;
-    private final TreeMap<String, BeanData> beanMap;
+    private final HashMap<String, BeanData> beanMap;
 
     final IdeValueConverterManager converters;
     final LinkedHashSet<String> processing = new LinkedHashSet<>();
@@ -47,12 +50,16 @@ public class BeanCache implements AutoCloseable {
     public BeanCache(ObservableList<BeanData> beans, ClassLoader classLoader) {
         beanList = beans;
         converters = new IdeValueConverterManager(classLoader);
-        beanMap = beans.stream().collect(toMap(BeanData::getName, identity(), (d1, d2) -> d2, TreeMap::new));
-        beans.addListener(this::onBeanChange);
+        beanMap = beans.stream().collect(toMap(BeanData::getName, identity(), (d1, d2) -> d2, HashMap::new));
+        beanList.addListener(this::onBeanChange);
     }
 
     public BeanData getBean(String name) {
         return Suppliers.get(beanMap, name, MaridBeanNotFoundException::new);
+    }
+
+    public boolean containsBean(String name) {
+        return beanMap.containsKey(name);
     }
 
     public void reset(String name) {
@@ -77,17 +84,8 @@ public class BeanCache implements AutoCloseable {
         }
         while (change.next()) {
             for (final BeanData data : change.getRemoved()) {
-                if (!IntStream.range(0, list.size())
-                        .map(i -> list.size() - i - 1)
-                        .mapToObj(list::get)
-                        .filter(d -> d.getName().equals(data.getName()))
-                        .peek(e -> beanMap.put(e.getName(), e))
-                        .peek(e -> reset(e.getName()))
-                        .findFirst()
-                        .isPresent()) {
-                    beanMap.remove(data.getName());
-                    reset(data.getName());
-                }
+                beanMap.remove(data.getName());
+                reset(data.getName());
             }
             for (final BeanData data : change.getAddedSubList()) {
                 beanMap.put(data.getName(), data);

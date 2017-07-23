@@ -33,7 +33,9 @@ import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
+import static java.util.logging.Level.WARNING;
 import static org.marid.ide.project.ProjectFileType.BEANS_XML;
+import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -43,12 +45,17 @@ public class BeanFile {
     public final ObservableList<BeanData> beans = FXCollections.observableArrayList(BeanData::observables);
 
     public void save(ProjectProfile profile) {
-        final MaridConfiguration context = new MaridConfiguration(beans.stream().map(BeanData::toBean).toArray(Bean[]::new));
-        Xmls.writeFormatted(d -> {
-            final Element root = d.createElement("beans");
-            d.appendChild(root);
-            context.writeTo(root);
-        }, profile.get(BEANS_XML));
+        final Bean[] array = beans.stream().map(BeanData::toBean).toArray(Bean[]::new);
+        final MaridConfiguration context = new MaridConfiguration(array);
+        try {
+            Xmls.writeFormatted(d -> {
+                final Element root = d.createElement("beans");
+                d.appendChild(root);
+                context.writeTo(root);
+            }, profile.get(BEANS_XML));
+        } catch (Exception x) {
+            log(WARNING, "Unable to save {0}", x, profile.get(BEANS_XML));
+        }
     }
 
     public void load(ProjectProfile profile) {
@@ -58,9 +65,13 @@ public class BeanFile {
             return;
         }
         final AtomicReference<Element> elementRef = new AtomicReference<>();
-        Xmls.read(d -> elementRef.set(d.getDocumentElement()), file);
-        final MaridConfiguration context = new MaridConfiguration(elementRef.get());
-        beans.setAll(Stream.of(context.beans).map(BeanData::new).toArray(BeanData[]::new));
+        try {
+            Xmls.read(d -> elementRef.set(d.getDocumentElement()), file);
+            final MaridConfiguration context = new MaridConfiguration(elementRef.get());
+            beans.setAll(Stream.of(context.beans).map(BeanData::new).toArray(BeanData[]::new));
+        } catch (Exception x) {
+            log(WARNING, "Unable to load {0}", x, profile.get(BEANS_XML));
+        }
     }
 
     public Bean[] toBeans() {
