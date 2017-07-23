@@ -189,6 +189,7 @@ public class ProjectProfile {
             final ClassLoader parent = Thread.currentThread().getContextClassLoader();
             classLoader = new URLClassLoader(urls, parent);
             beanCache = new BeanCache(beanFile.beans, classLoader);
+            onUpdate.forEach(l -> l.accept(this));
         } catch (Exception x) {
             log(logger, WARNING, "Unable to close class loader", x);
         }
