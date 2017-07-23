@@ -40,7 +40,6 @@ import org.marid.ide.structure.editor.FileEditor;
 import org.marid.ide.structure.icons.FileIcons;
 import org.marid.jfx.LocalizedStrings;
 import org.marid.jfx.action.FxAction;
-import org.marid.jfx.action.SpecialActions;
 import org.marid.jfx.table.MaridTreeTableView;
 import org.marid.misc.Builder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,8 +69,8 @@ public class ProjectStructureTree extends MaridTreeTableView<Path> {
     private final TreeTableColumn<Path, String> sizeColumn;
 
     @Autowired
-    public ProjectStructureTree(Directories directories, SpecialActions specialActions, FileIcons icons) {
-        super(new TreeItem<>(directories.getProfiles()), specialActions);
+    public ProjectStructureTree(Directories directories, FileIcons icons) {
+        super(new TreeItem<>(directories.getProfiles()));
         getRoot().setExpanded(true);
         getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 

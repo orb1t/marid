@@ -21,6 +21,7 @@
 
 package org.marid.jfx.table;
 
+import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -34,7 +35,7 @@ import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.SpecialActions;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -46,41 +47,51 @@ import java.util.stream.Collectors;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class MaridTreeTableView<T> extends TreeTableView<T> {
+public class MaridTreeTableView<T> extends TreeTableView<T> implements AutoCloseable {
 
     protected final ObjectProperty<Supplier<TreeTableRow<T>>> rowSupplier = new SimpleObjectProperty<>(TreeTableRow::new);
     protected final ObservableList<Function<TreeItem<T>, FxAction>> actions = FXCollections.observableArrayList();
-    protected final SpecialActions specialActions;
     protected final List<Observable> observables = new ArrayList<>();
+    protected final List<Runnable> onConstruct = new ArrayList<>();
+    protected final List<Runnable> onDestroy = new ArrayList<>();
 
-    public MaridTreeTableView(TreeItem<T> root, SpecialActions specialActions) {
+    public MaridTreeTableView(TreeItem<T> root) {
         super(root);
-        this.specialActions = specialActions;
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
     }
 
-    @PostConstruct
-    protected void initialize() {
-        observables.forEach(o -> o.addListener(this::onInvalidate));
-        setRowFactory(param -> {
-            final TreeTableRow<T> row = rowSupplier.get().get();
-            row.addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> {
-                final Collection<FxAction> fxActions = actions(row.getTreeItem());
-                row.setContextMenu(fxActions.isEmpty() ? null : FxAction.grouped(fxActions));
-            });
-            return row;
-        });
-        addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> {
-            final Collection<FxAction> fxActions = actions(new TreeItem<>());
-            setContextMenu(fxActions.isEmpty() ? null : FxAction.grouped(fxActions));
-        });
-        getSelectionModel().selectedItemProperty().addListener(this::onInvalidate);
-        focusedProperty().addListener((o, oV, nV) -> {
-            if (nV) {
-                onInvalidate(o);
-            } else {
-                specialActions.reset();
+    @Resource
+    public void setSpecialActions(SpecialActions specialActions) {
+        final InvalidationListener invalidationListener = o -> {
+            if (isFocused()) {
+                specialActions.assign(actions(getSelectionModel().getSelectedItem()));
             }
+        };
+        onConstruct.add(() -> {
+            observables.forEach(o -> o.addListener(invalidationListener));
+            setRowFactory(param -> {
+                final TreeTableRow<T> row = rowSupplier.get().get();
+                row.addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> {
+                    final Collection<FxAction> fxActions = actions(row.getTreeItem());
+                    row.setContextMenu(fxActions.isEmpty() ? null : FxAction.grouped(fxActions));
+                });
+                return row;
+            });
+            addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> {
+                final Collection<FxAction> fxActions = actions(new TreeItem<>());
+                setContextMenu(fxActions.isEmpty() ? null : FxAction.grouped(fxActions));
+            });
+            getSelectionModel().selectedItemProperty().addListener(invalidationListener);
+            focusedProperty().addListener((o, oV, nV) -> {
+                if (nV) {
+                    invalidationListener.invalidated(o);
+                } else {
+                    specialActions.reset();
+                }
+            });
+        });
+        onDestroy.add(() -> {
+            observables.forEach(o -> o.removeListener(invalidationListener));
         });
     }
 
@@ -91,14 +102,13 @@ public class MaridTreeTableView<T> extends TreeTableView<T> {
                 .collect(Collectors.toList());
     }
 
-    @PreDestroy
-    protected void onDestroy() {
-        observables.forEach(o -> o.removeListener(this::onInvalidate));
+    @PostConstruct
+    public void onConstruct() {
+        onConstruct.forEach(Runnable::run);
     }
 
-    protected void onInvalidate(Observable observable) {
-        if (isFocused()) {
-            specialActions.assign(actions(getSelectionModel().getSelectedItem()));
-        }
+    @Override
+    public void close() {
+        onDestroy.forEach(Runnable::run);
     }
 }
