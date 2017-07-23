@@ -26,6 +26,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.marid.dependant.beaneditor.dao.LibraryBeanDao;
 import org.marid.dependant.beaneditor.model.LibraryBean;
+import org.marid.ide.model.BeanData;
 import org.marid.ide.model.BeanMethodArgData;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.types.BeanTypeInfo;
@@ -36,6 +37,8 @@ import org.springframework.stereotype.Repository;
 
 import java.lang.reflect.Type;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -73,7 +76,6 @@ public class BeanEditorContext {
     }
 
     public Type possibleType(BeanMethodArgData arg) {
-        context.reset(arg.parent.parent.getName());
         final String oldValue = arg.getValue();
         arg.value.set(null);
         try {
@@ -90,10 +92,15 @@ public class BeanEditorContext {
     }
 
     private void onProfileUpdate() {
-        context = new BeanTypeResolverContext(profile);
-        discoveredContext = new BeanTypeResolverContext(profile);
+        final LibraryBean[] libraryBeans = libraryBeanDao.beans();
+        final ObservableList<BeanData> libraryBeansData = Stream.of(libraryBeans)
+                .map(b -> new BeanData(b.bean))
+                .collect(Collectors.toCollection(FXCollections::observableArrayList));
 
-        final LibraryBean[] beans = libraryBeanDao.beans();
-        Platform.runLater(() -> discoveredBeans.setAll(beans));
+        Platform.runLater(() -> {
+            discoveredBeans.setAll(libraryBeans);
+            context = new BeanTypeResolverContext(profile.getBeanFile().beans, profile.getClassLoader());
+            discoveredContext = new BeanTypeResolverContext(libraryBeansData, profile.getClassLoader());
+        });
     }
 }

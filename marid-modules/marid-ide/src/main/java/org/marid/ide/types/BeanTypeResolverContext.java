@@ -20,15 +20,15 @@
 
 package org.marid.ide.types;
 
+import javafx.collections.ListChangeListener.Change;
+import javafx.collections.ObservableList;
+import javafx.collections.WeakListChangeListener;
 import org.marid.function.Suppliers;
 import org.marid.ide.model.BeanData;
-import org.marid.ide.project.ProjectProfile;
 import org.marid.runtime.exception.MaridBeanNotFoundException;
 
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.IntStream;
 
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
@@ -39,17 +39,14 @@ import static java.util.stream.Collectors.toMap;
 public class BeanTypeResolverContext {
 
     final IdeValueConverterManager converters;
-    final Map<String, BeanData> beanMap;
+    final TreeMap<String, BeanData> beanMap;
     final LinkedHashSet<String> processing = new LinkedHashSet<>();
     final Map<String, BeanTypeInfo> typeInfoMap = new HashMap<>();
 
-    public BeanTypeResolverContext(List<BeanData> beans, ClassLoader classLoader) {
+    public BeanTypeResolverContext(ObservableList<BeanData> beans, ClassLoader classLoader) {
         converters = new IdeValueConverterManager(classLoader);
-        beanMap = beans.stream().collect(toMap(BeanData::getName, identity()));
-    }
-
-    public BeanTypeResolverContext(ProjectProfile profile) {
-        this(profile.getBeanFile().beans, profile.getClassLoader());
+        beanMap = beans.stream().collect(toMap(BeanData::getName, identity(), (d1, d2) -> d2, TreeMap::new));
+        beans.addListener(new WeakListChangeListener<BeanData>(this::onBeanChange));
     }
 
     public BeanData getBean(String name) {
@@ -58,9 +55,46 @@ public class BeanTypeResolverContext {
 
     public void reset(String name) {
         typeInfoMap.remove(name);
+        processing.remove(name);
+    }
+
+    public void reset() {
+        typeInfoMap.clear();
+        processing.clear();
     }
 
     public ClassLoader getClassLoader() {
         return converters.getClassLoader();
+    }
+
+    private void onBeanChange(Change<? extends BeanData> change) {
+        final List<? extends BeanData> list = change.getList();
+        if (list.isEmpty()) {
+            reset();
+            return;
+        }
+        while (change.next()) {
+            for (final BeanData data : change.getRemoved()) {
+                if (!IntStream.range(0, list.size())
+                        .map(i -> list.size() - i - 1)
+                        .mapToObj(list::get)
+                        .filter(d -> d.getName().equals(data.getName()))
+                        .peek(e -> beanMap.put(e.getName(), e))
+                        .peek(e -> reset(e.getName()))
+                        .findFirst()
+                        .isPresent()) {
+                    beanMap.remove(data.getName());
+                    reset(data.getName());
+                }
+            }
+            for (final BeanData data : change.getAddedSubList()) {
+                beanMap.put(data.getName(), data);
+            }
+            if (change.wasUpdated()) {
+                IntStream.range(change.getFrom(), change.getTo())
+                        .mapToObj(list::get)
+                        .forEach(e -> reset(e.getName()));
+            }
+        }
     }
 }
