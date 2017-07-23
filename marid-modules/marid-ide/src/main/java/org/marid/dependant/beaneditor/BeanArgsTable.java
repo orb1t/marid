@@ -20,10 +20,8 @@
 
 package org.marid.dependant.beaneditor;
 
-import javafx.collections.FXCollections;
 import javafx.scene.control.TableColumn;
 import org.marid.ide.model.BeanMethodArgData;
-import org.marid.jfx.action.SpecialActions;
 import org.marid.jfx.table.MaridTableView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
@@ -35,8 +33,7 @@ import static org.marid.jfx.LocalizedStrings.ls;
  */
 public class BeanArgsTable extends MaridTableView<BeanMethodArgData> {
 
-    public BeanArgsTable(SpecialActions specialActions) {
-        super(FXCollections.observableArrayList(), specialActions);
+    public BeanArgsTable() {;
         setEditable(false);
     }
 

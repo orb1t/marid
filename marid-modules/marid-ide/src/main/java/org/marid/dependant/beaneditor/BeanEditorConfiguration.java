@@ -26,7 +26,6 @@ import javafx.scene.Node;
 import javafx.scene.layout.HBox;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.LocalizedStrings;
-import org.marid.jfx.action.SpecialActions;
 import org.marid.spring.dependant.DependantConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -54,8 +53,8 @@ public class BeanEditorConfiguration extends DependantConfiguration<BeanEditorPa
     }
 
     @Bean
-    public BeanArgsTable argTable(SpecialActions specialActions, BeanTable table) {
-        final BeanArgsTable memberTable = new BeanArgsTable(specialActions);
+    public BeanArgsTable argTable(BeanTable table) {
+        final BeanArgsTable memberTable = new BeanArgsTable();
         table.getSelectionModel().selectedItemProperty().addListener((o, oV, nV) -> {
             if (nV == null) {
                 memberTable.setItems(FXCollections.emptyObservableList());
