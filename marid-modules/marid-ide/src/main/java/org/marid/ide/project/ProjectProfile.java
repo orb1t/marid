@@ -40,7 +40,6 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import static java.util.Arrays.asList;
@@ -252,9 +251,9 @@ public class ProjectProfile {
 
     private void updateClassLoader() {
         try (final URLClassLoader old = classLoader) {
-            final Set<URL> urls = Urls.classpath(target.resolve("lib"), target.resolve("classes"));
+            final URL[] urls = Urls.classpath(target.resolve("lib"), target.resolve("classes"));
             final ClassLoader parent = Thread.currentThread().getContextClassLoader();
-            classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]), parent);
+            classLoader = new URLClassLoader(urls, parent);
         } catch (Exception x) {
             log(logger, WARNING, "Unable to close class loader", x);
         }

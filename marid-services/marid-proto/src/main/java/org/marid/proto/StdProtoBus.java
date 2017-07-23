@@ -23,6 +23,8 @@ package org.marid.proto;
 
 import org.marid.io.IOSupplier;
 import org.marid.proto.io.ProtoIO;
+import org.marid.runtime.annotation.MaridBean;
+import org.marid.runtime.annotation.MaridBeanProducer;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
@@ -38,6 +40,7 @@ import static org.marid.logging.Log.log;
 /**
  * @author Dmitry Ovchinnikov
  */
+@MaridBean
 public class StdProtoBus extends StdProto implements ProtoBus {
 
     private final StdProtoRoot root;
@@ -50,6 +53,7 @@ public class StdProtoBus extends StdProto implements ProtoBus {
 
     volatile ProtoIO io;
 
+    @MaridBeanProducer(name = "Proto Bus")
     public StdProtoBus(StdProtoRoot root, String id, String name, StdProtoBusProps p) {
         super(id, name);
         this.root = root;

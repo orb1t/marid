@@ -23,10 +23,12 @@ package org.marid.proto;
 
 import org.marid.io.IOSupplier;
 import org.marid.proto.io.ProtoIO;
+import org.marid.runtime.annotation.MaridBean;
 
 /**
  * @author Dmitry Ovchinnikov
  */
+@MaridBean(name = "Proto Bus Properties")
 public class StdProtoBusProps {
 
     private long terminationTimeout = 10_000L;

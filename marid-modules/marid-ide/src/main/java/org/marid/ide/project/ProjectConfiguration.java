@@ -132,11 +132,9 @@ public class ProjectConfiguration {
                 .setAccelerator(KeyCombination.valueOf("F5"))
                 .bindText(ls("Run"))
                 .setIcon("F_PLAY")
-                .setEventHandler(event -> {
-                    projectRunService.getObject()
-                            .setProfile(manager.getProfile())
-                            .start();
-                })
+                .setEventHandler(event -> projectRunService.getObject()
+                        .setProfile(manager.getProfile())
+                        .start())
                 .bindDisabled(projectDisabled);
     }
 

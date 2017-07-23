@@ -92,13 +92,14 @@ public interface Urls {
     }
 
     @Nonnull
-    static Set<URL> classpath(@Nonnull Path path, @Nonnull Path... paths) {
+    static URL[] classpath(@Nonnull Path path, @Nonnull Path... paths) {
         final Stream<URL> pathUrls = Stream.of(paths).filter(Files::isDirectory).map(Urls::url);
         try {
             return concat(Files.list(path).filter(pathEndsWith(".jar")).map(Urls::url), pathUrls)
-                    .collect(Collectors.toCollection(LinkedHashSet::new));
+                    .distinct()
+                    .toArray(URL[]::new);
         } catch (NotDirectoryException | NoSuchFileException x) {
-            return Collections.emptySet();
+            return new URL[0];
         } catch (IOException x) {
             throw new UncheckedIOException(x);
         }

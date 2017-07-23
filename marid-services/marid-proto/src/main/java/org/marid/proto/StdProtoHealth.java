@@ -21,6 +21,8 @@
 
 package org.marid.proto;
 
+import org.marid.runtime.annotation.MaridBean;
+
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicLong;
@@ -28,6 +30,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * @author Dmitry Ovchinnikov
  */
+@MaridBean(name = "Proto Health Object")
 public class StdProtoHealth implements ProtoHealth {
 
     final AtomicLong successfulTransactionCount = new AtomicLong();

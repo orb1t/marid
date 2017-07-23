@@ -5,4 +5,5 @@ package org.marid.dependant.beaneditor;
  */
 public class BeanTableActions {
 
+
 }

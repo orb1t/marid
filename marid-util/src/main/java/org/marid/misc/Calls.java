@@ -38,6 +38,10 @@ public interface Calls {
     static <T> T call(@Nonnull Callable<T> func, @Nonnull Function<Exception, RuntimeException> xfunc) {
         try {
             return func.call();
+        } catch (RuntimeException x) {
+            throw x;
+        } catch (IOException x) {
+            throw new UncheckedIOException(x);
         } catch (Exception x) {
             throw xfunc.apply(x);
         }
