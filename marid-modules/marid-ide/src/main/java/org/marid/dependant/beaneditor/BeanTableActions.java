@@ -22,13 +22,11 @@ package org.marid.dependant.beaneditor;
 
 import org.marid.annotation.MetaLiteral;
 import org.marid.dependant.beaneditor.dao.LibraryBeanDao;
-import org.marid.dependant.beaneditor.initializers.BeanInitializerList;
 import org.marid.dependant.beaneditor.model.LibraryBean;
 import org.marid.dependant.beaneditor.model.LibraryMethod;
 import org.marid.ide.model.BeanData;
 import org.marid.ide.model.BeanMethodData;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.ide.settings.AppearanceSettings;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.SpecialAction;
 import org.springframework.beans.factory.ObjectFactory;
@@ -45,8 +43,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.*;
-import static org.marid.ide.model.BeanMethodData.signature;
 import static org.marid.jfx.LocalizedStrings.ls;
+import static org.marid.runtime.beans.BeanMethod.name;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -121,9 +119,7 @@ public class BeanTableActions {
     @Bean
     public Function<BeanData, FxAction> initializerAdder(ProjectProfile profile,
                                                          LibraryBeanDao dao,
-                                                         ObjectFactory<BeanInitializerList> list,
-                                                         SpecialAction addAction,
-                                                         AppearanceSettings appearanceSettings) {
+                                                         SpecialAction addAction) {
         return data -> {
             if (data == null) {
                 return null;
@@ -135,10 +131,10 @@ public class BeanTableActions {
             final Consumer<ProjectProfile> listener = p -> {
                 final Function<LibraryMethod, FxAction> function = m -> new FxAction("bean", m.literal.group)
                         .setIcon(m.literal.icon)
-                        .bindText(signature(m.method.signature, appearanceSettings.showFullNamesProperty()))
+                        .bindText(name(m.method.signature) + "/" + m.method.args.length)
                         .setEventHandler(event -> {
                             final BeanMethodData d = new BeanMethodData(data, m.method);
-                            list.getObject().getItems().add(d);
+                            data.initializers.add(d);
                         });
                 final Map<String, List<FxAction>> grouped = dao.initializers(data)
                         .collect(groupingBy(b -> b.literal.group, TreeMap::new, mapping(function, toList())));

@@ -20,20 +20,19 @@
 
 package org.marid.dependant.beaneditor.initializers;
 
+import javafx.collections.FXCollections;
 import javafx.scene.control.ListCell;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderStroke;
 import javafx.scene.layout.BorderStrokeStyle;
 import org.marid.dependant.beaneditor.BeanTable;
+import org.marid.dependant.beaneditor.model.MethodSignatureResolver;
 import org.marid.ide.model.BeanMethodData;
-import org.marid.ide.settings.AppearanceSettings;
 import org.marid.jfx.table.MaridListView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static javafx.beans.binding.Bindings.createStringBinding;
 import static javafx.scene.paint.Color.TRANSPARENT;
-import static org.marid.ide.model.BeanMethodData.signature;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -42,17 +41,11 @@ import static org.marid.ide.model.BeanMethodData.signature;
 public class BeanInitializerList extends MaridListView<BeanMethodData> {
 
     @Autowired
-    public BeanInitializerList(AppearanceSettings appearanceSettings) {
+    public BeanInitializerList(MethodSignatureResolver signatureResolver) {
         setBorder(new Border(new BorderStroke(TRANSPARENT, BorderStrokeStyle.NONE, null, null)));
         cellSupplier.set(() -> {
             final ListCell<BeanMethodData> cell = new ListCell<>();
-            cell.textProperty().bind(createStringBinding(() -> {
-                if (cell.getItem() == null) {
-                    return null;
-                } else {
-                    return signature(cell.getItem().getSignature(), appearanceSettings.showFullNamesProperty().get());
-                }
-            }, cell.itemProperty(), appearanceSettings.showFullNamesProperty()));
+            cell.textProperty().bind(signatureResolver.signature(cell.itemProperty()));
             return cell;
         });
     }
@@ -61,9 +54,9 @@ public class BeanInitializerList extends MaridListView<BeanMethodData> {
     private void initOnSelectionListener(BeanTable table) {
         table.getSelectionModel().selectedItemProperty().addListener((o, oV, nV) -> {
             if (nV == null) {
-                getItems().clear();
+                setItems(FXCollections.observableArrayList());
             } else {
-                getItems().setAll(nV.initializers);
+                setItems(nV.initializers);
             }
         });
     }

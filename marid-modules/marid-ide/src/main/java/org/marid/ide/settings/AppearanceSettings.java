@@ -25,6 +25,8 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import org.springframework.stereotype.Component;
 
+import static java.lang.Boolean.parseBoolean;
+
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -32,11 +34,19 @@ import org.springframework.stereotype.Component;
 public class AppearanceSettings extends AbstractSettings {
 
     private final BooleanProperty showFullNames = new SimpleBooleanProperty(isShowFullNames());
+    private final BooleanProperty showGenericSignatures = new SimpleBooleanProperty(isShowGenericSignatures());
 
     public AppearanceSettings() {
         preferences.addPreferenceChangeListener(evt -> {
-            if ("showFullNames".equals(evt.getKey())) {
-                Platform.runLater(() -> showFullNames.set(Boolean.parseBoolean(evt.getNewValue())));
+            if (evt.getKey() != null) {
+                switch (evt.getKey()) {
+                    case "showFullNames":
+                        Platform.runLater(() -> showFullNames.set(parseBoolean(evt.getNewValue())));
+                        break;
+                    case "showGenericSignatures":
+                        Platform.runLater(() -> showGenericSignatures.set(parseBoolean(evt.getNewValue())));
+                        break;
+                }
             }
         });
     }
@@ -50,11 +60,23 @@ public class AppearanceSettings extends AbstractSettings {
         return preferences.getBoolean("showFullNames", false);
     }
 
+    public boolean isShowGenericSignatures() {
+        return preferences.getBoolean("showGenericSignatures", true);
+    }
+
     public void setShowFullNames(boolean value) {
         preferences.putBoolean("showFullNames", value);
     }
 
+    public void setShowGenericSignatures(boolean value) {
+        preferences.putBoolean("showGenericSignatures", value);
+    }
+
     public BooleanProperty showFullNamesProperty() {
         return showFullNames;
+    }
+
+    public BooleanProperty showGenericSignaturesProperty() {
+        return showGenericSignatures;
     }
 }

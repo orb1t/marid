@@ -21,11 +21,8 @@
 package org.marid.ide.model;
 
 import javafx.beans.Observable;
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.beans.value.ObservableStringValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.marid.runtime.beans.BeanMethod;
@@ -90,10 +87,6 @@ public class BeanMethodData {
                 return signature;
             }
         }
-    }
-
-    public static ObservableStringValue signature(String signature, BooleanProperty showFullNames) {
-        return Bindings.createStringBinding(() -> signature(signature, showFullNames.get()), showFullNames);
     }
 
     @Override

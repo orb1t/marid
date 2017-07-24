@@ -53,14 +53,14 @@ public class BeanMethod {
 
     public BeanMethod(@Nonnull Constructor<?> constructor, @Nonnull BeanMethodArg... args) {
         this.signature = Stream.of(constructor.getParameterTypes())
-                .map(Class::getName)
+                .map(Class::getCanonicalName)
                 .collect(Collectors.joining(",", "new(", ")"));
         this.args = args;
     }
 
     public BeanMethod(@Nonnull Method method, @Nonnull BeanMethodArg... args) {
         this.signature = Stream.of(method.getParameterTypes())
-                .map(Class::getName)
+                .map(Class::getCanonicalName)
                 .collect(Collectors.joining(",", method.getName() + "(", ")"));
         this.args = args;
     }
@@ -116,7 +116,7 @@ public class BeanMethod {
         final String[] types = argTypes();
         if (argTypes.length == types.length) {
             for (int i = 0; i < argTypes.length; i++) {
-                if (!types[i].equals(argTypes[i].getName())) {
+                if (!types[i].equals(argTypes[i].getCanonicalName())) {
                     return false;
                 }
             }

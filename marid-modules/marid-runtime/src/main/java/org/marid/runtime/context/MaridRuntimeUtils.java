@@ -36,22 +36,6 @@ import java.util.stream.Stream;
  */
 public interface MaridRuntimeUtils {
 
-    static Object defaultValue(Class<?> type) {
-        if (type.isPrimitive()) {
-            switch (type.getName()) {
-                case "int": return  0;
-                case "long": return  0L;
-                case "float": return  0f;
-                case "double": return  0d;
-                case "char": return (char) 0;
-                case "boolean": return false;
-                case "short": return (short) 0;
-                case "byte": return (byte) 0;
-            }
-        }
-        return null;
-    }
-
     static Class<?> loadClass(ClassLoader classLoader, String beanName, String className) {
         try {
             return classLoader.loadClass(className);
