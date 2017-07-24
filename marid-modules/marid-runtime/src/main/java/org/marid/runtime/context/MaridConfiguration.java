@@ -45,8 +45,6 @@ public final class MaridConfiguration {
 
     public MaridConfiguration(@Nonnull Element element) {
         this.beans = Xmls.nodes(element, Element.class)
-                .filter(e -> "beans".equals(e.getTagName()))
-                .flatMap(e -> Xmls.nodes(e, Element.class))
                 .filter(e -> "bean".equals(e.getTagName()))
                 .map(Bean::new)
                 .toArray(Bean[]::new);

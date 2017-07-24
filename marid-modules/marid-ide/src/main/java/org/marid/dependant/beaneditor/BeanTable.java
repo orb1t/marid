@@ -74,8 +74,8 @@ public class BeanTable extends MaridTableView<BeanData> {
 
         factoryColumn = build(new TableColumn<>(), column -> {
             column.textProperty().bind(ls("Factory"));
-            column.setMinWidth(300);
-            column.setPrefWidth(350);
+            column.setMinWidth(200);
+            column.setPrefWidth(250);
             column.setMaxWidth(800);
             column.setCellValueFactory(param -> Bindings.createStringBinding(() -> {
                 final BeanData bean = param.getValue();
