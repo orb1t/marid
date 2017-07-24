@@ -20,11 +20,9 @@
 
 package org.marid.dependant.beaneditor.dao;
 
-import com.github.javaparser.utils.Utils;
 import org.marid.annotation.MetaLiteral;
 import org.marid.dependant.beaneditor.model.LibraryBean;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.runtime.annotation.MaridBean;
 import org.marid.runtime.annotation.MaridBeanProducer;
 import org.marid.runtime.beans.Bean;
 import org.marid.runtime.beans.BeanMethod;
@@ -32,10 +30,13 @@ import org.marid.runtime.beans.BeanMethodArg;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Executable;
 import java.util.stream.Stream;
 
+import static com.github.javaparser.utils.Utils.decapitalize;
+import static java.lang.reflect.Modifier.isStatic;
 import static java.util.logging.Level.WARNING;
+import static java.util.stream.Stream.of;
 import static org.marid.annotation.MetaLiteral.l;
 import static org.marid.logging.Log.log;
 import static org.marid.misc.Urls.lines;
@@ -56,58 +57,55 @@ public class LibraryBeanDao {
     }
 
     public LibraryBean[] beans() {
-        return lines(profile.getClassLoader(), BEAN_CLASSES, this::beans).flatMap(v -> v).toArray(LibraryBean[]::new);
+        return lines(profile.getClassLoader(), BEAN_CLASSES, this::beans)
+                .flatMap(v -> v)
+                .toArray(LibraryBean[]::new);
     }
 
-    public Stream<LibraryBean> beans(String type) {
+    private Stream<LibraryBean> beans(String type) {
         if (type.isEmpty() || type.startsWith("#")) {
             return Stream.empty();
         }
-        final Class<?> c;
-        try {
-            c = Class.forName(type, false, profile.getClassLoader());
-        } catch (ClassNotFoundException x) {
-            log(WARNING, "Class {0} is not found", x, type);
-            return Stream.empty();
-        }
-        if (!c.isAnnotationPresent(MaridBean.class)) {
-            log(WARNING, "{0} is not annotated with {1}", c, MaridBean.class.getName());
-            return Stream.empty();
-        }
-        final Stream.Builder<LibraryBean> builder = Stream.builder();
-        for (final Constructor<?> constructor: c.getConstructors()) {
-            if (constructor.getParameterCount() > 0 && !constructor.isAnnotationPresent(MaridBeanProducer.class)) {
-                continue;
-            }
-            final MetaLiteral literal = l("Bean", "Other", c, "D_SERVER_NETWORK", constructor);
-            final Bean bean = new Bean(literal.name, c.getName(), new BeanMethod(constructor, args(constructor)));
-            builder.accept(new LibraryBean(Utils.decapitalize(c.getSimpleName()), bean, literal));
-        }
-        for (final Method method : c.getMethods()) {
-            if (Modifier.isStatic(method.getModifiers())) {
-                if (!method.isAnnotationPresent(MaridBeanProducer.class)) {
-                    continue;
-                }
-                final MetaLiteral literal = l("Bean", "Other", method.getName(), "D_SERVER_NETWORK", method);
-                final Bean bean = new Bean(literal.name, c.getName(), new BeanMethod(method, args(method)));
-                builder.accept(new LibraryBean(method.getName(), bean, literal));
-            }
-        }
-        for (final Field field : c.getFields()) {
-            if (Modifier.isStatic(field.getModifiers())) {
-                if (!field.isAnnotationPresent(MaridBeanProducer.class)) {
-                    continue;
-                }
-                final MetaLiteral literal = l("Bean", "Other", field.getName(), "D_SERVER_NETWORK", field);
-                final Bean bean = new Bean(literal.name, c.getName(), new BeanMethod(field));
-                builder.accept(new LibraryBean(field.getName(), bean, literal));
-            }
-        }
-        return builder.build();
+        final Class<?> c = type(type);
+        return of(
+                of(c.getConstructors())
+                        .filter(e -> e.getParameterCount() == 0 || e.isAnnotationPresent(MaridBeanProducer.class))
+                        .map(e -> {
+                            final String name = decapitalize(c.getSimpleName());
+                            final MetaLiteral literal = l("Bean", "Other", c, "D_SERVER_NETWORK", e);
+                            final Bean bean = new Bean(name, c.getName(), new BeanMethod(e, args(e)));
+                            return new LibraryBean(bean, literal);
+                        }),
+                of(c.getMethods())
+                        .filter(m -> m.isAnnotationPresent(MaridBeanProducer.class))
+                        .map(e -> {
+                            final String factory = isStatic(e.getModifiers()) ? c.getName() : "@" + decapitalize(c.getSimpleName());
+                            final MetaLiteral literal = l("Bean", "Other", e.getName(), "D_SERVER_NETWORK", e);
+                            final Bean bean = new Bean(e.getName(), factory, new BeanMethod(e, args(e)));
+                            return new LibraryBean(bean, literal);
+                        }),
+                of(c.getFields())
+                        .filter(f -> f.isAnnotationPresent(MaridBeanProducer.class))
+                        .map(e -> {
+                            final String factory = isStatic(e.getModifiers()) ? c.getName() : "@" + decapitalize(c.getSimpleName());
+                            final MetaLiteral literal = l("Bean", "Other", e.getName(), "D_SERVER_NETWORK", e);
+                            final Bean bean = new Bean(e.getName(), factory, new BeanMethod(e));
+                            return new LibraryBean(bean, literal);
+                        })
+        ).flatMap(v -> v);
     }
 
-    public static BeanMethodArg[] args(Executable executable) {
-        return Stream.of(executable.getParameters())
+    private Class<?> type(String type) {
+        try {
+            return Class.forName(type, false, profile.getClassLoader());
+        } catch (ClassNotFoundException x) {
+            log(WARNING, "Class {0} is not found", x, type);
+        }
+        return Void.class;
+    }
+
+    private static BeanMethodArg[] args(Executable executable) {
+        return of(executable.getParameters())
                 .map(p -> new BeanMethodArg(p.getName(), "default", null, null))
                 .toArray(BeanMethodArg[]::new);
     }

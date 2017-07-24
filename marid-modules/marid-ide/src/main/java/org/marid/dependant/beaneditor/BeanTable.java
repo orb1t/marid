@@ -117,11 +117,7 @@ public class BeanTable extends MaridTableView<BeanData> {
             final Function<LibraryBean, FxAction> function = bean -> new FxAction("bean", bean.literal.group)
                     .setIcon(bean.literal.icon)
                     .bindText(ls("%s%s%s", textFunc.apply(bean)))
-                    .setEventHandler(event -> {
-                        final BeanData beanData = new BeanData(bean.bean);
-                        beanData.name.set(bean.name);
-                        getItems().add(beanData);
-                    });
+                    .setEventHandler(event -> getItems().add(new BeanData(bean.bean)));
             final Map<String, List<FxAction>> grouped = context.discoveredBeans.stream()
                     .collect(groupingBy(b -> b.literal.group, TreeMap::new, mapping(function, toList())));
             switch (grouped.size()) {

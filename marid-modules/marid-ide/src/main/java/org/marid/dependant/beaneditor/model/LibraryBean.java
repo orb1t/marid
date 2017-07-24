@@ -28,12 +28,10 @@ import org.marid.runtime.beans.Bean;
  */
 public class LibraryBean {
 
-    public final String name;
     public final Bean bean;
     public final MetaLiteral literal;
 
-    public LibraryBean(String name, Bean bean, MetaLiteral literal) {
-        this.name = name;
+    public LibraryBean(Bean bean, MetaLiteral literal) {
         this.bean = bean;
         this.literal = literal;
     }
