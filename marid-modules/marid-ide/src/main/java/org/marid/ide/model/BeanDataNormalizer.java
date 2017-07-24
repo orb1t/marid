@@ -20,6 +20,7 @@
 
 package org.marid.ide.model;
 
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -79,7 +80,7 @@ public interface BeanDataNormalizer {
                             }
                         }
                     }
-                    file.beans.removeAll(toRemove);
+                    Platform.runLater(() -> file.beans.removeIf(toRemove::contains));
                 } finally {
                     if (newName != null) {
                         bean.name.addListener(this);
@@ -96,8 +97,8 @@ public interface BeanDataNormalizer {
                 try {
                     while (change.next()) {
                         for (final BeanData bean : change.getRemoved()) {
-                            map.remove(bean.getName());
                             nameChangeListener.changed(bean.name, bean.getName(), null);
+                            map.remove(bean.getName());
                         }
                         for (final BeanData bean : change.getAddedSubList()) {
                             final String name = generator.apply(bean.getName());

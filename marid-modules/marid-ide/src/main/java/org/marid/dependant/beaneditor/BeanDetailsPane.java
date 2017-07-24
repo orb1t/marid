@@ -20,6 +20,7 @@
 
 package org.marid.dependant.beaneditor;
 
+import javafx.beans.binding.Bindings;
 import javafx.geometry.Orientation;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TitledPane;
@@ -47,6 +48,7 @@ public class BeanDetailsPane extends SplitPane {
             tab.setGraphic(FontIcons.glyphIcon("D_DISQUS", 16));
             tab.setMaxHeight(Double.MAX_VALUE);
             tab.setCollapsible(false);
+            getItems().add(tab);
         });
 
         initializersTab = build(new TitledPane(), tab -> {
@@ -61,15 +63,7 @@ public class BeanDetailsPane extends SplitPane {
     @Autowired
     private void initArgsPane(BeanArgTable argTable) {
         argsTab.setContent(argTable);
-        argTable.itemsProperty().addListener(o -> {
-            if (argTable.getItems().isEmpty()) {
-                getItems().remove(argsTab);
-            } else {
-                if (!getItems().contains(argsTab)) {
-                    getItems().add(0, argsTab);
-                }
-            }
-        });
+        argsTab.disableProperty().bind(Bindings.selectBoolean(argTable.itemsProperty(), "empty"));
     }
 
     @Autowired

@@ -21,6 +21,10 @@
 package org.marid.dependant.beaneditor;
 
 import javafx.scene.control.TableColumn;
+import javafx.scene.layout.Border;
+import javafx.scene.layout.BorderStroke;
+import javafx.scene.layout.BorderStrokeStyle;
+import javafx.scene.paint.Color;
 import org.marid.ide.model.BeanMethodArgData;
 import org.marid.jfx.table.MaridTableView;
 
@@ -65,5 +69,7 @@ public abstract class BeanMethodArgTable extends MaridTableView<BeanMethodArgDat
             column.setCellValueFactory(param -> param.getValue().value);
             getColumns().add(column);
         });
+
+        setBorder(new Border(new BorderStroke(Color.TRANSPARENT, BorderStrokeStyle.NONE, null, null)));
     }
 }

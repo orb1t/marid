@@ -133,4 +133,9 @@ public class MaridListView<T> extends ListView<T> implements MaridActionsControl
     public List<Runnable> onDestroyListeners() {
         return onDestroy;
     }
+
+    @Override
+    public void remove(List<? extends T> list) {
+        getItems().removeAll(list);
+    }
 }

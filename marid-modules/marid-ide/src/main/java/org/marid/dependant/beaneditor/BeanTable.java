@@ -98,4 +98,10 @@ public class BeanTable extends MaridTableView<BeanData> {
         actions().addAll(actions);
         observables().add(context.discoveredBeans);
     }
+
+    @Autowired
+    @Override
+    public void installRemoveAction(FxAction removeAction) {
+        super.installRemoveAction(removeAction);
+    }
 }

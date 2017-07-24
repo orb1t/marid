@@ -33,6 +33,7 @@ import javafx.scene.control.TreeTableView;
 import javafx.scene.input.ContextMenuEvent;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.SpecialActions;
+import org.marid.jfx.tree.TreeUtils;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -131,5 +132,10 @@ public class MaridTreeTableView<T> extends TreeTableView<T> implements MaridActi
     @Override
     public List<Runnable> onDestroyListeners() {
         return onDestroy;
+    }
+
+    @Override
+    public void remove(List<? extends TreeItem<T>> list) {
+        list.forEach(e -> e.getParent().getChildren().remove(e));
     }
 }

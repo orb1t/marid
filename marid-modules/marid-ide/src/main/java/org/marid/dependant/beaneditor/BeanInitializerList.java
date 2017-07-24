@@ -21,6 +21,10 @@
 package org.marid.dependant.beaneditor;
 
 import javafx.scene.control.cell.TextFieldListCell;
+import javafx.scene.layout.Border;
+import javafx.scene.layout.BorderStroke;
+import javafx.scene.layout.BorderStrokeStyle;
+import javafx.scene.paint.Color;
 import org.marid.ide.model.BeanMethodData;
 import org.marid.jfx.table.MaridListView;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +37,7 @@ import org.springframework.stereotype.Component;
 public class BeanInitializerList extends MaridListView<BeanMethodData> {
 
     public BeanInitializerList() {
+        setBorder(new Border(new BorderStroke(Color.TRANSPARENT, BorderStrokeStyle.NONE, null, null)));
         cellSupplier.set(() -> {
             final TextFieldListCell<BeanMethodData> cell = new TextFieldListCell<>();
             return cell;

@@ -41,7 +41,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import org.controlsfx.control.HiddenSidesPane;
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.PopOver.ArrowLocation;
 import org.marid.ide.project.ProjectManager;
@@ -72,17 +71,14 @@ import static org.marid.jfx.icons.FontIcons.glyphIcon;
 public class IdeStatusBar extends BorderPane {
 
     private final HBox right;
-    private final HiddenSidesPane sidesPane = new HiddenSidesPane();
-    private final ScrollPane scrollPane;
     private final HBox toolBar;
     private final Button notificationsButton;
     private final ObservableList<Node> notifications = FXCollections.observableArrayList();
     private final ContextMenu contextMenu = new ContextMenu();
 
     public IdeStatusBar() {
-        sidesPane.setContent(scrollPane = new ScrollPane(toolBar = new HBox(5)));
-
-        setCenter(sidesPane);
+        final ScrollPane scrollPane = new ScrollPane(toolBar = new HBox(5));
+        setCenter(scrollPane);
         setRight(right = new HBox(10));
 
         setMargin(toolBar, new Insets(0, 5, 0, 5));
@@ -99,7 +95,7 @@ public class IdeStatusBar extends BorderPane {
         scrollPane.setFitToHeight(true);
         scrollPane.setPannable(true);
         scrollPane.setVbarPolicy(ScrollBarPolicy.NEVER);
-        scrollPane.setHbarPolicy(ScrollBarPolicy.NEVER);
+        scrollPane.setHbarPolicy(ScrollBarPolicy.AS_NEEDED);
 
         notificationsButton.setShape(Builder.build(new Rectangle(30, 30), r -> {
             r.setArcWidth(10);
