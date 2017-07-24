@@ -39,7 +39,6 @@ import static java.util.Objects.requireNonNull;
 import static org.marid.l10n.L10n.m;
 import static org.marid.runtime.beans.Bean.ref;
 import static org.marid.runtime.beans.Bean.type;
-import static org.springframework.util.ClassUtils.resolveClassName;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -88,7 +87,7 @@ public class BeanFactoryInfo {
             factoryClass = factoryToken.getRawType();
         } else {
             final String className = requireNonNull(type(factory), () -> m("Factory class is null: {0}", bean.name));
-            factoryClass = resolveClassName(className, context.getClassLoader());
+            factoryClass = Class.forName(className, false, context.getClassLoader());
             factoryToken = of(factoryClass).getSupertype(Casts.cast(factoryClass));
         }
         returnHandle = bean.findProducer(factoryClass);
