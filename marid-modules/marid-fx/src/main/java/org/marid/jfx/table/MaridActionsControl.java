@@ -51,6 +51,7 @@ public interface MaridActionsControl<T> {
         actions().add(e -> new FxAction("rem", "rem", "rem")
                 .bindDisabled(Bindings.isEmpty(getSelectionModel().getSelectedItems()))
                 .bindText("Remove selected items")
+                .setIcon("F_REMOVE")
                 .setEventHandler(event -> remove(getSelectionModel().getSelectedItems()))
         );
     }

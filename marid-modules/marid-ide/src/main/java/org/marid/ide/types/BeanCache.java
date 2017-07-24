@@ -20,20 +20,13 @@
 
 package org.marid.ide.types;
 
-import javafx.collections.ListChangeListener.Change;
+import javafx.beans.InvalidationListener;
 import javafx.collections.ObservableList;
-import org.marid.function.Suppliers;
 import org.marid.ide.model.BeanData;
 import org.marid.runtime.exception.MaridBeanNotFoundException;
 
 import java.util.HashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.IntStream;
-
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toMap;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -41,30 +34,27 @@ import static java.util.stream.Collectors.toMap;
 public class BeanCache implements AutoCloseable {
 
     private final ObservableList<BeanData> beanList;
-    private final HashMap<String, BeanData> beanMap;
+    private final InvalidationListener listChangeListener = o -> reset();
 
     final IdeValueConverterManager converters;
     final LinkedHashSet<String> processing = new LinkedHashSet<>();
-    final Map<String, BeanTypeInfo> typeInfoMap = new HashMap<>();
+    final HashMap<String, BeanTypeInfo> typeInfoMap = new HashMap<>();
 
     public BeanCache(ObservableList<BeanData> beans, ClassLoader classLoader) {
         beanList = beans;
         converters = new IdeValueConverterManager(classLoader);
-        beanMap = beans.stream().collect(toMap(BeanData::getName, identity(), (d1, d2) -> d2, HashMap::new));
-        beanList.addListener(this::onBeanChange);
+        beanList.addListener(listChangeListener);
     }
 
     public BeanData getBean(String name) {
-        return Suppliers.get(beanMap, name, MaridBeanNotFoundException::new);
+        return beanList.parallelStream()
+                .filter(b -> name.equals(b.getName()))
+                .findAny()
+                .orElseThrow(() -> new MaridBeanNotFoundException(name));
     }
 
     public boolean containsBean(String name) {
-        return beanMap.containsKey(name);
-    }
-
-    public void reset(String name) {
-        typeInfoMap.remove(name);
-        processing.remove(name);
+        return beanList.parallelStream().anyMatch(b -> name.equals(b.getName()));
     }
 
     public void reset() {
@@ -76,30 +66,9 @@ public class BeanCache implements AutoCloseable {
         return converters.getClassLoader();
     }
 
-    private void onBeanChange(Change<? extends BeanData> change) {
-        final List<? extends BeanData> list = change.getList();
-        if (list.isEmpty()) {
-            reset();
-            return;
-        }
-        while (change.next()) {
-            for (final BeanData data : change.getRemoved()) {
-                beanMap.remove(data.getName());
-                reset(data.getName());
-            }
-            for (final BeanData data : change.getAddedSubList()) {
-                beanMap.put(data.getName(), data);
-            }
-            if (change.wasUpdated()) {
-                IntStream.range(change.getFrom(), change.getTo())
-                        .mapToObj(list::get)
-                        .forEach(e -> reset(e.getName()));
-            }
-        }
-    }
-
     @Override
     public void close() {
-        beanList.removeListener(this::onBeanChange);
+        typeInfoMap.clear();
+        beanList.removeListener(listChangeListener);
     }
 }

@@ -36,14 +36,15 @@ import org.marid.misc.Urls;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.EnumMap;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
@@ -67,7 +68,7 @@ public class ProjectProfile {
     private final Logger logger;
     private final BooleanProperty enabled;
     private final BeanFile beanFile;
-    private final List<Consumer<ProjectProfile>> onUpdate = new CopyOnWriteArrayList<>();
+    private final Queue<WeakReference<Consumer<ProjectProfile>>> onUpdate = new ConcurrentLinkedQueue<>();
 
     private URLClassLoader classLoader;
     private BeanCache beanCache;
@@ -193,7 +194,15 @@ public class ProjectProfile {
             final ClassLoader parent = Thread.currentThread().getContextClassLoader();
             classLoader = new URLClassLoader(urls, parent);
             beanCache = new BeanCache(beanFile.beans, classLoader);
-            onUpdate.forEach(l -> l.accept(this));
+            onUpdate.removeIf(ref -> {
+                final Consumer<ProjectProfile> c = ref.get();
+                if (c == null) {
+                    return true;
+                } else {
+                    c.accept(this);
+                    return false;
+                }
+            });
         } catch (Exception x) {
             log(logger, WARNING, "Unable to close class loader", x);
         }
@@ -208,11 +217,16 @@ public class ProjectProfile {
     }
 
     public void addOnUpdate(Consumer<ProjectProfile> listener) {
-        onUpdate.add(listener);
+        onUpdate.removeIf(ref -> ref.get() == null);
+        onUpdate.add(new WeakReference<>(listener));
     }
 
     public void removeOnUpdate(Consumer<ProjectProfile> listener) {
-        onUpdate.remove(listener);
+        onUpdate.removeIf(ref -> {
+            final Consumer<ProjectProfile> c = ref.get();
+            return c == null || c.equals(listener);
+        });
+        onUpdate.remove(new WeakReference<>(listener));
     }
 
     @Override

@@ -57,15 +57,10 @@ public interface BeanDataNormalizer {
                 try {
                     newName = generator.apply(newName);
                     bean.name.set(newName);
-                    final Set<BeanData> toRemove = new HashSet<>();
+
                     for (final BeanData b : file.beans) {
                         if (b.getFactory().startsWith("@" + oldName)) {
-                            if (newName == null) {
-                                toRemove.add(b);
-                                continue;
-                            } else {
-                                b.factory.set("@" + newName);
-                            }
+                            b.factory.set("@" + newName);
                         }
                         for (final BeanMethodArgData a : b.getProducer().args) {
                             if ("ref".equals(a.getType()) && a.getValue() != null && a.getValue().equals(oldName)) {
@@ -80,13 +75,10 @@ public interface BeanDataNormalizer {
                             }
                         }
                     }
-                    Platform.runLater(() -> file.beans.removeIf(toRemove::contains));
                 } finally {
-                    if (newName != null) {
-                        bean.name.addListener(this);
-                        map.remove(oldName);
-                        map.put(newName, bean);
-                    }
+                    bean.name.addListener(this);
+                    map.remove(oldName);
+                    map.put(newName, bean);
                 }
             }
         };
@@ -94,11 +86,30 @@ public interface BeanDataNormalizer {
             @Override
             public void onChanged(Change<? extends BeanData> change) {
                 change.getList().removeListener(this);
+                final Set<BeanData> toRemove = new HashSet<>();
                 try {
                     while (change.next()) {
                         for (final BeanData bean : change.getRemoved()) {
-                            nameChangeListener.changed(bean.name, bean.getName(), null);
                             map.remove(bean.getName());
+
+                            for (final BeanData b : change.getList()) {
+                                if (b.getFactory().startsWith("@" + bean.getName())) {
+                                    toRemove.add(b);
+                                    continue;
+                                }
+                                for (final BeanMethodArgData a : b.getProducer().args) {
+                                    if ("ref".equals(a.getType()) && a.getValue() != null && a.getValue().equals(bean.getName())) {
+                                        a.value.set(null);
+                                    }
+                                }
+                                for (final BeanMethodData i : b.initializers) {
+                                    for (final BeanMethodArgData a : i.args) {
+                                        if ("ref".equals(a.getType()) && a.getValue() != null && a.getValue().equals(bean.getName())) {
+                                            a.value.set(null);
+                                        }
+                                    }
+                                }
+                            }
                         }
                         for (final BeanData bean : change.getAddedSubList()) {
                             final String name = generator.apply(bean.getName());
@@ -109,6 +120,7 @@ public interface BeanDataNormalizer {
                     }
                 } finally {
                     change.getList().addListener(this);
+                    Platform.runLater(() -> change.getList().removeIf(toRemove::contains));
                 }
             }
         });

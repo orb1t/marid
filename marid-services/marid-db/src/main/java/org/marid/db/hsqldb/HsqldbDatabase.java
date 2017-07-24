@@ -55,7 +55,7 @@ import static org.marid.logging.Log.log;
 /**
  * @author Dmitry Ovchinnikov.
  */
-@MaridBean(name = "HSQLDB Database", icon = "D_DATABASE")
+@MaridBean
 public final class HsqldbDatabase implements Closeable {
 
     private final Server server;

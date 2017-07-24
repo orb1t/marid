@@ -20,10 +20,10 @@
 
 package org.marid.dependant.beaneditor;
 
-import javafx.beans.InvalidationListener;
-import javafx.beans.WeakInvalidationListener;
+import org.marid.dependant.beaneditor.dao.LibraryBeanDao;
 import org.marid.dependant.beaneditor.model.LibraryBean;
 import org.marid.ide.model.BeanData;
+import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.SpecialAction;
 import org.springframework.beans.factory.ObjectFactory;
@@ -35,8 +35,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.*;
 import static org.marid.jfx.LocalizedStrings.ls;
@@ -50,27 +52,27 @@ public class BeanTableActions {
     @Bean
     @Qualifier("beanTable")
     public Function<BeanData, FxAction> addRootBeans(SpecialAction addAction,
-                                                     BeanEditorContext context,
-                                                     ObjectFactory<BeanTable> table) {
+                                                     LibraryBeanDao dao,
+                                                     ObjectFactory<BeanTable> table,
+                                                     ProjectProfile profile) {
         return data -> {
             final FxAction action = new FxAction("add", "add", "add")
                     .setSpecialAction(addAction)
                     .bindText("Add a bean")
                     .setIcon("D_SERVER_PLUS");
-            final InvalidationListener listener = o -> {
+            final Consumer<ProjectProfile> listener = p -> {
                 final Function<LibraryBean, FxAction> function = bean -> new FxAction("bean", bean.literal.group)
                         .setIcon(bean.literal.icon)
                         .bindText(ls("%s%s%s", libraryBeanObservables(bean)))
                         .setEventHandler(event -> table.getObject().getItems().add(new BeanData(bean.bean)));
-                final Map<String, List<FxAction>> grouped = context.discoveredBeans.stream()
-                        .filter(b -> !b.bean.factory.startsWith("@"))
+                final Map<String, List<FxAction>> grouped = Stream.of(dao.beans())
                         .collect(groupingBy(b -> b.literal.group, TreeMap::new, mapping(function, toList())));
                 action.setChildren(children(grouped));
                 action.setDisabled(action.getChildren().isEmpty());
             };
             action.anchors.add(listener);
-            context.discoveredBeans.addListener(new WeakInvalidationListener(listener));
-            listener.invalidated(null);
+            listener.accept(profile);
+            profile.addOnUpdate(listener);
             return action;
         };
     }
@@ -78,8 +80,9 @@ public class BeanTableActions {
     @Bean
     @Qualifier("beanTable")
     public Function<BeanData, FxAction> factoryBeans(SpecialAction addAction,
-                                                     BeanEditorContext context,
-                                                     ObjectFactory<BeanTable> table) {
+                                                     LibraryBeanDao dao,
+                                                     ObjectFactory<BeanTable> table,
+                                                     ProjectProfile profile) {
         return data -> {
             if (data == null) {
                 return null;
@@ -88,7 +91,7 @@ public class BeanTableActions {
                         .setSpecialAction(addAction)
                         .bindText("Add a factory bean")
                         .setIcon("D_SERVER_PLUS");
-                final InvalidationListener listener = o -> {
+                final Consumer<ProjectProfile> listener = p -> {
                     final Function<LibraryBean, FxAction> function = bean -> new FxAction("bean", bean.literal.group)
                             .setIcon(bean.literal.icon)
                             .bindText(ls("%s%s%s", libraryBeanObservables(bean)))
@@ -97,19 +100,14 @@ public class BeanTableActions {
                                 beanData.factory.set("@" + data.getName());
                                 table.getObject().getItems().add(beanData);
                             });
-                    final Map<String, List<FxAction>> grouped = context.discoveredBeans.stream()
-                            .filter(b -> b.bean.factory.startsWith("@"))
-                            .filter(b -> context.discoveredBeans.stream()
-                                    .filter(e -> e.bean.name.equals(b.bean.factory.substring(1)))
-                                    .anyMatch(e -> e.bean.factory.equals(data.getFactory()))
-                            )
+                    final Map<String, List<FxAction>> grouped = dao.beans(data)
                             .collect(groupingBy(b -> b.literal.group, TreeMap::new, mapping(function, toList())));
                     action.setChildren(children(grouped));
                     action.setDisabled(action.getChildren().isEmpty());
                 };
                 action.anchors.add(listener);
-                context.discoveredBeans.addListener(new WeakInvalidationListener(listener));
-                listener.invalidated(null);
+                listener.accept(profile);
+                profile.addOnUpdate(listener);
                 return action;
             }
         };

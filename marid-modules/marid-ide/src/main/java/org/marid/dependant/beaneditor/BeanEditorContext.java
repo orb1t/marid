@@ -20,47 +20,28 @@
 
 package org.marid.dependant.beaneditor;
 
-import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import org.marid.dependant.beaneditor.dao.LibraryBeanDao;
-import org.marid.dependant.beaneditor.model.LibraryBean;
-import org.marid.ide.model.BeanData;
 import org.marid.ide.model.BeanMethodArgData;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.ide.types.BeanCache;
 import org.marid.ide.types.BeanTypeInfo;
 import org.marid.ide.types.BeanTypeResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.lang.reflect.Type;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @Repository
-public class BeanEditorContext implements AutoCloseable {
+public class BeanEditorContext {
 
     private final ProjectProfile profile;
     private final BeanTypeResolver resolver;
-    private final LibraryBeanDao libraryBeanDao;
-
-    public final ObservableList<LibraryBean> discoveredBeans = FXCollections.observableArrayList();
-
-    private BeanCache discoveredContext;
 
     @Autowired
-    public BeanEditorContext(ProjectProfile profile, BeanTypeResolver resolver, LibraryBeanDao libraryBeanDao) {
+    public BeanEditorContext(ProjectProfile profile, BeanTypeResolver resolver) {
         this.profile = profile;
         this.resolver = resolver;
-        this.libraryBeanDao = libraryBeanDao;
-
-        profile.addOnUpdate(this::updateAsync);
-        updateAsync(profile);
     }
 
     public Type formalType(BeanMethodArgData arg) {
@@ -81,26 +62,5 @@ public class BeanEditorContext implements AutoCloseable {
         } finally {
             arg.value.set(oldValue);
         }
-    }
-
-    private void updateAsync(ProjectProfile profile) {
-        CompletableFuture.runAsync(this::onProfileUpdate);
-    }
-
-    private void onProfileUpdate() {
-        final LibraryBean[] libraryBeans = libraryBeanDao.beans();
-        final ObservableList<BeanData> libraryBeansData = Stream.of(libraryBeans)
-                .map(b -> new BeanData(b.bean))
-                .collect(Collectors.toCollection(FXCollections::observableArrayList));
-
-        Platform.runLater(() -> {
-            discoveredBeans.setAll(libraryBeans);
-            discoveredContext = new BeanCache(libraryBeansData, profile.getClassLoader());
-        });
-    }
-
-    @Override
-    public void close() {
-        profile.removeOnUpdate(this::updateAsync);
     }
 }

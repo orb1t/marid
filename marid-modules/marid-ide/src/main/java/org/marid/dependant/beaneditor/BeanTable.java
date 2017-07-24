@@ -93,10 +93,8 @@ public class BeanTable extends MaridTableView<BeanData> {
     }
 
     @Autowired
-    private void initActions(@Qualifier("beanTable") List<Function<BeanData, FxAction>> actions,
-                             BeanEditorContext context) {
+    private void initActions(@Qualifier("beanTable") List<Function<BeanData, FxAction>> actions) {
         actions().addAll(actions);
-        observables().add(context.discoveredBeans);
     }
 
     @Autowired
