@@ -27,6 +27,7 @@ import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -54,15 +55,16 @@ public class FxAction {
     public final String menu;
 
     protected final ObservableList<FxAction> children = observableArrayList();
+    public final List<Object> anchors = new LinkedList<>();
 
-    protected final StringProperty text = new SimpleStringProperty();
-    protected final ObjectProperty<KeyCombination> accelerator = new SimpleObjectProperty<>();
-    protected final StringProperty icon = new SimpleStringProperty();
-    protected final StringProperty description = new SimpleStringProperty();
-    protected final ObjectProperty<Tooltip> hint = new SimpleObjectProperty<>();
-    protected final BooleanProperty disabled = new SimpleBooleanProperty();
-    protected final ObjectProperty<Boolean> selected = new SimpleObjectProperty<>();
-    protected final ObjectProperty<EventHandler<ActionEvent>> eventHandler = new SimpleObjectProperty<>();
+    protected final StringProperty text = new SimpleStringProperty(this, "text");
+    protected final ObjectProperty<KeyCombination> accelerator = new SimpleObjectProperty<>(this, "accelerator");
+    protected final StringProperty icon = new SimpleStringProperty(this, "icon");
+    protected final StringProperty description = new SimpleStringProperty(this, "description");
+    protected final ObjectProperty<Tooltip> hint = new SimpleObjectProperty<>(this, "hint");
+    protected final BooleanProperty disabled = new SimpleBooleanProperty(this, "disabled");
+    protected final ObjectProperty<Boolean> selected = new SimpleObjectProperty<>(this, "selected");
+    protected final ObjectProperty<EventHandler<ActionEvent>> eventHandler = new SimpleObjectProperty<>(this, "eventHandler");
 
     public SpecialAction specialAction;
 
@@ -246,8 +248,8 @@ public class FxAction {
         return button;
     }
 
-    public List<FxAction> getChildren() {
-        return Collections.unmodifiableList(children);
+    public ObservableList<FxAction> getChildren() {
+        return FXCollections.unmodifiableObservableList(children);
     }
 
     public FxAction setChildren(FxAction... actions) {

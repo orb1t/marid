@@ -20,13 +20,13 @@
 
 package org.marid.dependant.beaneditor;
 
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
+import javafx.geometry.Orientation;
+import javafx.scene.control.SplitPane;
+import javafx.scene.control.TitledPane;
 import org.marid.jfx.icons.FontIcons;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static javafx.beans.binding.Bindings.selectBoolean;
 import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.misc.Builder.build;
 
@@ -34,29 +34,42 @@ import static org.marid.misc.Builder.build;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class BeanDetailsPane extends TabPane {
+public class BeanDetailsPane extends SplitPane {
 
-    private final Tab argsTab;
-    private final Tab initializersTab;
+    private final TitledPane argsTab;
+    private final TitledPane initializersTab;
 
     public BeanDetailsPane() {
-        argsTab = build(new Tab(), tab -> {
+        setOrientation(Orientation.VERTICAL);
+
+        argsTab = build(new TitledPane(), tab -> {
             tab.textProperty().bind(ls("Arguments"));
             tab.setGraphic(FontIcons.glyphIcon("D_DISQUS", 16));
-            getTabs().add(tab);
+            tab.setMaxHeight(Double.MAX_VALUE);
+            tab.setCollapsible(false);
         });
 
-        initializersTab = build(new Tab(), tab -> {
+        initializersTab = build(new TitledPane(), tab -> {
             tab.textProperty().bind(ls("Initializers"));
             tab.setGraphic(FontIcons.glyphIcon("D_STAR", 16));
-            getTabs().add(tab);
+            tab.setMaxHeight(Double.MAX_VALUE);
+            tab.setCollapsible(false);
+            getItems().add(tab);
         });
     }
 
     @Autowired
     private void initArgsPane(BeanArgTable argTable) {
         argsTab.setContent(argTable);
-        argsTab.disableProperty().bind(selectBoolean(argTable.itemsProperty(), "empty"));
+        argTable.itemsProperty().addListener(o -> {
+            if (argTable.getItems().isEmpty()) {
+                getItems().remove(argsTab);
+            } else {
+                if (!getItems().contains(argsTab)) {
+                    getItems().add(0, argsTab);
+                }
+            }
+        });
     }
 
     @Autowired

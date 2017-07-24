@@ -47,13 +47,14 @@ import java.util.stream.Collectors;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class MaridTreeTableView<T> extends TreeTableView<T> implements AutoCloseable {
+public class MaridTreeTableView<T> extends TreeTableView<T> implements MaridActionsControl<TreeItem<T>>, AutoCloseable {
 
     protected final ObjectProperty<Supplier<TreeTableRow<T>>> rowSupplier = new SimpleObjectProperty<>(TreeTableRow::new);
-    protected final ObservableList<Function<TreeItem<T>, FxAction>> actions = FXCollections.observableArrayList();
-    protected final List<Observable> observables = new ArrayList<>();
-    protected final List<Runnable> onConstruct = new ArrayList<>();
-    protected final List<Runnable> onDestroy = new ArrayList<>();
+
+    private final ObservableList<Function<TreeItem<T>, FxAction>> actions = FXCollections.observableArrayList();
+    private final List<Observable> observables = new ArrayList<>();
+    private final List<Runnable> onConstruct = new ArrayList<>();
+    private final List<Runnable> onDestroy = new ArrayList<>();
 
     public MaridTreeTableView(TreeItem<T> root) {
         super(root);
@@ -110,5 +111,25 @@ public class MaridTreeTableView<T> extends TreeTableView<T> implements AutoClose
     @Override
     public void close() {
         onDestroy.forEach(Runnable::run);
+    }
+
+    @Override
+    public ObservableList<Function<TreeItem<T>, FxAction>> actions() {
+        return actions;
+    }
+
+    @Override
+    public List<Observable> observables() {
+        return observables;
+    }
+
+    @Override
+    public List<Runnable> onConstructListeners() {
+        return onConstruct;
+    }
+
+    @Override
+    public List<Runnable> onDestroyListeners() {
+        return onDestroy;
     }
 }

@@ -129,7 +129,7 @@ public class ProjectStructureTree extends MaridTreeTableView<Path> {
     @Autowired
     private void init(Map<String, FileEditor> fileEditors) {
         fileEditors.forEach((name, editor) -> {
-            actions.add((item -> {
+            actions().add((item -> {
                 if (item == null || item.getValue() == null) {
                     return null;
                 } else {

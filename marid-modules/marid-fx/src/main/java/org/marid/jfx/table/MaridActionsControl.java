@@ -1,6 +1,6 @@
 /*-
  * #%L
- * marid-runtime
+ * marid-fx
  * %%
  * Copyright (C) 2012 - 2017 MARID software development group
  * %%
@@ -19,13 +19,28 @@
  * #L%
  */
 
-package org.marid.runtime.converter;
+package org.marid.jfx.table;
+
+import javafx.beans.Observable;
+import javafx.collections.ObservableList;
+import javafx.scene.control.MultipleSelectionModel;
+import org.marid.jfx.action.FxAction;
+
+import java.util.List;
+import java.util.function.Function;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@FunctionalInterface
-public interface ValueConverter {
+public interface MaridActionsControl<T> {
 
-    Object convert(String value, Class<?> type);
+    ObservableList<Function<T, FxAction>> actions();
+
+    MultipleSelectionModel<T> getSelectionModel();
+
+    List<Observable> observables();
+
+    List<Runnable> onConstructListeners();
+
+    List<Runnable> onDestroyListeners();
 }

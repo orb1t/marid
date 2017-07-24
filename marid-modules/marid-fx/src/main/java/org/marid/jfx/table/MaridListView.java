@@ -47,13 +47,14 @@ import java.util.stream.Collectors;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class MaridListView<T> extends ListView<T> implements AutoCloseable {
+public class MaridListView<T> extends ListView<T> implements MaridActionsControl<T>, AutoCloseable {
 
     protected final ObjectProperty<Supplier<ListCell<T>>> cellSupplier = new SimpleObjectProperty<>(TextFieldListCell::new);
-    protected final ObservableList<Function<T, FxAction>> actions = FXCollections.observableArrayList();
-    protected final List<Observable> observables = new ArrayList<>();
-    protected final List<Runnable> onDestroy = new ArrayList<>();
-    protected final List<Runnable> onConstruct = new ArrayList<>();
+
+    private final ObservableList<Function<T, FxAction>> actions = FXCollections.observableArrayList();
+    private final List<Observable> observables = new ArrayList<>();
+    private final List<Runnable> onDestroy = new ArrayList<>();
+    private final List<Runnable> onConstruct = new ArrayList<>();
 
     public MaridListView(ObservableList<T> list) {
         super(list);
@@ -111,5 +112,25 @@ public class MaridListView<T> extends ListView<T> implements AutoCloseable {
     @Override
     public void close() {
         onDestroy.forEach(Runnable::run);
+    }
+
+    @Override
+    public ObservableList<Function<T, FxAction>> actions() {
+        return actions;
+    }
+
+    @Override
+    public List<Observable> observables() {
+        return observables;
+    }
+
+    @Override
+    public List<Runnable> onConstructListeners() {
+        return onConstruct;
+    }
+
+    @Override
+    public List<Runnable> onDestroyListeners() {
+        return onDestroy;
     }
 }

@@ -24,7 +24,6 @@ package org.marid.jfx.action;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
@@ -48,8 +47,11 @@ public class SpecialActions {
 
     public void assign(Collection<FxAction> actions) {
         reset();
-        final Function<FxAction, SpecialAction> gf = a -> a.specialAction != null ? a.specialAction : miscAction;
-        final Map<SpecialAction, List<FxAction>> map = actions.stream().collect(groupingBy(gf, toList()));
+        final Map<SpecialAction, List<FxAction>> map = actions.stream()
+                .collect(groupingBy(
+                        a -> a.specialAction != null ? a.specialAction : miscAction,
+                        toList()
+                ));
         map.forEach((k, v) -> {
             if (v.size() == 1) {
                 k.copy(v.get(0));
