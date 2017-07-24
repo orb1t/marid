@@ -20,10 +20,15 @@
 
 package org.marid.dependant.beaneditor;
 
+import org.marid.annotation.MetaLiteral;
 import org.marid.dependant.beaneditor.dao.LibraryBeanDao;
+import org.marid.dependant.beaneditor.initializers.BeanInitializerList;
 import org.marid.dependant.beaneditor.model.LibraryBean;
+import org.marid.dependant.beaneditor.model.LibraryMethod;
 import org.marid.ide.model.BeanData;
+import org.marid.ide.model.BeanMethodData;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.ide.settings.AppearanceSettings;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.SpecialAction;
 import org.springframework.beans.factory.ObjectFactory;
@@ -38,9 +43,9 @@ import java.util.TreeMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.*;
+import static org.marid.ide.model.BeanMethodData.signature;
 import static org.marid.jfx.LocalizedStrings.ls;
 
 /**
@@ -63,9 +68,9 @@ public class BeanTableActions {
             final Consumer<ProjectProfile> listener = p -> {
                 final Function<LibraryBean, FxAction> function = bean -> new FxAction("bean", bean.literal.group)
                         .setIcon(bean.literal.icon)
-                        .bindText(ls("%s%s%s", libraryBeanObservables(bean)))
+                        .bindText(ls("%s%s%s", lo(bean.literal)))
                         .setEventHandler(event -> table.getObject().getItems().add(new BeanData(bean.bean)));
-                final Map<String, List<FxAction>> grouped = Stream.of(dao.beans())
+                final Map<String, List<FxAction>> grouped = dao.beans()
                         .collect(groupingBy(b -> b.literal.group, TreeMap::new, mapping(function, toList())));
                 action.setChildren(children(grouped));
                 action.setDisabled(action.getChildren().isEmpty());
@@ -86,38 +91,72 @@ public class BeanTableActions {
         return data -> {
             if (data == null) {
                 return null;
-            } else {
-                final FxAction action = new FxAction("add", "add", "add")
-                        .setSpecialAction(addAction)
-                        .bindText("Add a factory bean")
-                        .setIcon("D_SERVER_PLUS");
-                final Consumer<ProjectProfile> listener = p -> {
-                    final Function<LibraryBean, FxAction> function = bean -> new FxAction("bean", bean.literal.group)
-                            .setIcon(bean.literal.icon)
-                            .bindText(ls("%s%s%s", libraryBeanObservables(bean)))
-                            .setEventHandler(event -> {
-                                final BeanData beanData = new BeanData(bean.bean);
-                                beanData.factory.set("@" + data.getName());
-                                table.getObject().getItems().add(beanData);
-                            });
-                    final Map<String, List<FxAction>> grouped = dao.beans(data)
-                            .collect(groupingBy(b -> b.literal.group, TreeMap::new, mapping(function, toList())));
-                    action.setChildren(children(grouped));
-                    action.setDisabled(action.getChildren().isEmpty());
-                };
-                action.anchors.add(listener);
-                listener.accept(profile);
-                profile.addOnUpdate(listener);
-                return action;
             }
+            final FxAction action = new FxAction("add", "add", "add")
+                    .setSpecialAction(addAction)
+                    .bindText("Add a factory bean")
+                    .setIcon("D_SERVER_PLUS");
+            final Consumer<ProjectProfile> listener = p -> {
+                final Function<LibraryBean, FxAction> function = bean -> new FxAction("bean", bean.literal.group)
+                        .setIcon(bean.literal.icon)
+                        .bindText(ls("%s%s%s", lo(bean.literal)))
+                        .setEventHandler(event -> {
+                            final BeanData beanData = new BeanData(bean.bean);
+                            beanData.factory.set("@" + data.getName());
+                            table.getObject().getItems().add(beanData);
+                        });
+                final Map<String, List<FxAction>> grouped = dao.beans(data)
+                        .collect(groupingBy(b -> b.literal.group, TreeMap::new, mapping(function, toList())));
+                action.setChildren(children(grouped));
+                action.setDisabled(action.getChildren().isEmpty());
+            };
+            action.anchors.add(listener);
+            listener.accept(profile);
+            profile.addOnUpdate(listener);
+            return action;
         };
     }
 
-    private static Object[] libraryBeanObservables(LibraryBean bean) {
-        if (bean.literal.description.isEmpty()) {
-            return new Object[] {ls(bean.literal.name), "", ""};
+    @Qualifier("beanTable")
+    @Bean
+    public Function<BeanData, FxAction> initializerAdder(ProjectProfile profile,
+                                                         LibraryBeanDao dao,
+                                                         ObjectFactory<BeanInitializerList> list,
+                                                         SpecialAction addAction,
+                                                         AppearanceSettings appearanceSettings) {
+        return data -> {
+            if (data == null) {
+                return null;
+            }
+            final FxAction action = new FxAction("add", "add", "add")
+                    .bindText("Add an initializer")
+                    .setIcon("D_PLUS")
+                    .setSpecialAction(addAction);
+            final Consumer<ProjectProfile> listener = p -> {
+                final Function<LibraryMethod, FxAction> function = m -> new FxAction("bean", m.literal.group)
+                        .setIcon(m.literal.icon)
+                        .bindText(signature(m.method.signature, appearanceSettings.showFullNamesProperty()))
+                        .setEventHandler(event -> {
+                            final BeanMethodData d = new BeanMethodData(data, m.method);
+                            list.getObject().getItems().add(d);
+                        });
+                final Map<String, List<FxAction>> grouped = dao.initializers(data)
+                        .collect(groupingBy(b -> b.literal.group, TreeMap::new, mapping(function, toList())));
+                action.setChildren(children(grouped));
+                action.setDisabled(action.getChildren().isEmpty());
+            };
+            action.anchors.add(listener);
+            listener.accept(profile);
+            profile.addOnUpdate(listener);
+            return action;
+        };
+    }
+
+    public static Object[] lo(MetaLiteral literal) {
+        if (literal.description.isEmpty()) {
+            return new Object[]{ls(literal.name), "", ""};
         } else {
-            return new Object[] {ls(bean.literal.name), ": ", ls(bean.literal.description)};
+            return new Object[]{ls(literal.name), ": ", ls(literal.description)};
         }
     }
 

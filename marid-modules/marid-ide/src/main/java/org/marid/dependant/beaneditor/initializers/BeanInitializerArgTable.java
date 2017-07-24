@@ -18,9 +18,10 @@
  * #L%
  */
 
-package org.marid.dependant.beaneditor;
+package org.marid.dependant.beaneditor.initializers;
 
 import javafx.collections.FXCollections;
+import org.marid.dependant.beaneditor.BeanMethodArgTable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

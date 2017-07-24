@@ -26,6 +26,7 @@ import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
 import javafx.scene.control.MultipleSelectionModel;
 import org.marid.jfx.action.FxAction;
+import org.marid.jfx.action.SpecialAction;
 
 import java.util.List;
 import java.util.function.Function;
@@ -47,7 +48,7 @@ public interface MaridActionsControl<T> {
 
     void remove(List<? extends T> list);
 
-    default void installRemoveAction(FxAction removeAction) {
+    default void installRemoveAction(SpecialAction removeAction) {
         actions().add(e -> new FxAction("rem", "rem", "rem")
                 .bindDisabled(Bindings.isEmpty(getSelectionModel().getSelectedItems()))
                 .bindText("Remove selected items")

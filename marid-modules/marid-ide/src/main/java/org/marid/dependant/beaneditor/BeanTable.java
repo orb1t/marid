@@ -28,6 +28,7 @@ import org.marid.ide.model.BeanMethodData;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.settings.AppearanceSettings;
 import org.marid.jfx.action.FxAction;
+import org.marid.jfx.action.SpecialAction;
 import org.marid.jfx.table.MaridTableView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -86,7 +87,7 @@ public class BeanTable extends MaridTableView<BeanData> {
             column.setMaxWidth(800);
             column.setCellValueFactory(param -> Bindings.createStringBinding(() -> {
                 final BeanMethodData producer = param.getValue().getProducer();
-                return producer.signature(appearanceSettings.showFullNamesProperty().get());
+                return BeanMethodData.signature(producer.getSignature(), appearanceSettings.showFullNamesProperty().get());
             }, param.getValue().producer, appearanceSettings.showFullNamesProperty()));
             getColumns().add(column);
         });
@@ -99,7 +100,7 @@ public class BeanTable extends MaridTableView<BeanData> {
 
     @Autowired
     @Override
-    public void installRemoveAction(FxAction removeAction) {
+    public void installRemoveAction(SpecialAction removeAction) {
         super.installRemoveAction(removeAction);
     }
 }

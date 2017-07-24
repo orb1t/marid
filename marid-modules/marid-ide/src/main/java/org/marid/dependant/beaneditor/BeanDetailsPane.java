@@ -24,6 +24,7 @@ import javafx.beans.binding.Bindings;
 import javafx.geometry.Orientation;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TitledPane;
+import org.marid.dependant.beaneditor.initializers.BeanInitializerDetailsPane;
 import org.marid.jfx.icons.FontIcons;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

@@ -23,6 +23,7 @@ package org.marid.dependant.beaneditor.dao;
 import com.google.common.reflect.TypeToken;
 import org.marid.annotation.MetaLiteral;
 import org.marid.dependant.beaneditor.model.LibraryBean;
+import org.marid.dependant.beaneditor.model.LibraryMethod;
 import org.marid.ide.model.BeanData;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.types.BeanCache;
@@ -63,10 +64,8 @@ public class LibraryBeanDao {
         this.resolver = resolver;
     }
 
-    public LibraryBean[] beans() {
-        return lines(profile.getClassLoader(), BEAN_CLASSES, this::beans)
-                .flatMap(v -> v)
-                .toArray(LibraryBean[]::new);
+    public Stream<LibraryBean> beans() {
+        return lines(profile.getClassLoader(), BEAN_CLASSES, this::beans).flatMap(v -> v);
     }
 
     private Stream<LibraryBean> beans(String type) {
@@ -121,6 +120,28 @@ public class LibraryBeanDao {
                             final MetaLiteral literal = l("Bean", "Other", e.getName(), "D_SERVER_NETWORK", e);
                             final Bean bean = new Bean(e.getName(), "@" + beanData.getName(), new BeanMethod(e));
                             return new LibraryBean(bean, literal);
+                        })
+        ).flatMap(v -> v);
+    }
+
+    public Stream<LibraryMethod> initializers(BeanData beanData) {
+        final BeanCache cache = profile.getBeanCache();
+        final BeanTypeInfo typeInfo = resolver.resolve(cache, beanData.getName());
+        final Class<?> c = TypeToken.of(typeInfo.getType()).getRawType();
+        return of(
+                of(c.getMethods())
+                        .filter(e -> !Modifier.isStatic(e.getModifiers()))
+                        .map(e -> {
+                            final MetaLiteral literal = l("Bean", "Other", e.getName(), "D_SERVER_NETWORK", e);
+                            final BeanMethod i = new BeanMethod(e, args(e));
+                            return new LibraryMethod(i, literal);
+                        }),
+                of(c.getFields())
+                        .filter(f -> !Modifier.isStatic(f.getModifiers()))
+                        .map(e -> {
+                            final MetaLiteral literal = l("Bean", "Other", e.getName(), "D_SERVER_NETWORK", e);
+                            final BeanMethod i = new BeanMethod(e);
+                            return new LibraryMethod(i, literal);
                         })
         ).flatMap(v -> v);
     }

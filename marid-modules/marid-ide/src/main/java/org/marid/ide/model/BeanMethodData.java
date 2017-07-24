@@ -21,9 +21,11 @@
 package org.marid.ide.model;
 
 import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ObservableStringValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.marid.runtime.beans.BeanMethod;
@@ -75,19 +77,23 @@ public class BeanMethodData {
         }
     }
 
-    public String signature(boolean showFullNames) {
+    public static String signature(String signature, boolean showFullNames) {
         if (showFullNames) {
-            return getSignature();
+            return signature;
         } else {
-            final String[] argTypes = BeanMethod.argTypes(getSignature());
+            final String[] argTypes = BeanMethod.argTypes(signature);
             if (argTypes.length > 0) {
                 return Stream.of(argTypes)
                         .map(BeanMethodData::toShortClass)
-                        .collect(joining(",", BeanMethod.name(getSignature()) + "(", ")"));
+                        .collect(joining(",", BeanMethod.name(signature) + "(", ")"));
             } else {
-                return getSignature();
+                return signature;
             }
         }
+    }
+
+    public static ObservableStringValue signature(String signature, BooleanProperty showFullNames) {
+        return Bindings.createStringBinding(() -> signature(signature, showFullNames.get()), showFullNames);
     }
 
     @Override

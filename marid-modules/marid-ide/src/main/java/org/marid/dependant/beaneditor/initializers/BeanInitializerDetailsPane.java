@@ -18,15 +18,15 @@
  * #L%
  */
 
-package org.marid.dependant.beaneditor;
+package org.marid.dependant.beaneditor.initializers;
 
-import javafx.scene.control.cell.TextFieldListCell;
+import javafx.beans.binding.Bindings;
+import javafx.geometry.Side;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderStroke;
 import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.paint.Color;
-import org.marid.ide.model.BeanMethodData;
-import org.marid.jfx.table.MaridListView;
+import org.controlsfx.control.MasterDetailPane;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -34,24 +34,18 @@ import org.springframework.stereotype.Component;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class BeanInitializerList extends MaridListView<BeanMethodData> {
+public class BeanInitializerDetailsPane extends MasterDetailPane {
 
-    public BeanInitializerList() {
-        setBorder(new Border(new BorderStroke(Color.TRANSPARENT, BorderStrokeStyle.NONE, null, null)));
-        cellSupplier.set(() -> {
-            final TextFieldListCell<BeanMethodData> cell = new TextFieldListCell<>();
-            return cell;
-        });
-    }
+    final BeanInitializerList initializerList;
+    final BeanInitializerArgTable argTable;
 
     @Autowired
-    private void initOnSelectionListener(BeanTable table) {
-        table.getSelectionModel().selectedItemProperty().addListener((o, oV, nV) -> {
-            if (nV == null) {
-                getItems().clear();
-            } else {
-                getItems().setAll(nV.initializers);
-            }
-        });
+    public BeanInitializerDetailsPane(BeanInitializerList initializerList, BeanInitializerArgTable argTable) {
+        super(Side.BOTTOM, initializerList, argTable, false);
+        this.initializerList = initializerList;
+        this.argTable = argTable;
+        setDividerPosition(0.5);
+        setBorder(new Border(new BorderStroke(Color.TRANSPARENT, BorderStrokeStyle.NONE, null, null)));
+        showDetailNodeProperty().bind(Bindings.selectBoolean(argTable.itemsProperty(), "empty").not());
     }
 }
