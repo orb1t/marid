@@ -20,6 +20,9 @@
 
 package org.marid.ide.settings;
 
+import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import org.springframework.stereotype.Component;
 
 /**
@@ -28,8 +31,30 @@ import org.springframework.stereotype.Component;
 @Component
 public class AppearanceSettings extends AbstractSettings {
 
+    private final BooleanProperty showFullNames = new SimpleBooleanProperty(isShowFullNames());
+
+    public AppearanceSettings() {
+        preferences.addPreferenceChangeListener(evt -> {
+            if ("showFullNames".equals(evt.getKey())) {
+                Platform.runLater(() -> showFullNames.set(Boolean.parseBoolean(evt.getNewValue())));
+            }
+        });
+    }
+
     @Override
     public String getName() {
         return "Appearance";
+    }
+
+    public boolean isShowFullNames() {
+        return preferences.getBoolean("showFullNames", false);
+    }
+
+    public void setShowFullNames(boolean value) {
+        preferences.putBoolean("showFullNames", value);
+    }
+
+    public BooleanProperty showFullNamesProperty() {
+        return showFullNames;
     }
 }

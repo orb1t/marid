@@ -53,6 +53,8 @@ public class AppearanceTab extends GenericGridPane implements SettingsEditor {
         addIntField("Max log records", logHandler::getMaxRecords, logHandler::setMaxRecords, 100, 100_000, 100);
         addSeparator();
         addControl("System stylesheet", this::styleSheetCombo);
+        addSeparator();
+        addBooleanField("Show full names", appearanceSettings::isShowFullNames, appearanceSettings::setShowFullNames);
     }
 
     private ComboBox<String> styleSheetCombo() {

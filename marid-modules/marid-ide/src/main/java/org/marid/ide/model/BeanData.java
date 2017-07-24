@@ -77,8 +77,8 @@ public class BeanData {
         return new Bean(
                 getName(),
                 getFactory(),
-                getProducer().toProducer(),
-                initializers.stream().map(BeanMethodData::toProducer).toArray(BeanMethod[]::new)
+                getProducer().toMethod(),
+                initializers.stream().map(BeanMethodData::toMethod).toArray(BeanMethod[]::new)
         );
     }
 

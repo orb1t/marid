@@ -21,11 +21,14 @@
 package org.marid.dependant.beaneditor;
 
 import javafx.beans.InvalidationListener;
+import javafx.beans.binding.Bindings;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.TextFieldTableCell;
 import org.marid.dependant.beaneditor.model.LibraryBean;
 import org.marid.ide.model.BeanData;
+import org.marid.ide.model.BeanMethodData;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.ide.settings.AppearanceSettings;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.SpecialAction;
 import org.marid.jfx.table.MaridTableView;
@@ -54,7 +57,7 @@ public class BeanTable extends MaridTableView<BeanData> {
     private final TableColumn<BeanData, String> producerColumn;
 
     @Autowired
-    public BeanTable(ProjectProfile profile) {
+    public BeanTable(ProjectProfile profile, AppearanceSettings appearanceSettings) {
         super(profile.getBeanFile().beans);
         setEditable(true);
 
@@ -74,7 +77,12 @@ public class BeanTable extends MaridTableView<BeanData> {
             column.setMinWidth(300);
             column.setPrefWidth(350);
             column.setMaxWidth(800);
-            column.setCellValueFactory(param -> param.getValue().factory);
+            column.setCellValueFactory(param -> Bindings.createStringBinding(() -> {
+                final BeanData bean = param.getValue();
+                return appearanceSettings.showFullNamesProperty().get()
+                        ? bean.getFactory()
+                        : BeanMethodData.toShortClass(bean.getFactory());
+            }, param.getValue().factory, appearanceSettings.showFullNamesProperty()));
             getColumns().add(column);
         });
 
@@ -83,7 +91,10 @@ public class BeanTable extends MaridTableView<BeanData> {
             column.setMinWidth(200);
             column.setPrefWidth(250);
             column.setMaxWidth(800);
-            column.setCellValueFactory(param -> param.getValue().getProducer().signature);
+            column.setCellValueFactory(param -> Bindings.createStringBinding(() -> {
+                final BeanMethodData producer = param.getValue().getProducer();
+                return producer.signature(appearanceSettings.showFullNamesProperty().get());
+            }, param.getValue().producer, appearanceSettings.showFullNamesProperty()));
             getColumns().add(column);
         });
     }

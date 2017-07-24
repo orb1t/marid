@@ -41,8 +41,8 @@ public abstract class BeanMethodArgTable extends MaridTableView<BeanMethodArgDat
 
         nameColumn = build(new TableColumn<>(), column -> {
             column.textProperty().bind(ls("Name"));
-            column.setMinWidth(100);
-            column.setPrefWidth(150);
+            column.setMinWidth(70);
+            column.setPrefWidth(80);
             column.setPrefWidth(350);
             column.setCellValueFactory(param -> param.getValue().name);
             getColumns().add(column);
@@ -50,8 +50,8 @@ public abstract class BeanMethodArgTable extends MaridTableView<BeanMethodArgDat
 
         typeColumn = build(new TableColumn<>(), column -> {
             column.textProperty().bind(ls("Type"));
-            column.setMinWidth(100);
-            column.setPrefWidth(150);
+            column.setMinWidth(70);
+            column.setPrefWidth(80);
             column.setPrefWidth(350);
             column.setCellValueFactory(param -> param.getValue().type);
             getColumns().add(column);
@@ -60,7 +60,7 @@ public abstract class BeanMethodArgTable extends MaridTableView<BeanMethodArgDat
         valueColumn = build(new TableColumn<>(), column -> {
             column.textProperty().bind(ls("Value"));
             column.setMinWidth(200);
-            column.setPrefWidth(350);
+            column.setPrefWidth(400);
             column.setPrefWidth(1000);
             column.setCellValueFactory(param -> param.getValue().value);
             getColumns().add(column);

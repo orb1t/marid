@@ -79,6 +79,10 @@ public class BeanMethod {
     }
 
     public String name() {
+        return name(signature);
+    }
+
+    public static String name(String signature) {
         final int index = signature.indexOf('(');
         if (index < 0) {
             return signature;
@@ -88,6 +92,10 @@ public class BeanMethod {
     }
 
     public String[] argTypes() {
+        return argTypes(signature);
+    }
+
+    public static String[] argTypes(String signature) {
         final int index = signature.indexOf('(');
         if (index < 0) {
             return new String[0];

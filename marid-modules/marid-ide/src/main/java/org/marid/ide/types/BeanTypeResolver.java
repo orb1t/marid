@@ -151,7 +151,7 @@ public class BeanTypeResolver {
                 } catch (NoSuchFieldException | NullPointerException fx) {
                     throw new MaridFilterNotFoundException(
                             arg.parent.parent.getName(),
-                            arg.parent.toProducer().name(),
+                            arg.parent.toMethod().name(),
                             arg.getName(),
                             arg.getFilter());
                 }

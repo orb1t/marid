@@ -20,6 +20,7 @@
 
 package org.marid.dependant.beaneditor;
 
+import javafx.scene.control.cell.TextFieldListCell;
 import org.marid.ide.model.BeanMethodData;
 import org.marid.jfx.table.MaridListView;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,10 @@ import org.springframework.stereotype.Component;
 public class BeanInitializerList extends MaridListView<BeanMethodData> {
 
     public BeanInitializerList() {
+        cellSupplier.set(() -> {
+            final TextFieldListCell<BeanMethodData> cell = new TextFieldListCell<>();
+            return cell;
+        });
     }
 
     @Autowired

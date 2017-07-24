@@ -21,6 +21,7 @@
 package org.marid.ide.model;
 
 import javafx.beans.Observable;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -33,6 +34,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -57,15 +59,35 @@ public class BeanMethodData {
     }
 
     public Observable[] observables() {
-        return new Observable[] {signature, args};
+        return new Observable[]{signature, args};
     }
 
-    public BeanMethod toProducer() {
+    public BeanMethod toMethod() {
         return new BeanMethod(signature.get(), args.stream().map(BeanMethodArgData::toArg).toArray(BeanMethodArg[]::new));
     }
 
-    public ObservableList<BeanMethodArgData> getArgs() {
-        return args;
+    public static String toShortClass(String name) {
+        if (name.startsWith("@")) {
+            return name;
+        } else {
+            final int index = name.lastIndexOf('.');
+            return index < 0 ? name : name.substring(index + 1);
+        }
+    }
+
+    public String signature(boolean showFullNames) {
+        if (showFullNames) {
+            return getSignature();
+        } else {
+            final String[] argTypes = BeanMethod.argTypes(getSignature());
+            if (argTypes.length > 0) {
+                return Stream.of(argTypes)
+                        .map(BeanMethodData::toShortClass)
+                        .collect(joining(",", BeanMethod.name(getSignature()) + "(", ")"));
+            } else {
+                return getSignature();
+            }
+        }
     }
 
     @Override
@@ -73,8 +95,8 @@ public class BeanMethodData {
         if (obj instanceof BeanMethodData) {
             final BeanMethodData that = (BeanMethodData) obj;
             return Arrays.equals(
-                    new Object[] {this.getSignature(), this.args},
-                    new Object[] {that.getSignature(), that.args}
+                    new Object[]{this.getSignature(), this.args},
+                    new Object[]{that.getSignature(), that.args}
             );
         } else {
             return false;
@@ -88,6 +110,6 @@ public class BeanMethodData {
 
     @Override
     public String toString() {
-        return toProducer().toString();
+        return toMethod().toString();
     }
 }
