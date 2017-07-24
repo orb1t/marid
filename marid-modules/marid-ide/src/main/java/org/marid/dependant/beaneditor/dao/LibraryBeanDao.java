@@ -20,6 +20,7 @@
 
 package org.marid.dependant.beaneditor.dao;
 
+import com.github.javaparser.utils.Utils;
 import org.marid.annotation.MetaLiteral;
 import org.marid.dependant.beaneditor.model.LibraryBean;
 import org.marid.ide.project.ProjectProfile;
@@ -80,7 +81,7 @@ public class LibraryBeanDao {
             }
             final MetaLiteral literal = l("Bean", "Other", c, "D_SERVER_NETWORK", constructor);
             final Bean bean = new Bean(literal.name, c.getName(), new BeanMethod(constructor, args(constructor)));
-            builder.accept(new LibraryBean(bean, literal));
+            builder.accept(new LibraryBean(Utils.decapitalize(c.getSimpleName()), bean, literal));
         }
         for (final Method method : c.getMethods()) {
             if (Modifier.isStatic(method.getModifiers())) {
@@ -89,7 +90,7 @@ public class LibraryBeanDao {
                 }
                 final MetaLiteral literal = l("Bean", "Other", method.getName(), "D_SERVER_NETWORK", method);
                 final Bean bean = new Bean(literal.name, c.getName(), new BeanMethod(method, args(method)));
-                builder.accept(new LibraryBean(bean, literal));
+                builder.accept(new LibraryBean(method.getName(), bean, literal));
             }
         }
         for (final Field field : c.getFields()) {
@@ -99,7 +100,7 @@ public class LibraryBeanDao {
                 }
                 final MetaLiteral literal = l("Bean", "Other", field.getName(), "D_SERVER_NETWORK", field);
                 final Bean bean = new Bean(literal.name, c.getName(), new BeanMethod(field));
-                builder.accept(new LibraryBean(bean, literal));
+                builder.accept(new LibraryBean(field.getName(), bean, literal));
             }
         }
         return builder.build();

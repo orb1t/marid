@@ -250,12 +250,14 @@ public class FxAction {
         return Collections.unmodifiableList(children);
     }
 
-    public void setChildren(FxAction... actions) {
+    public FxAction setChildren(FxAction... actions) {
         children.setAll(actions);
+        return this;
     }
 
-    public void setChildren(Collection<? extends FxAction> actions) {
+    public FxAction setChildren(Collection<? extends FxAction> actions) {
         children.setAll(actions);
+        return this;
     }
 
     @Override

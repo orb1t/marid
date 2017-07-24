@@ -22,6 +22,7 @@ package org.marid.dependant.beaneditor;
 
 import javafx.beans.InvalidationListener;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.cell.TextFieldTableCell;
 import org.marid.dependant.beaneditor.model.LibraryBean;
 import org.marid.ide.model.BeanData;
 import org.marid.ide.project.ProjectProfile;
@@ -63,6 +64,7 @@ public class BeanTable extends MaridTableView<BeanData> {
             column.setPrefWidth(200);
             column.setMaxWidth(700);
             column.setCellValueFactory(param -> param.getValue().name);
+            column.setCellFactory(TextFieldTableCell.forTableColumn());
             column.setEditable(true);
             getColumns().add(column);
         });
@@ -106,6 +108,7 @@ public class BeanTable extends MaridTableView<BeanData> {
                     .bindText(ls("%s%s%s", textFunc.apply(bean)))
                     .setEventHandler(event -> {
                         final BeanData beanData = new BeanData(bean.bean);
+                        beanData.name.set(bean.name);
                         getItems().add(beanData);
                     });
             final Map<String, List<FxAction>> grouped = context.discoveredBeans.stream()
@@ -115,12 +118,9 @@ public class BeanTable extends MaridTableView<BeanData> {
                     action.setChildren(grouped.values().stream().flatMap(Collection::stream).collect(toList()));
                     break;
                 default:
-                    action.setChildren(grouped.entrySet().stream().map(e -> {
-                        final FxAction a = new FxAction("", "");
-                        a.bindText(e.getKey());
-                        a.setChildren(e.getValue());
-                        return a;
-                    }).collect(Collectors.toList()));
+                    action.setChildren(grouped.entrySet().stream().map(e -> new FxAction("", "")
+                            .bindText(e.getKey())
+                            .setChildren(e.getValue())).collect(Collectors.toList()));
                     break;
             }
         };

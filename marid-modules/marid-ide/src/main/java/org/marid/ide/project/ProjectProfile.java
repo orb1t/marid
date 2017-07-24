@@ -50,7 +50,7 @@ import java.util.logging.Logger;
 import static java.util.EnumSet.allOf;
 import static java.util.logging.Level.WARNING;
 import static java.util.stream.Collectors.toMap;
-import static org.marid.ide.model.BeanDataNormalizer.nameNormalizer;
+import static org.marid.ide.model.BeanDataNormalizer.registerNormalizer;
 import static org.marid.ide.project.ProjectFileType.*;
 import static org.marid.logging.Log.log;
 import static org.marid.misc.Builder.build;
@@ -92,8 +92,8 @@ public class ProjectProfile {
         model = loadModel();
         model.setModelVersion("4.0.0");
         beanFile = build(new BeanFile(), f -> {
+            registerNormalizer(f);
             f.load(this);
-            f.beans.addListener(nameNormalizer(this::getBeanCache));
         });
         init();
         enabled = new SimpleBooleanProperty(true);

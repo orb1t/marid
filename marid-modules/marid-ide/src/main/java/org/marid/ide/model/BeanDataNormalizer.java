@@ -20,33 +20,96 @@
 
 package org.marid.ide.model;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
-import org.marid.ide.types.BeanCache;
 
-import java.util.function.Supplier;
-import java.util.stream.IntStream;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toMap;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public interface BeanDataNormalizer {
 
-    static ListChangeListener<BeanData> nameNormalizer(Supplier<BeanCache> cacheSupplier) {
-        return change -> {
-            final BeanCache cache = cacheSupplier.get();
-            while (change.next()) {
-                for (final BeanData bean : change.getAddedSubList()) {
-                    if (cache.containsBean(bean.getName())) {
-                        bean.name.set(bean.getName() + "_new");
-                    }
+    static void registerNormalizer(BeanFile file) {
+        final Map<String, BeanData> map = file.beans.stream().collect(toMap(BeanData::getName, b -> b, (v1, v2) -> v2));
+        final Function<String, String> generator = name -> {
+            if (map.containsKey(name)) {
+                name = name.replaceFirst("(_new)+$", "");
+                while (map.containsKey(name)) {
+                    name += "_new";
                 }
-                if (change.wasUpdated()) {
-                    IntStream.range(change.getFrom(), change.getTo())
-                            .mapToObj(change.getList()::get)
-                            .filter(b -> cache.containsBean(b.getName()))
-                            .forEach(b -> b.name.set(b.getName() + "_new"));
+            }
+            return name;
+        };
+        final ChangeListener<String> nameChangeListener = new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> o, String oldName, String newName) {
+                final BeanData bean = requireNonNull(map.get(oldName), oldName);
+                bean.name.removeListener(this);
+                try {
+                    newName = generator.apply(newName);
+                    bean.name.set(newName);
+                    final Set<BeanData> toRemove = new HashSet<>();
+                    for (final BeanData b : file.beans) {
+                        if (b.getFactory().startsWith("@" + oldName)) {
+                            if (newName == null) {
+                                toRemove.add(b);
+                                continue;
+                            } else {
+                                b.factory.set("@" + newName);
+                            }
+                        }
+                        for (final BeanMethodArgData a : b.getProducer().args) {
+                            if ("ref".equals(a.getType()) && a.getValue() != null && a.getValue().equals(oldName)) {
+                                a.value.set(newName);
+                            }
+                        }
+                        for (final BeanMethodData i : b.initializers) {
+                            for (final BeanMethodArgData a : i.args) {
+                                if ("ref".equals(a.getType()) && a.getValue() != null && a.getValue().equals(oldName)) {
+                                    a.value.set(newName);
+                                }
+                            }
+                        }
+                    }
+                    file.beans.removeAll(toRemove);
+                } finally {
+                    if (newName != null) {
+                        bean.name.addListener(this);
+                        map.remove(oldName);
+                        map.put(newName, bean);
+                    }
                 }
             }
         };
+        file.beans.addListener(new ListChangeListener<BeanData>() {
+            @Override
+            public void onChanged(Change<? extends BeanData> change) {
+                change.getList().removeListener(this);
+                try {
+                    while (change.next()) {
+                        for (final BeanData bean : change.getRemoved()) {
+                            map.remove(bean.getName());
+                            nameChangeListener.changed(bean.name, bean.getName(), null);
+                        }
+                        for (final BeanData bean : change.getAddedSubList()) {
+                            final String name = generator.apply(bean.getName());
+                            bean.name.set(name);
+                            map.put(name, bean);
+                            bean.name.addListener(nameChangeListener);
+                        }
+                    }
+                } finally {
+                    change.getList().addListener(this);
+                }
+            }
+        });
     }
 }
