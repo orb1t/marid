@@ -58,7 +58,10 @@ public class BeanTypeResolver {
                 final BeanFactoryInfo info = new BeanFactoryInfo(beanData, this, context);
                 final Map<TypeToken<?>, List<TypeToken<?>>> pairs = new LinkedHashMap<>();
                 final Type[] beanPs = formalTypes(info.returnHandle, true);
-                final Type[] beanAs = info.producer.args.stream().map(a -> actualType(context, a)).toArray(Type[]::new);
+                final Type[] beanAs = new Type[beanPs.length];
+                for (int k = 0; k < beanAs.length; k++) {
+                    beanAs[k] = actualType(context, info.producer.args.get(k), beanPs[k]);
+                }
                 for (int i = 0; i < beanPs.length; i++) {
                     if (beanAs[i] != null) {
                         resolve(pairs, info.factoryToken.resolveType(beanPs[i]), of(beanAs[i]));
@@ -69,7 +72,10 @@ public class BeanTypeResolver {
                 for (int i = 0; i < info.bean.initializers.length; i++) {
                     final MethodHandle handle = info.bean.findInitializer(info.returnHandle, info.bean.initializers[i]);
                     final Type[] ps = formalTypes(handle, false);
-                    final Type[] as = beanData.getArgs(i).map(a -> actualType(context, a)).toArray(Type[]::new);
+                    final Type[] as = new Type[ps.length];
+                    for (int k = 0; k < ps.length; k++) {
+                        as[k] = actualType(context, beanData.getArgs(i).get(k), ps[k]);
+                    }
                     for (int k = 0; k < as.length; k++) {
                         if (as[k] != null) {
                             resolve(pairs, info.factoryToken.resolveType(ps[k]), of(as[k]));
@@ -126,15 +132,16 @@ public class BeanTypeResolver {
                 : ((Executable) m).getGenericParameterTypes();
     }
 
-    private Type actualType(BeanCache context, BeanMethodArgData arg) {
+    private Type actualType(BeanCache context, BeanMethodArgData arg, Type formalType) {
         final Type type;
         switch (arg.getType()) {
             case "ref":
                 type = resolve(context, arg.getValue()).getType();
                 break;
-            default:
-                type = context.converters.getType(arg.getType()).orElse(null);
-                break;
+            default: {
+                final Type t = context.converters.getType(arg.getType()).orElse(null);
+                type = t instanceof WildcardType ? formalType : t;
+            }
         }
         if (type == null || arg.getFilter() == null) {
             return type;

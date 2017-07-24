@@ -28,5 +28,5 @@ import org.marid.runtime.context.MaridRuntime;
  */
 public interface ValueConvertersFactory {
 
-    ValueConverters converters(MaridRuntime object);
+    ValueConverters converters(MaridRuntime runtime);
 }

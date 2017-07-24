@@ -24,78 +24,126 @@ package org.marid.runtime.converter;
 import org.marid.annotation.MetaInfo;
 import org.marid.runtime.context.MaridRuntime;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.function.Function;
+import java.nio.charset.Charset;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.util.*;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-import static java.lang.Integer.decode;
 import static org.marid.annotation.MetaLiteral.l;
-import static org.marid.function.Suppliers.elseFunc;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class DefaultValueConverters extends AbstractValueConverters {
 
-    public DefaultValueConverters(MaridRuntime object) {
-        register(l("Numerics", "int", "D_NUMERIC", "Integer"), int.class, Integer::valueOf);
-        register(l("Numerics", "Integer", "D_NUMERIC", "Integer"), Integer.class, elseFunc(Integer::valueOf));
+    public DefaultValueConverters(MaridRuntime runtime) {
+        register(l("Basic", "String", "D_TOOLTIP_TEXT", "String"), String.class, (v, c) -> v);
+        register(l("Basic", "Character", "D_NUMERIC", "Character"), Character.class, (v, c) -> v == null ? null : (char) (int) Integer.decode(v));
 
-        register(l("Numerics", "long", "D_NUMERIC", "Long"), long.class, Long::valueOf);
-        register(l("Numerics", "Long", "D_NUMERIC", "Long"), Long.class, elseFunc(Long::valueOf));
+        redirect(l("Basic", "Integer", "D_NUMERIC", "Integer"), Integer.class, valueOf()::apply);
+        redirect(l("Basic", "Long", "D_NUMERIC", "Long"), Long.class, valueOf()::apply);
+        redirect(l("Basic", "Short", "D_NUMERIC", "Short"), Short.class, valueOf()::apply);
+        redirect(l("Basic", "Byte", "D_NUMERIC", "Byte"), Byte.class, valueOf()::apply);
+        redirect(l("Basic", "Boolean", "D_NUMERIC", "Boolean"), Boolean.class, valueOf()::apply);
+        redirect(l("Basic", "Float", "D_NUMERIC", "Float"), Float.class, valueOf()::apply);
+        redirect(l("Basic", "Double", "D_NUMERIC", "Double"), Double.class, valueOf()::apply);
+        redirect(l("Basic", "BigInteger", "D_NUMERIC", "BigInteger"), BigInteger.class, valueOf()::apply);
+        redirect(l("Basic", "BigDecimal", "D_NUMERIC", "BigDecimal"), BigDecimal.class, valueOf()::apply);
 
-        register(l("Numerics", "short", "D_NUMERIC", "Short"), short.class, Short::valueOf);
-        register(l("Numerics", "Short", "D_NUMERIC", "Short"), Short.class, elseFunc(Short::valueOf));
+        register(l("Special", "ref", "D_SERVER", "Bean by name"), Object.class, (v, c) -> runtime.getBean(v));
+        register(l("Special", "runtime", "D_RUN", "Runtime"), MaridRuntime.class, (v, c) -> runtime);
+    }
 
-        register(l("Numerics", "byte", "D_NUMERIC", "Byte"), byte.class, Byte::valueOf);
-        register(l("Numerics", "Byte", "D_NUMERIC", "Byte"), Byte.class, elseFunc(Byte::valueOf));
-
-        register(l("Numerics", "char", "D_KEY_CHANGE", "Character"), char.class, s -> (char) (int) decode(s));
-        register(l("Numerics", "Character", "D_KEY_CHANGE", "Character"), Character.class, elseFunc(s -> (char) (int) decode(s)));
-
-        register(l("Numerics", "float", "D_NUMERIC", "Byte"), float.class, Float::valueOf);
-        register(l("Numerics", "Float", "D_NUMERIC", "Byte"), Float.class, elseFunc(Float::valueOf));
-
-        register(l("Numerics", "double", "D_NUMERIC", "Double"), double.class, Double::valueOf);
-        register(l("Numerics", "Double", "D_NUMERIC", "Double"), Double.class, elseFunc(Double::valueOf));
-
-        register(l("Numerics", "boolean", "D_NUMERIC_1_BOX_OUTLINE", "Boolean"), boolean.class, Boolean::valueOf);
-        register(l("Numerics", "Boolean", "D_NUMERIC_1_BOX_OUTLINE", "Boolean"), Boolean.class, elseFunc(Boolean::valueOf));
-
-        register(l("Numerics", "BigInteger", "D_NUMERIC_9_PLUS_BOX", "BigInteger"), BigInteger.class, elseFunc(BigInteger::new));
-        register(l("Numerics", "BigDecimal", "D_NUMERIC_9_PLUS_BOX", "BigDecimal"), BigDecimal.class, elseFunc(BigDecimal::new));
-
-        register(l("Strings", "String", "D_MESSAGE_TEXT", "String"), String.class, Function.identity());
-
-        register(l("Special", "ref", "D_SERVER", "Bean by name"), Object.class, object::getBean);
-        register(l("Special", "runtime", "D_RUN", "Runtime"), MaridRuntime.class, v -> object);
+    @MetaInfo(group = "Special", name = "of", icon = "D_FORMAT_TEXT", description = "ValueOf conversion")
+    public BiFunction<String, Class<?>, ?> valueOf() {
+        return (v, c) -> {
+            switch (c.getName()) {
+                case "java.lang.String":
+                case "java.lang.CharSequence":
+                    return v;
+                case "java.math.BigInteger":
+                    return v == null ? null : new BigInteger(v);
+                case "java.math.BigDecimal":
+                    return v == null ? null : new BigDecimal(v);
+                case "java.util.Locale":
+                    return v == null ? null : Locale.forLanguageTag(v);
+                case "java.util.Currency":
+                    return v == null ? null : Currency.getInstance(v);
+                case "java.util.TimeZone":
+                    return v == null ? null : TimeZone.getTimeZone(v);
+                case "java.time.ZoneId":
+                    return v == null ? null : ZoneId.of(v);
+                case "java.time.Instant":
+                    return v == null ? null : Instant.parse(v);
+                case "java.time.Duration":
+                    return v == null ? null : Duration.parse(v);
+                case "java.nio.Charset":
+                    return v == null ? null : Charset.forName(v);
+                case "int":
+                    return v == null ? 0 : Integer.valueOf(v);
+                case "long":
+                    return v == null ? 0L : Long.valueOf(v);
+                case "float":
+                    return v == null ? 0f : Float.valueOf(v);
+                case "double":
+                    return v == null ? 0d : Double.valueOf(v);
+                case "char":
+                    return v == null ? (char) 0 : (char) (int) Integer.decode(v);
+                case "boolean":
+                    return v == null ? Boolean.FALSE : Boolean.valueOf(v);
+                case "byte":
+                    return v == null ? (byte) 0 : Byte.valueOf(v);
+                case "short":
+                    return v == null ? (short) 0 : Short.valueOf(v);
+                default: {
+                    if (v == null) {
+                        return null;
+                    } else {
+                        final MethodType methodType = MethodType.methodType(c, String.class);
+                        try {
+                            final MethodHandle h = MethodHandles.publicLookup().findStatic(c, "valueOf", methodType);
+                            return h.invokeWithArguments(v);
+                        } catch (RuntimeException x) {
+                            throw x;
+                        } catch (Throwable x) {
+                            throw new IllegalStateException(x);
+                        }
+                    }
+                }
+            }
+        };
     }
 
     @MetaInfo(group = "Collections", name = "Set<String>", icon = "D_ARRANGE_SEND_TO_BACK", description = "Set of strings")
-    public Function<String, Set<String>> convertToSet() {
-        return v -> COMMA.splitAsStream(v).map(String::trim).collect(Collectors.toSet());
+    public BiFunction<String, Class<?>, Set<String>> convertToSet() {
+        return (v, c) -> COMMA.splitAsStream(v).map(String::trim).collect(Collectors.toSet());
     }
 
     @MetaInfo(group = "Collections", name = "TreeSet<String>", icon = "D_ARRANGE_SEND_TO_BACK", description = "Sorted set of strings")
-    public Function<String, TreeSet<String>> convertToSortedSet() {
-        return v -> COMMA.splitAsStream(v).map(String::trim).collect(Collectors.toCollection(TreeSet::new));
+    public BiFunction<String, Class<?>, TreeSet<String>> convertToSortedSet() {
+        return (v, c) -> COMMA.splitAsStream(v).map(String::trim).collect(Collectors.toCollection(TreeSet::new));
     }
 
     @MetaInfo(group = "Arrays", name = "int[]", icon = "D_NUMERIC_8_BOX_MULTIPLE_OUTLINE", description = "Int array")
-    public Function<String, int[]> convertToIntArray() {
-        return v -> COMMA.splitAsStream(v).map(String::trim).mapToInt(Integer::parseInt).toArray();
+    public BiFunction<String, Class<?>, int[]> convertToIntArray() {
+        return (v, c) -> COMMA.splitAsStream(v).map(String::trim).mapToInt(Integer::parseInt).toArray();
     }
 
     @MetaInfo(group = "Arrays", name = "long[]", icon = "D_FORMAT_LIST_NUMBERS", description = "Long array")
-    public Function<String, long[]> convertToLongArray() {
-        return v -> COMMA.splitAsStream(v).map(String::trim).mapToLong(Long::parseLong).toArray();
+    public BiFunction<String, Class<?>, long[]> convertToLongArray() {
+        return (v, c) -> COMMA.splitAsStream(v).map(String::trim).mapToLong(Long::parseLong).toArray();
     }
 
     @MetaInfo(group = "Arrays", name = "String[]", icon = "D_COMMENT_TEXT", description = "String array")
-    public Function<String, String[]> convertToStringArray() {
-        return v -> COMMA.splitAsStream(v).map(String::trim).toArray(String[]::new);
+    public BiFunction<String, Class<?>, String[]> convertToStringArray() {
+        return (v, c) -> COMMA.splitAsStream(v).map(String::trim).toArray(String[]::new);
     }
 }

@@ -26,7 +26,6 @@ import org.marid.runtime.context.MaridRuntime;
 import java.lang.reflect.Type;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 
 import static java.util.ServiceLoader.load;
 import static java.util.stream.Stream.of;
@@ -47,7 +46,7 @@ public class DefaultValueConvertersManager {
                 .toArray(ValueConverters[]::new);
     }
 
-    public Optional<? extends Function<String, ?>> getConverter(String name) {
+    public Optional<? extends ValueConverter> getConverter(String name) {
         return of(valueConverters).map(c -> c.getConverter(name)).filter(Objects::nonNull).findFirst();
     }
 

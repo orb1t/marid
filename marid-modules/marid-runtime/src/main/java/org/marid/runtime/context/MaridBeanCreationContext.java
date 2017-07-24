@@ -22,10 +22,12 @@
 package org.marid.runtime.context;
 
 import org.marid.function.Suppliers;
+import org.marid.misc.Casts;
 import org.marid.runtime.beans.Bean;
 import org.marid.runtime.beans.BeanMethod;
 import org.marid.runtime.beans.BeanMethodArg;
 import org.marid.runtime.converter.DefaultValueConvertersManager;
+import org.marid.runtime.converter.ValueConverter;
 import org.marid.runtime.exception.*;
 
 import java.lang.invoke.MethodHandle;
@@ -125,14 +127,10 @@ final class MaridBeanCreationContext implements AutoCloseable {
 
     private Object arg(Bean bean, BeanMethod method, BeanMethodArg methodArg, Class<?> type) {
         try {
-            final Object arg;
-            if (methodArg.value == null) {
-                arg = MaridRuntimeUtils.defaultValue(type);
-            } else {
-                arg = convertersManager.getConverter(methodArg.type)
-                        .map(c -> c.apply(runtime.resolvePlaceholders(methodArg.value)))
-                        .orElseThrow(() -> new MaridBeanArgConverterNotFoundException(bean, method, methodArg));
-            }
+            final ValueConverter converter = convertersManager
+                    .getConverter(methodArg.type)
+                    .orElseThrow(() -> new MaridBeanArgConverterNotFoundException(bean, method, methodArg));
+            final Object arg = converter.convert(runtime.resolvePlaceholders(methodArg.value), Casts.cast(type));
             return bean.filtered(method, methodArg, methodArg.filter, arg);
         } catch (RuntimeException x) {
             throw x;

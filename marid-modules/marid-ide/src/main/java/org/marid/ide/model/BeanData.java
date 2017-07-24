@@ -31,6 +31,7 @@ import org.marid.runtime.beans.BeanMethod;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -82,8 +83,8 @@ public class BeanData {
         );
     }
 
-    public Stream<BeanMethodArgData> getArgs(int initializer) {
-        return initializers.get(initializer).args.stream();
+    public List<BeanMethodArgData> getArgs(int initializer) {
+        return initializers.get(initializer).args;
     }
 
     public Observable[] observables() {

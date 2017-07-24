@@ -52,24 +52,24 @@ public class MaridContextTest {
                         Bean1.class.getName(),
                         new BeanMethod(
                                 Bean1.class.getConstructor(int.class, String.class, BigDecimal.class),
-                                m("x", "int", "1"),
-                                m("y", "String", "abc"),
-                                m("z", "BigDecimal", "1.23")
+                                m("x", "of", "1"),
+                                m("y", "of", "abc"),
+                                m("z", "of", "1.23")
                         ),
-                        new BeanMethod(Bean1.class.getMethod("setA", boolean.class), m("a", "boolean", "true"))
+                        new BeanMethod(Bean1.class.getMethod("setA", boolean.class), m("a", "of", "true"))
                 ),
                 new Bean("bean3", "@bean1", new BeanMethod(Bean1.class.getField("y"))),
                 new Bean(
                         "bean4",
                         Bean1.class.getName(),
                         new BeanMethod(Bean1.class.getMethod("list")),
-                        new BeanMethod(List.class.getMethod("add", Object.class), m("e", "int", "1"))
+                        new BeanMethod(List.class.getMethod("add", Object.class), m("e", "Integer", "1"))
                 ),
                 new Bean(
                         "bean5",
                         Bean1.class.getName(),
                         new BeanMethod(Bean1.class.getMethod("list")),
-                        new BeanMethod(List.class.getMethod("add", Object.class), m("e", "int", "1")),
+                        new BeanMethod(List.class.getMethod("add", Object.class), m("e", "Integer", "1")),
                         new BeanMethod(List.class.getMethod("add", Object.class), m("e", "String", "length", "22"))
                 ),
                 new Bean(
@@ -79,13 +79,13 @@ public class MaridContextTest {
                 )
         };
         try (final MaridContext runtime = new MaridContext(new MaridConfiguration(beans))) {
-            assertEquals(new Bean1(1, "abc", new BigDecimal("1.23")).setA(true), runtime.beans.get("bean1"));
-            assertEquals(new BigDecimal("1.23"), runtime.beans.get("bean2"));
-            assertEquals("abc", runtime.beans.get("bean3"));
-            assertEquals(singletonList(1), runtime.beans.get("bean4"));
-            assertEquals(asList(1, 2), runtime.beans.get("bean5"));
-            assertEquals("a1", runtime.beans.get("bean6"));
-            assertEquals(10, ((Bean1) runtime.beans.get("bean1")).q);
+            assertEquals("bean1", new Bean1(1, "abc", new BigDecimal("1.23")).setA(true), runtime.beans.get("bean1"));
+            assertEquals("bean2", new BigDecimal("1.23"), runtime.beans.get("bean2"));
+            assertEquals("bean3", "abc", runtime.beans.get("bean3"));
+            assertEquals("bean4", singletonList(1), runtime.beans.get("bean4"));
+            assertEquals("bean5", asList(1, 2), runtime.beans.get("bean5"));
+            assertEquals("bean6", "a1", runtime.beans.get("bean6"));
+            assertEquals("bean1", 10, ((Bean1) runtime.beans.get("bean1")).q);
         }
     }
 
@@ -97,7 +97,7 @@ public class MaridContextTest {
                         Bean1.class.getName(),
                         new BeanMethod(
                                 Bean1.class.getConstructor(int.class, String.class, BigDecimal.class),
-                                m("x", "int", "1"), m("y", "ref", "toString", "bean1"), m("BigDecimal", "z", "1.23")
+                                m("x", "of", "1"), m("y", "ref", "toString", "bean1"), m("z", "of", "1.23")
                         ),
                         new BeanMethod(
                                 Bean1.class.getMethod("setA", boolean.class),

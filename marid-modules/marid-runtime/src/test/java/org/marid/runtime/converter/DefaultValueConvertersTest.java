@@ -24,12 +24,8 @@ package org.marid.runtime.converter;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.marid.runtime.context.MaridRuntime;
-import org.marid.runtime.converter.DefaultValueConvertersFactory;
-import org.marid.runtime.converter.ValueConverters;
 import org.marid.test.NormalTests;
 import org.mockito.Mockito;
-
-import java.util.function.Function;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -45,13 +41,13 @@ public class DefaultValueConvertersTest {
 
     @Test
     public void testString() {
-        final Function<String, ?> function = CONVERTERS.getConverter("String");
-        assertEquals("a", function.apply("a"));
+        final ValueConverter converter = CONVERTERS.getConverter("of");
+        assertEquals("a", converter.convert("a", String.class));
     }
 
     @Test
     public void testIntArray() {
-        final Function<String, ?> function = CONVERTERS.getConverter("int[]");
-        assertArrayEquals(new int[] {1, 2}, (int[]) function.apply("1, 2"));
+        final ValueConverter function = CONVERTERS.getConverter("int[]");
+        assertArrayEquals(new int[] {1, 2}, (int[]) function.convert("1, 2", int[].class));
     }
 }

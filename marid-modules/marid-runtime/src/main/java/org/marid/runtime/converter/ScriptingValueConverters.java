@@ -39,7 +39,7 @@ import java.util.function.Function;
 public class ScriptingValueConverters implements ValueConverters {
 
     private final HashMap<String, MetaLiteral> info = new HashMap<>();
-    private final HashMap<String, Function<String, ?>> functions = new HashMap<>();
+    private final HashMap<String, ValueConverter> functions = new HashMap<>();
 
     public ScriptingValueConverters(MaridRuntime runtime) {
         final ScriptEngineManager manager = new ScriptEngineManager(runtime.getClassLoader());
@@ -53,22 +53,22 @@ public class ScriptingValueConverters implements ValueConverters {
             final ScriptEngine engine = scriptEngineFactory.getScriptEngine();
             engine.put("bean", (Function<String, Object>) runtime::getBean);
             engine.put("runtime", runtime);
-            final Function<String, ?> function = script -> {
+            final ValueConverter converter = (script, c) -> {
                 try {
-                    return engine.eval(script);
+                    return c.cast(engine.eval(script));
                 } catch (ScriptException se) {
                     throw new IllegalStateException(se);
                 }
             };
             scriptEngineFactory.getExtensions().forEach(ext -> {
                 info.put(ext, new MetaLiteral("Scripting", ext, "D_SCRIPT", description));
-                functions.put(ext, function);
+                functions.put(ext, converter);
             });
         });
     }
 
     @Override
-    public Function<String, ?> getConverter(String name) {
+    public ValueConverter getConverter(String name) {
         return functions.get(name);
     }
 

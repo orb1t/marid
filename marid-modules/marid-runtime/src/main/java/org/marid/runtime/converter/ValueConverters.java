@@ -25,14 +25,13 @@ import org.marid.annotation.MetaLiteral;
 
 import java.lang.reflect.Type;
 import java.util.Map;
-import java.util.function.Function;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public interface ValueConverters {
 
-    Function<String, ?> getConverter(String name);
+    ValueConverter getConverter(String name);
 
     Map<String, MetaLiteral> getMetaMap();
 

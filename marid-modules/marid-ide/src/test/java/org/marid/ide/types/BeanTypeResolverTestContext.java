@@ -133,8 +133,8 @@ public class BeanTypeResolverTestContext {
                 AnotherComplexBean.class.getName(),
                 new BeanMethod(
                         AnotherComplexBean.class.getConstructor(Object.class, Object.class),
-                        new BeanMethodArg("arg0", "int", null, "1"),
-                        new BeanMethodArg("arg0", "long", null, "2")
+                        new BeanMethodArg("arg0", "Integer", null, "1"),
+                        new BeanMethodArg("arg1", "Long", null, "2")
                 )
         );
     }
@@ -146,8 +146,8 @@ public class BeanTypeResolverTestContext {
                 ComplexBean.class.getName(),
                 new BeanMethod(
                         ComplexBean.class.getConstructor(Set.class, Object.class),
-                        new BeanMethodArg("arg0", "", null, null),
-                        new BeanMethodArg("arg0", "int", null, "1")
+                        new BeanMethodArg("arg0", "of", null, null),
+                        new BeanMethodArg("arg1", "Integer", null, "1")
                 )
         );
     }
