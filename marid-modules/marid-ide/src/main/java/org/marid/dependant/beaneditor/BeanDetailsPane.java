@@ -20,12 +20,13 @@
 
 package org.marid.dependant.beaneditor;
 
-import javafx.scene.control.Accordion;
-import javafx.scene.control.TitledPane;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import org.marid.jfx.icons.FontIcons;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static javafx.beans.binding.Bindings.selectBoolean;
 import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.misc.Builder.build;
 
@@ -33,28 +34,34 @@ import static org.marid.misc.Builder.build;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class BeanDetailsPane extends Accordion {
+public class BeanDetailsPane extends TabPane {
 
-    private final TitledPane argsPane;
-    private final TitledPane initializersPane;
+    private final Tab argsTab;
+    private final Tab initializersTab;
 
     public BeanDetailsPane() {
-        argsPane = build(new TitledPane(), pane -> {
-            pane.textProperty().bind(ls("Arguments"));
-            pane.setGraphic(FontIcons.glyphIcon("D_DISQUS", 16));
-            getPanes().add(pane);
-            setExpandedPane(pane);
+        argsTab = build(new Tab(), tab -> {
+            tab.textProperty().bind(ls("Arguments"));
+            tab.setGraphic(FontIcons.glyphIcon("D_DISQUS", 16));
+            getTabs().add(tab);
         });
 
-        initializersPane = build(new TitledPane(), pane -> {
-            pane.textProperty().bind(ls("Initializers"));
-            pane.setGraphic(FontIcons.glyphIcon("D_STAR", 16));
-            getPanes().add(pane);
+        initializersTab = build(new Tab(), tab -> {
+            tab.textProperty().bind(ls("Initializers"));
+            tab.setGraphic(FontIcons.glyphIcon("D_STAR", 16));
+            getTabs().add(tab);
         });
     }
 
     @Autowired
-    private void initArgsPane(BeanArgsTable argTable) {
-        argsPane.setContent(argTable);
+    private void initArgsPane(BeanArgTable argTable) {
+        argsTab.setContent(argTable);
+        argsTab.disableProperty().bind(selectBoolean(argTable.itemsProperty(), "empty"));
+    }
+
+    @Autowired
+    private void initInitializersPane(BeanInitializerDetailsPane pane, BeanTable table) {
+        initializersTab.setContent(pane);
+        initializersTab.disableProperty().bind(table.getSelectionModel().selectedItemProperty().isNull());
     }
 }

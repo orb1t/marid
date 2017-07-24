@@ -64,6 +64,10 @@ public class BeanMethodData {
         return new BeanMethod(signature.get(), args.stream().map(BeanMethodArgData::toArg).toArray(BeanMethodArg[]::new));
     }
 
+    public ObservableList<BeanMethodArgData> getArgs() {
+        return args;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof BeanMethodData) {

@@ -20,16 +20,24 @@
 
 package org.marid.dependant.beaneditor;
 
-import javafx.collections.ObservableList;
-import org.marid.ide.model.BeanMethodData;
-import org.marid.jfx.table.MaridTableView;
+import javafx.collections.FXCollections;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class BeanInitializersTable extends MaridTableView<BeanMethodData> {
+@Component
+public class BeanInitializerArgTable extends BeanMethodArgTable {
 
-    public BeanInitializersTable(ObservableList<BeanMethodData> list) {
-        super(list);
+    @Autowired
+    private void initSelectionListener(BeanInitializerList list) {
+        list.getSelectionModel().selectedItemProperty().addListener((o, oV, nV) -> {
+            if (nV == null) {
+                setItems(FXCollections.emptyObservableList());
+            } else {
+                setItems(nV.args);
+            }
+        });
     }
 }

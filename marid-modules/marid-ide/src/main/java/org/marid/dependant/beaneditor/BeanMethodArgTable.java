@@ -30,13 +30,13 @@ import static org.marid.misc.Builder.build;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class BeanArgsTable extends MaridTableView<BeanMethodArgData> {
+public abstract class BeanMethodArgTable extends MaridTableView<BeanMethodArgData> {
 
-    private final TableColumn<BeanMethodArgData, String> nameColumn;
-    private final TableColumn<BeanMethodArgData, String> typeColumn;
-    private final TableColumn<BeanMethodArgData, String> valueColumn;
+    protected final TableColumn<BeanMethodArgData, String> nameColumn;
+    protected final TableColumn<BeanMethodArgData, String> typeColumn;
+    protected final TableColumn<BeanMethodArgData, String> valueColumn;
 
-    public BeanArgsTable() {
+    public BeanMethodArgTable() {
         setEditable(false);
 
         nameColumn = build(new TableColumn<>(), column -> {
