@@ -37,8 +37,6 @@ import java.lang.reflect.Type;
 import static com.google.common.reflect.TypeToken.of;
 import static java.util.Objects.requireNonNull;
 import static org.marid.l10n.L10n.m;
-import static org.marid.runtime.beans.Bean.ref;
-import static org.marid.runtime.beans.Bean.type;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -82,12 +80,11 @@ public class BeanFactoryInfo {
         producer = beanData.getProducer();
         bean = beanData.toBean();
         factory = requireNonNull(beanData.getFactory(), () -> m("Factory is null: {0}", bean.name));
-        if (ref(factory) != null) {
-            factoryToken = of(resolver.resolve(context, ref(factory)).getType());
+        if (!factory.contains(".")) {
+            factoryToken = of(resolver.resolve(context, factory).getType());
             factoryClass = factoryToken.getRawType();
         } else {
-            final String className = requireNonNull(type(factory), () -> m("Factory class is null: {0}", bean.name));
-            factoryClass = Class.forName(className, false, context.getClassLoader());
+            factoryClass = Class.forName(factory, false, context.getClassLoader());
             factoryToken = of(factoryClass).getSupertype(Casts.cast(factoryClass));
         }
         returnHandle = bean.findProducer(factoryClass);

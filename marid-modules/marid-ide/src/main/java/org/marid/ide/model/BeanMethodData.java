@@ -33,7 +33,6 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -63,30 +62,6 @@ public class BeanMethodData {
 
     public BeanMethod toMethod() {
         return new BeanMethod(signature.get(), args.stream().map(BeanMethodArgData::toArg).toArray(BeanMethodArg[]::new));
-    }
-
-    public static String toShortClass(String name) {
-        if (name.startsWith("@")) {
-            return name;
-        } else {
-            final int index = name.lastIndexOf('.');
-            return index < 0 ? name : name.substring(index + 1);
-        }
-    }
-
-    public static String signature(String signature, boolean showFullNames) {
-        if (showFullNames) {
-            return signature;
-        } else {
-            final String[] argTypes = BeanMethod.argTypes(signature);
-            if (argTypes.length > 0) {
-                return Stream.of(argTypes)
-                        .map(BeanMethodData::toShortClass)
-                        .collect(joining(",", BeanMethod.name(signature) + "(", ")"));
-            } else {
-                return signature;
-            }
-        }
     }
 
     @Override

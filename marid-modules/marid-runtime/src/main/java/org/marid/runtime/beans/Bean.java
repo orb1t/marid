@@ -112,14 +112,6 @@ public final class Bean {
         }
     }
 
-    public static String ref(@Nonnull String factory) {
-        return factory.startsWith("@") ? factory.substring(1) : null;
-    }
-
-    public static String type(@Nonnull String factory) {
-        return factory.startsWith("@") ? null : factory;
-    }
-
     public MethodHandle findInitializer(MethodHandle constructor, BeanMethod initializer) {
         final Class<?> targetClass = constructor.type().returnType();
         try {

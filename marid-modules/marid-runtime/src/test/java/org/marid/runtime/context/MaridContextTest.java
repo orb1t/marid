@@ -46,7 +46,7 @@ public class MaridContextTest {
     @Test
     public void simple() throws Exception {
         final Bean[] beans = {
-                new Bean("bean2", "@bean1", new BeanMethod(Bean1.class.getMethod("getZ"))),
+                new Bean("bean2", "bean1", new BeanMethod(Bean1.class.getMethod("getZ"))),
                 new Bean(
                         "bean1",
                         Bean1.class.getName(),
@@ -58,7 +58,7 @@ public class MaridContextTest {
                         ),
                         new BeanMethod(Bean1.class.getMethod("setA", boolean.class), m("a", "of", "true"))
                 ),
-                new Bean("bean3", "@bean1", new BeanMethod(Bean1.class.getField("y"))),
+                new Bean("bean3", "bean1", new BeanMethod(Bean1.class.getField("y"))),
                 new Bean(
                         "bean4",
                         Bean1.class.getName(),

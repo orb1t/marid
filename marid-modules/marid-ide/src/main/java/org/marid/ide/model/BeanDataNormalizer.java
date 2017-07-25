@@ -59,8 +59,8 @@ public interface BeanDataNormalizer {
                     bean.name.set(newName);
 
                     for (final BeanData b : file.beans) {
-                        if (b.getFactory().startsWith("@" + oldName)) {
-                            b.factory.set("@" + newName);
+                        if (b.getFactory().equals(oldName)) {
+                            b.factory.set(newName);
                         }
                         for (final BeanMethodArgData a : b.getProducer().args) {
                             if ("ref".equals(a.getType()) && a.getValue() != null && a.getValue().equals(oldName)) {
@@ -93,7 +93,7 @@ public interface BeanDataNormalizer {
                             map.remove(bean.getName());
 
                             for (final BeanData b : change.getList()) {
-                                if (b.getFactory().startsWith("@" + bean.getName())) {
+                                if (b.getFactory().equals(bean.getName())) {
                                     toRemove.add(b);
                                     continue;
                                 }

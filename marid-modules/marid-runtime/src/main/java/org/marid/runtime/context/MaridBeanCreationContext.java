@@ -84,9 +84,9 @@ final class MaridBeanCreationContext implements AutoCloseable {
     }
 
     private Object create0(String name, Bean bean) {
-        final Object factoryObject = bean.factory.startsWith("@") ? getOrCreate(bean.factory.substring(1)) : null;
-        final Class<?> factoryClass = bean.factory.startsWith("@")
-                ? beanClasses.get(bean.factory.substring(1))
+        final Object factoryObject = !bean.factory.contains(".") ? getOrCreate(bean.factory) : null;
+        final Class<?> factoryClass = !bean.factory.contains(".")
+                ? beanClasses.get(bean.factory)
                 : MaridRuntimeUtils.loadClass(context.classLoader, name, bean.factory);
         final MethodHandle constructor = bind(bean.producer, bean.findProducer(factoryClass), factoryObject);
 

@@ -100,7 +100,7 @@ public class BeanTableActions {
                         .bindText(ls("%s%s%s", lo(bean.literal)))
                         .setEventHandler(event -> {
                             final BeanData beanData = new BeanData(bean.bean);
-                            beanData.factory.set("@" + data.getName());
+                            beanData.factory.set(data.getName());
                             table.getObject().getItems().add(beanData);
                         });
                 final Map<String, List<FxAction>> grouped = dao.beans(data)

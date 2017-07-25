@@ -111,14 +111,14 @@ public class LibraryBeanDao {
                         .filter(e -> e.getReturnType() != void.class)
                         .map(e -> {
                             final MetaLiteral literal = l("Bean", "Other", e.getName(), "D_SERVER_NETWORK", e);
-                            final Bean bean = new Bean(e.getName(), "@" + beanData.getName(), new BeanMethod(e, args(e)));
+                            final Bean bean = new Bean(e.getName(), beanData.getName(), new BeanMethod(e, args(e)));
                             return new LibraryBean(bean, literal);
                         }),
                 of(c.getFields())
                         .filter(f -> !Modifier.isStatic(f.getModifiers()))
                         .map(e -> {
                             final MetaLiteral literal = l("Bean", "Other", e.getName(), "D_SERVER_NETWORK", e);
-                            final Bean bean = new Bean(e.getName(), "@" + beanData.getName(), new BeanMethod(e));
+                            final Bean bean = new Bean(e.getName(), beanData.getName(), new BeanMethod(e));
                             return new LibraryBean(bean, literal);
                         })
         ).flatMap(v -> v);

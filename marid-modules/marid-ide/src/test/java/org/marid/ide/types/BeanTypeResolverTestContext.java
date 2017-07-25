@@ -111,7 +111,7 @@ public class BeanTypeResolverTestContext {
 
     @Bean
     public BeanData bean6() throws Exception {
-        return new BeanData("bean6", "@bean4", new BeanMethod(ComplexBean.class.getField("arg")));
+        return new BeanData("bean6", "bean4", new BeanMethod(ComplexBean.class.getField("arg")));
     }
 
     @Bean

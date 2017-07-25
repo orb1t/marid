@@ -34,10 +34,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.logging.Level.WARNING;
+import static java.util.stream.Collectors.joining;
 import static org.marid.logging.Log.log;
 
 /**
@@ -68,6 +68,14 @@ public class MethodSignatureResolver {
         );
     }
 
+    public ObservableStringValue factory(ObservableValue<String> factory) {
+        return Bindings.createStringBinding(
+                () -> factorySafe(factory.getValue()),
+                appearanceSettings.showFullNamesProperty(),
+                factory
+        );
+    }
+
     private String textSafe(BeanMethodData data) {
         if (data == null) {
             return null;
@@ -77,11 +85,19 @@ public class MethodSignatureResolver {
                 final BeanTypeInfo typeInfo = resolver.resolve(profile.getBeanCache(), data.parent.getName());
                 final Type[] types = typeInfo.getArguments(data);
                 final String name = BeanMethod.name(data.getSignature());
-                return Stream.of(types).map(TypeUtils::toString).collect(Collectors.joining(",", name + "(", ")"));
+                return Stream.of(types).map(TypeUtils::toString).collect(joining(",", name + "(", ")"));
             } catch (Exception x) {
                 log(WARNING, "Unable to get generic signature", x);
             }
         }
         return data.getSignature();
+    }
+
+    private String factorySafe(String factory) {
+        if (appearanceSettings.showFullNamesProperty().get()) {
+            return factory;
+        } else {
+            return factory.replaceAll("(\\w+[.])+", "");
+        }
     }
 }
