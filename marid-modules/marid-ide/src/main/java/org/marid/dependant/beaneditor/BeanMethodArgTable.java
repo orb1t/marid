@@ -26,10 +26,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.util.converter.DefaultStringConverter;
 import org.apache.commons.lang3.reflect.TypeUtils;
@@ -88,6 +85,7 @@ public abstract class BeanMethodArgTable extends MaridTableView<BeanMethodArgDat
         });
 
         setBorder(new Border(new BorderStroke(Color.TRANSPARENT, BorderStrokeStyle.NONE, null, null)));
+        setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, null, null)));
     }
 
     @Autowired

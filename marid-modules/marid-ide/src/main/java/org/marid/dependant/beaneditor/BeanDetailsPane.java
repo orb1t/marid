@@ -24,6 +24,8 @@ import javafx.beans.binding.Bindings;
 import javafx.geometry.Orientation;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TitledPane;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import org.marid.dependant.beaneditor.initializers.BeanInitializerDetailsPane;
 import org.marid.jfx.icons.FontIcons;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +51,8 @@ public class BeanDetailsPane extends SplitPane {
             tab.setGraphic(FontIcons.glyphIcon("D_DISQUS", 16));
             tab.setMaxHeight(Double.MAX_VALUE);
             tab.setCollapsible(false);
+            tab.setBorder(new Border(new BorderStroke(Color.TRANSPARENT, BorderStrokeStyle.NONE, null, null)));
+            tab.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, null, null)));
             getItems().add(tab);
         });
 
@@ -57,6 +61,8 @@ public class BeanDetailsPane extends SplitPane {
             tab.setGraphic(FontIcons.glyphIcon("D_STAR", 16));
             tab.setMaxHeight(Double.MAX_VALUE);
             tab.setCollapsible(false);
+            tab.setBorder(new Border(new BorderStroke(Color.TRANSPARENT, BorderStrokeStyle.NONE, null, null)));
+            tab.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, null, null)));
             getItems().add(tab);
         });
     }

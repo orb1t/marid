@@ -20,10 +20,7 @@
 
 package org.marid.ide.logging;
 
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.paint.Color;
 import org.marid.jfx.logging.LogComponent;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
@@ -36,11 +33,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class IdeLogPane extends BorderPane {
 
+    private final LogComponent component = new LogComponent(IdeLogHandler.LOG_RECORDS);
+
     @EventListener
     public void onContextStart(ContextStartedEvent event) {
-        final LogComponent component = new LogComponent(IdeLogHandler.LOG_RECORDS);
         setCenter(component);
         component.scrollTo(component.getItems().size() - 1);
-        component.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, null, null)));
     }
 }

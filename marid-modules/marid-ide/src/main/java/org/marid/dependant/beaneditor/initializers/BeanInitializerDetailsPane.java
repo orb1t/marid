@@ -22,9 +22,7 @@ package org.marid.dependant.beaneditor.initializers;
 
 import javafx.beans.binding.Bindings;
 import javafx.geometry.Side;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import org.controlsfx.control.MasterDetailPane;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +44,7 @@ public class BeanInitializerDetailsPane extends MasterDetailPane {
         this.argTable = argTable;
         setDividerPosition(0.5);
         setBorder(new Border(new BorderStroke(Color.TRANSPARENT, BorderStrokeStyle.NONE, null, null)));
+        setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, null, null)));
         showDetailNodeProperty().bind(Bindings.selectBoolean(argTable.itemsProperty(), "empty").not());
     }
 }

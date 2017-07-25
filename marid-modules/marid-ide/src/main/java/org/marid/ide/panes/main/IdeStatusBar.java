@@ -23,6 +23,7 @@ package org.marid.ide.panes.main;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -45,7 +46,6 @@ import org.controlsfx.control.PopOver;
 import org.controlsfx.control.PopOver.ArrowLocation;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.jfx.icons.FontIcons;
 import org.marid.misc.Builder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
@@ -109,7 +109,7 @@ public class IdeStatusBar extends BorderPane {
             notificationsButton.setOnAction(event -> contextMenu.show(notificationsButton, Side.TOP, 0, 0));
         }));
         notificationsButton.setContextMenu(Builder.build(new ContextMenu(), m -> {
-            final MenuItem clearAllNotifications = new MenuItem(null, FontIcons.glyphIcon("D_CLOSE"));
+            final MenuItem clearAllNotifications = new MenuItem(null, glyphIcon("D_CLOSE"));
             clearAllNotifications.textProperty().bind(ls("Remove all notifications"));
             clearAllNotifications.setOnAction(event -> notifications.clear());
             m.getItems().add(clearAllNotifications);
@@ -117,6 +117,25 @@ public class IdeStatusBar extends BorderPane {
     }
 
     @Order(1)
+    @Bean(initMethod = "run")
+    public Runnable healthInitializer(IdeSplitPane pane) {
+        return () -> {
+            final SimpleIntegerProperty counter = new SimpleIntegerProperty();
+            final ToggleButton button = new ToggleButton(null, glyphIcon("F_LIST_ALT", 20));
+            button.textProperty().bind(counter.asString());
+            button.setFocusTraversable(false);
+            button.selectedProperty().addListener((o, oV, nV) -> {
+                if (nV) {
+                    pane.setPinnedSide(Side.BOTTOM);
+                } else {
+                    pane.setPinnedSide(null);
+                }
+            });
+            right.getChildren().add(button);
+        };
+    }
+
+    @Order(2)
     @Bean(initMethod = "run")
     public Runnable profileInitializer(ProjectManager manager) {
         return () -> {
@@ -132,7 +151,7 @@ public class IdeStatusBar extends BorderPane {
         };
     }
 
-    @Order(2)
+    @Order(3)
     @Bean(initMethod = "run")
     public Runnable dateTimeInitializer(ScheduledExecutorService timer) {
         return () -> {
@@ -174,7 +193,7 @@ public class IdeStatusBar extends BorderPane {
         notifications.add(node);
 
         final MenuItem menuItem = new MenuItem();
-        final Button close = new Button(null, FontIcons.glyphIcon("D_CLOSE_CIRCLE"));
+        final Button close = new Button(null, glyphIcon("D_CLOSE_CIRCLE"));
         close.setOnAction(event -> {
             contextMenu.getItems().remove(menuItem);
             notifications.remove(node);
