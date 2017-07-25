@@ -34,10 +34,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
-import java.util.stream.Stream;
+import java.util.regex.Pattern;
 
 import static java.util.logging.Level.WARNING;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Stream.of;
 import static org.marid.logging.Log.log;
 
 /**
@@ -45,6 +46,8 @@ import static org.marid.logging.Log.log;
  */
 @Component
 public class MethodSignatureResolver {
+
+    private static final Pattern LONG_NAME_PREFIX = Pattern.compile("(\\w+[.])+");
 
     private final AppearanceSettings appearanceSettings;
     private final ProjectProfile profile;
@@ -70,7 +73,7 @@ public class MethodSignatureResolver {
 
     public ObservableStringValue factory(ObservableValue<String> factory) {
         return Bindings.createStringBinding(
-                () -> factorySafe(factory.getValue()),
+                () -> postProcess(factory.getValue()),
                 appearanceSettings.showFullNamesProperty(),
                 factory
         );
@@ -85,19 +88,15 @@ public class MethodSignatureResolver {
                 final BeanTypeInfo typeInfo = resolver.resolve(profile.getBeanCache(), data.parent.getName());
                 final Type[] types = typeInfo.getArguments(data);
                 final String name = BeanMethod.name(data.getSignature());
-                return Stream.of(types).map(TypeUtils::toString).collect(joining(",", name + "(", ")"));
+                return postProcess(of(types).map(TypeUtils::toString).collect(joining(",", name + "(", ")")));
             } catch (Exception x) {
                 log(WARNING, "Unable to get generic signature", x);
             }
         }
-        return data.getSignature();
+        return postProcess(data.getSignature());
     }
 
-    private String factorySafe(String factory) {
-        if (appearanceSettings.showFullNamesProperty().get()) {
-            return factory;
-        } else {
-            return factory.replaceAll("(\\w+[.])+", "");
-        }
+    private String postProcess(String type) {
+        return appearanceSettings.showFullNamesProperty().get() ? type : LONG_NAME_PREFIX.matcher(type).replaceAll("");
     }
 }
