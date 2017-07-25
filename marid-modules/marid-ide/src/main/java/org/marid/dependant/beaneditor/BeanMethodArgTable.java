@@ -22,9 +22,10 @@ package org.marid.dependant.beaneditor;
 
 import javafx.beans.binding.Bindings;
 import javafx.geometry.Orientation;
-import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.Separator;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderStroke;
 import javafx.scene.layout.BorderStrokeStyle;
@@ -36,13 +37,15 @@ import org.marid.dependant.beaneditor.dao.ConvertersDao;
 import org.marid.dependant.beaneditor.model.SignatureResolver;
 import org.marid.ide.model.BeanMethodArgData;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.jfx.action.FxAction;
+import org.marid.jfx.action.SpecialAction;
 import org.marid.jfx.table.MaridTableView;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
+import java.util.stream.Collectors;
 
 import static org.marid.jfx.LocalizedStrings.ls;
-import static org.marid.l10n.L10n.s;
 import static org.marid.misc.Builder.build;
 
 /**
@@ -115,24 +118,19 @@ public abstract class BeanMethodArgTable extends MaridTableView<BeanMethodArgDat
     }
 
     @Autowired
-    public void initRowFactory(ConvertersDao convertersDao) {
-        rowSupplier.set(() -> {
-            final TableRow<BeanMethodArgData> row = new TableRow<>();
-            row.addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> {
-                final BeanMethodArgData arg = row.getItem();
-                if (arg != null) {
-                    final ContextMenu contextMenu = new ContextMenu();
-                    convertersDao.getConverters(arg).forEach((name, meta) -> {
-                        final MenuItem menuItem = new MenuItem(s(meta.name));
-                        menuItem.setOnAction(e -> arg.type.set(name));
-                        contextMenu.getItems().add(menuItem);
-                    });
-                    row.setContextMenu(contextMenu);
-                } else {
-                    row.setContextMenu(null);
-                }
-            });
-            return row;
-        });
+    public void initRowFactory(ConvertersDao convertersDao, SpecialAction miscAction) {
+        actions().add(a -> a == null ? null : new FxAction("misc", "misc", "misc")
+                .bindText("Set a converter")
+                .setSpecialAction(miscAction)
+                .setChildren(convertersDao.getConverters(a).entrySet().stream()
+                        .map(e -> new FxAction("", "", "")
+                                .bindText(e.getValue().name)
+                                .setIcon(e.getValue().icon)
+                                .setEventHandler(event -> a.type.set(e.getKey()))
+                        )
+                        .collect(Collectors.toList())
+                )
+                .setDisabled(false)
+        );
     }
 }
