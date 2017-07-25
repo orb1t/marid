@@ -29,6 +29,7 @@ import org.apache.commons.lang3.reflect.TypeUtils;
 import org.marid.dependant.beaneditor.model.SignatureResolver;
 import org.marid.ide.model.BeanData;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.ide.settings.AppearanceSettings;
 import org.marid.ide.types.BeanTypeInfo;
 import org.marid.ide.types.BeanTypeResolver;
 import org.marid.jfx.action.FxAction;
@@ -115,11 +116,17 @@ public class BeanTable extends MaridTableView<BeanData> {
     @Autowired
     private void initTypeColumn(SignatureResolver signatureResolver,
                                 BeanTypeResolver typeResolver,
-                                ProjectProfile profile) {
-        typeColumn.setCellValueFactory(param -> Bindings.createStringBinding(() -> {
-            final BeanTypeInfo type = typeResolver.resolve(profile.getBeanCache(), param.getValue().getName());
-            return signatureResolver.postProcess(TypeUtils.toString(type.getType()));
-        }, profile.getBeanFile().beans));
+                                ProjectProfile profile,
+                                AppearanceSettings appearanceSettings) {
+        typeColumn.setCellValueFactory(param -> Bindings.createStringBinding(
+                () -> {
+                    final BeanTypeInfo type = typeResolver.resolve(profile.getBeanCache(), param.getValue().getName());
+                    return signatureResolver.postProcess(TypeUtils.toString(type.getType()));
+                },
+                profile.getBeanFile().beans,
+                appearanceSettings.showFullNamesProperty(),
+                appearanceSettings.showGenericSignaturesProperty())
+        );
     }
 
     @Autowired
