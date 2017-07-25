@@ -73,7 +73,7 @@ public class MethodSignatureResolver {
 
     public ObservableStringValue factory(ObservableValue<String> factory) {
         return Bindings.createStringBinding(
-                () -> postProcess(factory.getValue()),
+                () -> factory.getValue() == null ? null : postProcess(factory.getValue()),
                 appearanceSettings.showFullNamesProperty(),
                 factory
         );

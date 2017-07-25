@@ -20,6 +20,9 @@
 
 package org.marid.dependant.beaneditor;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.TextFieldTableCell;
 import org.marid.dependant.beaneditor.model.MethodSignatureResolver;
@@ -27,6 +30,7 @@ import org.marid.ide.model.BeanData;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.SpecialAction;
+import org.marid.jfx.icons.FontIcons;
 import org.marid.jfx.table.MaridTableView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -45,7 +49,7 @@ import static org.marid.misc.Builder.build;
 public class BeanTable extends MaridTableView<BeanData> {
 
     private final TableColumn<BeanData, String> nameColumn;
-    private final TableColumn<BeanData, String> factoryColumn;
+    private final TableColumn<BeanData, Label> factoryColumn;
     private final TableColumn<BeanData, String> producerColumn;
 
     @Autowired
@@ -69,7 +73,15 @@ public class BeanTable extends MaridTableView<BeanData> {
             column.setMinWidth(200);
             column.setPrefWidth(250);
             column.setMaxWidth(800);
-            column.setCellValueFactory(param -> resolver.factory(param.getValue().factory));
+            column.setCellValueFactory(param -> {
+                final Label label = new Label();
+                label.textProperty().bind(resolver.factory(param.getValue().factory));
+                label.graphicProperty().bind(Bindings.createObjectBinding(() -> {
+                    final String factory = param.getValue().getFactory();
+                    return FontIcons.glyphIcon(factory.contains(".") ? "D_LIBRARY" : "D_LINK");
+                }, param.getValue().factory));
+                return new SimpleObjectProperty<>(label);
+            });
             getColumns().add(column);
         });
 
