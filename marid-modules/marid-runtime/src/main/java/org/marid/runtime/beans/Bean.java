@@ -35,7 +35,7 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 
 import static java.lang.invoke.MethodHandles.publicLookup;
-import static java.util.Objects.requireNonNull;
+import static org.marid.io.Xmls.attribute;
 import static org.marid.misc.Builder.build;
 
 /**
@@ -66,8 +66,8 @@ public final class Bean {
     }
 
     public Bean(@Nonnull Element element) {
-        this.name = requireNonNull(element.getAttribute("name"));
-        this.factory = requireNonNull(element.getAttribute("factory"));
+        this.name = attribute(element, "name").orElseThrow(NullPointerException::new);
+        this.factory = attribute(element, "factory").orElseThrow(NullPointerException::new);
         this.producer = Xmls.nodes(element, Element.class)
                 .filter(e -> "producer".equals(e.getTagName()))
                 .map(BeanMethod::new)

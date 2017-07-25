@@ -22,6 +22,7 @@
 package org.marid.io;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -36,6 +37,7 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.Spliterators;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -129,5 +131,11 @@ public interface Xmls {
                 .mapToObj(children::item)
                 .filter(type::isInstance)
                 .map(type::cast);
+    }
+
+    static Optional<String> attribute(Element element, String name) {
+        return element.hasAttribute(name)
+                ? Optional.of(element.getAttribute(name))
+                : Optional.empty();
     }
 }

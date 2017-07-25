@@ -25,10 +25,9 @@ import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
 import java.util.Objects;
 
-import static java.util.Objects.requireNonNull;
+import static org.marid.io.Xmls.attribute;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -55,9 +54,9 @@ public final class BeanMethodArg {
     }
 
     public BeanMethodArg(@Nonnull Element element) {
-        type = requireNonNull(element.getAttribute("type"));
-        name = requireNonNull(element.getAttribute("name"));
-        filter = element.getAttribute("filter");
+        name = attribute(element, "name").orElseThrow(NullPointerException::new);
+        type = attribute(element, "type").orElseThrow(NullPointerException::new);
+        filter = attribute(element, "filter").orElse(null);
         value = element.getTextContent();
     }
 

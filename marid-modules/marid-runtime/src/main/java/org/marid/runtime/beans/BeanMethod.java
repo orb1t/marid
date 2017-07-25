@@ -32,6 +32,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.marid.io.Xmls.attribute;
 import static org.marid.io.Xmls.nodes;
 import static org.marid.misc.Builder.build;
 
@@ -71,7 +72,7 @@ public class BeanMethod {
     }
 
     public BeanMethod(@Nonnull Element element) {
-        signature = element.getAttribute("signature");
+        signature = attribute(element, "signature").orElseThrow(NullPointerException::new);
         args = nodes(element, Element.class)
                 .filter(e -> "arg".equals(e.getTagName()))
                 .map(BeanMethodArg::new)
