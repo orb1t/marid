@@ -25,9 +25,12 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.TextFieldTableCell;
+import org.apache.commons.lang3.reflect.TypeUtils;
 import org.marid.dependant.beaneditor.model.MethodSignatureResolver;
 import org.marid.ide.model.BeanData;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.ide.types.BeanTypeInfo;
+import org.marid.ide.types.BeanTypeResolver;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.SpecialAction;
 import org.marid.jfx.icons.FontIcons;
@@ -51,6 +54,7 @@ public class BeanTable extends MaridTableView<BeanData> {
     private final TableColumn<BeanData, String> nameColumn;
     private final TableColumn<BeanData, Label> factoryColumn;
     private final TableColumn<BeanData, String> producerColumn;
+    private final TableColumn<BeanData, String> typeColumn;
 
     @Autowired
     public BeanTable(ProjectProfile profile, MethodSignatureResolver resolver) {
@@ -93,11 +97,29 @@ public class BeanTable extends MaridTableView<BeanData> {
             column.setCellValueFactory(param -> resolver.signature(param.getValue().producer));
             getColumns().add(column);
         });
+
+        typeColumn = build(new TableColumn<>(), column -> {
+            column.textProperty().bind(ls("Type"));
+            column.setMinWidth(150);
+            column.setPrefWidth(300);
+            column.setMaxWidth(500);
+            getColumns().add(column);
+        });
     }
 
     @Autowired
     private void initActions(@Qualifier("beanTable") List<Function<BeanData, FxAction>> actions) {
         actions().addAll(actions);
+    }
+
+    @Autowired
+    private void initTypeColumn(MethodSignatureResolver signatureResolver,
+                                BeanTypeResolver typeResolver,
+                                ProjectProfile profile) {
+        typeColumn.setCellValueFactory(param -> Bindings.createStringBinding(() -> {
+            final BeanTypeInfo type = typeResolver.resolve(profile.getBeanCache(), param.getValue().getName());
+            return signatureResolver.postProcess(TypeUtils.toString(type.getType()));
+        }, profile.getBeanFile().beans));
     }
 
     @Autowired

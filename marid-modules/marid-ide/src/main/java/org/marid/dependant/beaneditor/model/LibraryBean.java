@@ -35,4 +35,9 @@ public class LibraryBean {
         this.bean = bean;
         this.literal = literal;
     }
+
+    @Override
+    public String toString() {
+        return bean.toString();
+    }
 }

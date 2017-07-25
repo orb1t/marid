@@ -20,6 +20,9 @@
 
 package org.marid.dependant.beaneditor;
 
+import javafx.scene.control.ChoiceDialog;
+import javafx.scene.control.TextInputDialog;
+import javafx.stage.Modality;
 import org.marid.annotation.MetaLiteral;
 import org.marid.dependant.beaneditor.dao.LibraryBeanDao;
 import org.marid.dependant.beaneditor.model.LibraryBean;
@@ -42,8 +45,12 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static java.util.logging.Level.WARNING;
 import static java.util.stream.Collectors.*;
+import static org.marid.ide.IdeNotifications.n;
 import static org.marid.jfx.LocalizedStrings.ls;
+import static org.marid.l10n.L10n.m;
+import static org.marid.l10n.L10n.s;
 import static org.marid.runtime.beans.BeanMethod.name;
 
 /**
@@ -146,6 +153,34 @@ public class BeanTableActions {
             profile.addOnUpdate(listener);
             return action;
         };
+    }
+
+    @Qualifier("beanTable")
+    @Bean
+    public Function<BeanData, FxAction> wildBeanAdder(ProjectProfile profile,
+                                                      LibraryBeanDao dao,
+                                                      SpecialAction addAction) {
+        return data -> new FxAction("add", "add", "add")
+                .setSpecialAction(addAction)
+                .bindText("Add a wild bean")
+                .setIcon("D_SERVER_NETWORK")
+                .setEventHandler(event -> {
+                    final TextInputDialog dialog = new TextInputDialog();
+                    dialog.setHeaderText(m("Enter a class name:"));
+                    dialog.setTitle(s("Wild bean"));
+                    dialog.initModality(Modality.APPLICATION_MODAL);
+                    dialog.showAndWait().ifPresent(type -> {
+                        final LibraryBean[] beans = dao.beans(type).toArray(LibraryBean[]::new);
+                        if (beans.length == 0) {
+                            n(WARNING, "No beans found");
+                        }
+                        final ChoiceDialog<LibraryBean> d = new ChoiceDialog<>(beans[0], beans);
+                        d.setTitle(s("Bean selector"));
+                        d.setHeaderText(m("Select a bean: "));
+                        d.initModality(Modality.APPLICATION_MODAL);
+                        d.showAndWait().ifPresent(bean -> profile.getBeanFile().beans.add(new BeanData(bean.bean)));
+                    });
+                });
     }
 
     public static Object[] lo(MetaLiteral literal) {

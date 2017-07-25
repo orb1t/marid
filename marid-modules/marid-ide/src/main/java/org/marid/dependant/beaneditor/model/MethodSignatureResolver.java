@@ -96,7 +96,7 @@ public class MethodSignatureResolver {
         return postProcess(data.getSignature());
     }
 
-    private String postProcess(String type) {
+    public String postProcess(String type) {
         return appearanceSettings.showFullNamesProperty().get() ? type : LONG_NAME_PREFIX.matcher(type).replaceAll("");
     }
 }
