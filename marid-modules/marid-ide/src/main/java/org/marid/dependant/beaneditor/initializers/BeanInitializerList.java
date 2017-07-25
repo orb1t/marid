@@ -28,6 +28,7 @@ import javafx.scene.layout.BorderStrokeStyle;
 import org.marid.dependant.beaneditor.BeanTable;
 import org.marid.dependant.beaneditor.model.SignatureResolver;
 import org.marid.ide.model.BeanMethodData;
+import org.marid.jfx.action.SpecialAction;
 import org.marid.jfx.table.MaridListView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -59,5 +60,11 @@ public class BeanInitializerList extends MaridListView<BeanMethodData> {
                 setItems(nV.initializers);
             }
         });
+    }
+
+    @Override
+    @Autowired
+    public void installRemoveAction(SpecialAction removeAction) {
+        super.installRemoveAction(removeAction);
     }
 }

@@ -121,6 +121,7 @@ public abstract class BeanMethodArgTable extends MaridTableView<BeanMethodArgDat
     public void initRowFactory(ConvertersDao convertersDao, SpecialAction miscAction) {
         actions().add(a -> a == null ? null : new FxAction("misc", "misc", "misc")
                 .bindText("Set a converter")
+                .setIcon("D_CLIPPY")
                 .setSpecialAction(miscAction)
                 .setChildren(convertersDao.getConverters(a).entrySet().stream()
                         .map(e -> new FxAction("", "", "")
