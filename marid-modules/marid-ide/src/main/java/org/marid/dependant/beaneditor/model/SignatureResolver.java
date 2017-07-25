@@ -45,7 +45,7 @@ import static org.marid.logging.Log.log;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class MethodSignatureResolver {
+public class SignatureResolver {
 
     private static final Pattern LONG_NAME_PREFIX = Pattern.compile("(\\w+[.])+");
 
@@ -54,9 +54,9 @@ public class MethodSignatureResolver {
     private final BeanTypeResolver resolver;
 
     @Autowired
-    public MethodSignatureResolver(AppearanceSettings appearanceSettings,
-                                   ProjectProfile profile,
-                                   BeanTypeResolver resolver) {
+    public SignatureResolver(AppearanceSettings appearanceSettings,
+                             ProjectProfile profile,
+                             BeanTypeResolver resolver) {
         this.appearanceSettings = appearanceSettings;
         this.profile = profile;
         this.resolver = resolver;

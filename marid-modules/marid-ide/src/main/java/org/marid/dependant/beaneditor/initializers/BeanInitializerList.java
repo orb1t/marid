@@ -26,7 +26,7 @@ import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderStroke;
 import javafx.scene.layout.BorderStrokeStyle;
 import org.marid.dependant.beaneditor.BeanTable;
-import org.marid.dependant.beaneditor.model.MethodSignatureResolver;
+import org.marid.dependant.beaneditor.model.SignatureResolver;
 import org.marid.ide.model.BeanMethodData;
 import org.marid.jfx.table.MaridListView;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +41,7 @@ import static javafx.scene.paint.Color.TRANSPARENT;
 public class BeanInitializerList extends MaridListView<BeanMethodData> {
 
     @Autowired
-    public BeanInitializerList(MethodSignatureResolver signatureResolver) {
+    public BeanInitializerList(SignatureResolver signatureResolver) {
         setBorder(new Border(new BorderStroke(TRANSPARENT, BorderStrokeStyle.NONE, null, null)));
         cellSupplier.set(() -> {
             final ListCell<BeanMethodData> cell = new ListCell<>();

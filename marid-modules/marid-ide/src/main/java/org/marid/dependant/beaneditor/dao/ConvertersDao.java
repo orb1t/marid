@@ -1,5 +1,6 @@
 package org.marid.dependant.beaneditor.dao;
 
+import org.marid.annotation.MetaLiteral;
 import org.marid.dependant.beaneditor.BeanEditorContext;
 import org.marid.ide.model.BeanMethodArgData;
 import org.marid.ide.project.ProjectProfile;
@@ -7,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.lang.reflect.Type;
-import java.util.Set;
+import java.util.Map;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -24,8 +25,8 @@ public class ConvertersDao {
         this.context = context;
     }
 
-    public Set<String> getConverters(BeanMethodArgData arg) {
+    public Map<String, MetaLiteral> getConverters(BeanMethodArgData arg) {
         final Type type = context.formalType(arg);
-        return profile.getBeanCache().getConverters().getMatchedConverters(type).keySet();
+        return profile.getBeanCache().getConverters().getMatchedConverters(type);
     }
 }

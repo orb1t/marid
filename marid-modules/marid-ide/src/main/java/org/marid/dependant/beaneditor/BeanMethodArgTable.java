@@ -20,24 +20,29 @@
 
 package org.marid.dependant.beaneditor;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.cell.ComboBoxTableCell;
+import javafx.beans.binding.Bindings;
+import javafx.geometry.Orientation;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderStroke;
 import javafx.scene.layout.BorderStrokeStyle;
+import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.util.converter.DefaultStringConverter;
+import org.apache.commons.lang3.reflect.TypeUtils;
 import org.marid.dependant.beaneditor.dao.ConvertersDao;
+import org.marid.dependant.beaneditor.model.SignatureResolver;
 import org.marid.ide.model.BeanMethodArgData;
+import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.table.MaridTableView;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Set;
+import javax.annotation.PostConstruct;
 
 import static org.marid.jfx.LocalizedStrings.ls;
+import static org.marid.l10n.L10n.s;
 import static org.marid.misc.Builder.build;
 
 /**
@@ -45,7 +50,7 @@ import static org.marid.misc.Builder.build;
  */
 public abstract class BeanMethodArgTable extends MaridTableView<BeanMethodArgData> {
 
-    protected final TableColumn<BeanMethodArgData, String> nameColumn;
+    protected final TableColumn<BeanMethodArgData, HBox> nameColumn;
     protected final TableColumn<BeanMethodArgData, String> typeColumn;
     protected final TableColumn<BeanMethodArgData, String> valueColumn;
 
@@ -57,7 +62,6 @@ public abstract class BeanMethodArgTable extends MaridTableView<BeanMethodArgDat
             column.setMinWidth(70);
             column.setPrefWidth(80);
             column.setPrefWidth(350);
-            column.setCellValueFactory(param -> param.getValue().name);
             getColumns().add(column);
         });
 
@@ -66,7 +70,6 @@ public abstract class BeanMethodArgTable extends MaridTableView<BeanMethodArgDat
             column.setMinWidth(70);
             column.setPrefWidth(80);
             column.setPrefWidth(350);
-            column.setCellValueFactory(param -> param.getValue().type);
             getColumns().add(column);
         });
 
@@ -85,16 +88,51 @@ public abstract class BeanMethodArgTable extends MaridTableView<BeanMethodArgDat
     }
 
     @Autowired
-    public void initTypeColumn(ConvertersDao convertersDao) {
-        final ObservableList<String> items = FXCollections.observableArrayList();
-        typeColumn.setOnEditStart(event -> {
-            final Set<String> converters = convertersDao.getConverters(event.getRowValue());
-            items.setAll(converters);
-        });
-        typeColumn.setCellFactory(param -> {
-            final ComboBoxTableCell<BeanMethodArgData, String> cell = new ComboBoxTableCell<>(items);
-            cell.setComboBoxEditable(true);
-            return cell;
+    public void initTypeColumn(SignatureResolver signatureResolver,
+                               ProjectProfile profile,
+                               BeanEditorContext context) {
+        typeColumn.setCellValueFactory(param -> Bindings.createStringBinding(() -> {
+            final BeanMethodArgData arg = param.getValue();
+            return signatureResolver.postProcess(TypeUtils.toString(context.formalType(arg)));
+        }, profile.getBeanFile().beans));
+    }
+
+    @PostConstruct
+    public void initNameColumn() {
+        nameColumn.setCellValueFactory(param -> Bindings.createObjectBinding(() -> {
+            final String name = param.getValue().getName();
+            final String type = param.getValue().getType();
+            final HBox box = new HBox(3);
+            box.getChildren().add(new Label(name));
+            if (!"of".equals(type)) {
+                box.getChildren().add(new Separator(Orientation.VERTICAL));
+                final Label label = new Label(type);
+                label.setUnderline(true);
+                box.getChildren().add(label);
+            }
+            return box;
+        }, param.getValue().name, param.getValue().type));
+    }
+
+    @Autowired
+    public void initRowFactory(ConvertersDao convertersDao) {
+        rowSupplier.set(() -> {
+            final TableRow<BeanMethodArgData> row = new TableRow<>();
+            row.addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> {
+                final BeanMethodArgData arg = row.getItem();
+                if (arg != null) {
+                    final ContextMenu contextMenu = new ContextMenu();
+                    convertersDao.getConverters(arg).forEach((name, meta) -> {
+                        final MenuItem menuItem = new MenuItem(s(meta.name));
+                        menuItem.setOnAction(e -> arg.type.set(name));
+                        contextMenu.getItems().add(menuItem);
+                    });
+                    row.setContextMenu(contextMenu);
+                } else {
+                    row.setContextMenu(null);
+                }
+            });
+            return row;
         });
     }
 }

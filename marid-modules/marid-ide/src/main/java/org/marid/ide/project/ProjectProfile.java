@@ -82,7 +82,7 @@ public class ProjectProfile {
                     Files.createDirectories(p);
                 } else {
                     Files.createDirectories(p.getParent());
-                    if (!Files.isRegularFile(p)) {
+                    if (!Files.isRegularFile(p) && !p.endsWith("beans.xml")) {
                         Files.createFile(p);
                     }
                 }
@@ -92,10 +92,7 @@ public class ProjectProfile {
         logger = Logger.getLogger(getName());
         model = loadModel();
         model.setModelVersion("4.0.0");
-        beanFile = build(new BeanFile(), f -> {
-            registerNormalizer(f);
-            f.load(this);
-        });
+        beanFile = new BeanFile();
         init();
         enabled = new SimpleBooleanProperty(true);
         enabled.addListener((o, oV, nV) -> {
@@ -106,6 +103,8 @@ public class ProjectProfile {
     }
 
     private void init() {
+        registerNormalizer(beanFile);
+        beanFile.load(this);
         updateClassLoader();
         if (model.getProfiles().stream().noneMatch(p -> "conf".equals(p.getId()))) {
             final Profile profile = new Profile();

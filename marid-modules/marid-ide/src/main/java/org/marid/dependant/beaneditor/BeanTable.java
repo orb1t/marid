@@ -26,7 +26,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.TextFieldTableCell;
 import org.apache.commons.lang3.reflect.TypeUtils;
-import org.marid.dependant.beaneditor.model.MethodSignatureResolver;
+import org.marid.dependant.beaneditor.model.SignatureResolver;
 import org.marid.ide.model.BeanData;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.types.BeanTypeInfo;
@@ -57,15 +57,15 @@ public class BeanTable extends MaridTableView<BeanData> {
     private final TableColumn<BeanData, String> typeColumn;
 
     @Autowired
-    public BeanTable(ProjectProfile profile, MethodSignatureResolver resolver) {
+    public BeanTable(ProjectProfile profile, SignatureResolver resolver) {
         super(profile.getBeanFile().beans);
         setEditable(true);
 
         nameColumn = build(new TableColumn<>(), column -> {
             column.textProperty().bind(ls("Name"));
-            column.setMinWidth(150);
-            column.setPrefWidth(200);
-            column.setMaxWidth(700);
+            column.setMinWidth(100);
+            column.setPrefWidth(100);
+            column.setMaxWidth(400);
             column.setCellValueFactory(param -> param.getValue().name);
             column.setCellFactory(TextFieldTableCell.forTableColumn());
             column.setEditable(true);
@@ -74,9 +74,9 @@ public class BeanTable extends MaridTableView<BeanData> {
 
         factoryColumn = build(new TableColumn<>(), column -> {
             column.textProperty().bind(ls("Factory"));
-            column.setMinWidth(200);
-            column.setPrefWidth(250);
-            column.setMaxWidth(800);
+            column.setMinWidth(150);
+            column.setPrefWidth(200);
+            column.setMaxWidth(600);
             column.setCellValueFactory(param -> {
                 final Label label = new Label();
                 label.textProperty().bind(resolver.factory(param.getValue().factory));
@@ -91,18 +91,18 @@ public class BeanTable extends MaridTableView<BeanData> {
 
         producerColumn = build(new TableColumn<>(), column -> {
             column.textProperty().bind(ls("Producer"));
-            column.setMinWidth(200);
-            column.setPrefWidth(250);
-            column.setMaxWidth(800);
+            column.setMinWidth(150);
+            column.setPrefWidth(200);
+            column.setMaxWidth(700);
             column.setCellValueFactory(param -> resolver.signature(param.getValue().producer));
             getColumns().add(column);
         });
 
         typeColumn = build(new TableColumn<>(), column -> {
             column.textProperty().bind(ls("Type"));
-            column.setMinWidth(150);
-            column.setPrefWidth(300);
-            column.setMaxWidth(500);
+            column.setMinWidth(100);
+            column.setPrefWidth(400);
+            column.setMaxWidth(700);
             getColumns().add(column);
         });
     }
@@ -113,7 +113,7 @@ public class BeanTable extends MaridTableView<BeanData> {
     }
 
     @Autowired
-    private void initTypeColumn(MethodSignatureResolver signatureResolver,
+    private void initTypeColumn(SignatureResolver signatureResolver,
                                 BeanTypeResolver typeResolver,
                                 ProjectProfile profile) {
         typeColumn.setCellValueFactory(param -> Bindings.createStringBinding(() -> {

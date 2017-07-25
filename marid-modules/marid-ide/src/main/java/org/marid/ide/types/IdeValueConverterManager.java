@@ -27,6 +27,7 @@ import org.marid.runtime.converter.DefaultValueConvertersManager;
 import org.marid.runtime.converter.ValueConverters;
 
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.TreeMap;
 
@@ -46,7 +47,10 @@ public class IdeValueConverterManager extends DefaultValueConvertersManager {
         for (final ValueConverters c : valueConverters) {
             c.getMetaMap().forEach((name, literal) -> {
                 final Type type = c.getTypeMap().get(name);
-                if (type == null || TypeUtils.isAssignable(type, target) || type instanceof WildcardType) {
+                if (type == null
+                        || TypeUtils.isAssignable(type, target)
+                        || type instanceof WildcardType
+                        || target instanceof TypeVariable<?>) {
                     result.put(name, literal);
                 }
             });
