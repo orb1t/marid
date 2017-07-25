@@ -21,12 +21,14 @@
 package org.marid.ide.types;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
+import org.marid.annotation.MetaLiteral;
 import org.marid.runtime.context.MaridRuntime;
 import org.marid.runtime.converter.DefaultValueConvertersManager;
 import org.marid.runtime.converter.ValueConverters;
 
 import java.lang.reflect.Type;
-import java.util.TreeSet;
+import java.lang.reflect.WildcardType;
+import java.util.TreeMap;
 
 import static com.google.common.reflect.Reflection.newProxy;
 
@@ -39,15 +41,15 @@ public class IdeValueConverterManager extends DefaultValueConvertersManager {
         super(classLoader, newProxy(MaridRuntime.class, (proxy, method, args) -> null));
     }
 
-    public TreeSet<String> getMatchedConverters(Type target) {
-        final TreeSet<String> result = new TreeSet<>();
+    public TreeMap<String, MetaLiteral> getMatchedConverters(Type target) {
+        final TreeMap<String, MetaLiteral> result = new TreeMap<>();
         for (final ValueConverters c : valueConverters) {
-            for (final String name : c.getMetaMap().keySet()) {
+            c.getMetaMap().forEach((name, literal) -> {
                 final Type type = c.getTypeMap().get(name);
-                if (type == null || TypeUtils.isAssignable(type, target)) {
-                    result.add(name);
+                if (type == null || TypeUtils.isAssignable(type, target) || type instanceof WildcardType) {
+                    result.put(name, literal);
                 }
-            }
+            });
         }
         return result;
     }

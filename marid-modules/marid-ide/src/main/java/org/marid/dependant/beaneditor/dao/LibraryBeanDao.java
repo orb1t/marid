@@ -157,7 +157,7 @@ public class LibraryBeanDao {
 
     private static BeanMethodArg[] args(Executable executable) {
         return of(executable.getParameters())
-                .map(p -> new BeanMethodArg(p.getName(), "default", null, null))
+                .map(p -> new BeanMethodArg(p.getName(), "of", null, null))
                 .toArray(BeanMethodArg[]::new);
     }
 }

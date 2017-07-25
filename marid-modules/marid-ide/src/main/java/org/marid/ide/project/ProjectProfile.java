@@ -199,7 +199,11 @@ public class ProjectProfile {
                 if (c == null) {
                     return true;
                 } else {
-                    c.accept(this);
+                    try {
+                        c.accept(this);
+                    } catch (Exception x) {
+                        // just ignore
+                    }
                     return false;
                 }
             });

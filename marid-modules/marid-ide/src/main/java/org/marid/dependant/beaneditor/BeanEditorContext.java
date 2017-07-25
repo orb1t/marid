@@ -53,14 +53,4 @@ public class BeanEditorContext {
         final BeanTypeInfo typeInfo = resolver.resolve(profile.getBeanCache(), arg.parent.parent.getName());
         return typeInfo.getArgument(arg);
     }
-
-    public Type possibleType(BeanMethodArgData arg) {
-        final String oldValue = arg.getValue();
-        arg.value.set(null);
-        try {
-            return actualType(arg);
-        } finally {
-            arg.value.set(oldValue);
-        }
-    }
 }

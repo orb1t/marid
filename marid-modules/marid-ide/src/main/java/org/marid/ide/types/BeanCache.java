@@ -53,6 +53,10 @@ public class BeanCache implements AutoCloseable {
                 .orElseThrow(() -> new MaridBeanNotFoundException(name));
     }
 
+    public IdeValueConverterManager getConverters() {
+        return converters;
+    }
+
     public boolean containsBean(String name) {
         return beanList.parallelStream().anyMatch(b -> name.equals(b.getName()));
     }
