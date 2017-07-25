@@ -42,7 +42,7 @@ public class BeanDetailsPane extends SplitPane {
     private final TitledPane initializersTab;
 
     public BeanDetailsPane() {
-        setOrientation(Orientation.VERTICAL);
+        setOrientation(Orientation.HORIZONTAL);
 
         argsTab = build(new TitledPane(), tab -> {
             tab.textProperty().bind(ls("Arguments"));
