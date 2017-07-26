@@ -198,43 +198,4 @@ public class BeanTypeResolver {
             }
         }
     }
-
-    public static Stream<TypeVariable<?>> typeVariables(Type type) {
-        if (type instanceof TypeVariable<?>) {
-            final TypeVariable<?> var = (TypeVariable<?>) type;
-            return Stream.concat(
-                    Stream.of(var),
-                    Stream.of(var.getBounds()).flatMap(BeanTypeResolver::typeVariables)
-            );
-        } else if (type instanceof GenericArrayType) {
-            return typeVariables(((GenericArrayType) type).getGenericComponentType());
-        } else if (type instanceof ParameterizedType) {
-            final ParameterizedType pt = (ParameterizedType) type;
-            return Stream.of(pt.getActualTypeArguments()).flatMap(BeanTypeResolver::typeVariables);
-        } else if (type instanceof WildcardType) {
-            final WildcardType wildcardType = (WildcardType) type;
-            return Stream.concat(
-                    Stream.of(wildcardType.getUpperBounds()).flatMap(BeanTypeResolver::typeVariables),
-                    Stream.of(wildcardType.getLowerBounds()).flatMap(BeanTypeResolver::typeVariables)
-            );
-        } else {
-            return Stream.empty();
-        }
-    }
-
-    public static Type ground(Type type) {
-        return typeVariables(type).distinct().reduce(
-                new TypeResolver(),
-                BeanTypeResolver::upper,
-                (t1, t2) -> t2
-        ).resolveType(type);
-    }
-
-    private static TypeResolver upper(TypeResolver resolver, TypeVariable<?> variable) {
-        final Stream<Type> bounds = Stream.of(variable.getBounds());
-        return resolver.where(
-                variable,
-                bounds.map(BeanTypeResolver::ground).filter(b -> b != Object.class).findFirst().orElse(Object.class)
-        );
-    }
 }
