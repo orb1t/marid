@@ -97,10 +97,6 @@ public class IdeStatusBar extends BorderPane {
         scrollPane.setVbarPolicy(ScrollBarPolicy.NEVER);
         scrollPane.setHbarPolicy(ScrollBarPolicy.AS_NEEDED);
 
-        notificationsButton.setShape(Builder.build(new Rectangle(30, 30), r -> {
-            r.setArcWidth(10);
-            r.setArcHeight(10);
-        }));
         notificationsButton.setMinSize(30, 30);
         notificationsButton.textProperty().bind(size(notifications).asString());
         notificationsButton.disableProperty().bind(Bindings.isEmpty(notifications));
