@@ -29,8 +29,6 @@ import org.hsqldb.server.ServerConstants;
 import org.marid.runtime.annotation.MaridBean;
 import org.marid.runtime.annotation.MaridBeanProducer;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.sql.DataSource;
 import java.io.*;
 import java.net.MalformedURLException;
@@ -97,7 +95,6 @@ public final class HsqldbDatabase implements Closeable {
         databaseNameToIndex.put(name, url);
     }
 
-    @PostConstruct
     public void init() throws IOException {
         outWriter = new PrintWriter(new File(directory, "output.log"));
         errWriter = new PrintWriter(new File(directory, "errors.log"));
@@ -111,7 +108,6 @@ public final class HsqldbDatabase implements Closeable {
         }
     }
 
-    @PreDestroy
     public void destroy() throws IOException {
         close();
     }

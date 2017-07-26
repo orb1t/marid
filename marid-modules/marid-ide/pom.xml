@@ -113,7 +113,7 @@
                 <configuration>
                     <archive>
                         <manifestEntries>
-                            <JavaFX-Version>8.0</JavaFX-Version>
+                            <JavaFX-Version>9.0</JavaFX-Version>
                         </manifestEntries>
                     </archive>
                 </configuration>
@@ -122,7 +122,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>1.5.4.RELEASE</version>
+                <version>1.5.5.RELEASE</version>
                 <executions>
                     <execution>
                         <goals>

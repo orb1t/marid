@@ -28,7 +28,6 @@ import org.marid.proto.StdProto;
 import org.marid.runtime.annotation.MaridBean;
 import org.marid.runtime.annotation.MaridBeanProducer;
 
-import javax.annotation.PostConstruct;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.StreamCorruptedException;
@@ -74,7 +73,6 @@ public class ModbusTcpDriver extends StdProto implements ProtoDriver {
         this.timeUnit = props.getTimeUnit();
     }
 
-    @PostConstruct
     @Override
     public synchronized void start() {
         if (task != null) {

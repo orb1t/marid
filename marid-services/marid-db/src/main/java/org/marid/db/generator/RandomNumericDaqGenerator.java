@@ -28,8 +28,6 @@ import org.marid.db.data.DataRecordKey;
 import org.marid.runtime.annotation.MaridBean;
 import org.marid.runtime.annotation.MaridBeanProducer;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.util.Set;
 import java.util.Timer;
 import java.util.concurrent.ThreadLocalRandom;
@@ -61,7 +59,6 @@ public class RandomNumericDaqGenerator {
         this.periodMillis = TimeUnit.SECONDS.toMillis(periodSeconds);
     }
 
-    @PostConstruct
     public void start() {
         timer.schedule(new MaridTimerTask(task -> {
             final long t = System.currentTimeMillis();
@@ -73,7 +70,6 @@ public class RandomNumericDaqGenerator {
         }), periodMillis, periodMillis);
     }
 
-    @PreDestroy
     public void stop() {
         timer.cancel();
     }
