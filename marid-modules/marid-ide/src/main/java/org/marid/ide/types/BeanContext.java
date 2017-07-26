@@ -38,8 +38,8 @@ public class BeanContext implements AutoCloseable {
     private final ObservableList<BeanData> beanList;
     private final InvalidationListener listChangeListener = o -> reset();
     private final ConcurrentSkipListSet<String> processing = new ConcurrentSkipListSet<>();
+    private final IdeValueConverterManager converters;
 
-    final IdeValueConverterManager converters;
     final ConcurrentHashMap<String, BeanTypeInfo> typeInfoMap = new ConcurrentHashMap<>();
 
     public BeanContext(ObservableList<BeanData> beans, ClassLoader classLoader) {

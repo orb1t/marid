@@ -31,10 +31,7 @@ import org.springframework.stereotype.Component;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.*;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
@@ -133,7 +130,7 @@ public class BeanTypeResolver {
                 type = resolve(context, arg.getValue()).getType();
                 break;
             default: {
-                final Type t = context.converters.getType(arg.getType()).orElse(null);
+                final Type t = context.getConverters().getType(arg.getType()).orElse(null);
                 type = t instanceof WildcardType ? formalType : t;
             }
         }
@@ -161,12 +158,19 @@ public class BeanTypeResolver {
     }
 
     private void resolve(Map<TypeToken<?>, List<TypeToken<?>>> map, TypeToken<?> formal, TypeToken<?> actual) {
+        resolve(new HashSet<>(), map, formal, actual);
+    }
+
+    private void resolve(Set<TypeToken<?>> passed, Map<TypeToken<?>, List<TypeToken<?>>> map, TypeToken<?> formal, TypeToken<?> actual) {
+        if (!passed.add(formal)) {
+            return;
+        }
         if (formal.isArray() && actual.isArray()) {
-            resolve(map, formal.getComponentType(), actual.getComponentType());
+            resolve(passed, map, formal.getComponentType(), actual.getComponentType());
         } else if (formal.getType() instanceof TypeVariable<?>) {
             final TypeVariable<?> typeVariable = (TypeVariable<?>) formal.getType();
             for (final Type bound : typeVariable.getBounds()) {
-                resolve(map, of(bound), actual);
+                resolve(passed, map, of(bound), actual);
             }
             map.computeIfAbsent(formal, k -> new ArrayList<>()).add(actual.wrap());
         } else if (formal.getType() instanceof ParameterizedType) {
@@ -179,13 +183,13 @@ public class BeanTypeResolver {
                 final Type[] actualTypeArgs = actualParameterized.getActualTypeArguments();
                 final Type[] formalTypeArgs = formalParameterized.getActualTypeArguments();
                 for (int i = 0; i < actualTypeArgs.length; i++) {
-                    resolve(map, of(formalTypeArgs[i]), of(actualTypeArgs[i]));
+                    resolve(passed, map, of(formalTypeArgs[i]), of(actualTypeArgs[i]));
                 }
             }
         } else if (formal.getType() instanceof WildcardType) {
             final WildcardType wildcardType = (WildcardType) formal.getType();
             for (final Type bound : wildcardType.getUpperBounds()) {
-                resolve(map, of(bound), actual);
+                resolve(passed, map, of(bound), actual);
             }
         }
     }

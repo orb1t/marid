@@ -23,7 +23,6 @@ package org.marid.dependant.beaneditor.model;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableStringValue;
 import javafx.beans.value.ObservableValue;
-import org.apache.commons.lang3.reflect.TypeUtils;
 import org.marid.ide.model.BeanMethodData;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.settings.AppearanceSettings;
@@ -36,6 +35,7 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.Type;
 import java.util.regex.Pattern;
 
+import static com.google.common.reflect.TypeToken.of;
 import static java.util.logging.Level.WARNING;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Stream.of;
@@ -89,7 +89,7 @@ public class SignatureResolver {
                 final BeanTypeInfo typeInfo = resolver.resolve(profile.getBeanContext(), data.parent.getName());
                 final Type[] types = typeInfo.getParameters(data);
                 final String name = BeanMethod.name(data.getSignature());
-                return postProcess(of(types).map(TypeUtils::toString).collect(joining(",", name + "(", ")")));
+                return postProcess(of(types).map(t -> of(t).toString()).collect(joining(",", name + "(", ")")));
             } catch (Exception x) {
                 log(WARNING, "Unable to get generic signature", x);
             }

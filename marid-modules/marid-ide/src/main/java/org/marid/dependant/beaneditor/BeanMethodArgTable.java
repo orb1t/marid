@@ -20,6 +20,7 @@
 
 package org.marid.dependant.beaneditor;
 
+import com.google.common.reflect.TypeToken;
 import javafx.beans.binding.Bindings;
 import javafx.geometry.Orientation;
 import javafx.scene.control.Label;
@@ -94,7 +95,7 @@ public abstract class BeanMethodArgTable extends MaridTableView<BeanMethodArgDat
                                BeanEditorContext context) {
         typeColumn.setCellValueFactory(param -> Bindings.createStringBinding(() -> {
             final BeanMethodArgData arg = param.getValue();
-            return signatureResolver.postProcess(TypeUtils.toString(context.formalType(arg)));
+            return signatureResolver.postProcess(TypeToken.of(context.formalType(arg)).toString());
         }, profile.getBeanFile().beans));
     }
 
