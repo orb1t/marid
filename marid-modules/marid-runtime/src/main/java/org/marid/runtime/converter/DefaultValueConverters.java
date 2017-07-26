@@ -44,7 +44,11 @@ import static org.marid.annotation.MetaLiteral.l;
  */
 public class DefaultValueConverters extends AbstractValueConverters {
 
+    private final ClassLoader classLoader;
+
     public DefaultValueConverters(MaridRuntime runtime) {
+        classLoader = runtime.getClassLoader();
+
         register(l("Basic", "String", "D_TOOLTIP_TEXT", "String"), String.class, (v, c) -> v);
         register(l("Basic", "Character", "D_NUMERIC", "Character"), Character.class, (v, c) -> v == null ? null : (char) (int) Integer.decode(v));
 
@@ -103,6 +107,17 @@ public class DefaultValueConverters extends AbstractValueConverters {
                     return v == null ? (byte) 0 : Byte.valueOf(v);
                 case "short":
                     return v == null ? (short) 0 : Short.valueOf(v);
+                case "java.lang.Class": {
+                    try {
+                        if (v == null) {
+                            return null;
+                        } else {
+                            return classLoader.loadClass(v);
+                        }
+                    } catch (ClassNotFoundException x) {
+                        throw new IllegalArgumentException(v, x);
+                    }
+                }
                 default: {
                     if (v == null) {
                         return null;

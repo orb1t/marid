@@ -138,4 +138,10 @@ public interface Xmls {
                 ? Optional.of(element.getAttribute(name))
                 : Optional.empty();
     }
+
+    static Optional<String> content(Element element) {
+        return element.hasChildNodes()
+                ? Optional.of(element.getTextContent())
+                : Optional.empty();
+    }
 }

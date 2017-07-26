@@ -28,6 +28,7 @@ import javax.annotation.Nullable;
 import java.util.Objects;
 
 import static org.marid.io.Xmls.attribute;
+import static org.marid.io.Xmls.content;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -57,7 +58,7 @@ public final class BeanMethodArg {
         name = attribute(element, "name").orElseThrow(NullPointerException::new);
         type = attribute(element, "type").orElseThrow(NullPointerException::new);
         filter = attribute(element, "filter").orElse(null);
-        value = element.getTextContent();
+        value = content(element).orElse(null);
     }
 
     public void writeTo(@Nonnull Element element) {

@@ -124,11 +124,16 @@ public class BeanTypeResolver {
     }
 
     private Type actualType(BeanContext context, BeanMethodArgData arg, Type formalType) {
-        final Type type;
+        Type type;
         switch (arg.getType()) {
             case "ref":
                 type = resolve(context, arg.getValue()).getType();
                 break;
+            case "of":
+                if (TypeToken.of(formalType).getRawType() == Class.class && arg.getValue() != null) {
+                    type = TypeUtilities.classType(context.getClassLoader(), arg.getValue());
+                    break;
+                }
             default: {
                 final Type t = context.getConverters().getType(arg.getType()).orElse(null);
                 type = t instanceof WildcardType ? formalType : t;
