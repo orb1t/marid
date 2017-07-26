@@ -21,7 +21,6 @@
 package org.marid.ide.service;
 
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.WorkerStateEvent;
@@ -53,7 +52,6 @@ import javax.annotation.Nonnull;
 import java.util.ListIterator;
 import java.util.logging.Logger;
 
-import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.l10n.L10n.s;
 
 /**
@@ -115,7 +113,7 @@ public class ProjectBuilderService extends IdeService<HBox> {
                 final BorderPane pane = new BorderPane(logComponent);
                 BorderPane.setMargin(logComponent, new Insets(5));
                 logComponent.setPrefSize(800, 600);
-                statusBar.addNotification(Bindings.format("%s: %s", profile.getName(), ls("Maven Build")), pane);
+                details.set(pane);
                 multicaster.addApplicationListener(transferEventListener = new TransferListener());
             });
             try {

@@ -48,9 +48,7 @@ import java.util.stream.Collectors;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.WARNING;
-import static javafx.beans.binding.Bindings.format;
 import static org.marid.ide.project.ProjectFileType.TARGET;
-import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 import static org.marid.l10n.L10n.s;
 import static org.marid.logging.Log.log;
@@ -92,7 +90,7 @@ public class ProjectRunService extends IdeService<HBox> {
                 printStream = pane.printStream;
                 pane.setPrefSize(1000, 800);
                 updateGraphic(box -> {
-                    statusBar.addNotification(format("%s: %s", profile.getName(), ls("Running")), pane);
+                    details.set(pane);
                     box.setAlignment(Pos.CENTER_LEFT);
                 });
                 pane.process.waitFor();

@@ -23,17 +23,20 @@ package org.marid.ide.status;
 import com.google.common.collect.ImmutableSet;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
-import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventType;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
-import javafx.scene.effect.MotionBlur;
+import javafx.scene.effect.SepiaTone;
 import javafx.scene.layout.HBox;
 import org.apache.commons.lang3.time.DurationFormatUtils;
+import org.controlsfx.control.PopOver;
+import org.controlsfx.control.PopOver.ArrowLocation;
 import org.marid.ide.panes.main.IdeStatusBar;
 import org.marid.jfx.icons.FontIcons;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +48,8 @@ import java.util.function.Consumer;
 
 import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.WARNING;
+import static javafx.concurrent.WorkerStateEvent.*;
+import static javafx.scene.control.ProgressIndicator.INDETERMINATE_PROGRESS;
 import static org.marid.ide.IdeNotifications.n;
 import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.l10n.L10n.s;
@@ -55,23 +60,27 @@ import static org.marid.l10n.L10n.s;
 public abstract class IdeService<V extends Node> extends Service<Duration> {
 
     protected static final Set<EventType<?>> DONE_EVENT_TYPES = ImmutableSet.of(
-            WorkerStateEvent.WORKER_STATE_SUCCEEDED,
-            WorkerStateEvent.WORKER_STATE_FAILED,
-            WorkerStateEvent.WORKER_STATE_CANCELLED
+            WORKER_STATE_SUCCEEDED,
+            WORKER_STATE_FAILED,
+            WORKER_STATE_CANCELLED
     );
 
     private final SimpleObjectProperty<V> graphic = new SimpleObjectProperty<>();
+    protected final SimpleObjectProperty<Parent> details = new SimpleObjectProperty<>();
     private final Label label = new Label();
     private final ProgressBar progressBar = new ProgressBar();
     protected final HBox button = new HBox(5, label);
 
-    protected IdeStatusBar statusBar;
+    private IdeStatusBar statusBar;
+    private PopOver popOver;
 
     public IdeService() {
         button.setAlignment(Pos.CENTER_LEFT);
         button.setPadding(new Insets(4));
         button.getStyleClass().add("button");
-        button.setFocusTraversable(false);
+        button.setFocusTraversable(true);
+        button.setOnMouseClicked(event -> onDetail());
+        button.setOnKeyPressed(event -> onDetail());
 
         label.textProperty().bind(titleProperty());
         label.graphicProperty().bind(graphic);
@@ -86,7 +95,7 @@ public abstract class IdeService<V extends Node> extends Service<Duration> {
                 progressBar.setVisible(true);
             }
             if (nV.doubleValue() <= oV.doubleValue() || nV.doubleValue() < 0.01) {
-                progressBar.setProgress(ProgressBar.INDETERMINATE_PROGRESS);
+                progressBar.setProgress(INDETERMINATE_PROGRESS);
             } else {
                 progressBar.setProgress(nV.doubleValue());
             }
@@ -104,24 +113,50 @@ public abstract class IdeService<V extends Node> extends Service<Duration> {
         });
     }
 
+    private void onDetail() {
+        final Parent detailNode = details.get();
+        if (detailNode != null && popOver == null) {
+            detailNode.setDisable(false);
+
+            popOver = new PopOver(detailNode);
+            popOver.setHideOnEscape(true);
+            popOver.setCloseButtonEnabled(true);
+            popOver.setHeaderAlwaysVisible(true);
+            popOver.setAutoHide(false);
+            popOver.titleProperty().bind(titleProperty());
+            popOver.setArrowLocation(ArrowLocation.BOTTOM_LEFT);
+
+            final ChangeListener<Boolean> runningListener = (o, oV, nV) -> {
+                if (!nV) {
+                    popOver.hide();
+                }
+            };
+            popOver.setOnHiding(event -> {
+                detailNode.setDisable(true);
+                runningProperty().removeListener(runningListener);
+                popOver = null;
+            });
+            runningProperty().addListener(runningListener);
+
+            popOver.show(button);
+        }
+    }
+
     @Autowired
     private void init(IdeStatusBar statusBar) {
         this.statusBar = statusBar;
-        addEventHandler(WorkerStateEvent.WORKER_STATE_RUNNING, event -> statusBar.add(button));
-        addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, event -> {
+        addEventHandler(WORKER_STATE_RUNNING, event -> statusBar.add(button));
+        addEventHandler(WORKER_STATE_SUCCEEDED, event -> {
             statusBar.remove(button);
             final Duration duration = (Duration) event.getSource().getValue();
             final String durationText = DurationFormatUtils.formatDurationHMS(duration.toMillis());
-            n(INFO, "{0} succeeded in {1}", event.getSource().getTitle(), durationText);
+            n(INFO, "{0} succeeded in {1}", details.get(), event.getSource().getTitle(), durationText);
         });
-        addEventHandler(WorkerStateEvent.WORKER_STATE_FAILED, event -> {
+        addEventHandler(WORKER_STATE_FAILED, event -> {
             statusBar.remove(button);
-            n(WARNING, "{0} failed", event.getSource().getException(), event.getSource().getTitle());
+            n(WARNING, "{0} failed", details.get(), event.getSource().getException(), event.getSource().getTitle());
         });
-        addEventHandler(WorkerStateEvent.WORKER_STATE_CANCELLED, event -> {
-            button.setDisable(true);
-            button.setEffect(new MotionBlur(0.1, 0.1));
-        });
+        addEventHandler(WORKER_STATE_CANCELLED, event -> button.setEffect(new SepiaTone(0.5)));
     }
 
     @Override

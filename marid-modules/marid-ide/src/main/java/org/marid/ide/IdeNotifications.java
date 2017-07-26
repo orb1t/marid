@@ -22,15 +22,21 @@ package org.marid.ide;
 
 import javafx.application.Platform;
 import javafx.geometry.Pos;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.stage.Stage;
 import org.controlsfx.control.Notifications;
 import org.intellij.lang.annotations.MagicConstant;
 import org.marid.Ide;
+import org.marid.jfx.icons.FontIcons;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Locale;
 import java.util.logging.Level;
 
+import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.l10n.L10n.m;
 import static org.marid.l10n.L10n.s;
 import static org.marid.logging.Log.log;
@@ -39,13 +45,21 @@ import static org.marid.logging.Log.log;
  * @author Dmitry Ovchinnikov.
  * @since 0.9
  */
-public class IdeNotifications  {
+public class IdeNotifications {
 
     public static void n(@Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
                          @Nonnull String message,
                          @Nonnull Object... args) {
         log(4, level, message, null, args);
-        n0(level, message, null, args);
+        n0(level, message, null, null, args);
+    }
+
+    public static void n(@Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
+                         @Nonnull String message,
+                         @Nonnull Parent details,
+                         @Nonnull Object... args) {
+        log(4, level, message, null, args);
+        n0(level, message, details, null, args);
     }
 
     public static void n(@Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
@@ -53,16 +67,44 @@ public class IdeNotifications  {
                          @Nullable Throwable thrown,
                          @Nonnull Object... args) {
         log(4, level, message, thrown, args);
-        n0(level, message, thrown, args);
+        n0(level, message, null, thrown, args);
+    }
+
+    public static void n(@Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
+                         @Nonnull String message,
+                         @Nonnull Parent details,
+                         @Nullable Throwable thrown,
+                         @Nonnull Object... args) {
+        log(4, level, message, thrown, args);
+        n0(level, message, details, thrown, args);
     }
 
     private static void n0(@Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
                            @Nonnull String message,
+                           @Nullable Parent details,
                            @Nullable Throwable thrown,
                            @Nonnull Object... args) {
         final String text = m(Locale.getDefault(), message, args);
+        final Button graphic ;
+        if (details == null) {
+            graphic = null;
+        } else {
+            graphic = new Button();
+            graphic.textProperty().bind(ls("Details"));
+            graphic.setGraphic(FontIcons.glyphIcon("D_DETAILS", 20));
+            graphic.setOnAction(event -> {
+                details.setDisable(false);
+                final Stage stage = new Stage();
+                stage.initOwner(Ide.primaryStage);
+                stage.setScene(new Scene(details));
+                stage.setResizable(true);
+                stage.titleProperty().bind(ls("Details"));
+                stage.show();
+            });
+        }
         final Notifications notifications = Notifications.create()
                 .text(text)
+                .graphic(graphic)
                 .title(s(level.getName()))
                 .darkStyle()
                 .position(Pos.TOP_RIGHT);
