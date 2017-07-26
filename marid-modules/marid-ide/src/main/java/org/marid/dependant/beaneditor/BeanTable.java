@@ -120,7 +120,7 @@ public class BeanTable extends MaridTableView<BeanData> {
                                 AppearanceSettings appearanceSettings) {
         typeColumn.setCellValueFactory(param -> Bindings.createStringBinding(
                 () -> {
-                    final BeanTypeInfo type = typeResolver.resolve(profile.getBeanCache(), param.getValue().getName());
+                    final BeanTypeInfo type = typeResolver.resolve(profile.getBeanContext(), param.getValue().getName());
                     return signatureResolver.postProcess(TypeUtils.toString(type.getType()));
                 },
                 profile.getBeanFile().beans,

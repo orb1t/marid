@@ -27,6 +27,6 @@ public class ConvertersDao {
 
     public Map<String, MetaLiteral> getConverters(BeanMethodArgData arg) {
         final Type type = context.formalType(arg);
-        return profile.getBeanCache().getConverters().getMatchedConverters(type);
+        return profile.getBeanContext().getConverters().getMatchedConverters(type);
     }
 }

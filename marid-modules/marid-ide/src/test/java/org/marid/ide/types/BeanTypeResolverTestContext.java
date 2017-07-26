@@ -163,17 +163,17 @@ public class BeanTypeResolverTestContext {
     }
 
     @Bean
-    public BeanCache beanTypeResolverContext(BeanFile beanFile) {
-        return new BeanCache(beanFile.beans, currentThread().getContextClassLoader());
+    public BeanContext beanTypeResolverContext(BeanFile beanFile) {
+        return new BeanContext(beanFile.beans, currentThread().getContextClassLoader());
     }
 
     @Bean
-    public Function<String, Type> typeResolver(BeanTypeResolver resolver, BeanCache context) {
+    public Function<String, Type> typeResolver(BeanTypeResolver resolver, BeanContext context) {
         return name -> resolver.resolve(context, name).getType();
     }
 
     @Bean
-    public Function<String, BeanTypeInfo> typeInfoResolver(BeanTypeResolver resolver, BeanCache context) {
+    public Function<String, BeanTypeInfo> typeInfoResolver(BeanTypeResolver resolver, BeanContext context) {
         return name -> resolver.resolve(context, name);
     }
 }

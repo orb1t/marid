@@ -25,7 +25,6 @@ import com.google.common.reflect.TypeToken;
 import org.marid.ide.model.BeanData;
 import org.marid.ide.model.BeanMethodArgData;
 import org.marid.misc.Casts;
-import org.marid.runtime.exception.MaridCircularBeanException;
 import org.marid.runtime.exception.MaridFilterNotFoundException;
 import org.springframework.stereotype.Component;
 
@@ -48,12 +47,9 @@ import static com.google.common.reflect.TypeToken.of;
 @Component
 public class BeanTypeResolver {
 
-    public BeanTypeInfo resolve(BeanCache context, String beanName) {
+    public BeanTypeInfo resolve(BeanContext context, String beanName) {
         final BeanData beanData = context.getBean(beanName);
-        return context.typeInfoMap.computeIfAbsent(beanName, name -> {
-            if (!context.processing.add(name)) {
-                throw new MaridCircularBeanException(context.processing, name);
-            }
+        return context.typeInfoMap.computeIfAbsent(beanName, name -> context.process(name, () -> {
             try {
                 final BeanFactoryInfo info = new BeanFactoryInfo(beanData, this, context);
                 final Map<TypeToken<?>, List<TypeToken<?>>> pairs = new LinkedHashMap<>();
@@ -96,10 +92,8 @@ public class BeanTypeResolver {
                 throw x;
             } catch (Exception x) {
                 throw new IllegalArgumentException(name, x);
-            } finally {
-                context.processing.remove(name);
             }
-        });
+        }));
     }
 
     private TypeToken<?> commonAncestor(Entry<TypeToken<?>, List<TypeToken<?>>> entry) {
@@ -132,7 +126,7 @@ public class BeanTypeResolver {
                 : ((Executable) m).getGenericParameterTypes();
     }
 
-    private Type actualType(BeanCache context, BeanMethodArgData arg, Type formalType) {
+    private Type actualType(BeanContext context, BeanMethodArgData arg, Type formalType) {
         final Type type;
         switch (arg.getType()) {
             case "ref":

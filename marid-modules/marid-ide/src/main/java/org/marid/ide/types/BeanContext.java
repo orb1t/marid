@@ -24,23 +24,25 @@ import javafx.beans.InvalidationListener;
 import javafx.collections.ObservableList;
 import org.marid.ide.model.BeanData;
 import org.marid.runtime.exception.MaridBeanNotFoundException;
+import org.marid.runtime.exception.MaridCircularBeanException;
 
-import java.util.HashMap;
-import java.util.LinkedHashSet;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.function.Supplier;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public class BeanCache implements AutoCloseable {
+public class BeanContext implements AutoCloseable {
 
     private final ObservableList<BeanData> beanList;
     private final InvalidationListener listChangeListener = o -> reset();
+    private final ConcurrentSkipListSet<String> processing = new ConcurrentSkipListSet<>();
 
     final IdeValueConverterManager converters;
-    final LinkedHashSet<String> processing = new LinkedHashSet<>();
-    final HashMap<String, BeanTypeInfo> typeInfoMap = new HashMap<>();
+    final ConcurrentHashMap<String, BeanTypeInfo> typeInfoMap = new ConcurrentHashMap<>();
 
-    public BeanCache(ObservableList<BeanData> beans, ClassLoader classLoader) {
+    public BeanContext(ObservableList<BeanData> beans, ClassLoader classLoader) {
         beanList = beans;
         converters = new IdeValueConverterManager(classLoader);
         beanList.addListener(listChangeListener);
@@ -68,6 +70,18 @@ public class BeanCache implements AutoCloseable {
 
     public ClassLoader getClassLoader() {
         return converters.getClassLoader();
+    }
+
+    public <T> T process(String beanName, Supplier<T> supplier) {
+        try {
+            if (processing.add(beanName)) {
+                return supplier.get();
+            } else {
+                throw new MaridCircularBeanException(processing, beanName);
+            }
+        } finally {
+            processing.remove(beanName);
+        }
     }
 
     @Override

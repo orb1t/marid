@@ -86,7 +86,7 @@ public class SignatureResolver {
         }
         if (appearanceSettings.showGenericSignaturesProperty().get()) {
             try {
-                final BeanTypeInfo typeInfo = resolver.resolve(profile.getBeanCache(), data.parent.getName());
+                final BeanTypeInfo typeInfo = resolver.resolve(profile.getBeanContext(), data.parent.getName());
                 final Type[] types = typeInfo.getParameters(data);
                 final String name = BeanMethod.name(data.getSignature());
                 return postProcess(of(types).map(TypeUtils::toString).collect(joining(",", name + "(", ")")));

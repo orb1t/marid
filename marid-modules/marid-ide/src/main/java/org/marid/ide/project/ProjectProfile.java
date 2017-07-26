@@ -30,7 +30,7 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.marid.ide.model.BeanFile;
-import org.marid.ide.types.BeanCache;
+import org.marid.ide.types.BeanContext;
 import org.marid.misc.Urls;
 
 import java.io.IOException;
@@ -71,7 +71,7 @@ public class ProjectProfile {
     private final Queue<WeakReference<Consumer<ProjectProfile>>> onUpdate = new ConcurrentLinkedQueue<>();
 
     private URLClassLoader classLoader;
-    private BeanCache beanCache;
+    private BeanContext beanContext;
 
     ProjectProfile(Path profilesDir, String name) {
         path = profilesDir.resolve(name);
@@ -188,11 +188,11 @@ public class ProjectProfile {
     }
 
     private void updateClassLoader() {
-        try (final URLClassLoader old = classLoader; final BeanCache oldCache = beanCache) {
+        try (final URLClassLoader old = classLoader; final BeanContext oldCache = beanContext) {
             final URL[] urls = Urls.classpath(get(TARGET_LIB), get(TARGET_CLASSES));
             final ClassLoader parent = Thread.currentThread().getContextClassLoader();
             classLoader = new URLClassLoader(urls, parent);
-            beanCache = new BeanCache(beanFile.beans, classLoader);
+            beanContext = new BeanContext(beanFile.beans, classLoader);
             onUpdate.removeIf(ref -> {
                 final Consumer<ProjectProfile> c = ref.get();
                 if (c == null) {
@@ -211,8 +211,8 @@ public class ProjectProfile {
         }
     }
 
-    public BeanCache getBeanCache() {
-        return beanCache;
+    public BeanContext getBeanContext() {
+        return beanContext;
     }
 
     public URLClassLoader getClassLoader() {

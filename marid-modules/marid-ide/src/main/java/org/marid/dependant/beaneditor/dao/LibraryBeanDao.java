@@ -26,7 +26,7 @@ import org.marid.dependant.beaneditor.model.LibraryBean;
 import org.marid.dependant.beaneditor.model.LibraryMethod;
 import org.marid.ide.model.BeanData;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.ide.types.BeanCache;
+import org.marid.ide.types.BeanContext;
 import org.marid.ide.types.BeanTypeInfo;
 import org.marid.ide.types.BeanTypeResolver;
 import org.marid.runtime.beans.Bean;
@@ -98,7 +98,7 @@ public class LibraryBeanDao {
     }
 
     public Stream<LibraryBean> beans(BeanData beanData) {
-        final BeanCache cache = profile.getBeanCache();
+        final BeanContext cache = profile.getBeanContext();
         final BeanTypeInfo typeInfo = resolver.resolve(cache, beanData.getName());
         final Class<?> c = TypeToken.of(typeInfo.getType()).getRawType();
         return of(
@@ -121,7 +121,7 @@ public class LibraryBeanDao {
     }
 
     public Stream<LibraryMethod> initializers(BeanData beanData) {
-        final BeanCache cache = profile.getBeanCache();
+        final BeanContext cache = profile.getBeanContext();
         final BeanTypeInfo typeInfo = resolver.resolve(cache, beanData.getName());
         final Class<?> c = TypeToken.of(typeInfo.getType()).getRawType();
         return of(
