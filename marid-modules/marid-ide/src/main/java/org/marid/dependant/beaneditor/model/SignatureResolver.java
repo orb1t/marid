@@ -65,6 +65,7 @@ public class SignatureResolver {
     public ObservableStringValue signature(ObservableValue<BeanMethodData> methodData) {
         return Bindings.createStringBinding(
                 () -> textSafe(methodData.getValue()),
+                profile.getBeanFile().beans,
                 methodData,
                 appearanceSettings.showFullNamesProperty(),
                 appearanceSettings.showGenericSignaturesProperty()
