@@ -27,6 +27,7 @@ import javafx.scene.control.Tab;
 import javafx.stage.Window;
 import org.marid.ide.event.PropagatedEvent;
 import org.marid.ide.tabs.IdeTab;
+import org.marid.jfx.control.MaridControls;
 import org.marid.spring.dependant.DependantConfiguration;
 import org.marid.spring.postprocessors.MaridCommonPostProcessor;
 import org.marid.spring.postprocessors.WindowAndDialogPostProcessor;
@@ -124,6 +125,14 @@ public class IdeDependants {
             getBeanFactory().addBeanPostProcessor(new MaridCommonPostProcessor());
             getBeanFactory().setParentBeanFactory(parent.getDefaultListableBeanFactory());
             register(IdeDependants.class);
+
+            final WeakReference<DependantContext> contextRef = new WeakReference<>(this);
+            MaridControls.FXCLEANER.register(this, () -> {
+                final DependantContext c = contextRef.get();
+                if (c != null) {
+                    Platform.runLater(c::close);
+                }
+            });
         }
 
         @Override
@@ -143,11 +152,6 @@ public class IdeDependants {
                     return;
                 }
             }
-        }
-
-        @Override
-        protected void finalize() throws Throwable {
-            Platform.runLater(this::close);
         }
 
         private static class ParentListener extends WeakReference<GenericApplicationContext>

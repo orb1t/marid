@@ -24,10 +24,14 @@ package org.marid.jfx.control;
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
 
+import java.lang.ref.Cleaner;
+
 /**
  * @author Dmitry Ovchinnikov
  */
 public interface MaridControls {
+
+    static Cleaner FXCLEANER = Cleaner.create();
 
     static ScrollPane createMaridScrollPane(Node node) {
         final ScrollPane scrollPane = new ScrollPane(node);

@@ -35,6 +35,7 @@ import java.util.Locale;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static org.marid.jfx.control.MaridControls.FXCLEANER;
 import static org.marid.l10n.L10n.s;
 
 /**
@@ -72,17 +73,14 @@ public class LocalizedStrings {
                 for (final Observable observable : observables) {
                     observable.addListener(listener);
                 }
-            }
 
-            @Override
-            protected void finalize() throws Throwable {
-                Platform.runLater(() -> {
+                FXCLEANER.register(this, () -> Platform.runLater(() -> {
                     LOCALE.removeListener(listener);
 
                     for (final Observable observable : observables) {
                         observable.removeListener(listener);
                     }
-                });
+                }));
             }
         };
     }
