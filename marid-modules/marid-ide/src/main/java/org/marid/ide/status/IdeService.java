@@ -27,13 +27,15 @@ import javafx.beans.value.ChangeListener;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.event.EventType;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.Tooltip;
 import javafx.scene.effect.SepiaTone;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.BorderPane;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.PopOver.ArrowLocation;
@@ -67,22 +69,18 @@ public abstract class IdeService<V extends Node> extends Service<Duration> {
 
     private final SimpleObjectProperty<V> graphic = new SimpleObjectProperty<>();
     protected final SimpleObjectProperty<Parent> details = new SimpleObjectProperty<>();
-    private final Label label = new Label();
     private final ProgressBar progressBar = new ProgressBar();
-    protected final HBox button = new HBox(5, label);
+    protected final IdeServiceButton button = new IdeServiceButton();
 
     private IdeStatusBar statusBar;
     private PopOver popOver;
 
     public IdeService() {
         button.setAlignment(Pos.CENTER_LEFT);
-        button.setPadding(new Insets(4));
-        button.getStyleClass().add("button");
         button.setFocusTraversable(true);
         button.setOnMouseClicked(event -> onDetail());
-
-        label.textProperty().bind(titleProperty());
-        label.graphicProperty().bind(graphic);
+        button.label.textProperty().bind(titleProperty());
+        button.label.graphicProperty().bind(graphic);
 
         progressBar.setVisible(false);
         progressBar.setPrefWidth(50);
@@ -90,7 +88,7 @@ public abstract class IdeService<V extends Node> extends Service<Duration> {
 
         progressProperty().addListener((o, oV, nV) -> {
             if (!progressBar.isVisible()) {
-                button.getChildren().add(button.getChildren().size() - 1, progressBar);
+                button.box.getChildren().add(button.box.getChildren().size() - 1, progressBar);
                 progressBar.setVisible(true);
             }
             if (nV.doubleValue() <= oV.doubleValue() || nV.doubleValue() < 0.01) {
@@ -102,12 +100,12 @@ public abstract class IdeService<V extends Node> extends Service<Duration> {
 
         messageProperty().addListener((o, oV, nV) -> {
             if (nV != null) {
-                if (label.getTooltip() == null) {
-                    label.setTooltip(new Tooltip());
+                if (button.label.getTooltip() == null) {
+                    button.label.setTooltip(new Tooltip());
                 }
-                label.getTooltip().setText(nV);
+                button.label.getTooltip().setText(nV);
             } else {
-                label.setTooltip(null);
+                button.label.setTooltip(null);
             }
         });
     }
@@ -115,9 +113,8 @@ public abstract class IdeService<V extends Node> extends Service<Duration> {
     private void onDetail() {
         final Parent detailNode = details.get();
         if (detailNode != null && popOver == null) {
-            detailNode.setDisable(false);
-
-            popOver = new PopOver(detailNode);
+            final BorderPane pane = new BorderPane(detailNode);
+            popOver = new PopOver(pane);
             popOver.setHideOnEscape(true);
             popOver.setCloseButtonEnabled(true);
             popOver.setHeaderAlwaysVisible(true);
@@ -132,7 +129,8 @@ public abstract class IdeService<V extends Node> extends Service<Duration> {
                 }
             };
             popOver.setOnHiding(event -> {
-                detailNode.setDisable(true);
+                pane.setCenter(null);
+                popOver.setContentNode(null);
                 runningProperty().removeListener(runningListener);
                 popOver = null;
             });
@@ -192,18 +190,18 @@ public abstract class IdeService<V extends Node> extends Service<Duration> {
                     final V node = createGraphic();
                     Platform.runLater(() -> {
                         graphic.set(node);
-                        label.setContextMenu(contextMenu());
+                        button.label.setContextMenu(contextMenu());
 
                         final Button cancel = new Button();
                         cancel.setOnAction(event -> {
                             cancel();
-                            button.getChildren().remove(cancel);
+                            button.box.getChildren().remove(cancel);
                         });
                         final Tooltip tooltip = new Tooltip();
                         tooltip.textProperty().bind(ls("Cancel"));
                         cancel.setTooltip(tooltip);
                         cancel.setGraphic(FontIcons.glyphIcon("D_CLOSE_CIRCLE", 16));
-                        button.getChildren().add(cancel);
+                        button.box.getChildren().add(cancel);
                     });
                 }
                 execute();
@@ -211,7 +209,6 @@ public abstract class IdeService<V extends Node> extends Service<Duration> {
             } finally {
                 Platform.runLater(() -> {
                     if (popOver != null) {
-                        popOver.setContentNode(null);
                         popOver.hide();
                     }
                     graphic.set(null);
