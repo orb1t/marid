@@ -22,7 +22,8 @@ package org.marid.ide.panes.main;
 
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ListChangeListener;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Side;
@@ -48,8 +49,14 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
 
+import static java.util.Comparator.comparingInt;
+import static javafx.beans.binding.Bindings.createObjectBinding;
+import static org.marid.ide.logging.IdeLogHandler.LOG_RECORDS;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
+import static org.marid.jfx.icons.IconFactory.icon;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -85,12 +92,25 @@ public class IdeStatusBar extends BorderPane {
     @Bean(initMethod = "run")
     public Runnable healthInitializer(IdeSplitPane pane) {
         return () -> {
-            final SimpleIntegerProperty counter = new SimpleIntegerProperty();
-            final ToggleButton button = new ToggleButton(null, glyphIcon("F_LIST_ALT", 20));
-            button.textProperty().bind(counter.asString());
+            final ObjectProperty<Level> lastLevel = new SimpleObjectProperty<>(LOG_RECORDS.stream()
+                    .map(LogRecord::getLevel)
+                    .max(comparingInt(Level::intValue))
+                    .orElse(Level.INFO));
+            final ToggleButton button = new ToggleButton();
+            button.graphicProperty().bind(createObjectBinding(() -> icon(lastLevel.get(), 20), lastLevel));
+            LOG_RECORDS.addListener((ListChangeListener<LogRecord>) c -> {
+                while (c.next()) {
+                    for (final LogRecord record : c.getAddedSubList()) {
+                        if (record.getLevel().intValue() > lastLevel.get().intValue()) {
+                            lastLevel.set(record.getLevel());
+                        }
+                    }
+                }
+            });
             button.setFocusTraversable(false);
             button.selectedProperty().addListener((o, oV, nV) -> {
                 if (nV) {
+                    lastLevel.set(Level.INFO);
                     pane.setPinnedSide(Side.BOTTOM);
                 } else {
                     pane.setPinnedSide(null);

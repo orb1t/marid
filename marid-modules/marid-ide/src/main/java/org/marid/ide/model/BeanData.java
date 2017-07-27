@@ -21,7 +21,7 @@
 package org.marid.ide.model;
 
 import javafx.beans.Observable;
-import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -45,13 +45,13 @@ public class BeanData {
 
     public final StringProperty name = new SimpleStringProperty();
     public final StringProperty factory = new SimpleStringProperty();
-    public final ObjectProperty<BeanMethodData> producer = new SimpleObjectProperty<>();
+    public final ReadOnlyObjectProperty<BeanMethodData> producer;
     public final ObservableList<BeanMethodData> initializers = observableArrayList(BeanMethodData::observables);
 
     public BeanData(@Nonnull Bean bean) {
         name.set(bean.name);
         factory.set(bean.factory);
-        producer.set(new BeanMethodData(this, bean.producer));
+        producer = new SimpleObjectProperty<>(new BeanMethodData(this, bean.producer));
         initializers.setAll(Stream.of(bean.initializers).map(p -> new BeanMethodData(this, p)).collect(toList()));
     }
 
@@ -88,7 +88,7 @@ public class BeanData {
     }
 
     public Observable[] observables() {
-        return new Observable[] {name, factory, producer, initializers};
+        return new Observable[] {name, factory, producer.get().signature, producer.get().args, initializers};
     }
 
     @Override
