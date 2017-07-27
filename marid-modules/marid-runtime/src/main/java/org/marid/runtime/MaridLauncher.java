@@ -22,7 +22,6 @@
 package org.marid.runtime;
 
 
-import org.marid.io.Xmls;
 import org.marid.runtime.context.MaridConfiguration;
 import org.marid.runtime.context.MaridContext;
 import org.marid.runtime.context.MaridRuntimeUtils;
@@ -33,6 +32,7 @@ import java.net.URL;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.marid.io.Xmls.read;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -49,11 +49,8 @@ public class MaridLauncher {
         final AtomicReference<MaridContext> contextRef = new AtomicReference<>();
         MaridRuntimeUtils.daemonThread(contextRef).start();
 
-
         try (final Reader reader = new InputStreamReader(beansXmlUrl.openStream(), UTF_8)) {
-            final AtomicReference<MaridConfiguration> confRef = new AtomicReference<>();
-            Xmls.read(d -> confRef.set(new MaridConfiguration(d.getDocumentElement())), reader);
-            contextRef.set(new MaridContext(confRef.get(), classLoader));
+            contextRef.set(new MaridContext(read(reader, MaridConfiguration::new), classLoader));
         } catch (Throwable x) {
             x.printStackTrace();
         }

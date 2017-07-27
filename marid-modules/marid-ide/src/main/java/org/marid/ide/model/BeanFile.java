@@ -30,11 +30,11 @@ import org.w3c.dom.Element;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Stream;
 
 import static java.util.logging.Level.WARNING;
+import static java.util.stream.Stream.of;
 import static org.marid.ide.project.ProjectFileType.BEANS_XML;
+import static org.marid.io.Xmls.read;
 import static org.marid.logging.Log.log;
 
 /**
@@ -64,11 +64,8 @@ public class BeanFile {
             save(profile);
             return;
         }
-        final AtomicReference<Element> elementRef = new AtomicReference<>();
         try {
-            Xmls.read(d -> elementRef.set(d.getDocumentElement()), file);
-            final MaridConfiguration context = new MaridConfiguration(elementRef.get());
-            beans.setAll(Stream.of(context.beans).map(BeanData::new).toArray(BeanData[]::new));
+            beans.setAll(of(read(file, MaridConfiguration::new).beans).map(BeanData::new).toArray(BeanData[]::new));
         } catch (Exception x) {
             log(WARNING, "Unable to load {0}", x, profile.get(BEANS_XML));
         }

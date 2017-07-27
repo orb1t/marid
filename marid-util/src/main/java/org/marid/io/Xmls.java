@@ -40,6 +40,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Spliterators;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -75,9 +76,9 @@ public interface Xmls {
         }
     }
 
-    static void read(Consumer<DocumentBuilderFactory> documentBuilderFactoryConfigurer,
+    static <T> T read(Consumer<DocumentBuilderFactory> documentBuilderFactoryConfigurer,
                      Consumer<DocumentBuilder> documentBuilderConfigurer,
-                     Consumer<Document> documentConfigurer,
+                     Function<Document, T> documentReader,
                      InputSource source) {
         final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         documentBuilderFactoryConfigurer.accept(factory);
@@ -85,7 +86,7 @@ public interface Xmls {
             final DocumentBuilder builder = factory.newDocumentBuilder();
             documentBuilderConfigurer.accept(builder);
             final Document document = builder.parse(source);
-            documentConfigurer.accept(document);
+            return documentReader.apply(document);
         } catch (ParserConfigurationException | SAXException x) {
             throw new IllegalStateException(x);
         } catch (IOException x) {
@@ -105,16 +106,24 @@ public interface Xmls {
         }
     }
 
-    static void read(Consumer<Document> documentConsumer, Path file) {
+    static <T> T read(Function<Document, T> documentReader, Path file) {
         try (final BufferedReader reader = newBufferedReader(file, UTF_8)) {
-            read(documentConsumer, reader);
+            return read(documentReader, reader);
         } catch (IOException x) {
             throw new UncheckedIOException(x);
         }
     }
 
-    static void read(Consumer<Document> documentConsumer, Reader reader) {
-        read(f -> {}, b -> {}, documentConsumer, new InputSource(reader));
+    static <T> T read(Path file, Function<Element, T> elementReader) {
+        return read(d -> elementReader.apply(d.getDocumentElement()), file);
+    }
+
+    static <T> T read(Function<Document, T> documentReader, Reader reader) {
+        return read(f -> {}, b -> {}, documentReader, new InputSource(reader));
+    }
+
+    static <T> T read(Reader reader, Function<Element, T> elementReader) {
+        return read(d -> elementReader.apply(d.getDocumentElement()), reader);
     }
 
     static <E> Stream<E> stream(Class<E> type, Stream<?> stream) {
