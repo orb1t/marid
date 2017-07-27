@@ -50,6 +50,7 @@ import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.WARNING;
 import static javafx.concurrent.WorkerStateEvent.*;
 import static javafx.scene.control.ProgressIndicator.INDETERMINATE_PROGRESS;
+import static javafx.util.Duration.millis;
 import static org.marid.ide.IdeNotifications.n;
 import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.l10n.L10n.s;
@@ -80,7 +81,6 @@ public abstract class IdeService<V extends Node> extends Service<Duration> {
         button.getStyleClass().add("button");
         button.setFocusTraversable(true);
         button.setOnMouseClicked(event -> onDetail());
-        button.setOnKeyPressed(event -> onDetail());
 
         label.textProperty().bind(titleProperty());
         label.graphicProperty().bind(graphic);
@@ -139,6 +139,8 @@ public abstract class IdeService<V extends Node> extends Service<Duration> {
             runningProperty().addListener(runningListener);
 
             popOver.show(button);
+        } else if (popOver != null) {
+            popOver.hide(millis(100));
         }
     }
 

@@ -25,18 +25,14 @@ package org.marid.runtime;
 import org.marid.io.Xmls;
 import org.marid.runtime.context.MaridConfiguration;
 import org.marid.runtime.context.MaridContext;
+import org.marid.runtime.context.MaridRuntimeUtils;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
-import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.LockSupport;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.logging.Level.SEVERE;
-import static java.util.logging.Level.WARNING;
-import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -44,56 +40,22 @@ import static org.marid.logging.Log.log;
 public class MaridLauncher {
 
     public static void main(String... args) throws Exception {
-        // Use UTC
-        TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
-
-        // Context
         final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         final URL beansXmlUrl = classLoader.getResource("META-INF/marid/beans.xml");
         if (beansXmlUrl == null) {
             throw new IllegalStateException("No beans.xml file found");
         }
-        final MaridContext runtime;
+
+        final AtomicReference<MaridContext> contextRef = new AtomicReference<>();
+        MaridRuntimeUtils.daemonThread(contextRef).start();
+
+
         try (final Reader reader = new InputStreamReader(beansXmlUrl.openStream(), UTF_8)) {
-            final AtomicReference<MaridConfiguration> contextRef = new AtomicReference<>();
-            Xmls.read(d -> contextRef.set(new MaridConfiguration(d.getDocumentElement())), reader);
-            runtime = new MaridContext(contextRef.get(), classLoader);
-        }
-
-        // Input buffer
-        final StringBuilder buffer = new StringBuilder();
-        final Reader reader = new InputStreamReader(System.in);
-
-        // Command processing loop
-        try {
-            COMMANDS:
-            while (runtime.isActive() && !Thread.interrupted()) {
-                while (reader.ready()) {
-                    final int c = reader.read();
-                    if (c < 0) {
-                        log(SEVERE, "Broken pipe");
-                        break COMMANDS;
-                    }
-                    buffer.append((char) c);
-                }
-                final int i = buffer.indexOf(System.lineSeparator());
-                if (i >= 0) {
-                    final String line = buffer.substring(0, i).trim();
-                    buffer.delete(0, i + System.lineSeparator().length());
-                    switch (line) {
-                        case "close":
-                            break COMMANDS;
-                        case "exit":
-                            System.exit(1);
-                            break COMMANDS;
-                    }
-                }
-                LockSupport.parkNanos(100_000_000L);
-            }
-        } catch (Exception x) {
-            log(WARNING, "Command processing error", x);
-        } finally {
-            runtime.close();
+            final AtomicReference<MaridConfiguration> confRef = new AtomicReference<>();
+            Xmls.read(d -> confRef.set(new MaridConfiguration(d.getDocumentElement())), reader);
+            contextRef.set(new MaridContext(confRef.get(), classLoader));
+        } catch (Throwable x) {
+            x.printStackTrace();
         }
     }
 }

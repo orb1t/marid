@@ -24,15 +24,20 @@ import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
+import javafx.scene.control.TextArea;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import org.controlsfx.control.Notifications;
+import org.controlsfx.control.action.Action;
 import org.intellij.lang.annotations.MagicConstant;
 import org.marid.Ide;
 import org.marid.jfx.icons.FontIcons;
+import org.marid.misc.StringUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 
@@ -85,14 +90,9 @@ public class IdeNotifications {
                            @Nullable Throwable thrown,
                            @Nonnull Object... args) {
         final String text = m(Locale.getDefault(), message, args);
-        final Button graphic ;
-        if (details == null) {
-            graphic = null;
-        } else {
-            graphic = new Button();
-            graphic.textProperty().bind(ls("Details"));
-            graphic.setGraphic(FontIcons.glyphIcon("D_DETAILS", 20));
-            graphic.setOnAction(event -> {
+        final List<Action> actions = new ArrayList<>();
+        if (details != null) {
+            final Action action = new Action(actionEvent -> {
                 details.setDisable(false);
                 final Stage stage = new Stage();
                 stage.initOwner(Ide.primaryStage);
@@ -101,11 +101,29 @@ public class IdeNotifications {
                 stage.titleProperty().bind(ls("Details"));
                 stage.show();
             });
+            action.textProperty().bind(ls("Details"));
+            action.setGraphic(FontIcons.glyphIcon("D_DETAILS", 20));
+            actions.add(action);
+        }
+        if (thrown != null) {
+            final Action action = new Action(event -> {
+                final Stage stage = new Stage();
+                stage.initOwner(Ide.primaryStage);
+                final TextArea textArea = new TextArea(StringUtils.throwableText(thrown));
+                textArea.setFont(new Font("Monospace", 12));
+                stage.setScene(new Scene(textArea));
+                stage.setResizable(true);
+                stage.titleProperty().bind(ls("Error text"));
+                stage.show();
+            });
+            action.textProperty().bind(ls("Error text"));
+            action.setGraphic(FontIcons.glyphIcon("D_PANORAMA_WIDE_ANGLE", 20));
+            actions.add(action);
         }
         final Notifications notifications = Notifications.create()
                 .text(text)
-                .graphic(graphic)
                 .title(s(level.getName()))
+                .action(actions.toArray(new Action[actions.size()]))
                 .darkStyle()
                 .position(Pos.TOP_RIGHT);
         final Runnable task = () -> {
