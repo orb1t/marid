@@ -50,7 +50,6 @@ import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.WARNING;
 import static javafx.concurrent.WorkerStateEvent.*;
 import static javafx.scene.control.ProgressIndicator.INDETERMINATE_PROGRESS;
-import static javafx.util.Duration.millis;
 import static org.marid.ide.IdeNotifications.n;
 import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.l10n.L10n.s;
@@ -128,6 +127,7 @@ public abstract class IdeService<V extends Node> extends Service<Duration> {
 
             final ChangeListener<Boolean> runningListener = (o, oV, nV) -> {
                 if (!nV) {
+                    popOver.setContentNode(null);
                     popOver.hide();
                 }
             };
@@ -140,7 +140,7 @@ public abstract class IdeService<V extends Node> extends Service<Duration> {
 
             popOver.show(button);
         } else if (popOver != null) {
-            popOver.hide(millis(100));
+            popOver.hide();
         }
     }
 
@@ -206,14 +206,17 @@ public abstract class IdeService<V extends Node> extends Service<Duration> {
                         button.getChildren().add(cancel);
                     });
                 }
-                try {
-                    execute();
-                } finally {
-                    Platform.runLater(() -> graphic.set(null));
-                }
+                execute();
                 return Duration.ofNanos(System.nanoTime() - startTime);
             } finally {
-                Platform.runLater(() -> statusBar.remove(button));
+                Platform.runLater(() -> {
+                    if (popOver != null) {
+                        popOver.setContentNode(null);
+                        popOver.hide();
+                    }
+                    graphic.set(null);
+                    statusBar.remove(button);
+                });
             }
         }
     }
