@@ -21,35 +21,86 @@
 
 package org.marid.jfx.action;
 
+import javax.annotation.Resource;
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
+import static org.marid.jfx.action.SpecialActionType.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class SpecialActions {
 
-    private final List<SpecialAction> actionList;
-    private final SpecialAction miscAction;
+    private final EnumMap<SpecialActionType, SpecialAction> actionMap = new EnumMap<>(SpecialActionType.class);
 
-    public SpecialActions(List<SpecialAction> actionList, SpecialAction miscAction) {
-        this.actionList = actionList;
-        this.miscAction = miscAction;
+    @Resource
+    public void setAddAction(SpecialAction addAction) {
+        actionMap.put(ADD, addAction);
+    }
+
+    @Resource
+    public void setEditAction(SpecialAction editAction) {
+        actionMap.put(EDIT, editAction);
+    }
+
+    @Resource
+    public void setRemoveAction(SpecialAction removeAction) {
+        actionMap.put(REMOVE, removeAction);
+    }
+
+    @Resource
+    public void setClearAllAction(SpecialAction clearAllAction) {
+        actionMap.put(CLEAR_ALL, clearAllAction);
+    }
+
+    @Resource
+    public void setSelectAllAction(SpecialAction selectAllAction) {
+        actionMap.put(SELECT_ALL, selectAllAction);
+    }
+
+    @Resource
+    public void setCutAction(SpecialAction cutAction) {
+        actionMap.put(CUT, cutAction);
+    }
+
+    @Resource
+    public void setCopyAction(SpecialAction copyAction) {
+        actionMap.put(COPY, copyAction);
+    }
+
+    @Resource
+    public void setPasteAction(SpecialAction pasteAction) {
+        actionMap.put(CUT, pasteAction);
+    }
+
+    @Resource
+    public void setMiscAction(SpecialAction miscAction) {
+        actionMap.put(CUT, miscAction);
+    }
+
+    @Resource
+    public void setRenameAction(SpecialAction renameAction) {
+        actionMap.put(CUT, renameAction);
+    }
+
+    public SpecialAction get(SpecialActionType type) {
+        return actionMap.get(type);
     }
 
     public void reset() {
-        actionList.forEach(SpecialAction::reset);
+        actionMap.values().forEach(SpecialAction::reset);
     }
 
     public void assign(Collection<FxAction> actions) {
         reset();
         final Map<SpecialAction, List<FxAction>> map = actions.stream()
                 .collect(groupingBy(
-                        a -> a.specialAction != null ? a.specialAction : miscAction,
+                        a -> a.specialAction != null ? a.specialAction : actionMap.get(MISC),
                         toList()
                 ));
         map.forEach((k, v) -> {

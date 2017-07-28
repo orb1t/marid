@@ -138,4 +138,9 @@ public class MaridListView<T> extends ListView<T> implements MaridActionsControl
     public void remove(List<? extends T> list) {
         getItems().removeAll(list);
     }
+
+    @Override
+    public void clearAll() {
+        getItems().clear();
+    }
 }

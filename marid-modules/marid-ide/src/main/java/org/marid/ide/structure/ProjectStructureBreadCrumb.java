@@ -18,7 +18,7 @@
  * #L%
  */
 
-package org.marid.ide.panes.structure;
+package org.marid.ide.structure;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;

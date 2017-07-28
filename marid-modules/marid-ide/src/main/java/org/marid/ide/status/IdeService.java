@@ -39,7 +39,6 @@ import javafx.scene.layout.BorderPane;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.PopOver.ArrowLocation;
-import org.marid.ide.panes.main.IdeStatusBar;
 import org.marid.jfx.icons.FontIcons;
 import org.springframework.beans.factory.annotation.Autowired;
 

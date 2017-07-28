@@ -138,4 +138,9 @@ public class MaridTreeTableView<T> extends TreeTableView<T> implements MaridActi
     public void remove(List<? extends TreeItem<T>> list) {
         list.forEach(e -> e.getParent().getChildren().remove(e));
     }
+
+    @Override
+    public void clearAll() {
+        getRoot().getChildren().clear();
+    }
 }

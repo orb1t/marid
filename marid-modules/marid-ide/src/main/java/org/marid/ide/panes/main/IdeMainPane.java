@@ -18,23 +18,34 @@
  * #L%
  */
 
-package org.marid.ide.panes.structure;
+package org.marid.ide.panes.main;
 
-import javafx.geometry.Insets;
-import javafx.scene.layout.BorderPane;
+import org.controlsfx.control.HiddenSidesPane;
+import org.marid.ide.logging.IdeLogPane;
+import org.marid.ide.tabs.IdeTabPane;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.prefs.Preferences;
+
 /**
- * @author Dmitry Ovchinnikov
+ * @author Dmitry Ovchinnikov.
+ * @since 0.9
  */
 @Component
-public class ProjectStructurePane extends BorderPane {
+public class IdeMainPane extends HiddenSidesPane {
+
+    private final IdeTabPane tabPane;
+    private final IdeLogPane ideLogPane;
+    private final Preferences preferences;
 
     @Autowired
-    public ProjectStructurePane(ProjectStructureTree tree, ProjectStructureBreadCrumb crumb) {
-        setCenter(tree);
-        setBottom(crumb);
-        BorderPane.setMargin(crumb, new Insets(2));
+    public IdeMainPane(IdeTabPane tabPane, IdeLogPane ideLogPane, Preferences preferences) {
+        super(tabPane, null, null, ideLogPane, null);
+        this.tabPane = tabPane;
+        this.ideLogPane = ideLogPane;
+        this.preferences = preferences;
+        this.ideLogPane.maxHeightProperty().bind(heightProperty().subtract(100.0));
+        setFocusTraversable(false);
     }
 }

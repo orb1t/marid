@@ -33,7 +33,7 @@ import org.marid.ide.settings.AppearanceSettings;
 import org.marid.ide.types.BeanTypeInfo;
 import org.marid.ide.types.BeanTypeResolver;
 import org.marid.jfx.action.FxAction;
-import org.marid.jfx.action.SpecialAction;
+import org.marid.jfx.action.SpecialActions;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.jfx.table.MaridTableView;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -131,7 +131,7 @@ public class BeanTable extends MaridTableView<BeanData> {
 
     @Autowired
     @Override
-    public void installRemoveAction(SpecialAction removeAction) {
-        super.installRemoveAction(removeAction);
+    public void installActions(SpecialActions specialActions) {
+        super.installActions(specialActions);
     }
 }

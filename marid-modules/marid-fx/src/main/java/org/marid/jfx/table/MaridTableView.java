@@ -138,4 +138,9 @@ public class MaridTableView<T> extends TableView<T> implements MaridActionsContr
     public void remove(List<? extends T> list) {
         getItems().removeAll(list);
     }
+
+    @Override
+    public void clearAll() {
+        getItems().clear();
+    }
 }

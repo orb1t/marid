@@ -27,8 +27,6 @@ import org.marid.spring.annotation.IdeAction;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.8
@@ -37,8 +35,8 @@ import java.util.List;
 public class SpecialActionConfiguration {
 
     @Bean
-    public SpecialActions specialActions(List<SpecialAction> specialActions, SpecialAction miscAction) {
-        return new SpecialActions(specialActions, miscAction);
+    public SpecialActions specialActions() {
+        return new SpecialActions();
     }
 
     @IdeAction

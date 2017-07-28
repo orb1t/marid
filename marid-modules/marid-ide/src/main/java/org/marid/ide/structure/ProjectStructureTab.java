@@ -18,7 +18,7 @@
  * #L%
  */
 
-package org.marid.ide.panes.structure;
+package org.marid.ide.structure;
 
 import org.marid.ide.tabs.IdeTab;
 import org.springframework.beans.factory.annotation.Autowired;

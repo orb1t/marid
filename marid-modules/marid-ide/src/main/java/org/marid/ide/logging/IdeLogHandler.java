@@ -61,7 +61,7 @@ public class IdeLogHandler extends Handler {
                 LOG_RECORDS.add(record);
                 final int maxRecords = this.maxRecords;
                 while (LOG_RECORDS.size() - maxRecords > 0) {
-                    LOG_RECORDS.subList(0, LOG_RECORDS.size() - maxRecords).clear();
+                    LOG_RECORDS.remove(0, LOG_RECORDS.size() - maxRecords);
                 }
             });
         }

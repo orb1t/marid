@@ -25,8 +25,10 @@ import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
 import javafx.scene.control.MultipleSelectionModel;
+import javafx.scene.control.SelectionMode;
 import org.marid.jfx.action.FxAction;
-import org.marid.jfx.action.SpecialAction;
+import org.marid.jfx.action.SpecialActionType;
+import org.marid.jfx.action.SpecialActions;
 
 import java.util.List;
 import java.util.function.Function;
@@ -48,12 +50,30 @@ public interface MaridActionsControl<T> {
 
     void remove(List<? extends T> list);
 
-    default void installRemoveAction(SpecialAction removeAction) {
+    void clearAll();
+
+    default void installActions(SpecialActions specialActions) {
         actions().add(e -> new FxAction("rem", "rem", "rem")
+                .setSpecialAction(specialActions.get(SpecialActionType.REMOVE))
                 .bindDisabled(Bindings.isEmpty(getSelectionModel().getSelectedItems()))
                 .bindText("Remove selected items")
                 .setIcon("F_REMOVE")
                 .setEventHandler(event -> remove(getSelectionModel().getSelectedItems()))
+        );
+
+        actions().add(e -> new FxAction("rem", "rem", "rem")
+                .setSpecialAction(specialActions.get(SpecialActionType.SELECT_ALL))
+                .setDisabled(getSelectionModel().getSelectionMode().equals(SelectionMode.SINGLE))
+                .bindText("Select all items")
+                .setIcon("D_SELECT_ALL")
+                .setEventHandler(event -> getSelectionModel().selectAll())
+        );
+
+        actions().add(e -> new FxAction("rem", "rem", "rem")
+                .setSpecialAction(specialActions.get(SpecialActionType.CLEAR_ALL))
+                .bindText("Clear all items")
+                .setIcon("D_DELETE")
+                .setEventHandler(event -> clearAll())
         );
     }
 }

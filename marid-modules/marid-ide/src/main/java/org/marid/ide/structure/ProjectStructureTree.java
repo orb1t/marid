@@ -18,7 +18,7 @@
  * #L%
  */
 
-package org.marid.ide.panes.structure;
+package org.marid.ide.structure;
 
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
