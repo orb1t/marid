@@ -30,18 +30,17 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.util.converter.DefaultStringConverter;
-import org.apache.commons.lang3.reflect.TypeUtils;
-import org.marid.dependant.beaneditor.dao.ConvertersDao;
 import org.marid.dependant.beaneditor.model.SignatureResolver;
 import org.marid.ide.model.BeanMethodArgData;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
-import org.marid.jfx.action.SpecialAction;
 import org.marid.jfx.table.MaridTableView;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.annotation.PostConstruct;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.function.Function;
 
 import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.misc.Builder.build;
@@ -117,20 +116,7 @@ public abstract class BeanMethodArgTable extends MaridTableView<BeanMethodArgDat
     }
 
     @Autowired
-    public void initRowFactory(ConvertersDao convertersDao, SpecialAction miscAction) {
-        actions().add(a -> a == null ? null : new FxAction("misc", "misc", "misc")
-                .bindText("Set a converter")
-                .setIcon("D_CLIPPY")
-                .setSpecialAction(miscAction)
-                .setChildren(convertersDao.getConverters(a).entrySet().stream()
-                        .map(e -> new FxAction("", "", "")
-                                .bindText(e.getValue().name)
-                                .setIcon(e.getValue().icon)
-                                .setEventHandler(event -> a.type.set(e.getKey()))
-                        )
-                        .collect(Collectors.toList())
-                )
-                .setDisabled(false)
-        );
+    public void initRowFactory(@Qualifier("methodArg") List<Function<BeanMethodArgData, FxAction>> actionProviders) {
+        actions().addAll(actionProviders);
     }
 }
