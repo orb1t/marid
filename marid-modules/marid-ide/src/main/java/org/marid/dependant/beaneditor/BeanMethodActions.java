@@ -99,4 +99,18 @@ public class BeanMethodActions {
                 )
                 .setDisabled(false);
     }
+
+    @Bean
+    @Qualifier("methodArg")
+    public Function<BeanMethodArgData, FxAction> resetArgAction(SpecialAction removeAction) {
+        return a -> a == null ? null : new FxAction("misc", "misc", "misc")
+                .bindText("Clear argument")
+                .setIcon("D_NEEDLE")
+                .setSpecialAction(removeAction)
+                .setEventHandler(event -> {
+                    a.type.set("of");
+                    a.value.set(null);
+                })
+                .setDisabled(false);
+    }
 }
