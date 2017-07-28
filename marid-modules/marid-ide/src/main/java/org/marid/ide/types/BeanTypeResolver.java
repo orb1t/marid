@@ -45,52 +45,58 @@ import static com.google.common.reflect.TypeToken.of;
 public class BeanTypeResolver {
 
     public BeanTypeInfo resolve(BeanContext context, String beanName) {
-        final BeanData beanData = context.getBean(beanName);
-        return context.typeInfoMap.computeIfAbsent(beanName, name -> context.process(name, () -> {
-            try {
-                final BeanFactoryInfo info = new BeanFactoryInfo(beanData, this, context);
-                final Map<TypeToken<?>, List<TypeToken<?>>> pairs = new LinkedHashMap<>();
-                final Type[] beanPs = formalTypes(info.returnHandle, true);
-                final Type[] beanAs = new Type[beanPs.length];
-                for (int k = 0; k < beanAs.length; k++) {
-                    beanAs[k] = actualType(context, info.producer.args.get(k), beanPs[k]);
-                }
-                for (int i = 0; i < beanPs.length; i++) {
-                    if (beanAs[i] != null) {
-                        resolve(pairs, info.factoryToken.resolveType(beanPs[i]), of(beanAs[i]));
-                    }
-                }
-                final Type[][] initPs = new Type[info.bean.initializers.length][];
-                final Type[][] initAs = new Type[info.bean.initializers.length][];
-                for (int i = 0; i < info.bean.initializers.length; i++) {
-                    final MethodHandle handle = info.bean.findInitializer(info.returnHandle, info.bean.initializers[i]);
-                    final Type[] ps = formalTypes(handle, false);
-                    final Type[] as = new Type[ps.length];
-                    for (int k = 0; k < ps.length; k++) {
-                        as[k] = actualType(context, beanData.getArgs(i).get(k), ps[k]);
-                    }
-                    for (int k = 0; k < as.length; k++) {
-                        if (as[k] != null) {
-                            resolve(pairs, info.factoryToken.resolveType(ps[k]), of(as[k]));
-                        }
-                    }
-                    initPs[i] = ps;
-                    initAs[i] = as;
-                }
+        return context.getBean(beanName)
+                .map(beanData -> context.typeInfoMap.computeIfAbsent(
+                        beanName,
+                        name -> context.process(name, () -> resolve(context, beanData)))
+                )
+                .orElse(EmptyBeanTypeInfo.EMPTY);
+    }
 
-                final TypeResolver r = pairs.entrySet().stream().reduce(
-                        new TypeResolver(),
-                        (a, e) -> a.where(e.getKey().getType(), commonAncestor(e).getType()),
-                        (r1, r2) -> r2
-                );
-                final UnaryOperator<Type> resolverFunc = t -> info.factoryToken.resolveType(r.resolveType(t)).getType();
-                return new BeanTypeInfo(resolverFunc, info.returnType, beanPs, beanPs, initPs, initAs);
-            } catch (RuntimeException x) {
-                throw x;
-            } catch (Exception x) {
-                throw new IllegalArgumentException(name, x);
+    private BeanTypeInfo resolve(BeanContext context, BeanData beanData) {
+        try {
+            final BeanFactoryInfo info = new BeanFactoryInfo(beanData, this, context);
+            final Map<TypeToken<?>, List<TypeToken<?>>> pairs = new LinkedHashMap<>();
+            final Type[] beanPs = formalTypes(info.returnHandle, true);
+            final Type[] beanAs = new Type[beanPs.length];
+            for (int k = 0; k < beanAs.length; k++) {
+                beanAs[k] = actualType(context, info.producer.args.get(k), beanPs[k]);
             }
-        }));
+            for (int i = 0; i < beanPs.length; i++) {
+                if (beanAs[i] != null) {
+                    resolve(pairs, info.factoryToken.resolveType(beanPs[i]), of(beanAs[i]));
+                }
+            }
+            final Type[][] initPs = new Type[info.bean.initializers.length][];
+            final Type[][] initAs = new Type[info.bean.initializers.length][];
+            for (int i = 0; i < info.bean.initializers.length; i++) {
+                final MethodHandle handle = info.bean.findInitializer(info.returnHandle, info.bean.initializers[i]);
+                final Type[] ps = formalTypes(handle, false);
+                final Type[] as = new Type[ps.length];
+                for (int k = 0; k < ps.length; k++) {
+                    as[k] = actualType(context, beanData.getArgs(i).get(k), ps[k]);
+                }
+                for (int k = 0; k < as.length; k++) {
+                    if (as[k] != null) {
+                        resolve(pairs, info.factoryToken.resolveType(ps[k]), of(as[k]));
+                    }
+                }
+                initPs[i] = ps;
+                initAs[i] = as;
+            }
+
+            final TypeResolver r = pairs.entrySet().stream().reduce(
+                    new TypeResolver(),
+                    (a, e) -> a.where(e.getKey().getType(), commonAncestor(e).getType()),
+                    (r1, r2) -> r2
+            );
+            final UnaryOperator<Type> resolverFunc = t -> info.factoryToken.resolveType(r.resolveType(t)).getType();
+            return new GenericBeanTypeInfo(resolverFunc, info.returnType, beanPs, beanPs, initPs, initAs);
+        } catch (RuntimeException x) {
+            throw x;
+        } catch (Exception x) {
+            throw new IllegalArgumentException(beanData.getName(), x);
+        }
     }
 
     private TypeToken<?> commonAncestor(Entry<TypeToken<?>, List<TypeToken<?>>> entry) {
