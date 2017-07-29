@@ -97,6 +97,11 @@ public class GenericBeanTypeInfo implements BeanTypeInfo {
     }
 
     @Override
+    public Throwable getError() {
+        return null;
+    }
+
+    @Override
     public String toString() {
         final StringBuilder builder = new StringBuilder();
         final AtomicBoolean empty = new AtomicBoolean(true);

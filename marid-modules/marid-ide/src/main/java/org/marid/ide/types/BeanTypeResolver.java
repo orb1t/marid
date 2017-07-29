@@ -45,12 +45,7 @@ import static com.google.common.reflect.TypeToken.of;
 public class BeanTypeResolver {
 
     public BeanTypeInfo resolve(BeanContext context, String beanName) {
-        return context.getBean(beanName)
-                .map(beanData -> context.typeInfoMap.computeIfAbsent(
-                        beanName,
-                        name -> context.process(name, () -> resolve(context, beanData)))
-                )
-                .orElse(EmptyBeanTypeInfo.EMPTY);
+        return context.get(beanName, d -> resolve(context, d));
     }
 
     private BeanTypeInfo resolve(BeanContext context, BeanData beanData) {

@@ -30,9 +30,10 @@ import java.lang.reflect.Type;
  */
 public class EmptyBeanTypeInfo implements BeanTypeInfo {
 
-    public static final EmptyBeanTypeInfo EMPTY = new EmptyBeanTypeInfo();
+    private final Throwable error;
 
-    private EmptyBeanTypeInfo() {
+    public EmptyBeanTypeInfo(Throwable error) {
+        this.error = error;
     }
 
     @Override
@@ -58,6 +59,11 @@ public class EmptyBeanTypeInfo implements BeanTypeInfo {
     @Override
     public Type getArgument(BeanMethodArgData argument) {
         return Object.class;
+    }
+
+    @Override
+    public Throwable getError() {
+        return error;
     }
 
     @Override

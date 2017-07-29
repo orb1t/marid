@@ -39,4 +39,6 @@ public interface BeanTypeInfo {
     Type getParameter(BeanMethodArgData parameter);
 
     Type getArgument(BeanMethodArgData argument);
+
+    Throwable getError();
 }

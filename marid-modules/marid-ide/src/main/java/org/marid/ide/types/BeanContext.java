@@ -23,11 +23,13 @@ package org.marid.ide.types;
 import javafx.beans.InvalidationListener;
 import javafx.collections.ObservableList;
 import org.marid.ide.model.BeanData;
+import org.marid.runtime.exception.MaridBeanNotFoundException;
 import org.marid.runtime.exception.MaridCircularBeanException;
 
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -52,6 +54,12 @@ public class BeanContext implements AutoCloseable {
         return beanList.parallelStream()
                 .filter(b -> name.equals(b.getName()))
                 .findAny();
+    }
+
+    public BeanTypeInfo get(String beanName, Function<BeanData, BeanTypeInfo> typeInfoFunc) {
+        return getBean(beanName)
+                .map(d -> process(beanName, () -> typeInfoMap.computeIfAbsent(beanName, name -> typeInfoFunc.apply(d))))
+                .orElse(new EmptyBeanTypeInfo(new MaridBeanNotFoundException(beanName)));
     }
 
     public IdeValueConverterManager getConverters() {
