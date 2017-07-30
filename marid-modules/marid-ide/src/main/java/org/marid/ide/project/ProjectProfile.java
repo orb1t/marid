@@ -82,7 +82,7 @@ public class ProjectProfile {
                     Files.createDirectories(p);
                 } else {
                     Files.createDirectories(p.getParent());
-                    if (!Files.isRegularFile(p) && !p.endsWith("beans.xml")) {
+                    if (!Files.isRegularFile(p) && !p.endsWith(".xml")) {
                         Files.createFile(p);
                     }
                 }
