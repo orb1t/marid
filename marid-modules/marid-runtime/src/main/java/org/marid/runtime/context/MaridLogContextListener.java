@@ -37,6 +37,11 @@ import static org.marid.logging.Log.log;
 public class MaridLogContextListener implements MaridContextListener {
 
     @Override
+    public void bootstrap(MaridRuntime runtime) {
+
+    }
+
+    @Override
     public void onEvent(@Nonnull BeanEvent event) {
         log(INFO, "{0}", event);
     }

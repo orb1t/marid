@@ -33,6 +33,8 @@ import java.util.function.Consumer;
  */
 public interface MaridContextListener extends EventListener, Comparable<MaridContextListener> {
 
+    void bootstrap(MaridRuntime runtime);
+
     void onEvent(@Nonnull BeanEvent event);
 
     void onInitialize(@Nonnull String name, @Nullable Object bean);

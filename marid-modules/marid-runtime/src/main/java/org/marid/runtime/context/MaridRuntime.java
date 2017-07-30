@@ -21,6 +21,8 @@
 
 package org.marid.runtime.context;
 
+import java.util.Properties;
+
 /**
  * @author Dmitry Ovchinnikov
  */
@@ -33,4 +35,6 @@ public interface MaridRuntime {
     ClassLoader getClassLoader();
 
     String resolvePlaceholders(String value);
+
+    Properties getApplicationProperties();
 }

@@ -48,7 +48,8 @@ final class MaridBeanCreationContext implements AutoCloseable {
     private final Set<String> creationBeanNames = new LinkedHashSet<>();
     private final List<Throwable> throwables = new ArrayList<>();
     private final DefaultValueConvertersManager convertersManager;
-    private final MaridRuntimeObject runtime;
+
+    final MaridRuntimeObject runtime;
 
     MaridBeanCreationContext(MaridConfiguration configuration, MaridContext context) {
         this.context = context;

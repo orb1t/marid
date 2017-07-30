@@ -26,20 +26,29 @@ import org.marid.runtime.exception.MaridBeanInitializationException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.lang.reflect.Method;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.TreeSet;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
+import static java.lang.System.getProperties;
 import static org.marid.runtime.context.MaridRuntimeUtils.methods;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class MaridDefaultContextListener implements MaridContextListener {
+
+    @Override
+    public void bootstrap(MaridRuntime runtime) {
+        for (final String key : runtime.getApplicationProperties().stringPropertyNames()) {
+            if (key.startsWith("system.")) {
+                getProperties().setProperty(key.substring(7), runtime.getApplicationProperties().getProperty(key));
+            }
+        }
+    }
 
     @Override
     public void onEvent(@Nonnull BeanEvent event) {
@@ -52,7 +61,7 @@ public class MaridDefaultContextListener implements MaridContextListener {
         }
         final Comparator<Method> byClass = this::cmp;
         final Comparator<Method> cmp = byClass.thenComparing(Method::getName);
-        final TreeSet<Method> methods = methods(bean, m -> m.isAnnotationPresent(PostConstruct.class), cmp);
+        final TreeSet<Method> methods = methods(bean, this::isPostConstruct, cmp);
         final HashSet<String> passed = new HashSet<>();
         for (final Method method : methods) {
             if (passed.add(method.getName())) {
@@ -72,7 +81,7 @@ public class MaridDefaultContextListener implements MaridContextListener {
         }
         final Comparator<Method> byClass = this::cmp;
         final Comparator<Method> cmp = byClass.thenComparing(Method::getName).reversed();
-        final TreeSet<Method> methods = methods(bean, m -> m.isAnnotationPresent(PreDestroy.class), cmp);
+        final TreeSet<Method> methods = methods(bean, this::isPreDestroy, cmp);
         final HashSet<String> passed = new HashSet<>();
         for (final Method method : methods) {
             if (passed.add(method.getName())) {
@@ -117,5 +126,15 @@ public class MaridDefaultContextListener implements MaridContextListener {
         } else {
             return 1;
         }
+    }
+
+    private boolean isPostConstruct(Method method) {
+        return method.getParameterCount() == 0 && Stream.of(method.getAnnotations())
+                .anyMatch(a -> a.annotationType().getName().equals("javax.annotation.PostConstruct"));
+    }
+
+    private boolean isPreDestroy(Method method) {
+        return method.getParameterCount() == 0 && Stream.of(method.getAnnotations())
+                .anyMatch(a -> a.annotationType().getName().equals("javax.annotation.PreDestroy"));
     }
 }
