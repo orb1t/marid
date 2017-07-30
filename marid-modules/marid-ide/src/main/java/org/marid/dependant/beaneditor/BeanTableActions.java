@@ -27,6 +27,7 @@ import org.marid.annotation.MetaLiteral;
 import org.marid.dependant.beaneditor.dao.LibraryBeanDao;
 import org.marid.dependant.beaneditor.model.LibraryBean;
 import org.marid.dependant.beaneditor.model.LibraryMethod;
+import org.marid.dependant.beaneditor.model.WildBean;
 import org.marid.ide.model.BeanData;
 import org.marid.ide.model.BeanMethodData;
 import org.marid.ide.project.ProjectProfile;
@@ -170,11 +171,11 @@ public class BeanTableActions {
                     dialog.setTitle(s("Wild bean"));
                     dialog.initModality(Modality.APPLICATION_MODAL);
                     dialog.showAndWait().ifPresent(type -> {
-                        final LibraryBean[] beans = dao.beans(type).toArray(LibraryBean[]::new);
+                        final WildBean[] beans = dao.beans(type).map(WildBean::new).toArray(WildBean[]::new);
                         if (beans.length == 0) {
                             n(WARNING, "No beans found");
                         }
-                        final ChoiceDialog<LibraryBean> d = new ChoiceDialog<>(beans[0], beans);
+                        final ChoiceDialog<WildBean> d = new ChoiceDialog<>(beans[0], beans);
                         d.setTitle(s("Bean selector"));
                         d.setHeaderText(m("Select a bean: "));
                         d.initModality(Modality.APPLICATION_MODAL);

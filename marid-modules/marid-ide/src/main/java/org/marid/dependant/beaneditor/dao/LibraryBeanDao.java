@@ -82,6 +82,7 @@ public class LibraryBeanDao {
                         }),
                 of(c.getMethods())
                         .filter(m -> Modifier.isStatic(m.getModifiers()))
+                        .filter(m -> !m.getReturnType().isPrimitive())
                         .map(e -> {
                             final MetaLiteral literal = l("Bean", "Other", e.getName(), "D_SERVER_NETWORK", e);
                             final Bean bean = new Bean(e.getName(), c.getName(), new BeanMethod(e, args(e)));
@@ -89,6 +90,7 @@ public class LibraryBeanDao {
                         }),
                 of(c.getFields())
                         .filter(f -> Modifier.isStatic(f.getModifiers()))
+                        .filter(f -> !f.getType().isPrimitive())
                         .map(e -> {
                             final MetaLiteral literal = l("Bean", "Other", e.getName(), "D_SERVER_NETWORK", e);
                             final Bean bean = new Bean(e.getName(), c.getName(), new BeanMethod(e));
@@ -104,7 +106,7 @@ public class LibraryBeanDao {
         return of(
                 of(c.getMethods())
                         .filter(e -> !Modifier.isStatic(e.getModifiers()))
-                        .filter(e -> e.getReturnType() != void.class)
+                        .filter(e -> !e.getReturnType().isPrimitive())
                         .map(e -> {
                             final MetaLiteral literal = l("Bean", "Other", e.getName(), "D_SERVER_NETWORK", e);
                             final Bean bean = new Bean(e.getName(), beanData.getName(), new BeanMethod(e, args(e)));
@@ -112,6 +114,7 @@ public class LibraryBeanDao {
                         }),
                 of(c.getFields())
                         .filter(f -> !Modifier.isStatic(f.getModifiers()))
+                        .filter(f -> !f.getType().isPrimitive())
                         .map(e -> {
                             final MetaLiteral literal = l("Bean", "Other", e.getName(), "D_SERVER_NETWORK", e);
                             final Bean bean = new Bean(e.getName(), beanData.getName(), new BeanMethod(e));
