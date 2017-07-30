@@ -32,6 +32,9 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.marid.ide.model.BeanFile;
 import org.marid.ide.types.BeanContext;
 import org.marid.misc.Urls;
+import org.marid.runtime.context.MaridDefaultContextListener;
+import org.marid.runtime.context.MaridLogContextListener;
+import org.marid.runtime.converter.DefaultValueConvertersFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,6 +51,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.nio.file.Files.write;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static java.util.EnumSet.allOf;
 import static java.util.logging.Level.WARNING;
 import static java.util.stream.Collectors.toMap;
@@ -82,7 +89,7 @@ public class ProjectProfile {
                     Files.createDirectories(p);
                 } else {
                     Files.createDirectories(p.getParent());
-                    if (!Files.isRegularFile(p) && !p.endsWith(".xml")) {
+                    if (!Files.isRegularFile(p) && !p.getFileName().toString().endsWith(".xml")) {
                         Files.createFile(p);
                     }
                 }
@@ -122,7 +129,17 @@ public class ProjectProfile {
             final MavenXpp3Reader reader = new MavenXpp3Reader();
             return reader.read(is);
         } catch (NoSuchFileException x) {
-            // nop
+            try {
+                write(get(CONTEXT_LISTENERS), asList(
+                        MaridLogContextListener.class.getName(),
+                        MaridDefaultContextListener.class.getName()
+                ), UTF_8);
+                write(get(VALUE_CONVERTER_FACTORIES), singletonList(
+                        DefaultValueConvertersFactory.class.getName()
+                ), UTF_8);
+            } catch (IOException ix) {
+                log(logger, WARNING, "Unable to write default services", ix);
+            }
         } catch (IOException x) {
             log(logger, WARNING, "Unable to read pom.xml", x);
         } catch (XmlPullParserException x) {

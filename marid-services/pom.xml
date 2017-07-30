@@ -42,33 +42,31 @@
                         </systemPropertyVariables>
                     </configuration>
                 </plugin>
+
+                <plugin>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>default-jar</id>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                            <phase>package</phase>
+                        </execution>
+
+                        <execution>
+                            <id>classified-jar</id>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                            <phase>package</phase>
+                            <configuration>
+                                <classifier>marid</classifier>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
-
-        <plugins>
-            <plugin>
-                <artifactId>maven-jar-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>default-jar</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <phase>package</phase>
-                    </execution>
-
-                    <execution>
-                        <id>classified-jar</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <phase>package</phase>
-                        <configuration>
-                            <classifier>marid</classifier>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
     </build>
 </project>
