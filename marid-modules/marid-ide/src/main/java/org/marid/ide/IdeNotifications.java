@@ -61,7 +61,7 @@ public class IdeNotifications {
 
     public static void n(@Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
                          @Nonnull String message,
-                         @Nonnull Parent details,
+                         @Nullable Parent details,
                          @Nonnull Object... args) {
         log(4, level, message, null, args);
         n0(level, message, details, null, args);
@@ -77,7 +77,7 @@ public class IdeNotifications {
 
     public static void n(@Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
                          @Nonnull String message,
-                         @Nonnull Parent details,
+                         @Nullable Parent details,
                          @Nullable Throwable thrown,
                          @Nonnull Object... args) {
         log(4, level, message, thrown, args);
