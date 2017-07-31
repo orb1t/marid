@@ -8,25 +8,51 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>marid-services</artifactId>
+    <version>0.9.6.2-MARID-SNAPSHOT</version>
     <packaging>pom</packaging>
 
+    <properties>
+        <marid.version>${project.parent.version}</marid.version>
+    </properties>
+
     <modules>
+        <module>marid-api</module>
         <module>marid-proto</module>
         <module>marid-db</module>
     </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.marid</groupId>
+                <artifactId>marid-util</artifactId>
+                <version>0.9.6.2-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.marid</groupId>
+                <artifactId>marid-test</artifactId>
+                <version>0.9.6.2-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.marid</groupId>
+                <artifactId>marid-runtime</artifactId>
+                <version>0.9.6.2-SNAPSHOT</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
             <groupId>org.marid</groupId>
             <artifactId>marid-runtime</artifactId>
-            <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.marid</groupId>
             <artifactId>marid-test</artifactId>
-            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -41,30 +67,6 @@
                             <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
                         </systemPropertyVariables>
                     </configuration>
-                </plugin>
-
-                <plugin>
-                    <artifactId>maven-jar-plugin</artifactId>
-                    <executions>
-                        <execution>
-                            <id>default-jar</id>
-                            <goals>
-                                <goal>jar</goal>
-                            </goals>
-                            <phase>package</phase>
-                        </execution>
-
-                        <execution>
-                            <id>classified-jar</id>
-                            <goals>
-                                <goal>jar</goal>
-                            </goals>
-                            <phase>package</phase>
-                            <configuration>
-                                <classifier>marid</classifier>
-                            </configuration>
-                        </execution>
-                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
