@@ -8,12 +8,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>marid-services</artifactId>
-    <version>0.9.6.2-MARID-SNAPSHOT</version>
     <packaging>pom</packaging>
-
-    <properties>
-        <marid.version>${project.parent.version}</marid.version>
-    </properties>
 
     <modules>
         <module>marid-api</module>
@@ -26,19 +21,19 @@
             <dependency>
                 <groupId>org.marid</groupId>
                 <artifactId>marid-util</artifactId>
-                <version>0.9.6.2-SNAPSHOT</version>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.marid</groupId>
                 <artifactId>marid-test</artifactId>
-                <version>0.9.6.2-SNAPSHOT</version>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.marid</groupId>
                 <artifactId>marid-runtime</artifactId>
-                <version>0.9.6.2-SNAPSHOT</version>
+                <version>${project.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

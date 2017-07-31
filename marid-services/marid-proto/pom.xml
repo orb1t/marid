@@ -3,11 +3,12 @@
     <parent>
         <artifactId>marid-services</artifactId>
         <groupId>org.marid</groupId>
-        <version>0.9.6.2-MARID-SNAPSHOT</version>
+        <version>0.9.6.2-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>marid-proto</artifactId>
+    <name>[MARID] Marid Device Protocol Beans</name>
 
     <dependencies>
         <dependency>
