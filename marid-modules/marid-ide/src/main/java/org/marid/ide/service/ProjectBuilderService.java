@@ -102,8 +102,7 @@ public class ProjectBuilderService extends IdeService<HBox> {
         protected void execute() throws Exception {
             final ProjectMavenBuilder projectBuilder = builder.getObject()
                     .profile(profile)
-                    .goals("clean", "install")
-                    .profiles("conf");
+                    .goals("clean", "install");
             final int threadId = logHandler.registerBlockedThreadId();
             final IdeMavenLogHandler mavenLogHandler = new IdeMavenLogHandler(threadId);
             final Logger root = Logger.getLogger("");

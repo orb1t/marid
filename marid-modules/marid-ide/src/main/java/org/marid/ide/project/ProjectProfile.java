@@ -25,7 +25,6 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Organization;
-import org.apache.maven.model.Profile;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
@@ -113,11 +112,6 @@ public class ProjectProfile {
         registerNormalizer(beanFile);
         beanFile.load(this);
         updateClassLoader();
-        if (model.getProfiles().stream().noneMatch(p -> "conf".equals(p.getId()))) {
-            final Profile profile = new Profile();
-            profile.setId("conf");
-            model.getProfiles().add(profile);
-        }
     }
 
     public Path get(ProjectFileType type) {

@@ -28,7 +28,6 @@ import org.apache.maven.index.IteratorSearchRequest;
 import org.apache.maven.index.IteratorSearchResponse;
 import org.apache.maven.index.context.IndexCreator;
 import org.apache.maven.index.context.IndexingContext;
-import org.apache.maven.index.expr.SourcedSearchExpression;
 import org.apache.maven.index.updater.IndexUpdater;
 import org.apache.maven.model.Dependency;
 import org.codehaus.plexus.DefaultContainerConfiguration;
@@ -45,13 +44,12 @@ import javax.annotation.Nonnull;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.WARNING;
-import static org.apache.lucene.search.BooleanClause.Occur.SHOULD;
-import static org.apache.maven.index.MAVEN.CLASSIFIER;
 import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.logging.Log.log;
 
@@ -115,11 +113,8 @@ public class MavenRepositoryManager implements AutoCloseable {
         return list.spliterator();
     }
 
-    public List<Dependency> getMaridArtifacts(@Nonnull String classifier) {
-        final BooleanQuery query = new BooleanQuery();
-        query.setMinimumNumberShouldMatch(1);
-        query.add(indexer.constructQuery(CLASSIFIER, new SourcedSearchExpression(classifier)), SHOULD);
-        final IteratorSearchRequest request = new IteratorSearchRequest(query, contexts);
+    public List<Dependency> getMaridArtifacts(@Nonnull Function<Indexer, BooleanQuery> queryFunction) {
+        final IteratorSearchRequest request = new IteratorSearchRequest(queryFunction.apply(indexer), contexts);
         try (final IteratorSearchResponse response = indexer.searchIterator(request)) {
             return StreamSupport.stream(response.spliterator(), false)
                     .map(e -> {

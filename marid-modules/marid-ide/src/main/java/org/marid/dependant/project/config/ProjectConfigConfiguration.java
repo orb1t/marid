@@ -28,11 +28,9 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.Region;
 import javafx.stage.Modality;
-import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.marid.dependant.project.ProjectParams;
 import org.marid.dependant.project.config.deps.DependenciesPane;
-import org.marid.ide.maven.MavenRepositoryManager;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.control.MaridControls;
@@ -69,20 +67,8 @@ public class ProjectConfigConfiguration extends DependantConfiguration<ProjectPa
     @Bean
     @Qualifier("projectConf")
     @Order(4)
-    public DependenciesPane mainDependencyEditor(Model model, MavenRepositoryManager manager) {
-        return new DependenciesPane("Dependencies", model.getDependencies(), manager.getMaridArtifacts("marid"));
-    }
-
-    @Bean
-    @Qualifier("projectConf")
-    @Order(5)
-    public DependenciesPane confDependencyEditor(Model model, MavenRepositoryManager manager) {
-        final List<Dependency> list = model.getProfiles().stream()
-                .filter(p -> "conf".equals(p.getId()))
-                .findAny()
-                .orElseThrow(IllegalStateException::new)
-                .getDependencies();
-        return new DependenciesPane("Configuration dependencies", list, manager.getMaridArtifacts("maridconf"));
+    public DependenciesPane mainDependencyEditor(Model model) {
+        return new DependenciesPane("Dependencies", model.getDependencies());
     }
 
     @Bean
