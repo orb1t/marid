@@ -18,24 +18,12 @@
  * #L%
  */
 
-package org.marid.dependant.beaneditor.model;
+package org.marid.ide.maven;
 
-import org.marid.runtime.beans.Bean;
+import javafx.scene.control.Dialog;
+import org.marid.ide.model.MavenArtifact;
 
-public class WildBean {
+public class MavenArtifactFinder extends Dialog<MavenArtifact> {
 
-    public final Bean bean;
 
-    public WildBean(Bean bean) {
-        this.bean = bean;
-    }
-
-    public WildBean(LibraryBean bean) {
-        this(bean.bean);
-    }
-
-    @Override
-    public String toString() {
-        return bean.producer.signature;
-    }
 }

@@ -30,7 +30,6 @@ import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import org.apache.maven.model.Model;
 import org.marid.dependant.project.ProjectParams;
-import org.marid.dependant.project.config.deps.DependenciesPane;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.control.MaridControls;

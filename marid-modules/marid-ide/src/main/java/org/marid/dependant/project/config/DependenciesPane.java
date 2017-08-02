@@ -18,7 +18,7 @@
  * #L%
  */
 
-package org.marid.dependant.project.config.deps;
+package org.marid.dependant.project.config;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -27,7 +27,9 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.layout.BorderPane;
 import org.apache.maven.model.Dependency;
+import org.marid.ide.maven.MavenRepositoryManager;
 import org.marid.jfx.toolbar.ToolbarBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
@@ -61,8 +63,8 @@ public class DependenciesPane extends BorderPane {
         ), selected);
     }
 
-    @PostConstruct
-    private void initToolbar() {
+    @Autowired
+    private void initToolbar(MavenRepositoryManager manager) {
         final ObservableList<Dependency> selected = dependencyTable.getSelectionModel().getSelectedItems();
         setBottom(new ToolbarBuilder()
                 .add("Add item", "M_ADD", event -> dependencies.add(new Dependency()))

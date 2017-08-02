@@ -18,7 +18,7 @@
  * #L%
  */
 
-package org.marid.dependant.project.config.deps;
+package org.marid.dependant.project.config;
 
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
@@ -41,7 +41,6 @@ public class DependencyTable extends TableView<Dependency> {
         getColumns().add(groupIdColumn());
         getColumns().add(artifactIdColumn());
         getColumns().add(versionColumn());
-        getColumns().add(classifierColumn());
     }
 
     private TableColumn<Dependency, Integer> idColumn() {
@@ -78,15 +77,6 @@ public class DependencyTable extends TableView<Dependency> {
         col.setStyle("-fx-alignment: center-right");
         col.setSortable(false);
         col.setEditable(true);
-        return col;
-    }
-
-    private TableColumn<Dependency, String> classifierColumn() {
-        final TableColumn<Dependency, String> col = new TableColumn<>("classifier");
-        col.setCellValueFactory(param -> stringProp(param.getValue()::getClassifier, param.getValue()::setClassifier));
-        col.setCellFactory(param -> new TextFieldTableCell<>());
-        col.setPrefWidth(150);
-        col.setSortable(false);
         return col;
     }
 }
