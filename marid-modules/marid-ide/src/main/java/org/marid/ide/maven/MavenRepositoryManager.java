@@ -29,10 +29,10 @@ import org.apache.maven.index.IteratorSearchResponse;
 import org.apache.maven.index.context.IndexCreator;
 import org.apache.maven.index.context.IndexingContext;
 import org.apache.maven.index.updater.IndexUpdater;
-import org.apache.maven.model.Dependency;
 import org.codehaus.plexus.DefaultContainerConfiguration;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusConstants;
+import org.marid.ide.model.MavenArtifact;
 import org.marid.jfx.action.FxAction;
 import org.marid.spring.annotation.IdeAction;
 import org.springframework.beans.factory.ObjectFactory;
@@ -43,9 +43,12 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Spliterator;
 import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static java.util.logging.Level.INFO;
@@ -113,22 +116,14 @@ public class MavenRepositoryManager implements AutoCloseable {
         return list.spliterator();
     }
 
-    public List<Dependency> getMaridArtifacts(@Nonnull Function<Indexer, BooleanQuery> queryFunction) {
+    public Stream<MavenArtifact> getMaridArtifacts(@Nonnull Function<Indexer, BooleanQuery> queryFunction) {
         final IteratorSearchRequest request = new IteratorSearchRequest(queryFunction.apply(indexer), contexts);
         try (final IteratorSearchResponse response = indexer.searchIterator(request)) {
             return StreamSupport.stream(response.spliterator(), false)
-                    .map(e -> {
-                        final Dependency dependency = new Dependency();
-                        dependency.setGroupId(e.getGroupId());
-                        dependency.setArtifactId(e.getArtifactId());
-                        dependency.setVersion(e.getVersion());
-                        dependency.setClassifier(e.getClassifier());
-                        return dependency;
-                    })
-                    .collect(Collectors.toList());
+                    .map(e -> new MavenArtifact(e.getGroupId(), e.getArtifactId(), e.getVersion()));
         } catch (Exception x) {
             log(WARNING, "Unable to fetch artifacts", x);
-            return Collections.emptyList();
+            return Stream.empty();
         }
     }
 

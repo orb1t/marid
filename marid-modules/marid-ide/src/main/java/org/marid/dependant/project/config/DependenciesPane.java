@@ -20,15 +20,15 @@
 
 package org.marid.dependant.project.config;
 
-import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.layout.BorderPane;
 import org.apache.maven.model.Dependency;
-import org.marid.ide.maven.MavenRepositoryManager;
+import org.marid.ide.maven.MavenArtifactFinder;
 import org.marid.jfx.toolbar.ToolbarBuilder;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
@@ -64,13 +64,35 @@ public class DependenciesPane extends BorderPane {
     }
 
     @Autowired
-    private void initToolbar(MavenRepositoryManager manager) {
+    private void initToolbar(ObjectFactory<MavenArtifactFinder> artifactFinder) {
         final ObservableList<Dependency> selected = dependencyTable.getSelectionModel().getSelectedItems();
+        final BooleanBinding empty = createBooleanBinding(this::empty, dependencies);
         setBottom(new ToolbarBuilder()
                 .add("Add item", "M_ADD", event -> dependencies.add(new Dependency()))
                 .add("Remove item", "M_REMOVE", event -> dependencies.removeAll(selected), removeDisabled())
                 .addSeparator()
-                .add("Clear all items", "M_CLEAR_ALL", event -> dependencies.clear(), Bindings.isEmpty(dependencies))
+                .add("Clear all items", "M_CLEAR_ALL", event -> clear(), empty)
+                .addSeparator()
+                .add("Find an artifact", "M_FIND_IN_PAGE", event -> {
+                    final MavenArtifactFinder finder = artifactFinder.getObject();
+                    finder.showAndWait().ifPresent(a -> dependencies.add(a.toDependency()));
+                })
                 .build(t -> setMargin(t, new Insets(10, 0, 0, 0))));
+    }
+
+    private boolean empty() {
+        switch (dependencies.size()) {
+            case 0:
+                return true;
+            case 1:
+                return "org.marid".equals(dependencies.get(0).getGroupId())
+                        && "marid-runtime".equals(dependencies.get(0).getArtifactId());
+            default:
+                return false;
+        }
+    }
+
+    private void clear() {
+        dependencies.removeIf(d -> !"org.marid".equals(d.getGroupId()) && !"marid-runtime".equals(d.getArtifactId()));
     }
 }

@@ -8,7 +8,6 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>marid-proto</artifactId>
-    <name>[MARID] Marid Device Protocol Beans</name>
 
     <dependencies>
         <dependency>

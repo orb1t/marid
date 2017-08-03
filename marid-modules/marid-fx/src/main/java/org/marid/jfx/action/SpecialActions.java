@@ -75,17 +75,17 @@ public class SpecialActions {
 
     @Resource
     public void setPasteAction(SpecialAction pasteAction) {
-        actionMap.put(CUT, pasteAction);
+        actionMap.put(PASTE, pasteAction);
     }
 
     @Resource
     public void setMiscAction(SpecialAction miscAction) {
-        actionMap.put(CUT, miscAction);
+        actionMap.put(MISC, miscAction);
     }
 
     @Resource
     public void setRenameAction(SpecialAction renameAction) {
-        actionMap.put(CUT, renameAction);
+        actionMap.put(RENAME, renameAction);
     }
 
     public SpecialAction get(SpecialActionType type) {
@@ -96,13 +96,13 @@ public class SpecialActions {
         actionMap.values().forEach(SpecialAction::reset);
     }
 
+    private SpecialAction key(FxAction action) {
+        return action.specialAction == null ? actionMap.get(MISC) : action.specialAction;
+    }
+
     public void assign(Collection<FxAction> actions) {
         reset();
-        final Map<SpecialAction, List<FxAction>> map = actions.stream()
-                .collect(groupingBy(
-                        a -> a.specialAction != null ? a.specialAction : actionMap.get(MISC),
-                        toList()
-                ));
+        final Map<SpecialAction, List<FxAction>> map = actions.stream().collect(groupingBy(this::key, toList()));
         map.forEach((k, v) -> {
             if (v.size() == 1) {
                 k.copy(v.get(0));
