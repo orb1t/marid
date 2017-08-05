@@ -67,7 +67,9 @@ public class ProjectMavenBuilder {
     public void build(Consumer<MavenBuildResult> consumer) {
         final long start = System.currentTimeMillis();
         final List<String> argList = new ArrayList<>();
-        argList.add("-P" + String.join(",", profiles));
+        if (!profiles.isEmpty()) {
+            argList.add("-P" + String.join(",", profiles));
+        }
         argList.addAll(goals);
         final String[] args = argList.toArray(new String[argList.size()]);
         final List<Throwable> exceptions = new ArrayList<>();
