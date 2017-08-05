@@ -36,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import static javafx.scene.control.ButtonType.APPLY;
 import static javafx.scene.control.ButtonType.CANCEL;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.lucene.search.BooleanClause.Occur.SHOULD;
 import static org.apache.maven.index.MAVEN.ARTIFACT_ID;
 import static org.apache.maven.index.MAVEN.GROUP_ID;
@@ -77,18 +78,22 @@ public class MavenArtifactFinder extends Dialog<MavenArtifact> {
 
         groupIdBox.getItems().add("org.marid");
         artifactIdBox.setOnShowing(event -> {
-            final String[] artifacts = repositoryManager.getMaridArtifacts(this::artifactQuery)
-                    .map(MavenArtifact::getArtifactId)
-                    .distinct()
-                    .toArray(String[]::new);
-            artifactIdBox.getItems().setAll(artifacts);
+            if (isNotBlank(getGroupId())) {
+                final String[] artifacts = repositoryManager.getMaridArtifacts(this::artifactQuery)
+                        .map(MavenArtifact::getArtifactId)
+                        .distinct()
+                        .toArray(String[]::new);
+                artifactIdBox.getItems().setAll(artifacts);
+            }
         });
         versionBox.setOnShowing(event -> {
-            final String[] versions = repositoryManager.getMaridArtifacts(this::versionQuery)
-                    .map(MavenArtifact::getVersion)
-                    .distinct()
-                    .toArray(String[]::new);
-            versionBox.getItems().setAll(versions);
+            if (isNotBlank(getGroupId()) && isNotBlank(getArtifactId())) {
+                final String[] versions = repositoryManager.getMaridArtifacts(this::versionQuery)
+                        .map(MavenArtifact::getVersion)
+                        .distinct()
+                        .toArray(String[]::new);
+                versionBox.getItems().setAll(versions);
+            }
         });
 
         getDialogPane().setContent(pane);
@@ -136,7 +141,7 @@ public class MavenArtifactFinder extends Dialog<MavenArtifact> {
 
     private BooleanQuery versionQuery(Indexer indexer) {
         final BooleanQuery query = new BooleanQuery();
-        query.setMinimumNumberShouldMatch(2);;
+        query.setMinimumNumberShouldMatch(2);
         query.add(indexer.constructQuery(GROUP_ID, new StringSearchExpression(getGroupId())), SHOULD);
         query.add(indexer.constructQuery(ARTIFACT_ID, new StringSearchExpression(getArtifactId())), SHOULD);
         return query;

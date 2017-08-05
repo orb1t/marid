@@ -68,7 +68,7 @@ public class Ide extends Application {
         final MaridSplash maridSplash = new MaridSplash(IdeLogHandler.LOG_RECORDS);
 
         final Stage splash = new Stage(StageStyle.UNDECORATED);
-        splash.setTitle("Marid IDE");
+        splash.setTitle("Marid");
         splash.getIcons().addAll(MaridIconFx.getIcons(24, 32));
         splash.setScene(new Scene(maridSplash));
         splash.show();
