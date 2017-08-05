@@ -30,7 +30,7 @@ import java.util.Objects;
  */
 public interface Dependencies {
 
-    static boolean equals(Dependency d1, Dependency d2) {
+    static boolean eq(Dependency d1, Dependency d2) {
         if (!Objects.equals(d1.getGroupId(), d2.getGroupId())) {
             return false;
         }

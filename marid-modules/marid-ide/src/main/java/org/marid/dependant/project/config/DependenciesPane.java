@@ -20,12 +20,15 @@
 
 package org.marid.dependant.project.config;
 
-import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.Modality;
 import org.apache.maven.model.Dependency;
+import org.marid.Ide;
 import org.marid.ide.maven.MavenArtifactFinder;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.springframework.beans.factory.ObjectFactory;
@@ -33,8 +36,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
+import java.util.function.Consumer;
 
-import static javafx.beans.binding.Bindings.createBooleanBinding;
+import static javafx.beans.binding.Bindings.isEmpty;
+import static org.marid.l10n.L10n.m;
+import static org.marid.l10n.L10n.s;
+import static org.marid.util.Dependencies.eq;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -48,7 +55,7 @@ public class DependenciesPane extends BorderPane {
     public DependenciesPane(String name, List<Dependency> deps) {
         setId(name);
         dependencies = FXCollections.observableList(deps);
-        dependencyTable = new DependencyTable(dependencies);
+        dependencyTable = new DependencyTable(dependencies.filtered(d -> !eq(d, runtimeDependency())));
     }
 
     @PostConstruct
@@ -56,43 +63,55 @@ public class DependenciesPane extends BorderPane {
         setCenter(dependencyTable);
     }
 
-    private BooleanBinding removeDisabled() {
-        final ObservableList<Dependency> selected = dependencyTable.getSelectionModel().getSelectedItems();
-        return createBooleanBinding(() -> selected.stream().anyMatch(
-                d -> "org.marid".equals(d.getGroupId()) && "marid-runtime".equals(d.getArtifactId())
-        ), selected);
-    }
-
     @Autowired
     private void initToolbar(ObjectFactory<MavenArtifactFinder> artifactFinder) {
         final ObservableList<Dependency> selected = dependencyTable.getSelectionModel().getSelectedItems();
-        final BooleanBinding empty = createBooleanBinding(this::empty, dependencies);
         setBottom(new ToolbarBuilder()
-                .add("Add item", "M_ADD", event -> dependencies.add(new Dependency()))
-                .add("Remove item", "M_REMOVE", event -> dependencies.removeAll(selected), removeDisabled())
+                .add("Add item", "M_ADD", event -> addDependency(new Dependency(), d -> {}))
+                .add("Remove item", "M_REMOVE", event -> dependencies.removeAll(selected), isEmpty(selected))
                 .addSeparator()
-                .add("Clear all items", "M_CLEAR_ALL", event -> clear(), empty)
+                .add("Clear all items", "M_CLEAR_ALL", event -> clear(), isEmpty(dependencyTable.getItems()))
                 .addSeparator()
                 .add("Find an artifact", "M_FIND_IN_PAGE", event -> {
                     final MavenArtifactFinder finder = artifactFinder.getObject();
-                    finder.showAndWait().ifPresent(a -> dependencies.add(a.toDependency()));
+                    finder.showAndWait().ifPresent(a -> addDependency(a.toDependency(), d -> {}));
                 })
+                .addSeparator()
+                .add("Add standard artifact", "M_ADD_CIRCLE", this::onStandard)
                 .build(t -> setMargin(t, new Insets(10, 0, 0, 0))));
     }
 
-    private boolean empty() {
-        switch (dependencies.size()) {
-            case 0:
-                return true;
-            case 1:
-                return "org.marid".equals(dependencies.get(0).getGroupId())
-                        && "marid-runtime".equals(dependencies.get(0).getArtifactId());
-            default:
-                return false;
+    private void clear() {
+        final Dependency dependency = runtimeDependency();
+        dependencies.removeIf(d -> !eq(d, dependency));
+    }
+
+    private void onStandard(ActionEvent event) {
+        final String[] artifacts = {"marid-db", "marid-proto"};
+        final ChoiceDialog<String> choiceDialog = new ChoiceDialog<>(artifacts[0], artifacts);
+        choiceDialog.initModality(Modality.APPLICATION_MODAL);
+        choiceDialog.initOwner(Ide.primaryStage);
+        choiceDialog.setTitle(s("Standard artifact chooser"));
+        choiceDialog.setHeaderText(m("Select a standard artifact") + ": ");
+        choiceDialog.showAndWait().ifPresent(artifactId -> addDependency(new Dependency(), d -> {
+            d.setGroupId("org.marid");
+            d.setArtifactId(artifactId);
+            d.setVersion("${marid.version}");
+        }));
+    }
+
+    private void addDependency(Dependency dependency, Consumer<Dependency> dependencyConsumer) {
+        dependencyConsumer.accept(dependency);
+        if (dependencies.stream().noneMatch(d -> eq(d, dependency))) {
+            dependencies.add(dependency);
         }
     }
 
-    private void clear() {
-        dependencies.removeIf(d -> !"org.marid".equals(d.getGroupId()) && !"marid-runtime".equals(d.getArtifactId()));
+    private Dependency runtimeDependency() {
+        final Dependency dependency = new Dependency();
+        dependency.setGroupId("org.marid");
+        dependency.setArtifactId("marid-runtime");
+        dependency.setVersion("${marid.version}");
+        return dependency;
     }
 }
