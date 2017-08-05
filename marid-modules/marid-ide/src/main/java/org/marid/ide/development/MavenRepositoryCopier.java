@@ -63,7 +63,7 @@ public class MavenRepositoryCopier {
                     final Path relative = m2Repo.relativize(file);
                     final Path dest = directories.getRepo().resolve(relative);
                     Files.copy(file, dest, StandardCopyOption.REPLACE_EXISTING);
-                    Log.log(Level.INFO, "Copied {0} to {1}", file.getFileName(), dest);
+                    Log.log(Level.INFO, "Copied {0} to {1}", file.getFileName(), dest.getParent());
                     return FileVisitResult.CONTINUE;
                 }
             });
