@@ -107,12 +107,6 @@ public class SpecialAction extends FxAction {
     }
 
     @Override
-    public SpecialAction bindHint(ObservableValue<Tooltip> value) {
-        if (!sealed) hint = value;
-        return (SpecialAction) super.bindHint(value);
-    }
-
-    @Override
     public SpecialAction bindIcon(ObservableValue<String> value) {
         if (!sealed) icon = value;
         return (SpecialAction) super.bindIcon(value);
@@ -146,7 +140,6 @@ public class SpecialAction extends FxAction {
             super.text.bind(text == null ? new SimpleStringProperty() : text);
             super.disabled.bind(disabled == null ? new SimpleBooleanProperty() : disabled);
             super.selected.bind(selected == null ? new SimpleObjectProperty<>() : selected);
-            super.hint.bind(hint == null ? new SimpleObjectProperty<>() : hint);
             super.icon.bind(icon == null ? new SimpleStringProperty() : icon);
             super.eventHandler.bind(eventHandler == null ? new SimpleObjectProperty<>() : eventHandler);
 
@@ -160,7 +153,6 @@ public class SpecialAction extends FxAction {
         super.text.bind(action.text);
         super.disabled.bind(action.disabled);
         super.selected.bind(action.selected);
-        super.hint.bind(action.hint);
         super.icon.bind(action.icon);
         super.eventHandler.bind(action.eventHandler);
 

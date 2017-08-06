@@ -61,7 +61,6 @@ public class FxAction {
     protected final ObjectProperty<KeyCombination> accelerator = new SimpleObjectProperty<>(this, "accelerator");
     protected final StringProperty icon = new SimpleStringProperty(this, "icon");
     protected final StringProperty description = new SimpleStringProperty(this, "description");
-    protected final ObjectProperty<Tooltip> hint = new SimpleObjectProperty<>(this, "hint");
     protected final BooleanProperty disabled = new SimpleBooleanProperty(this, "disabled");
     protected final ObjectProperty<Boolean> selected = new SimpleObjectProperty<>(this, "selected");
     protected final ObjectProperty<EventHandler<ActionEvent>> eventHandler = new SimpleObjectProperty<>(this, "eventHandler");
@@ -128,11 +127,6 @@ public class FxAction {
 
     public FxAction bindDescription(ObservableValue<String> value) {
         description.bind(value);
-        return this;
-    }
-
-    public FxAction bindHint(ObservableValue<Tooltip> value) {
-        hint.bind(value);
         return this;
     }
 
@@ -226,7 +220,16 @@ public class FxAction {
         final Button button = new Button();
         button.setFocusTraversable(false);
         button.graphicProperty().bind(icon(20));
-        button.tooltipProperty().bind(hint);
+        button.tooltipProperty().bind(Bindings.createObjectBinding(() -> {
+            final String hint = getText();
+            if (hint == null || hint.isEmpty()) {
+                return null;
+            } else {
+                final Tooltip tooltip = new Tooltip();
+                tooltip.textProperty().bind(text);
+                return tooltip;
+            }
+        }, text));
         button.setOnAction(event -> {
             if (children.isEmpty()) {
                 final EventHandler<ActionEvent> h = eventHandler.get();
