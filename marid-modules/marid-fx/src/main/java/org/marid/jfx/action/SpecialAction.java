@@ -27,7 +27,6 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCombination;
 
 import javax.annotation.Nonnull;
@@ -42,7 +41,6 @@ public class SpecialAction extends FxAction {
     private ObservableValue<KeyCombination> accelerator;
     private ObservableValue<String> icon;
     private ObservableValue<String> description;
-    private ObservableValue<Tooltip> hint;
     private ObservableValue<Boolean> disabled;
     private ObservableValue<Boolean> selected;
     private ObservableValue<EventHandler<ActionEvent>> eventHandler;
