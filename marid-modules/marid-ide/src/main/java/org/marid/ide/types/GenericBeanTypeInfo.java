@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.Formatter;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -74,16 +75,26 @@ public class GenericBeanTypeInfo implements BeanTypeInfo {
 
     @Override
     public Type[] getParameters(BeanMethodData producer) {
-        return producer.parent.getProducer() == producer
-                ? parameters
-                : initializerParameters[producer.parent.initializers.indexOf(producer)];
+        if (producer.parent.getProducer() == producer) {
+            return parameters;
+        } else {
+            final int index = producer.parent.initializers.indexOf(producer);
+            return index < 0
+                    ? Stream.generate(() -> Void.class).limit(producer.args.size()).toArray(Type[]::new)
+                    : initializerParameters[index];
+        }
     }
 
     @Override
     public Type[] getArguments(BeanMethodData producer) {
-        return producer.parent.getProducer() == producer
-                ? arguments
-                : initializerArguments[producer.parent.initializers.indexOf(producer)];
+        if (producer.parent.getProducer() == producer) {
+            return arguments;
+        } else {
+            final int index = producer.parent.initializers.indexOf(producer);
+            return index < 0
+                    ? Stream.generate(() -> Void.class).limit(producer.args.size()).toArray(Type[]::new)
+                    : initializerArguments[index];
+        }
     }
 
     @Override
