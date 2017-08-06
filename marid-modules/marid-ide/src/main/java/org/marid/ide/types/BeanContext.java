@@ -26,6 +26,7 @@ import org.marid.ide.model.BeanData;
 import org.marid.runtime.exception.MaridBeanNotFoundException;
 import org.marid.runtime.exception.MaridCircularBeanException;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -52,7 +53,7 @@ public class BeanContext implements AutoCloseable {
 
     public Optional<BeanData> getBean(String name) {
         return beanList.parallelStream()
-                .filter(b -> name.equals(b.getName()))
+                .filter(b -> Objects.equals(name, b.getName()))
                 .findAny();
     }
 
