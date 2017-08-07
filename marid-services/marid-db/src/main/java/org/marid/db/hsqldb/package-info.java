@@ -23,6 +23,6 @@
  * @author Dmitry Ovchinnikov
  */
 @MaridBeanPackage(group = "HSQLDB", icon = "F_DATABASE")
-package org.hsqldb.jdbc;
+package org.marid.db.hsqldb;
 
 import org.marid.runtime.annotation.MaridBeanPackage;

@@ -22,6 +22,8 @@
 package org.marid.db.hsqldb;
 
 import org.marid.db.dao.NumericReader;
+import org.marid.runtime.annotation.MaridBean;
+import org.marid.runtime.annotation.MaridBeanProducer;
 
 import javax.annotation.Nonnull;
 import javax.sql.DataSource;
@@ -33,8 +35,10 @@ import java.sql.SQLException;
 /**
  * @author Dmitry Ovchinnikov.
  */
+@MaridBean
 public class HsqldbDaqNumericReader extends HsqldbDaqAbstractReader<Double> implements NumericReader {
 
+    @MaridBeanProducer
     public HsqldbDaqNumericReader(DataSource dataSource, String table) {
         super(dataSource, table);
     }

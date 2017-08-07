@@ -28,6 +28,7 @@ import java.lang.reflect.Member;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Stream.of;
 
 /**
@@ -88,7 +89,7 @@ public class MetaLiteral {
                                                                       @Nonnull String icon,
                                                                       @Nonnull E... elements) {
         final MetaLiteral[] v = of(elements)
-                .flatMap(e -> of(e.getDeclaringClass().getPackage(), e.getDeclaringClass(), e))
+                .flatMap(MetaLiteral::aeStream)
                 .flatMap(Stream::of)
                 .flatMap(e -> of(e.getAnnotations()))
                 .filter(a -> a.annotationType().isAnnotationPresent(MetaInfoType.class))
@@ -120,5 +121,13 @@ public class MetaLiteral {
     @Override
     public String toString() {
         return String.format("Meta(%s,%s,%s,%s)", group, name, icon, description);
+    }
+
+    private static <E extends AnnotatedElement & Member> Stream<AnnotatedElement> aeStream(E e) {
+        final Stream.Builder<AnnotatedElement> builder = Stream.builder();
+        builder.accept(e);
+        builder.accept(e.getDeclaringClass());
+        ofNullable(e.getDeclaringClass().getPackage()).ifPresent(builder::accept);
+        return builder.build();
     }
 }

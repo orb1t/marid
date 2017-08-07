@@ -83,6 +83,7 @@ public class LibraryBeanDao {
                 of(c.getMethods())
                         .filter(m -> Modifier.isStatic(m.getModifiers()))
                         .filter(m -> !m.getReturnType().isPrimitive())
+                        .filter(m -> !(c.isEnum() && m.getName().equals("valueOf")))
                         .map(e -> {
                             final MetaLiteral literal = l("Bean", "Other", e.getName(), "D_SERVER_NETWORK", e);
                             final Bean bean = new Bean(e.getName(), c.getName(), new BeanMethod(e, args(e)));

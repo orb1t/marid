@@ -37,7 +37,7 @@ public class JDBCSessionDataSource extends JDBCDataSource {
     private final Database database;
     private final String schema;
 
-    @MaridBeanProducer(name = "HSQLDB JDBC Session Data Source", icon = "F_DATABASE")
+    @MaridBeanProducer
     public JDBCSessionDataSource(Database database, String schema) {
         this.database = database;
         this.schema = schema;

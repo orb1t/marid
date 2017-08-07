@@ -66,7 +66,7 @@ public final class HsqldbDatabase implements Closeable {
     private PrintWriter outWriter;
     private PrintWriter errWriter;
 
-    @MaridBeanProducer(name = "HSQLDB Database", icon = "D_DATABASE")
+    @MaridBeanProducer
     public HsqldbDatabase(HsqldbProperties properties) throws MalformedURLException {
         log(INFO, "{0}", properties);
         directory = properties.getDirectory();

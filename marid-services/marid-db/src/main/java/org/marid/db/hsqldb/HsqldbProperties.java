@@ -31,7 +31,7 @@ import java.util.Properties;
 /**
  * @author Dmitry Ovchinnikov.
  */
-@MaridBean(name = "HSQLDB Properties", icon = "D_PACKAGE")
+@MaridBean
 public final class HsqldbProperties {
 
     private File directory = new File("daqDatabase");

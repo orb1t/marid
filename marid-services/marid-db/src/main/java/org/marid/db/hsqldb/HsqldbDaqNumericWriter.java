@@ -35,10 +35,10 @@ import java.sql.SQLException;
 /**
  * @author Dmitry Ovchinnikov.
  */
-@MaridBean(group = "DAQ")
+@MaridBean
 public class HsqldbDaqNumericWriter extends HsqldbDaqAbstractWriter<Double> implements NumericWriter {
 
-    @MaridBeanProducer(name = "HSQLDB DAQ Numeric Writer", icon = "D_WINDOW_RESTORE")
+    @MaridBeanProducer
     public HsqldbDaqNumericWriter(DataSource dataSource, String table) {
         super(dataSource, table);
     }

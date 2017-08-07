@@ -37,7 +37,7 @@ import static org.marid.logging.Log.log;
 @MaridBean
 public class JDBCSessionConnection extends JDBCConnection {
 
-    @MaridBeanProducer(name = "HSQLDB JDBC Session Connection", icon = "D_DISK_ALERT")
+    @MaridBeanProducer
     public JDBCSessionConnection(@Nonnull Database database, @Nonnull String schema) throws SQLException {
         super(database.getSessionManager().newSysSession());
         setSchema(schema);

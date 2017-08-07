@@ -42,7 +42,7 @@ import static org.marid.logging.Log.log;
 /**
  * @author Dmitry Ovchinnikov.
  */
-@MaridBean(group = "DAQ Generators", name = "Random Numeric DAQ Generator", icon = "D_RADIO", description = "Generates random sequences of numbers")
+@MaridBean(icon = "D_RADIO")
 public class RandomNumericDaqGenerator {
 
     private final NumericWriter numericWriter;
@@ -52,8 +52,14 @@ public class RandomNumericDaqGenerator {
     private final long periodMillis;
     private final Timer timer = new Timer();
 
-    @MaridBeanProducer(name = "Random Numeric DAQ Generator Producer", icon = "D_RADIO")
-    public RandomNumericDaqGenerator(NumericWriter numericWriter, long tag, double min, double max, long periodSeconds) {
+    @MaridBeanProducer(description = "Generates random sequences of numbers")
+    public RandomNumericDaqGenerator(
+            NumericWriter numericWriter,
+            long tag,
+            double min,
+            double max,
+            long periodSeconds
+    ) {
         this.numericWriter = numericWriter;
         this.tag = tag;
         this.min = min;
