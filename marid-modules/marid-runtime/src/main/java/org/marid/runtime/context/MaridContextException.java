@@ -21,14 +21,14 @@
 
 package org.marid.runtime.context;
 
-import java.util.List;
+import java.util.Collection;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class MaridContextException extends RuntimeException {
 
-    public MaridContextException(String message, List<Throwable> suppressed) {
+    public MaridContextException(String message, Collection<Throwable> suppressed) {
         super(message, null, true, false);
         suppressed.forEach(this::addSuppressed);
     }

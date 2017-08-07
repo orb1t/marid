@@ -31,7 +31,10 @@ import org.marid.runtime.converter.ValueConverter;
 import org.marid.runtime.exception.*;
 
 import java.lang.invoke.MethodHandle;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
@@ -46,7 +49,7 @@ final class MaridBeanCreationContext implements AutoCloseable {
     private final Map<String, Bean> beanMap;
     private final Map<String, Class<?>> beanClasses = new HashMap<>();
     private final Set<String> creationBeanNames = new LinkedHashSet<>();
-    private final List<Throwable> throwables = new ArrayList<>();
+    private final Set<Throwable> throwables = new LinkedHashSet<>();
     private final DefaultValueConvertersManager convertersManager;
 
     final MaridRuntimeObject runtime;
@@ -120,7 +123,7 @@ final class MaridBeanCreationContext implements AutoCloseable {
 
     private Object invoke(Bean bean, BeanMethod method, MethodHandle handle, Object... args) {
         try {
-            return handle.invokeWithArguments(args);
+            return handle.asFixedArity().invokeWithArguments(args);
         } catch (Throwable x) {
             throw new MaridBeanMethodInvocationException(bean.name, method.name(), x);
         }
