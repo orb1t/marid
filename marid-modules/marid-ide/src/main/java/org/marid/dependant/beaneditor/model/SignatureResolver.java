@@ -67,8 +67,7 @@ public class SignatureResolver {
                 () -> textSafe(methodData.getValue()),
                 profile.getBeanFile().beans,
                 methodData,
-                appearanceSettings.showFullNamesProperty(),
-                appearanceSettings.showGenericSignaturesProperty()
+                appearanceSettings.showFullNamesProperty()
         );
     }
 
@@ -84,15 +83,13 @@ public class SignatureResolver {
         if (data == null) {
             return null;
         }
-        if (appearanceSettings.showGenericSignaturesProperty().get()) {
-            try {
-                final BeanTypeInfo typeInfo = resolver.resolve(profile.getBeanContext(), data.parent.getName());
-                final Type[] types = typeInfo.getParameters(data);
-                final String name = BeanMethod.name(data.getSignature());
-                return postProcess(of(types).map(t -> of(t).toString()).collect(joining(",", name + "(", ")")));
-            } catch (Exception x) {
-                log(WARNING, "Unable to get generic signature", x);
-            }
+        try {
+            final BeanTypeInfo typeInfo = resolver.resolve(profile.getBeanContext(), data.parent.getName());
+            final Type[] types = typeInfo.getParameters(data);
+            final String name = BeanMethod.name(data.getSignature());
+            return postProcess(of(types).map(t -> of(t).toString()).collect(joining(",", name + "(", ")")));
+        } catch (Exception x) {
+            log(WARNING, "Unable to get generic signature", x);
         }
         return postProcess(data.getSignature());
     }

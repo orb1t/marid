@@ -24,6 +24,7 @@ import org.marid.ide.model.BeanMethodArgData;
 import org.marid.ide.model.BeanMethodData;
 
 import java.lang.reflect.Type;
+import java.util.Arrays;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -43,12 +44,16 @@ public class EmptyBeanTypeInfo implements BeanTypeInfo {
 
     @Override
     public Type[] getParameters(BeanMethodData producer) {
-        return producer.args.stream().map(a -> Object.class).toArray(Type[]::new);
+        final Type[] types = new Type[producer.args.size()];
+        Arrays.fill(types, Object.class);
+        return types;
     }
 
     @Override
     public Type[] getArguments(BeanMethodData producer) {
-        return producer.args.stream().map(a -> Object.class).toArray(Type[]::new);
+        final Type[] types = new Type[producer.args.size()];
+        Arrays.fill(types, Object.class);
+        return types;
     }
 
     @Override

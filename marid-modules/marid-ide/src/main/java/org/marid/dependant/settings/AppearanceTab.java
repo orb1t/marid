@@ -55,7 +55,6 @@ public class AppearanceTab extends GenericGridPane implements SettingsEditor {
         addControl("System stylesheet", this::styleSheetCombo);
         addSeparator();
         addBooleanField("Show full names", appearanceSettings::isShowFullNames, appearanceSettings::setShowFullNames);
-        addBooleanField("Show generic types", appearanceSettings::isShowGenericSignatures, appearanceSettings::setShowGenericSignatures);
     }
 
     private ComboBox<String> styleSheetCombo() {
