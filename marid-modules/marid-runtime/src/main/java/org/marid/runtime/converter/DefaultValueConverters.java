@@ -24,17 +24,20 @@ package org.marid.runtime.converter;
 import org.marid.annotation.MetaInfo;
 import org.marid.runtime.context.MaridRuntime;
 
+import java.io.File;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static org.marid.annotation.MetaLiteral.l;
@@ -73,6 +76,14 @@ public class DefaultValueConverters extends AbstractValueConverters {
                 case "java.lang.String":
                 case "java.lang.CharSequence":
                     return v;
+                case "java.lang.StringBuilder":
+                    return v == null ? null : new StringBuilder(v);
+                case "java.lang.StringBuffer":
+                    return v == null ? null : new StringBuffer(v);
+                case "java.util.ResourceBundle":
+                    return v == null ? null : ResourceBundle.getBundle(v);
+                case "java.util.logging.Logger":
+                    return v == null ? null : Logger.getLogger(v);
                 case "java.math.BigInteger":
                     return v == null ? null : new BigInteger(v);
                 case "java.math.BigDecimal":
@@ -91,6 +102,10 @@ public class DefaultValueConverters extends AbstractValueConverters {
                     return v == null ? null : Duration.parse(v);
                 case "java.nio.Charset":
                     return v == null ? null : Charset.forName(v);
+                case "java.io.File":
+                    return v == null ? null : new File(v);
+                case "java.nio.file.Path":
+                    return v == null ? null : Paths.get(v);
                 case "int":
                     return v == null ? 0 : Integer.valueOf(v);
                 case "long":
@@ -125,7 +140,7 @@ public class DefaultValueConverters extends AbstractValueConverters {
                         final MethodType methodType = MethodType.methodType(c, String.class);
                         try {
                             final MethodHandle h = MethodHandles.publicLookup().findStatic(c, "valueOf", methodType);
-                            return h.invokeWithArguments(v);
+                            return h.invoke(v);
                         } catch (RuntimeException x) {
                             throw x;
                         } catch (Throwable x) {
