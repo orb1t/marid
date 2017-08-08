@@ -100,7 +100,7 @@ public class BeanData extends BeanMethodData {
                 getFactory(),
                 producer.signature,
                 producer.args
-        ).add(initializers.stream().map(BeanMethodData::toMethod).collect(toList()));
+        ).addInitializers(initializers.stream().map(BeanMethodData::toMethod).collect(toList()));
     }
 
     public List<BeanMethodArgData> getArgs(int initializer) {

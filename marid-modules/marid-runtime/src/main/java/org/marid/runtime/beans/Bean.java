@@ -109,7 +109,7 @@ public final class Bean extends BeanMethod {
         return this;
     }
 
-    public Bean add(Collection<BeanMethod> initializers) {
+    public Bean addInitializers(Collection<BeanMethod> initializers) {
         this.initializers.addAll(initializers);
         return this;
     }
