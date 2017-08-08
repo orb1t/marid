@@ -29,8 +29,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.marid.io.Xmls.attribute;
 import static org.marid.io.Xmls.nodes;
@@ -53,21 +51,17 @@ public class BeanMethod {
     }
 
     public BeanMethod(@Nonnull Constructor<?> constructor, @Nonnull BeanMethodArg... args) {
-        this.signature = Stream.of(constructor.getParameterTypes())
-                .map(Class::getCanonicalName)
-                .collect(Collectors.joining(",", "new(", ")"));
+        this.signature = constructor.toString();
         this.args = args;
     }
 
     public BeanMethod(@Nonnull Method method, @Nonnull BeanMethodArg... args) {
-        this.signature = Stream.of(method.getParameterTypes())
-                .map(Class::getCanonicalName)
-                .collect(Collectors.joining(",", method.getName() + "(", ")"));
+        this.signature = method.toString();
         this.args = args;
     }
 
     public BeanMethod(@Nonnull Field field, @Nonnull BeanMethodArg... args) {
-        this.signature = field.getName();
+        this.signature = field.toString();
         this.args = args;
     }
 
@@ -92,38 +86,10 @@ public class BeanMethod {
         }
     }
 
-    public String[] argTypes() {
-        return argTypes(signature);
-    }
-
-    public static String[] argTypes(String signature) {
-        final int index = signature.indexOf('(');
-        if (index < 0) {
-            return new String[0];
-        } else {
-            final String args = signature.substring(index + 1, signature.length() - 1);
-            return args.isEmpty() ? new String[0] : args.split(",");
-        }
-    }
-
     public void writeTo(@Nonnull Element element) {
         element.setAttribute("signature", signature);
         for (final BeanMethodArg arg : args) {
             arg.writeTo(build(element.getOwnerDocument().createElement("arg"), element::appendChild));
-        }
-    }
-
-    public boolean matches(Class<?>... argTypes) {
-        final String[] types = argTypes();
-        if (argTypes.length == types.length) {
-            for (int i = 0; i < argTypes.length; i++) {
-                if (!types[i].equals(argTypes[i].getCanonicalName())) {
-                    return false;
-                }
-            }
-            return true;
-        } else {
-            return false;
         }
     }
 

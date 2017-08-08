@@ -173,26 +173,19 @@ public final class Bean extends BeanMethod {
     }
 
     private MethodHandle findMethod(Class<?> targetClass, BeanMethod producer, boolean getters) throws Exception {
-        if (producer.name().equals("new")) {
-            for (final Constructor<?> constructor : targetClass.getConstructors()) {
-                if (producer.matches(constructor.getParameterTypes())) {
-                    return publicLookup().unreflectConstructor(constructor);
-                }
-            }
-        } else {
-            for (final Method method : targetClass.getMethods()) {
-                if (method.getName().equals(producer.name()) && producer.matches(method.getParameterTypes())) {
-                    return publicLookup().unreflect(method);
-                }
+        for (final Constructor<?> c : targetClass.getConstructors()) {
+            if (c.toString().equals(producer.signature)) {
+                return publicLookup().unreflectConstructor(c);
             }
         }
-        if (producer.args.length == (getters ? 0 : 1)) {
-            for (final Field field : targetClass.getFields()) {
-                if (field.getName().equals(producer.name())) {
-                    return getters
-                            ? publicLookup().unreflectGetter(field)
-                            : publicLookup().unreflectSetter(field);
-                }
+        for (final Method m : targetClass.getMethods()) {
+            if (m.toString().equals(producer.signature)) {
+                return publicLookup().unreflect(m);
+            }
+        }
+        for (final Field f : targetClass.getFields()) {
+            if (f.toString().equals(producer.signature)) {
+                return getters ? publicLookup().unreflectGetter(f) : publicLookup().unreflectSetter(f);
             }
         }
         throw new IllegalStateException("No producers found for " + producer + " of " + targetClass);
