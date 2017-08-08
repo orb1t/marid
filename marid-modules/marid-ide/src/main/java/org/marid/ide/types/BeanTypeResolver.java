@@ -25,7 +25,6 @@ import com.google.common.reflect.TypeToken;
 import org.marid.ide.model.BeanData;
 import org.marid.ide.model.BeanMethodArgData;
 import org.marid.misc.Casts;
-import org.marid.runtime.exception.MaridFilterNotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.lang.invoke.MethodHandle;
@@ -127,40 +126,16 @@ public class BeanTypeResolver {
     }
 
     private Type actualType(BeanContext context, BeanMethodArgData arg, Type formalType) {
-        Type type;
         switch (arg.getType()) {
             case "ref":
-                type = resolve(context, arg.getValue()).getType();
-                break;
+                return resolve(context, arg.getValue()).getType();
             case "of":
                 if (TypeToken.of(formalType).getRawType() == Class.class && arg.getValue() != null) {
-                    type = TypeUtilities.classType(context.getClassLoader(), arg.getValue());
-                    break;
+                    return TypeUtilities.classType(context.getClassLoader(), arg.getValue());
                 }
             default: {
                 final Type t = context.getConverters().getType(arg.getType()).orElse(null);
-                type = t instanceof WildcardType ? formalType : t;
-            }
-        }
-        if (type == null || arg.getFilter() == null) {
-            return type;
-        } else {
-            final TypeToken<?> token = of(type);
-            final Class<?> raw = token.getRawType();
-            try {
-                final Method method = raw.getMethod(arg.getFilter());
-                return token.resolveType(method.getGenericReturnType()).getType();
-            } catch (NoSuchMethodException | NullPointerException mx) {
-                try {
-                    final Field field = raw.getField(arg.getFilter());
-                    return token.resolveType(field.getGenericType()).getType();
-                } catch (NoSuchFieldException | NullPointerException fx) {
-                    throw new MaridFilterNotFoundException(
-                            arg.parent.parent.getName(),
-                            arg.parent.toMethod().name(),
-                            arg.getName(),
-                            arg.getFilter());
-                }
+                return t instanceof WildcardType ? formalType : t;
             }
         }
     }

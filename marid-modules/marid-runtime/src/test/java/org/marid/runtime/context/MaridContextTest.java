@@ -70,7 +70,7 @@ public class MaridContextTest {
                         Bean1.class.getName(),
                         new BeanMethod(Bean1.class.getMethod("list")),
                         new BeanMethod(List.class.getMethod("add", Object.class), m("e", "Integer", "1")),
-                        new BeanMethod(List.class.getMethod("add", Object.class), m("e", "String", "length", "22"))
+                        new BeanMethod(List.class.getMethod("add", Object.class), m("e", "Integer", "2"))
                 ),
                 new Bean(
                         "bean6",
@@ -97,7 +97,7 @@ public class MaridContextTest {
                         Bean1.class.getName(),
                         new BeanMethod(
                                 Bean1.class.getConstructor(int.class, String.class, BigDecimal.class),
-                                m("x", "of", "1"), m("y", "ref", "toString", "bean1"), m("z", "of", "1.23")
+                                m("x", "of", "1"), m("y", "ref", "bean1"), m("z", "of", "1.23")
                         ),
                         new BeanMethod(
                                 Bean1.class.getMethod("setA", boolean.class),

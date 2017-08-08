@@ -39,14 +39,12 @@ public final class BeanMethodArgData {
 
     public final StringProperty name = new SimpleStringProperty();
     public final StringProperty type = new SimpleStringProperty();
-    public final StringProperty filter = new SimpleStringProperty();
     public final StringProperty value = new SimpleStringProperty();
 
     public BeanMethodArgData(@Nonnull BeanMethodData parent, @Nonnull BeanMethodArg member) {
         this.parent = parent;
         this.name.set(member.name);
         this.type.set(member.type);
-        this.filter.set(member.filter);
         this.value.set(member.value);
     }
 
@@ -62,21 +60,17 @@ public final class BeanMethodArgData {
         return value.get();
     }
 
-    public String getFilter() {
-        return filter.get();
-    }
-
     public BeanMethodArg toArg() {
-        return new BeanMethodArg(getName(), getType(), getFilter(), getValue());
+        return new BeanMethodArg(getName(), getType(), getValue());
     }
 
     public Observable[] observables() {
-        return new Observable[] {name, type, filter, value};
+        return new Observable[] {name, type, value};
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getName(), getType(), getFilter(), getValue());
+        return Objects.hash(getName(), getType(), getValue());
     }
 
     @Override
@@ -84,8 +78,8 @@ public final class BeanMethodArgData {
         if (obj instanceof BeanMethodArgData) {
             final BeanMethodArgData that = (BeanMethodArgData) obj;
             return Arrays.equals(
-                    new Object[] {this.getName(), this.getType(), this.getFilter(), this.getValue()},
-                    new Object[] {that.getName(), that.getType(), that.getFilter(), that.getValue()}
+                    new Object[] {this.getName(), this.getType(), this.getValue()},
+                    new Object[] {that.getName(), that.getType(), that.getValue()}
             );
         } else {
             return false;

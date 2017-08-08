@@ -42,31 +42,23 @@ public final class BeanMethodArg {
     public final String type;
 
     @Nullable
-    public final String filter;
-
-    @Nullable
     public final String value;
 
-    public BeanMethodArg(@Nonnull String name, @Nonnull String type, @Nullable String filter, @Nullable String value) {
+    public BeanMethodArg(@Nonnull String name, @Nonnull String type, @Nullable String value) {
         this.name = name;
         this.type = type;
-        this.filter = filter;
         this.value = value;
     }
 
     public BeanMethodArg(@Nonnull Element element) {
         name = attribute(element, "name").orElseThrow(NullPointerException::new);
         type = attribute(element, "type").orElseThrow(NullPointerException::new);
-        filter = attribute(element, "filter").orElse(null);
         value = content(element).orElse(null);
     }
 
     public void writeTo(@Nonnull Element element) {
         element.setAttribute("name", name);
         element.setAttribute("type", type);
-        if (filter != null) {
-            element.setAttribute("filter", filter);
-        }
         if (value != null) {
             element.setTextContent(value);
         }
@@ -82,18 +74,17 @@ public final class BeanMethodArg {
             final BeanMethodArg that = (BeanMethodArg) o;
             return Objects.equals(name, that.name) &&
                     Objects.equals(type, that.type) &&
-                    Objects.equals(filter, that.filter) &&
                     Objects.equals(value, that.value);
         }
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, type, filter, value);
+        return Objects.hash(name, type, value);
     }
 
     @Override
     public String toString() {
-        return String.format("%s(%s,%s,%s)", name, type, filter, value);
+        return String.format("%s(%s,%s,%s)", name, type, value);
     }
 }

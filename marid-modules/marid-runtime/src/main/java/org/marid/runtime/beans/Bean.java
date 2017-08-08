@@ -155,56 +155,6 @@ public final class Bean {
         throw new IllegalStateException("No producers found for " + producer + " of " + targetClass);
     }
 
-    public Object filtered(BeanMethod m, BeanMethodArg a, String filter, Object arg) {
-        if (arg == null || filter == null) {
-            return arg;
-        } else {
-            for (Class<?> c = arg.getClass(); c != null; c = c.getSuperclass()) {
-                if (Modifier.isPublic(c.getModifiers())) {
-                    try {
-                        return f(c, arg, filter);
-                    } catch (NoSuchMethodException x) {
-                        // continue
-                    } catch (Throwable x) {
-                        throw new MaridFilterNotFoundException(name, m.name(), a.name, filter, x);
-                    }
-                }
-            }
-            for (final Class<?> c : arg.getClass().getInterfaces()) {
-                try {
-                    return f(c, arg, filter);
-                } catch (NoSuchMethodException x) {
-                    // continue
-                } catch (Throwable x) {
-                    throw new MaridFilterNotFoundException(name, m.name(), a.name, filter, x);
-                }
-            }
-            throw new MaridFilterNotFoundException(name, m.name(), a.name, filter);
-        }
-    }
-
-    private Object f(Class<?> type, Object arg, String name) throws ReflectiveOperationException {
-        try {
-            final Method method = type.getMethod(name);
-            if (!Modifier.isStatic(method.getModifiers())) {
-                return method.invoke(arg);
-            } else {
-                throw new NoSuchMethodException(name);
-            }
-        } catch (NoSuchMethodException nsmx) {
-            try {
-                final Field field = type.getField(name);
-                if (!Modifier.isStatic(field.getModifiers())) {
-                    return field.get(arg);
-                } else {
-                    throw new NoSuchFieldException(name);
-                }
-            } catch (NoSuchFieldException nsfx) {
-                throw nsmx;
-            }
-        }
-    }
-
     @Override
     public String toString() {
         return "Bean" + Arrays.deepToString(new Object[]{name, factory, producer, initializers});

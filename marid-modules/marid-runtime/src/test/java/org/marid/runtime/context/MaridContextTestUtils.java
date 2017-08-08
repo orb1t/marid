@@ -28,11 +28,7 @@ import org.marid.runtime.beans.BeanMethodArg;
  */
 class MaridContextTestUtils {
 
-    static BeanMethodArg m(String name, String type, String filter, String value) {
-        return new BeanMethodArg(name, type, filter, value);
-    }
-
     static BeanMethodArg m(String name, String type, String value) {
-        return new BeanMethodArg(name, type, null, value);
+        return new BeanMethodArg(name, type, value);
     }
 }

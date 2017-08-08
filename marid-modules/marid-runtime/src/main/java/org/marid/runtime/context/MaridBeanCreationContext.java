@@ -134,8 +134,7 @@ final class MaridBeanCreationContext implements AutoCloseable {
             final ValueConverter converter = convertersManager
                     .getConverter(methodArg.type)
                     .orElseThrow(() -> new MaridBeanArgConverterNotFoundException(bean, method, methodArg));
-            final Object arg = converter.convert(runtime.resolvePlaceholders(methodArg.value), Casts.cast(type));
-            return bean.filtered(method, methodArg, methodArg.filter, arg);
+            return converter.convert(runtime.resolvePlaceholders(methodArg.value), Casts.cast(type));
         } catch (RuntimeException x) {
             throw x;
         } catch (Throwable x) {
