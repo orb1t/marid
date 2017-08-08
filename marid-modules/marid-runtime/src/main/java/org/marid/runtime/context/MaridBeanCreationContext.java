@@ -92,7 +92,7 @@ final class MaridBeanCreationContext implements AutoCloseable {
         final Class<?> factoryClass = !bean.factory.contains(".")
                 ? beanClasses.get(bean.factory)
                 : MaridRuntimeUtils.loadClass(context.classLoader, name, bean.factory);
-        final MethodHandle constructor = bind(bean.producer, bean.findProducer(factoryClass), factoryObject);
+        final MethodHandle constructor = bind(bean, bean.findProducer(factoryClass), factoryObject);
 
         beanClasses.put(name, constructor.type().returnType());
         final Object instance;
@@ -100,10 +100,10 @@ final class MaridBeanCreationContext implements AutoCloseable {
             final Class<?>[] argTypes = constructor.type().parameterArray();
             final Object[] args = new Object[argTypes.length];
             for (int i = 0; i < args.length; i++) {
-                final BeanMethodArg arg = bean.producer.args[i];
-                args[i] = arg(bean, bean.producer, arg, argTypes[i]);
+                final BeanMethodArg arg = bean.args[i];
+                args[i] = arg(bean, bean, arg, argTypes[i]);
             }
-            instance = invoke(bean, bean.producer, constructor, args);
+            instance = invoke(bean, bean, constructor, args);
         }
 
         if (instance != null) {

@@ -22,7 +22,6 @@ package org.marid.ide.types;
 
 import com.google.common.reflect.TypeToken;
 import org.marid.ide.model.BeanData;
-import org.marid.ide.model.BeanMethodData;
 import org.marid.misc.Casts;
 import org.marid.runtime.beans.Bean;
 
@@ -45,9 +44,6 @@ public class BeanFactoryInfo {
 
     @Nonnull
     public final Bean bean;
-
-    @Nonnull
-    public final BeanMethodData producer;
 
     @Nonnull
     public final String factory;
@@ -77,7 +73,6 @@ public class BeanFactoryInfo {
     public final Type returnType;
 
     public BeanFactoryInfo(BeanData beanData, BeanTypeResolver resolver, BeanContext context) throws Exception {
-        producer = beanData.getProducer();
         bean = beanData.toBean();
         factory = requireNonNull(beanData.getFactory(), () -> m("Factory is null: {0}", bean.name));
         if (!factory.contains(".")) {

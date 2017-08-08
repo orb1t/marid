@@ -77,7 +77,7 @@ public class LibraryBeanDao {
                         .map(e -> {
                             final String name = decapitalize(c.getSimpleName());
                             final MetaLiteral literal = l("Bean", "Other", c, "D_SERVER_NETWORK", e);
-                            final Bean bean = new Bean(name, c.getName(), new BeanMethod(e, args(e)));
+                            final Bean bean = new Bean(name, c.getName(), e, args(e));
                             return new LibraryBean(bean, literal);
                         }),
                 of(c.getMethods())
@@ -86,7 +86,7 @@ public class LibraryBeanDao {
                         .filter(m -> !(c.isEnum() && m.getName().equals("valueOf")))
                         .map(e -> {
                             final MetaLiteral literal = l("Bean", "Other", e.getName(), "D_SERVER_NETWORK", e);
-                            final Bean bean = new Bean(e.getName(), c.getName(), new BeanMethod(e, args(e)));
+                            final Bean bean = new Bean(e.getName(), c.getName(), e, args(e));
                             return new LibraryBean(bean, literal);
                         }),
                 of(c.getFields())
@@ -94,7 +94,7 @@ public class LibraryBeanDao {
                         .filter(f -> !f.getType().isPrimitive())
                         .map(e -> {
                             final MetaLiteral literal = l("Bean", "Other", e.getName(), "D_SERVER_NETWORK", e);
-                            final Bean bean = new Bean(e.getName(), c.getName(), new BeanMethod(e));
+                            final Bean bean = new Bean(e.getName(), c.getName(), e);
                             return new LibraryBean(bean, literal);
                         })
         ).flatMap(v -> v);
@@ -110,7 +110,7 @@ public class LibraryBeanDao {
                         .filter(e -> !e.getReturnType().isPrimitive())
                         .map(e -> {
                             final MetaLiteral literal = l("Bean", "Other", e.getName(), "D_SERVER_NETWORK", e);
-                            final Bean bean = new Bean(e.getName(), beanData.getName(), new BeanMethod(e, args(e)));
+                            final Bean bean = new Bean(e.getName(), beanData.getName(), e, args(e));
                             return new LibraryBean(bean, literal);
                         }),
                 of(c.getFields())
@@ -118,7 +118,7 @@ public class LibraryBeanDao {
                         .filter(f -> !f.getType().isPrimitive())
                         .map(e -> {
                             final MetaLiteral literal = l("Bean", "Other", e.getName(), "D_SERVER_NETWORK", e);
-                            final Bean bean = new Bean(e.getName(), beanData.getName(), new BeanMethod(e));
+                            final Bean bean = new Bean(e.getName(), beanData.getName(), e);
                             return new LibraryBean(bean, literal);
                         })
         ).flatMap(v -> v);

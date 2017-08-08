@@ -20,6 +20,7 @@
 
 package org.marid.dependant.beaneditor.model;
 
+import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableStringValue;
 import javafx.beans.value.ObservableValue;
@@ -33,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.regex.Pattern;
 
 import static com.google.common.reflect.TypeToken.of;
@@ -62,13 +64,12 @@ public class SignatureResolver {
         this.resolver = resolver;
     }
 
-    public ObservableStringValue signature(ObservableValue<BeanMethodData> methodData) {
-        return Bindings.createStringBinding(
-                () -> textSafe(methodData.getValue()),
-                profile.getBeanFile().beans,
-                methodData,
-                appearanceSettings.showFullNamesProperty()
-        );
+    public ObservableStringValue signature(ObservableValue<BeanMethodData> methodData, Observable... observables) {
+        final Observable[] deps = Arrays.copyOf(observables, observables.length + 3);
+        deps[observables.length] = profile.getBeanFile().beans;
+        deps[observables.length + 1] = appearanceSettings.showFullNamesProperty();
+        deps[observables.length + 2] = methodData;
+        return Bindings.createStringBinding(() -> textSafe(methodData.getValue()), deps);
     }
 
     public ObservableStringValue factory(ObservableValue<String> factory) {

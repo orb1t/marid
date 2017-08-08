@@ -61,17 +61,17 @@ public class BeanTypeResolver {
         final Type[] beanPs = formalTypes(info.returnHandle, true);
         final Type[] beanAs = new Type[beanPs.length];
         for (int k = 0; k < beanAs.length; k++) {
-            beanAs[k] = actualType(context, info.producer.args.get(k), beanPs[k]);
+            beanAs[k] = actualType(context, beanData.args.get(k), beanPs[k]);
         }
         for (int i = 0; i < beanPs.length; i++) {
             if (beanAs[i] != null) {
                 resolve(pairs, info.factoryToken.resolveType(beanPs[i]), of(beanAs[i]));
             }
         }
-        final Type[][] initPs = new Type[info.bean.initializers.length][];
-        final Type[][] initAs = new Type[info.bean.initializers.length][];
-        for (int i = 0; i < info.bean.initializers.length; i++) {
-            final MethodHandle handle = info.bean.findInitializer(info.returnHandle, info.bean.initializers[i]);
+        final Type[][] initPs = new Type[info.bean.initializers.size()][];
+        final Type[][] initAs = new Type[info.bean.initializers.size()][];
+        for (int i = 0; i < info.bean.initializers.size(); i++) {
+            final MethodHandle handle = info.bean.findInitializer(info.returnHandle, info.bean.initializers.get(i));
             final Type[] ps = formalTypes(handle, false);
             final Type[] as = new Type[ps.length];
             for (int k = 0; k < ps.length; k++) {

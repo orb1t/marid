@@ -96,7 +96,7 @@ public class BeanTable extends MaridTableView<BeanData> {
             column.setMinWidth(150);
             column.setPrefWidth(200);
             column.setMaxWidth(700);
-            column.setCellValueFactory(param -> resolver.signature(param.getValue().producer));
+            column.setCellValueFactory(param -> resolver.signature(new SimpleObjectProperty<>(param.getValue())));
             getColumns().add(column);
         });
 

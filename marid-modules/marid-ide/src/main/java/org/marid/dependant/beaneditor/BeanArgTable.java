@@ -36,7 +36,7 @@ public class BeanArgTable extends BeanMethodArgTable {
             if (nV == null) {
                 setItems(FXCollections.emptyObservableList());
             } else {
-                setItems(nV.getProducer().args);
+                setItems(nV.args);
             }
         });
     }

@@ -22,7 +22,6 @@
 package org.marid.runtime.beans;
 
 import org.marid.io.Xmls;
-import org.marid.runtime.exception.MaridFilterNotFoundException;
 import org.marid.runtime.exception.MaridMethodNotFoundException;
 import org.w3c.dom.Element;
 
@@ -31,8 +30,8 @@ import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.Arrays;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.lang.invoke.MethodHandles.publicLookup;
 import static org.marid.io.Xmls.attribute;
@@ -41,7 +40,7 @@ import static org.marid.misc.Builder.build;
 /**
  * @author Dmitry Ovchinnikov
  */
-public final class Bean {
+public final class Bean extends BeanMethod {
 
     @Nonnull
     public final String name;
@@ -50,62 +49,93 @@ public final class Bean {
     public final String factory;
 
     @Nonnull
-    public final BeanMethod producer;
-
-    @Nonnull
-    public final BeanMethod[] initializers;
+    public final List<BeanMethod> initializers;
 
     public Bean(@Nonnull String name,
                 @Nonnull String factory,
-                @Nonnull BeanMethod producer,
-                @Nonnull BeanMethod... initializers) {
+                @Nonnull String signature,
+                @Nonnull BeanMethodArg... args) {
+        super(signature, args);
         this.name = name;
         this.factory = factory;
-        this.producer = producer;
-        this.initializers = initializers;
+        this.initializers = new ArrayList<>();
+    }
+
+    public Bean(@Nonnull String name,
+                @Nonnull String factory,
+                @Nonnull Constructor<?> constructor,
+                @Nonnull BeanMethodArg... args) {
+        super(constructor, args);
+        this.name = name;
+        this.factory = factory;
+        this.initializers = new ArrayList<>();
+    }
+
+    public Bean(@Nonnull String name,
+                @Nonnull String factory,
+                @Nonnull Method method,
+                @Nonnull BeanMethodArg... args) {
+        super(method, args);
+        this.name = name;
+        this.factory = factory;
+        this.initializers = new ArrayList<>();
+    }
+
+    public Bean(@Nonnull String name,
+                @Nonnull String factory,
+                @Nonnull Field field,
+                @Nonnull BeanMethodArg... args) {
+        super(field, args);
+        this.name = name;
+        this.factory = factory;
+        this.initializers = new ArrayList<>();
     }
 
     public Bean(@Nonnull Element element) {
+        super(element);
         this.name = attribute(element, "name").orElseThrow(NullPointerException::new);
         this.factory = attribute(element, "factory").orElseThrow(NullPointerException::new);
-        this.producer = Xmls.nodes(element, Element.class)
-                .filter(e -> "producer".equals(e.getTagName()))
-                .map(BeanMethod::new)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("No producer for " + element));
         this.initializers = Xmls.nodes(element, Element.class)
                 .filter(e -> "initializer".equals(e.getTagName()))
                 .map(BeanMethod::new)
-                .toArray(BeanMethod[]::new);
+                .collect(Collectors.toList());
+    }
+
+    public Bean add(BeanMethod... initializers) {
+        Collections.addAll(this.initializers, initializers);
+        return this;
+    }
+
+    public Bean add(Collection<BeanMethod> initializers) {
+        this.initializers.addAll(initializers);
+        return this;
     }
 
     @Override
     public int hashCode() {
-        return Arrays.deepHashCode(new Object[]{name, factory, producer, initializers});
+        return super.hashCode() ^ Arrays.deepHashCode(new Object[]{name, factory, initializers});
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {
             return true;
-        } else if (obj == null) {
-            return true;
-        } else if (obj.getClass() != Bean.class) {
+        } else if (obj == null || obj.getClass() != getClass() || !super.equals(obj)) {
             return false;
         } else {
             final Bean that = (Bean) obj;
             return Arrays.deepEquals(
-                    new Object[]{this.name, this.factory, this.producer, this.initializers},
-                    new Object[]{that.name, that.factory, that.producer, that.initializers}
+                    new Object[]{this.name, this.factory, this.initializers},
+                    new Object[]{that.name, that.factory, that.initializers}
             );
         }
     }
 
     public void writeTo(@Nonnull Element element) {
+        super.writeTo(element);
+
         element.setAttribute("name", name);
         element.setAttribute("factory", factory);
-
-        producer.writeTo(build(element.getOwnerDocument().createElement("producer"), element::appendChild));
 
         for (final BeanMethod i : initializers) {
             i.writeTo(build(element.getOwnerDocument().createElement("initializer"), element::appendChild));
@@ -123,9 +153,9 @@ public final class Bean {
 
     public MethodHandle findProducer(Class<?> targetClass) {
         try {
-            return findMethod(targetClass, producer, true);
+            return findMethod(targetClass, this, true);
         } catch (Throwable x) {
-            throw new MaridMethodNotFoundException(name, producer.name(), x);
+            throw new MaridMethodNotFoundException(name, this.name(), x);
         }
     }
 
@@ -157,6 +187,6 @@ public final class Bean {
 
     @Override
     public String toString() {
-        return "Bean" + Arrays.deepToString(new Object[]{name, factory, producer, initializers});
+        return "Bean" + Arrays.deepToString(new Object[]{name, factory, signature, args, initializers});
     }
 }

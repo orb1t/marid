@@ -36,6 +36,6 @@ public class WildBean {
 
     @Override
     public String toString() {
-        return bean.producer.signature;
+        return bean.signature;
     }
 }

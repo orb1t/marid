@@ -23,7 +23,6 @@ package org.marid.ide.model;
 import javafx.beans.Observable;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.marid.runtime.beans.BeanMethod;
 import org.marid.runtime.beans.BeanMethodArg;
@@ -34,6 +33,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
+import static javafx.collections.FXCollections.observableArrayList;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -44,12 +44,16 @@ public class BeanMethodData {
     public final BeanData parent;
 
     public final StringProperty signature = new SimpleStringProperty();
-    public final ObservableList<BeanMethodArgData> args = FXCollections.observableArrayList(BeanMethodArgData::observables);
+    public final ObservableList<BeanMethodArgData> args = observableArrayList(BeanMethodArgData::observables);
 
     public BeanMethodData(@Nonnull BeanData parent, @Nonnull BeanMethod producer) {
         this.parent = parent;
         this.signature.set(producer.signature);
         this.args.setAll(Stream.of(producer.args).map(b -> new BeanMethodArgData(this, b)).collect(toList()));
+    }
+
+    BeanMethodData() {
+        this.parent = (BeanData) this;
     }
 
     public String getSignature() {

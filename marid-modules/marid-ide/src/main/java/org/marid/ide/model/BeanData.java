@@ -21,15 +21,17 @@
 package org.marid.ide.model;
 
 import javafx.beans.Observable;
-import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
 import org.marid.runtime.beans.Bean;
 import org.marid.runtime.beans.BeanMethod;
+import org.marid.runtime.beans.BeanMethodArg;
 
 import javax.annotation.Nonnull;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -41,25 +43,46 @@ import static javafx.collections.FXCollections.observableArrayList;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class BeanData {
+public class BeanData extends BeanMethodData {
 
     public final StringProperty name = new SimpleStringProperty();
     public final StringProperty factory = new SimpleStringProperty();
-    public final ReadOnlyObjectProperty<BeanMethodData> producer;
     public final ObservableList<BeanMethodData> initializers = observableArrayList(BeanMethodData::observables);
 
     public BeanData(@Nonnull Bean bean) {
         name.set(bean.name);
         factory.set(bean.factory);
-        producer = new SimpleObjectProperty<>(new BeanMethodData(this, bean.producer));
-        initializers.setAll(Stream.of(bean.initializers).map(p -> new BeanMethodData(this, p)).collect(toList()));
+        signature.set(bean.signature);
+        args.setAll(Stream.of(bean.args).map(b -> new BeanMethodArgData(this, b)).collect(toList()));
+        initializers.setAll(bean.initializers.stream().map(p -> new BeanMethodData(this, p)).collect(toList()));
     }
 
     public BeanData(@Nonnull String name,
                     @Nonnull String factory,
-                    @Nonnull BeanMethod producer,
-                    @Nonnull BeanMethod... initializers) {
-        this(new Bean(name, factory, producer, initializers));
+                    @Nonnull Constructor<?> constructor,
+                    @Nonnull BeanMethodArg... args) {
+        this(new Bean(name, factory, constructor, args));
+    }
+
+    public BeanData(@Nonnull String name,
+                    @Nonnull String factory,
+                    @Nonnull Method method,
+                    @Nonnull BeanMethodArg... args) {
+        this(new Bean(name, factory, method, args));
+    }
+
+    public BeanData(@Nonnull String name,
+                    @Nonnull String factory,
+                    @Nonnull Field field,
+                    @Nonnull BeanMethodArg... args) {
+        this(new Bean(name, factory, field, args));
+    }
+
+    public BeanData add(BeanMethod... initializers) {
+        for (final BeanMethod initializer : initializers) {
+            this.initializers.add(new BeanMethodData(this, initializer));
+        }
+        return this;
     }
 
     public String getName() {
@@ -70,17 +93,14 @@ public class BeanData {
         return factory.get();
     }
 
-    public BeanMethodData getProducer() {
-        return producer.get();
-    }
-
     public Bean toBean() {
+        final BeanMethod producer = toMethod();
         return new Bean(
                 getName(),
                 getFactory(),
-                getProducer().toMethod(),
-                initializers.stream().map(BeanMethodData::toMethod).toArray(BeanMethod[]::new)
-        );
+                producer.signature,
+                producer.args
+        ).add(initializers.stream().map(BeanMethodData::toMethod).collect(toList()));
     }
 
     public List<BeanMethodArgData> getArgs(int initializer) {
@@ -88,7 +108,7 @@ public class BeanData {
     }
 
     public Observable[] observables() {
-        return new Observable[] {name, factory, producer.get().signature, producer.get().args, initializers};
+        return new Observable[] {name, factory, signature, args, initializers};
     }
 
     @Override
@@ -96,8 +116,8 @@ public class BeanData {
         if (obj instanceof BeanData) {
             final BeanData that = (BeanData) obj;
             return Arrays.equals(
-                    new Object[] {this.getName(), this.getFactory(), this.getProducer(), this.initializers},
-                    new Object[] {that.getName(), that.getFactory(), that.getProducer(), that.initializers}
+                    new Object[] {this.getName(), this.getFactory(), this.signature, this.args, this.initializers},
+                    new Object[] {that.getName(), that.getFactory(), that.signature, that.args, that.initializers}
             );
         } else {
             return false;
@@ -106,7 +126,7 @@ public class BeanData {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getName(), getFactory(), getProducer(), initializers);
+        return Objects.hash(getName(), getFactory(), getSignature(), args, initializers);
     }
 
     @Override

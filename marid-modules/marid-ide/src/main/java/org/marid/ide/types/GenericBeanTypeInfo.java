@@ -20,6 +20,7 @@
 
 package org.marid.ide.types;
 
+import org.marid.ide.model.BeanData;
 import org.marid.ide.model.BeanMethodArgData;
 import org.marid.ide.model.BeanMethodData;
 
@@ -75,7 +76,7 @@ public class GenericBeanTypeInfo implements BeanTypeInfo {
 
     @Override
     public Type[] getParameters(BeanMethodData producer) {
-        if (producer.parent.getProducer() == producer) {
+        if (producer instanceof BeanData) {
             return parameters;
         } else {
             final int index = producer.parent.initializers.indexOf(producer);
@@ -87,7 +88,7 @@ public class GenericBeanTypeInfo implements BeanTypeInfo {
 
     @Override
     public Type[] getArguments(BeanMethodData producer) {
-        if (producer.parent.getProducer() == producer) {
+        if (producer instanceof BeanData) {
             return arguments;
         } else {
             final int index = producer.parent.initializers.indexOf(producer);

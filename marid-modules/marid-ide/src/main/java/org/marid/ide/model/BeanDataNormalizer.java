@@ -62,7 +62,7 @@ public interface BeanDataNormalizer {
                         if (b.getFactory().equals(oldName)) {
                             b.factory.set(newName);
                         }
-                        for (final BeanMethodArgData a : b.getProducer().args) {
+                        for (final BeanMethodArgData a : b.args) {
                             if ("ref".equals(a.getType()) && a.getValue() != null && a.getValue().equals(oldName)) {
                                 a.value.set(newName);
                             }
@@ -97,7 +97,7 @@ public interface BeanDataNormalizer {
                                     toRemove.add(b);
                                     continue;
                                 }
-                                for (final BeanMethodArgData a : b.getProducer().args) {
+                                for (final BeanMethodArgData a : b.args) {
                                     if ("ref".equals(a.getType()) && a.getValue() != null && a.getValue().equals(bean.getName())) {
                                         a.value.set(null);
                                     }
