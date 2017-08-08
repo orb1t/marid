@@ -51,6 +51,9 @@ public final class Bean extends BeanMethod {
     @Nonnull
     public final List<BeanMethod> initializers;
 
+    @Nonnull
+    public final List<Bean> children = new ArrayList<>();
+
     public Bean(@Nonnull String name,
                 @Nonnull String factory,
                 @Nonnull String signature,
@@ -108,6 +111,16 @@ public final class Bean extends BeanMethod {
 
     public Bean add(Collection<BeanMethod> initializers) {
         this.initializers.addAll(initializers);
+        return this;
+    }
+
+    public Bean add(Bean... beans) {
+        Collections.addAll(children, beans);
+        return this;
+    }
+
+    public Bean addChildren(Collection<Bean> beans) {
+        children.addAll(beans);
         return this;
     }
 

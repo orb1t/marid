@@ -45,6 +45,7 @@ import static java.util.stream.Stream.of;
  */
 final class MaridBeanCreationContext implements AutoCloseable {
 
+    private final ClassLoader classLoader;
     private final MaridContext context;
     private final Map<String, Bean> beanMap;
     private final Map<String, Class<?>> beanClasses = new HashMap<>();
@@ -54,11 +55,12 @@ final class MaridBeanCreationContext implements AutoCloseable {
 
     final MaridRuntimeObject runtime;
 
-    MaridBeanCreationContext(MaridConfiguration configuration, MaridContext context) {
+    MaridBeanCreationContext(MaridConfiguration configuration, ClassLoader classLoader, MaridContext context) {
+        this.classLoader = classLoader;
         this.context = context;
         this.beanMap = of(configuration.beans).collect(toMap(e -> e.name, identity()));
-        this.runtime = new MaridRuntimeObject(context, this::getOrCreate);
-        this.convertersManager = new DefaultValueConvertersManager(context.classLoader, runtime);
+        this.runtime = new MaridRuntimeObject(context, classLoader, this::getOrCreate);
+        this.convertersManager = new DefaultValueConvertersManager(classLoader, runtime);
     }
 
     Object getOrCreate(String name) {
@@ -91,7 +93,7 @@ final class MaridBeanCreationContext implements AutoCloseable {
         final Object factoryObject = !bean.factory.contains(".") ? getOrCreate(bean.factory) : null;
         final Class<?> factoryClass = !bean.factory.contains(".")
                 ? beanClasses.get(bean.factory)
-                : MaridRuntimeUtils.loadClass(context.classLoader, name, bean.factory);
+                : MaridRuntimeUtils.loadClass(classLoader, name, bean.factory);
         final MethodHandle constructor = bind(bean, bean.findProducer(factoryClass), factoryObject);
 
         beanClasses.put(name, constructor.type().returnType());

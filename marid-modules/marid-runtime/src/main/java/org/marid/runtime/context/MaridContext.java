@@ -45,11 +45,9 @@ import static org.marid.logging.Log.log;
 public final class MaridContext implements AutoCloseable {
 
     final LinkedHashMap<String, Object> beans;
-    final ClassLoader classLoader;
     final MaridContextListener[] listeners;
 
     public MaridContext(@Nonnull MaridConfiguration configuration, @Nonnull ClassLoader classLoader) {
-        this.classLoader = classLoader;
         this.beans = new LinkedHashMap<>(configuration.beans.length);
         try {
             final ServiceLoader<MaridContextListener> serviceLoader = load(MaridContextListener.class, classLoader);
@@ -59,7 +57,7 @@ public final class MaridContext implements AutoCloseable {
             throw new IllegalStateException("Unable to load context listeners", x);
         }
 
-        try (final MaridBeanCreationContext cc = new MaridBeanCreationContext(configuration, this)) {
+        try (final MaridBeanCreationContext cc = new MaridBeanCreationContext(configuration, classLoader, this)) {
             fireEvent(false, l -> l.bootstrap(cc.runtime));
             for (final Bean bean : configuration.beans) {
                 try {

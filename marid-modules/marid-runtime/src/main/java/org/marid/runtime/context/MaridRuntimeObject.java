@@ -39,12 +39,12 @@ public final class MaridRuntimeObject implements MaridRuntime {
     private final Properties properties;
     private final MaridPlaceholderResolver placeholderResolver;
 
-    public MaridRuntimeObject(MaridContext context, Function<String, Object> beanFunc) {
+    public MaridRuntimeObject(MaridContext context, ClassLoader classLoader, Function<String, Object> beanFunc) {
         this.beanFunc = beanFunc;
         this.active = context::isActive;
-        this.classLoader = context.classLoader;
+        this.classLoader = classLoader;
         this.properties = new Properties(System.getProperties());
-        try (final InputStream inputStream = context.classLoader.getResourceAsStream("application.properties")) {
+        try (final InputStream inputStream = classLoader.getResourceAsStream("application.properties")) {
             if (inputStream != null) {
                 try (final Reader reader = new InputStreamReader(inputStream, UTF_8)) {
                     properties.load(reader);
