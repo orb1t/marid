@@ -26,8 +26,6 @@ import javafx.beans.property.StringProperty;
 import org.marid.runtime.beans.BeanMethodArg;
 
 import javax.annotation.Nonnull;
-import java.util.Arrays;
-import java.util.Objects;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -66,24 +64,6 @@ public final class BeanMethodArgData {
 
     public Observable[] observables() {
         return new Observable[] {name, type, value};
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getName(), getType(), getValue());
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof BeanMethodArgData) {
-            final BeanMethodArgData that = (BeanMethodArgData) obj;
-            return Arrays.equals(
-                    new Object[] {this.getName(), this.getType(), this.getValue()},
-                    new Object[] {that.getName(), that.getType(), that.getValue()}
-            );
-        } else {
-            return false;
-        }
     }
 
     @Override

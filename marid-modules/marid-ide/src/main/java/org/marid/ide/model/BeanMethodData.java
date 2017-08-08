@@ -28,8 +28,6 @@ import org.marid.runtime.beans.BeanMethod;
 import org.marid.runtime.beans.BeanMethodArg;
 
 import javax.annotation.Nonnull;
-import java.util.Arrays;
-import java.util.Objects;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -66,24 +64,6 @@ public class BeanMethodData {
 
     public BeanMethod toMethod() {
         return new BeanMethod(signature.get(), args.stream().map(BeanMethodArgData::toArg).toArray(BeanMethodArg[]::new));
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof BeanMethodData) {
-            final BeanMethodData that = (BeanMethodData) obj;
-            return Arrays.equals(
-                    new Object[]{this.getSignature(), this.args},
-                    new Object[]{that.getSignature(), that.args}
-            );
-        } else {
-            return false;
-        }
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getSignature(), args);
     }
 
     @Override

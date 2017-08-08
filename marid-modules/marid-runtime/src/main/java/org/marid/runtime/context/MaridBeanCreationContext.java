@@ -32,12 +32,10 @@ import org.marid.runtime.exception.*;
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Member;
 import java.util.LinkedHashSet;
-import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Stream;
 
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Stream.of;
 import static org.marid.runtime.context.MaridRuntimeUtils.*;
 
 /**
@@ -45,9 +43,9 @@ import static org.marid.runtime.context.MaridRuntimeUtils.*;
  */
 final class MaridBeanCreationContext implements AutoCloseable {
 
+    private final MaridConfiguration configuration;
     private final ClassLoader classLoader;
     private final MaridContext context;
-    private final Map<String, Bean> beanMap;
     private final Set<String> creationBeanNames = new LinkedHashSet<>();
     private final Set<Throwable> throwables = new LinkedHashSet<>();
     private final DefaultValueConvertersManager convertersManager;
@@ -55,9 +53,9 @@ final class MaridBeanCreationContext implements AutoCloseable {
     final MaridRuntimeObject runtime;
 
     MaridBeanCreationContext(MaridConfiguration configuration, ClassLoader classLoader, MaridContext context) {
+        this.configuration = configuration;
         this.classLoader = classLoader;
         this.context = context;
-        this.beanMap = of(configuration.beans).collect(toMap(e -> e.name, identity()));
         this.runtime = new MaridRuntimeObject(context, classLoader, this::getOrCreate);
         this.convertersManager = new DefaultValueConvertersManager(classLoader, runtime);
     }
@@ -72,10 +70,10 @@ final class MaridBeanCreationContext implements AutoCloseable {
     }
 
     private Object create(String name) {
-        final Bean bean = beanMap.get(name);
-        if (bean == null) {
-            throw new MaridBeanNotFoundException(name);
-        }
+        final Bean bean = Stream.of(configuration.beans)
+                .filter(b -> Objects.equals(name, b.name))
+                .findFirst()
+                .orElseThrow(() -> new MaridBeanNotFoundException(name));
         if (creationBeanNames.add(name)) {
             try {
                 return create0(name, bean);
