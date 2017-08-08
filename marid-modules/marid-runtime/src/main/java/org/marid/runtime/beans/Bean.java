@@ -22,18 +22,15 @@
 package org.marid.runtime.beans;
 
 import org.marid.io.Xmls;
-import org.marid.runtime.exception.MaridMethodNotFoundException;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
-import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.lang.invoke.MethodHandles.publicLookup;
 import static org.marid.io.Xmls.attribute;
 import static org.marid.misc.Builder.build;
 
@@ -153,42 +150,6 @@ public final class Bean extends BeanMethod {
         for (final BeanMethod i : initializers) {
             i.writeTo(build(element.getOwnerDocument().createElement("initializer"), element::appendChild));
         }
-    }
-
-    public MethodHandle findInitializer(MethodHandle constructor, BeanMethod initializer) {
-        final Class<?> targetClass = constructor.type().returnType();
-        try {
-            return findMethod(targetClass, initializer, false);
-        } catch (Throwable x) {
-            throw new MaridMethodNotFoundException(name, initializer.name(), x);
-        }
-    }
-
-    public MethodHandle findProducer(Class<?> targetClass) {
-        try {
-            return findMethod(targetClass, this, true);
-        } catch (Throwable x) {
-            throw new MaridMethodNotFoundException(name, this.name(), x);
-        }
-    }
-
-    private MethodHandle findMethod(Class<?> targetClass, BeanMethod producer, boolean getters) throws Exception {
-        for (final Constructor<?> c : targetClass.getConstructors()) {
-            if (c.toString().equals(producer.signature)) {
-                return publicLookup().unreflectConstructor(c);
-            }
-        }
-        for (final Method m : targetClass.getMethods()) {
-            if (m.toString().equals(producer.signature)) {
-                return publicLookup().unreflect(m);
-            }
-        }
-        for (final Field f : targetClass.getFields()) {
-            if (f.toString().equals(producer.signature)) {
-                return getters ? publicLookup().unreflectGetter(f) : publicLookup().unreflectSetter(f);
-            }
-        }
-        throw new IllegalStateException("No producers found for " + producer + " of " + targetClass);
     }
 
     @Override

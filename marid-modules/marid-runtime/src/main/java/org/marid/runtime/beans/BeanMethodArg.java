@@ -85,6 +85,6 @@ public final class BeanMethodArg {
 
     @Override
     public String toString() {
-        return String.format("%s(%s,%s,%s)", name, type, value);
+        return String.format("%s(%s,%s)", name, type, value);
     }
 }

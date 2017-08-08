@@ -112,6 +112,6 @@ public class BeanMethod {
 
     @Override
     public String toString() {
-        return String.format("%s%s", signature, Arrays.toString(args));
+        return signature + Arrays.asList(args);
     }
 }

@@ -21,7 +21,6 @@
 
 package org.marid.runtime.context;
 
-import org.marid.function.Suppliers;
 import org.marid.misc.Casts;
 import org.marid.runtime.beans.Bean;
 import org.marid.runtime.beans.BeanMethod;
@@ -31,7 +30,7 @@ import org.marid.runtime.converter.ValueConverter;
 import org.marid.runtime.exception.*;
 
 import java.lang.invoke.MethodHandle;
-import java.util.HashMap;
+import java.lang.reflect.Member;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -39,6 +38,7 @@ import java.util.Set;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Stream.of;
+import static org.marid.runtime.context.MaridRuntimeUtils.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -48,7 +48,6 @@ final class MaridBeanCreationContext implements AutoCloseable {
     private final ClassLoader classLoader;
     private final MaridContext context;
     private final Map<String, Bean> beanMap;
-    private final Map<String, Class<?>> beanClasses = new HashMap<>();
     private final Set<String> creationBeanNames = new LinkedHashSet<>();
     private final Set<Throwable> throwables = new LinkedHashSet<>();
     private final DefaultValueConvertersManager convertersManager;
@@ -73,7 +72,10 @@ final class MaridBeanCreationContext implements AutoCloseable {
     }
 
     private Object create(String name) {
-        final Bean bean = Suppliers.get(beanMap, name, MaridBeanNotFoundException::new);
+        final Bean bean = beanMap.get(name);
+        if (bean == null) {
+            throw new MaridBeanNotFoundException(name);
+        }
         if (creationBeanNames.add(name)) {
             try {
                 return create0(name, bean);
@@ -90,13 +92,10 @@ final class MaridBeanCreationContext implements AutoCloseable {
     }
 
     private Object create0(String name, Bean bean) {
-        final Object factoryObject = !bean.factory.contains(".") ? getOrCreate(bean.factory) : null;
-        final Class<?> factoryClass = !bean.factory.contains(".")
-                ? beanClasses.get(bean.factory)
-                : MaridRuntimeUtils.loadClass(classLoader, name, bean.factory);
-        final MethodHandle constructor = bind(bean, bean.findProducer(factoryClass), factoryObject);
+        final Member factory = fromSignature(bean.signature, classLoader);
+        final Object factoryObject = isRoot(factory) ? null : getOrCreate(bean.factory);
+        final MethodHandle constructor = bind(bean, producer(factory), factoryObject);
 
-        beanClasses.put(name, constructor.type().returnType());
         final Object instance;
         {
             final Class<?>[] argTypes = constructor.type().parameterArray();
@@ -110,7 +109,8 @@ final class MaridBeanCreationContext implements AutoCloseable {
 
         if (instance != null) {
             for (final BeanMethod initializer : bean.initializers) {
-                final MethodHandle handle = bind(initializer, bean.findInitializer(constructor, initializer), instance);
+                final Member member = fromSignature(initializer.signature, classLoader);
+                final MethodHandle handle = bind(initializer, initializer(member), instance);
                 final Class<?>[] argTypes = handle.type().parameterArray();
                 final Object[] args = new Object[argTypes.length];
                 for (int i = 0; i < args.length; i++) {

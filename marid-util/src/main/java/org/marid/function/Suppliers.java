@@ -21,7 +21,6 @@
 
 package org.marid.function;
 
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
@@ -53,14 +52,5 @@ public interface Suppliers {
 
     static <T, U, R> BiFunction<T, U, R> elseBiFunc(BiFunction<T, U, R> func) {
         return (t, u) -> t == null ? null : func.apply(t, u);
-    }
-
-    static <K, V, E extends Exception> V get(Map<K, V> map, K key, Function<K, E> exceptionFunc) throws E {
-        final V value = map.get(key);
-        if (value == null) {
-            throw exceptionFunc.apply(key);
-        } else {
-            return value;
-        }
     }
 }

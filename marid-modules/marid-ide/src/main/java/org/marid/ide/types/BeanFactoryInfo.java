@@ -27,15 +27,13 @@ import org.marid.runtime.beans.Bean;
 
 import javax.annotation.Nonnull;
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Type;
 
 import static com.google.common.reflect.TypeToken.of;
-import static java.util.Objects.requireNonNull;
-import static org.marid.l10n.L10n.m;
+import static org.marid.runtime.context.MaridRuntimeUtils.*;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -44,12 +42,6 @@ public class BeanFactoryInfo {
 
     @Nonnull
     public final Bean bean;
-
-    @Nonnull
-    public final String factory;
-
-    @Nonnull
-    public final Class<?> factoryClass;
 
     @Nonnull
     public final TypeToken<?> factoryToken;
@@ -74,17 +66,14 @@ public class BeanFactoryInfo {
 
     public BeanFactoryInfo(BeanData beanData, BeanTypeResolver resolver, BeanContext context) throws Exception {
         bean = beanData.toBean();
-        factory = requireNonNull(beanData.getFactory(), () -> m("Factory is null: {0}", bean.name));
-        if (!factory.contains(".")) {
-            factoryToken = of(resolver.resolve(context, factory).getType());
-            factoryClass = factoryToken.getRawType();
-        } else {
-            factoryClass = Class.forName(factory, false, context.getClassLoader());
-            factoryToken = of(factoryClass).getSupertype(Casts.cast(factoryClass));
-        }
-        returnHandle = bean.findProducer(factoryClass);
-        returnMember = MethodHandles.reflectAs(Member.class, returnHandle);
+        returnMember = fromSignature(beanData.getSignature(), context.getClassLoader());
+        returnHandle = producer(returnMember);
         returnClass = returnHandle.type().returnType();
+        if (isRoot(returnMember)) {
+            factoryToken = of(returnMember.getDeclaringClass()).getSupertype(Casts.cast(returnMember.getDeclaringClass()));
+        } else {
+            factoryToken = of(resolver.resolve(context, beanData.getFactory()).getType());
+        }
         genericReturnType = returnMember instanceof Field
                 ? ((Field) returnMember).getGenericType()
                 : ((Executable) returnMember).getAnnotatedReturnType().getType();

@@ -21,33 +21,32 @@
 
 package org.marid.runtime.context;
 
-import org.marid.runtime.exception.MaridBeanClassLoadingException;
+import org.marid.runtime.exception.MaridUnknownSignatureException;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.Method;
+import java.lang.invoke.MethodHandle;
+import java.lang.reflect.*;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Scanner;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static java.lang.invoke.MethodHandles.publicLookup;
+import static java.lang.reflect.Modifier.*;
 import static java.util.logging.Level.WARNING;
+import static java.util.regex.Pattern.compile;
 import static org.marid.logging.Log.log;
+import static org.marid.misc.Calls.call;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public interface MaridRuntimeUtils {
-
-    static Class<?> loadClass(ClassLoader classLoader, String beanName, String className) {
-        try {
-            return classLoader.loadClass(className);
-        } catch (Exception x) {
-            throw new MaridBeanClassLoadingException(beanName, className, x);
-        }
-    }
 
     static TreeSet<Method> methods(@Nonnull Object bean,
                                    @Nonnull Predicate<Method> filter,
@@ -100,5 +99,67 @@ public interface MaridRuntimeUtils {
         }, "repl", 96L * 1024L);
         daemon.setDaemon(true);
         return daemon;
+    }
+
+    // TODO: speed optimization, make gc-less
+    static Member fromSignature(String signature, ClassLoader classLoader) {
+        final int pIndex = signature.indexOf('(');
+        final int modMask = methodModifiers() | constructorModifiers() | fieldModifiers();
+        final Pattern space = compile(" ");
+        final String[] mods = space.splitAsStream(Modifier.toString(modMask)).sorted().toArray(String[]::new);
+        final String[] tokens = space.splitAsStream(pIndex >= 0 ? signature.substring(0, pIndex) : signature)
+                .filter(t -> Arrays.binarySearch(mods, t) < 0)
+                .toArray(String[]::new);
+        final String declaringClassName;
+        try {
+            if (pIndex >= 0) {
+                switch (tokens.length) {
+                    case 1: // constructor
+                        declaringClassName = tokens[0];
+                        return Stream.of(Class.forName(declaringClassName, false, classLoader).getConstructors())
+                                .filter(c -> c.toString().equals(signature))
+                                .findFirst()
+                                .orElseThrow(() -> new NoSuchMethodException(signature));
+                    default:
+                        declaringClassName = tokens[1].substring(0, tokens[1].lastIndexOf('.'));
+                        return Stream.of(Class.forName(declaringClassName, false, classLoader).getMethods())
+                                .filter(m -> m.toString().equals(signature))
+                                .findFirst()
+                                .orElseThrow(() -> new NoSuchMethodException(signature));
+                }
+            } else {
+                declaringClassName = tokens[1].substring(0, tokens[1].lastIndexOf('.'));
+                return Stream.of(Class.forName(declaringClassName, false, classLoader).getFields())
+                        .filter(m -> m.toString().equals(signature))
+                        .findFirst()
+                        .orElseThrow(() -> new NoSuchFieldException(signature));
+            }
+        } catch (Exception x) {
+            throw new MaridUnknownSignatureException(signature, x);
+        }
+    }
+
+    static boolean isRoot(Member member) {
+        return member instanceof Constructor<?> || Modifier.isStatic(member.getModifiers());
+    }
+
+    static MethodHandle producer(Member member) {
+        if (member instanceof Constructor<?>) {
+            return call(() -> publicLookup().unreflectConstructor((Constructor<?>) member));
+        } else if (member instanceof Method) {
+            return call(() -> publicLookup().unreflect((Method) member));
+        } else {
+            return call(() -> publicLookup().unreflectGetter((Field) member));
+        }
+    }
+
+    static MethodHandle initializer(Member member) {
+        if (member instanceof Constructor<?>) {
+            return call(() -> publicLookup().unreflectConstructor((Constructor<?>) member));
+        } else if (member instanceof Method) {
+            return call(() -> publicLookup().unreflect((Method) member));
+        } else {
+            return call(() -> publicLookup().unreflectSetter((Field) member));
+        }
     }
 }

@@ -36,6 +36,8 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 import static com.google.common.reflect.TypeToken.of;
+import static org.marid.runtime.context.MaridRuntimeUtils.fromSignature;
+import static org.marid.runtime.context.MaridRuntimeUtils.initializer;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -71,7 +73,8 @@ public class BeanTypeResolver {
         final Type[][] initPs = new Type[info.bean.initializers.size()][];
         final Type[][] initAs = new Type[info.bean.initializers.size()][];
         for (int i = 0; i < info.bean.initializers.size(); i++) {
-            final MethodHandle handle = info.bean.findInitializer(info.returnHandle, info.bean.initializers.get(i));
+            final String signature = info.bean.initializers.get(i).signature;
+            final MethodHandle handle = initializer(fromSignature(signature, context.getClassLoader()));
             final Type[] ps = formalTypes(handle, false);
             final Type[] as = new Type[ps.length];
             for (int k = 0; k < ps.length; k++) {
