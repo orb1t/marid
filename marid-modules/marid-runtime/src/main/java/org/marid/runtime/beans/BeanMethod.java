@@ -33,6 +33,7 @@ import java.util.Objects;
 import static org.marid.io.Xmls.attribute;
 import static org.marid.io.Xmls.nodes;
 import static org.marid.misc.Builder.build;
+import static org.marid.runtime.context.MaridRuntimeUtils.signature;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -51,17 +52,17 @@ public class BeanMethod {
     }
 
     public BeanMethod(@Nonnull Constructor<?> constructor, @Nonnull BeanMethodArg... args) {
-        this.signature = constructor.toString();
+        this.signature = signature(constructor);
         this.args = args;
     }
 
     public BeanMethod(@Nonnull Method method, @Nonnull BeanMethodArg... args) {
-        this.signature = method.toString();
+        this.signature = signature(method);
         this.args = args;
     }
 
     public BeanMethod(@Nonnull Field field, @Nonnull BeanMethodArg... args) {
-        this.signature = field.toString();
+        this.signature = signature(field);
         this.args = args;
     }
 
@@ -71,19 +72,6 @@ public class BeanMethod {
                 .filter(e -> "arg".equals(e.getTagName()))
                 .map(BeanMethodArg::new)
                 .toArray(BeanMethodArg[]::new);
-    }
-
-    public String name() {
-        return name(signature);
-    }
-
-    public static String name(String signature) {
-        final int index = signature.indexOf('(');
-        if (index < 0) {
-            return signature;
-        } else {
-            return signature.substring(0, index);
-        }
     }
 
     public void writeTo(@Nonnull Element element) {

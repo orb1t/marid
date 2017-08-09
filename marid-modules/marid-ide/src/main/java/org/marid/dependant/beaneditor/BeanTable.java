@@ -20,13 +20,11 @@
 
 package org.marid.dependant.beaneditor;
 
-import com.google.common.reflect.TypeToken;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.TextFieldTableCell;
-import org.apache.commons.lang3.reflect.TypeUtils;
 import org.marid.dependant.beaneditor.model.SignatureResolver;
 import org.marid.ide.model.BeanData;
 import org.marid.ide.project.ProjectProfile;
@@ -122,7 +120,7 @@ public class BeanTable extends MaridTableView<BeanData> {
         typeColumn.setCellValueFactory(param -> Bindings.createStringBinding(
                 () -> {
                     final BeanTypeInfo type = typeResolver.resolve(profile.getBeanContext(), param.getValue().getName());
-                    return signatureResolver.postProcess(TypeUtils.toString(type.getType()));
+                    return signatureResolver.postProcess(type.getType().getTypeName());
                 },
                 profile.getBeanFile().beans,
                 appearanceSettings.showFullNamesProperty())

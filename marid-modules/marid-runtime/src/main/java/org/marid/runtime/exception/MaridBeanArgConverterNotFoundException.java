@@ -43,7 +43,7 @@ public class MaridBeanArgConverterNotFoundException extends RuntimeException {
     }
 
     public MaridBeanArgConverterNotFoundException(Bean bean, BeanMethod method, BeanMethodArg arg) {
-        this(bean.name, method.name(), arg.name, arg.type);
+        this(bean.name, method.signature, arg.name, arg.type);
     }
 
     public String getBeanName() {

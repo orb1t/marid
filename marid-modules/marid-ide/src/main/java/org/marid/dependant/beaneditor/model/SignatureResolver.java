@@ -29,7 +29,7 @@ import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.settings.AppearanceSettings;
 import org.marid.ide.types.BeanTypeInfo;
 import org.marid.ide.types.BeanTypeResolver;
-import org.marid.runtime.beans.BeanMethod;
+import org.marid.runtime.context.MaridRuntimeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,10 +37,7 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
-import static com.google.common.reflect.TypeToken.of;
 import static java.util.logging.Level.WARNING;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Stream.of;
 import static org.marid.logging.Log.log;
 
 /**
@@ -49,7 +46,7 @@ import static org.marid.logging.Log.log;
 @Component
 public class SignatureResolver {
 
-    private static final Pattern LONG_NAME_PREFIX = Pattern.compile("(\\w+[.])+");
+    private static final Pattern LONG_NAME_PREFIX = Pattern.compile("(\\w+[.])++");
 
     private final AppearanceSettings appearanceSettings;
     private final ProjectProfile profile;
@@ -87,8 +84,7 @@ public class SignatureResolver {
         try {
             final BeanTypeInfo typeInfo = resolver.resolve(profile.getBeanContext(), data.parent.getName());
             final Type[] types = typeInfo.getParameters(data);
-            final String name = BeanMethod.name(data.getSignature());
-            return postProcess(of(types).map(t -> of(t).toString()).collect(joining(",", name + "(", ")")));
+            return postProcess(MaridRuntimeUtils.toCanonicalWithArgs(data.getSignature(), types));
         } catch (Exception x) {
             log(WARNING, "Unable to get generic signature", x);
         }
@@ -96,6 +92,9 @@ public class SignatureResolver {
     }
 
     public String postProcess(String type) {
-        return appearanceSettings.showFullNamesProperty().get() ? type : LONG_NAME_PREFIX.matcher(type).replaceAll("");
+        if (!appearanceSettings.showFullNamesProperty().get()) {
+            type = LONG_NAME_PREFIX.matcher(type).replaceAll("");
+        }
+        return type;
     }
 }

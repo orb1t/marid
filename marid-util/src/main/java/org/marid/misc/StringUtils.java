@@ -24,7 +24,10 @@ package org.marid.misc;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Path;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -41,5 +44,21 @@ public interface StringUtils {
             throwable.printStackTrace(w);
         }
         return writer.toString();
+    }
+
+    static String replaceAll(CharSequence text, Pattern pattern, Function<Matcher, String> func) {
+        final Matcher matcher = pattern.matcher(text);
+        boolean result = matcher.find();
+        if (result) {
+            final StringBuffer buffer = new StringBuffer();
+            do {
+                matcher.appendReplacement(buffer, func.apply(matcher));
+                result = matcher.find();
+            } while (result);
+            matcher.appendTail(buffer);
+            return buffer.toString();
+        } else {
+            return text.toString();
+        }
     }
 }

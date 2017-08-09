@@ -125,7 +125,7 @@ final class MaridBeanCreationContext implements AutoCloseable {
         try {
             return handle.asFixedArity().invokeWithArguments(args);
         } catch (Throwable x) {
-            throw new MaridBeanMethodInvocationException(bean.name, method.name(), x);
+            throw new MaridBeanMethodInvocationException(bean.name, method.signature, x);
         }
     }
 
@@ -138,7 +138,7 @@ final class MaridBeanCreationContext implements AutoCloseable {
         } catch (RuntimeException x) {
             throw x;
         } catch (Throwable x) {
-            throw new MaridBeanMethodArgException(bean.name, method.name(), methodArg.name, x);
+            throw new MaridBeanMethodArgException(bean.name, method.signature, methodArg.name, x);
         }
     }
 

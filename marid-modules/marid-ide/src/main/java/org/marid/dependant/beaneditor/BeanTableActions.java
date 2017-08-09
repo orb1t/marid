@@ -33,6 +33,7 @@ import org.marid.ide.model.BeanMethodData;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.SpecialAction;
+import org.marid.runtime.context.MaridRuntimeUtils;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -52,7 +53,6 @@ import static org.marid.ide.IdeNotifications.n;
 import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.l10n.L10n.m;
 import static org.marid.l10n.L10n.s;
-import static org.marid.runtime.beans.BeanMethod.name;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -139,7 +139,7 @@ public class BeanTableActions {
             final Consumer<ProjectProfile> listener = p -> {
                 final Function<LibraryMethod, FxAction> function = m -> new FxAction("bean", m.literal.group)
                         .setIcon(m.literal.icon)
-                        .bindText(name(m.method.signature) + "/" + m.method.args.length)
+                        .bindText(MaridRuntimeUtils.toCanonical(m.method.signature))
                         .setEventHandler(event -> {
                             final BeanMethodData d = new BeanMethodData(data, m.method);
                             data.initializers.add(d);

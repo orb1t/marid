@@ -94,7 +94,7 @@ public abstract class BeanMethodArgTable extends MaridTableView<BeanMethodArgDat
                                BeanEditorContext context) {
         typeColumn.setCellValueFactory(param -> Bindings.createStringBinding(() -> {
             final BeanMethodArgData arg = param.getValue();
-            return signatureResolver.postProcess(TypeToken.of(context.formalType(arg)).toString());
+            return signatureResolver.postProcess(context.formalType(arg).getTypeName());
         }, profile.getBeanFile().beans));
     }
 

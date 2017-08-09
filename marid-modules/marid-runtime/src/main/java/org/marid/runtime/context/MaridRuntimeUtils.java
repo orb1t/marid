@@ -26,20 +26,17 @@ import org.marid.runtime.exception.MaridUnknownSignatureException;
 import javax.annotation.Nonnull;
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.*;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Scanner;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 import static java.lang.invoke.MethodHandles.publicLookup;
-import static java.lang.reflect.Modifier.*;
 import static java.util.logging.Level.WARNING;
-import static java.util.regex.Pattern.compile;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Stream.of;
 import static org.marid.logging.Log.log;
 import static org.marid.misc.Calls.call;
 
@@ -52,7 +49,7 @@ public interface MaridRuntimeUtils {
                                    @Nonnull Predicate<Method> filter,
                                    @Nonnull Comparator<Method> methodComparator) {
         final TreeSet<Method> methods = new TreeSet<>(methodComparator);
-        final Consumer<Class<?>> consumer = c -> Stream.of(c.getDeclaredMethods())
+        final Consumer<Class<?>> consumer = c -> of(c.getDeclaredMethods())
                 .filter(m -> m.getParameterCount() == 0)
                 .filter(filter)
                 .peek(m -> m.setAccessible(true))
@@ -101,40 +98,92 @@ public interface MaridRuntimeUtils {
         return daemon;
     }
 
-    // TODO: speed optimization, make gc-less
-    static Member fromSignature(String signature, ClassLoader classLoader) {
-        final int pIndex = signature.indexOf('(');
-        final int modMask = methodModifiers() | constructorModifiers() | fieldModifiers();
-        final Pattern space = compile(" ");
-        final String[] mods = space.splitAsStream(Modifier.toString(modMask)).sorted().toArray(String[]::new);
-        final String[] tokens = space.splitAsStream(pIndex >= 0 ? signature.substring(0, pIndex) : signature)
-                .filter(t -> Arrays.binarySearch(mods, t) < 0)
-                .toArray(String[]::new);
-        final String declaringClassName;
+    @Nonnull
+    static String signature(@Nonnull Field field) {
+        return String.format("F|%04X|%s|%s",
+                field.getModifiers(),
+                field.getDeclaringClass().getCanonicalName(),
+                field.getName()
+        );
+    }
+
+    @Nonnull
+    static String signature(@Nonnull Method method) {
+        return String.format("M|%04X|%s|%s|%s",
+                method.getModifiers(),
+                method.getDeclaringClass().getCanonicalName(),
+                method.getName(),
+                args(method)
+        );
+    }
+
+    @Nonnull
+    static String signature(@Nonnull Constructor<?> constructor) {
+        return String.format("C|%04X|%s|%s",
+                constructor.getModifiers(),
+                constructor.getDeclaringClass().getCanonicalName(),
+                args(constructor)
+        );
+    }
+
+    @Nonnull
+    static String args(@Nonnull Executable executable) {
+        return of(executable.getParameterTypes()).map(Class::getCanonicalName).collect(joining(","));
+    }
+
+    @Nonnull
+    static String toCanonical(@Nonnull String signature) {
+        final int limit = (int) signature.chars().filter(c -> c == '|').count() + 1;
+        final String[] parts = signature.split("[|]", limit);
+        final String mods = Modifier.toString(Integer.parseUnsignedInt(parts[1], 16));
+        switch (parts[0]) {
+            case "F": return String.format("%s %s.%s", mods, parts[2], parts[3]);
+            case "C": return String.format("%s %s(%s)", mods, parts[2], parts[3]);
+            case "M": return String.format("%s %s.%s(%s)", mods, parts[2], parts[3], parts[4]);
+            default: throw new IllegalArgumentException(signature);
+        }
+    }
+
+    @Nonnull
+    static String toCanonicalWithArgs(@Nonnull String signature, Type... types) {
+        final int limit = (int) signature.chars().filter(c -> c == '|').count() + 1;
+        final String[] parts = signature.split("[|]", limit);
+        final String mods = Modifier.toString(Integer.parseUnsignedInt(parts[1], 16));
+        final String args = of(types).map(Type::getTypeName).collect(joining(","));
+        switch (parts[0]) {
+            case "F": return String.format("%s %s.%s", mods, parts[2], parts[3]);
+            case "C": return String.format("%s %s(%s)", mods, parts[2], args);
+            case "M": return String.format("%s %s.%s(%s)", mods, parts[2], parts[3], args);
+            default: throw new IllegalArgumentException(signature);
+        }
+    }
+
+    static Member fromSignature(@Nonnull String signature, @Nonnull ClassLoader classLoader) {
         try {
-            if (pIndex >= 0) {
-                switch (tokens.length) {
-                    case 1: // constructor
-                        declaringClassName = tokens[0];
-                        return Stream.of(Class.forName(declaringClassName, false, classLoader).getConstructors())
-                                .filter(c -> c.toString().equals(signature))
-                                .findFirst()
-                                .orElseThrow(() -> new NoSuchMethodException(signature));
-                    default:
-                        declaringClassName = tokens[1].substring(0, tokens[1].lastIndexOf('.'));
-                        return Stream.of(Class.forName(declaringClassName, false, classLoader).getMethods())
-                                .filter(m -> m.toString().equals(signature))
-                                .findFirst()
-                                .orElseThrow(() -> new NoSuchMethodException(signature));
-                }
-            } else {
-                declaringClassName = tokens[1].substring(0, tokens[1].lastIndexOf('.'));
-                return Stream.of(Class.forName(declaringClassName, false, classLoader).getFields())
-                        .filter(m -> m.toString().equals(signature))
-                        .findFirst()
-                        .orElseThrow(() -> new NoSuchFieldException(signature));
+            final int limit = (int) signature.chars().filter(c -> c == '|').count() + 1;
+            final String[] parts = signature.split("[|]", limit);
+            final Class<?> declaringClass = Class.forName(parts[2], false, classLoader);
+            switch (parts[0]) {
+                case "F":
+                    return of(declaringClass.getFields())
+                            .filter(f -> f.getName().equals(parts[3]))
+                            .findFirst()
+                            .orElseThrow(() -> new NoSuchFieldException(parts[3]));
+                case "C":
+                    return of(declaringClass.getConstructors())
+                            .filter(c -> args(c).equals(parts[3]))
+                            .findFirst()
+                            .orElseThrow(() -> new NoSuchMethodException(signature));
+                case "M":
+                    return of(declaringClass.getMethods())
+                            .filter(m -> m.getName().equals(parts[3]))
+                            .filter(m -> args(m).equals(parts[4]))
+                            .findFirst()
+                            .orElseThrow(() -> new NoSuchMethodException(parts[3]));
+                default:
+                    throw new IllegalArgumentException(parts[0]);
             }
-        } catch (Exception x) {
+        } catch (Throwable x) {
             throw new MaridUnknownSignatureException(signature, x);
         }
     }
