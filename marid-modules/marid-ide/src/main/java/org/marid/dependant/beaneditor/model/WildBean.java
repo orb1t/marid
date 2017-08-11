@@ -21,6 +21,7 @@
 package org.marid.dependant.beaneditor.model;
 
 import org.marid.runtime.beans.Bean;
+import org.marid.runtime.context.MaridRuntimeUtils;
 
 public class WildBean {
 
@@ -36,6 +37,6 @@ public class WildBean {
 
     @Override
     public String toString() {
-        return bean.signature;
+        return MaridRuntimeUtils.toCanonical(bean.signature);
     }
 }
