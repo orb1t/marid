@@ -19,36 +19,51 @@
  * #L%
  */
 
-package org.marid.runtime.context;
+package org.marid.runtime.event;
 
-import org.marid.runtime.event.*;
+import org.marid.runtime.context.MaridContext;
 
 import javax.annotation.Nonnull;
-import java.util.EventListener;
+import javax.annotation.Nullable;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface MaridContextListener extends EventListener, Comparable<MaridContextListener> {
+public final class BeanEvent extends MaridEvent {
 
-    void bootstrap(@Nonnull ContextBootstrapEvent contextBootstrapEvent);
+    @Nonnull
+    private final String name;
 
-    void onEvent(@Nonnull BeanEvent event);
+    @Nullable
+    private final Object bean;
 
-    void onPostConstruct(@Nonnull BeanPostConstructEvent postConstructEvent);
+    @Nonnull
+    private final String type;
 
-    void onPreDestroy(@Nonnull BeanPreDestroyEvent preDestroyEvent);
+    public BeanEvent(@Nullable MaridContext source, @Nonnull String name, @Nullable Object bean, @Nonnull String type) {
+        super(source);
+        this.name = name;
+        this.bean = bean;
+        this.type = type;
+    }
 
-    void onStart(@Nonnull ContextStartEvent contextStartEvent);
+    @Nullable
+    public Object getBean() {
+        return bean;
+    }
 
-    void onStop(@Nonnull ContextStopEvent contextStopEvent);
+    @Nonnull
+    public String getName() {
+        return name;
+    }
 
-    void onFail(@Nonnull ContextFailEvent contextFailEvent);
-
-    int getOrder();
+    @Nonnull
+    public String getType() {
+        return type;
+    }
 
     @Override
-    default int compareTo(@Nonnull MaridContextListener o) {
-        return Integer.compare(getOrder(), o.getOrder());
+    public String toString() {
+        return String.format("%s[%s,%s]", getClass().getSimpleName(), type, name);
     }
 }

@@ -22,7 +22,7 @@
 package org.marid.runtime;
 
 
-import org.marid.runtime.context.MaridConfiguration;
+import org.marid.runtime.beans.Bean;
 import org.marid.runtime.context.MaridContext;
 import org.marid.runtime.context.MaridRuntimeUtils;
 
@@ -50,7 +50,7 @@ public class MaridLauncher {
         MaridRuntimeUtils.daemonThread(contextRef).start();
 
         try (final Reader reader = new InputStreamReader(beansXmlUrl.openStream(), UTF_8)) {
-            contextRef.set(new MaridContext(read(reader, MaridConfiguration::new), classLoader));
+            contextRef.set(new MaridContext(read(reader, Bean::new), classLoader, System.getProperties()));
         } catch (Throwable x) {
             x.printStackTrace();
         }

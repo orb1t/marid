@@ -34,7 +34,6 @@ import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.SpecialAction;
 import org.marid.runtime.context.MaridRuntimeUtils;
-import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
@@ -64,7 +63,6 @@ public class BeanTableActions {
     @Qualifier("beanTable")
     public Function<BeanData, FxAction> addRootBeans(SpecialAction addAction,
                                                      LibraryBeanDao dao,
-                                                     ObjectFactory<BeanTable> table,
                                                      ProjectProfile profile) {
         return data -> {
             final FxAction action = new FxAction("add", "add", "add")
@@ -75,7 +73,7 @@ public class BeanTableActions {
                 final Function<LibraryBean, FxAction> function = bean -> new FxAction("bean", bean.literal.group)
                         .setIcon(bean.literal.icon)
                         .bindText(ls("%s%s%s", lo(bean.literal)))
-                        .setEventHandler(event -> table.getObject().getItems().add(new BeanData(bean.bean)));
+                        .setEventHandler(event -> profile.getBeanFile().add(bean.bean));
                 final Map<String, List<FxAction>> grouped = dao.beans()
                         .collect(groupingBy(b -> b.literal.group, TreeMap::new, mapping(function, toList())));
                 action.setChildren(children(grouped));
@@ -92,7 +90,6 @@ public class BeanTableActions {
     @Qualifier("beanTable")
     public Function<BeanData, FxAction> factoryBeans(SpecialAction addAction,
                                                      LibraryBeanDao dao,
-                                                     ObjectFactory<BeanTable> table,
                                                      ProjectProfile profile) {
         return data -> {
             if (data == null) {
@@ -107,9 +104,8 @@ public class BeanTableActions {
                         .setIcon(bean.literal.icon)
                         .bindText(ls("%s%s%s", lo(bean.literal)))
                         .setEventHandler(event -> {
-                            final BeanData beanData = new BeanData(bean.bean);
+                            final BeanData beanData = profile.getBeanFile().add(bean.bean);
                             beanData.factory.set(data.getName());
-                            table.getObject().getItems().add(beanData);
                         });
                 final Map<String, List<FxAction>> grouped = dao.beans(data)
                         .collect(groupingBy(b -> b.literal.group, TreeMap::new, mapping(function, toList())));
@@ -179,7 +175,7 @@ public class BeanTableActions {
                         d.setTitle(s("Bean selector"));
                         d.setHeaderText(m("Select a bean: "));
                         d.initModality(Modality.APPLICATION_MODAL);
-                        d.showAndWait().ifPresent(bean -> profile.getBeanFile().beans.add(new BeanData(bean.bean)));
+                        d.showAndWait().ifPresent(bean -> profile.getBeanFile().add(bean.bean));
                     });
                 });
     }

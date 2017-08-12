@@ -26,16 +26,15 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
 import org.marid.runtime.beans.Bean;
 import org.marid.runtime.beans.BeanMethod;
-import org.marid.runtime.beans.BeanMethodArg;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.concat;
+import static java.util.stream.Stream.of;
 import static javafx.collections.FXCollections.observableArrayList;
 
 /**
@@ -43,38 +42,24 @@ import static javafx.collections.FXCollections.observableArrayList;
  */
 public class BeanData extends BeanMethodData {
 
+    public final BeanData parent;
     public final StringProperty name = new SimpleStringProperty();
     public final StringProperty factory = new SimpleStringProperty();
     public final ObservableList<BeanMethodData> initializers = observableArrayList(BeanMethodData::observables);
     public final ObservableList<BeanData> children = observableArrayList(BeanData::observables);
 
-    public BeanData(@Nonnull Bean bean) {
+    public BeanData(@Nullable BeanData parentBean, @Nonnull Bean bean) {
+        parent = parentBean;
         name.set(bean.name);
         factory.set(bean.factory);
         signature.set(bean.signature);
-        args.setAll(Stream.of(bean.args).map(b -> new BeanMethodArgData(this, b)).collect(toList()));
+        args.setAll(of(bean.args).map(b -> new BeanMethodArgData(this, b)).collect(toList()));
         initializers.setAll(bean.initializers.stream().map(p -> new BeanMethodData(this, p)).collect(toList()));
+        children.setAll(bean.children.stream().map(b -> new BeanData(this, b)).collect(toList()));
     }
 
-    public BeanData(@Nonnull String name,
-                    @Nonnull String factory,
-                    @Nonnull Constructor<?> constructor,
-                    @Nonnull BeanMethodArg... args) {
-        this(new Bean(name, factory, constructor, args));
-    }
-
-    public BeanData(@Nonnull String name,
-                    @Nonnull String factory,
-                    @Nonnull Method method,
-                    @Nonnull BeanMethodArg... args) {
-        this(new Bean(name, factory, method, args));
-    }
-
-    public BeanData(@Nonnull String name,
-                    @Nonnull String factory,
-                    @Nonnull Field field,
-                    @Nonnull BeanMethodArg... args) {
-        this(new Bean(name, factory, field, args));
+    public BeanData() {
+        this(null, new Bean());
     }
 
     public BeanData add(BeanMethod... initializers) {
@@ -82,6 +67,12 @@ public class BeanData extends BeanMethodData {
             this.initializers.add(new BeanMethodData(this, initializer));
         }
         return this;
+    }
+
+    public BeanData add(Bean bean) {
+        final BeanData beanData = new BeanData(this, bean);
+        children.add(beanData);
+        return beanData;
     }
 
     public String getName() {
@@ -92,14 +83,20 @@ public class BeanData extends BeanMethodData {
         return factory.get();
     }
 
+    public Stream<BeanData> reversedPath() {
+        return parent == null ? of(this) : concat(of(this), parent.reversedPath());
+    }
+
+    public Stream<BeanData> parents() {
+        return parent == null ? Stream.empty() : parent.reversedPath();
+    }
+
     public Bean toBean() {
         final BeanMethod producer = toMethod();
-        return new Bean(
-                getName(),
-                getFactory(),
-                producer.signature,
-                producer.args
-        ).addInitializers(initializers.stream().map(BeanMethodData::toMethod).collect(toList()));
+        final Bean bean = new Bean(getName(), getFactory(), producer.signature, producer.args);
+        bean.addInitializers(initializers.stream().map(BeanMethodData::toMethod).collect(toList()));
+        bean.addChildren(children.stream().map(BeanData::toBean).collect(toList()));
+        return bean;
     }
 
     public List<BeanMethodArgData> getArgs(int initializer) {
@@ -107,7 +104,7 @@ public class BeanData extends BeanMethodData {
     }
 
     public Observable[] observables() {
-        return new Observable[] {name, factory, signature, args, initializers, children};
+        return new Observable[]{name, factory, signature, args, initializers, children};
     }
 
     @Override

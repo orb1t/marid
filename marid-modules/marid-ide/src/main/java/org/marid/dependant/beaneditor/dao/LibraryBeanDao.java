@@ -102,7 +102,7 @@ public class LibraryBeanDao {
 
     public Stream<LibraryBean> beans(BeanData beanData) {
         final BeanContext cache = profile.getBeanContext();
-        final BeanTypeInfo typeInfo = resolver.resolve(cache, beanData.getName());
+        final BeanTypeInfo typeInfo = resolver.resolve(cache, beanData);
         final Class<?> c = TypeToken.of(typeInfo.getType()).getRawType();
         return of(
                 of(c.getMethods())
@@ -126,7 +126,7 @@ public class LibraryBeanDao {
 
     public Stream<LibraryMethod> initializers(BeanData beanData) {
         final BeanContext cache = profile.getBeanContext();
-        final BeanTypeInfo typeInfo = resolver.resolve(cache, beanData.getName());
+        final BeanTypeInfo typeInfo = resolver.resolve(cache, beanData);
         final Class<?> c = TypeToken.of(typeInfo.getType()).getRawType();
         return of(
                 of(c.getMethods())

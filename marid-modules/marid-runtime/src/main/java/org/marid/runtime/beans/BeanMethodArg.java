@@ -33,7 +33,7 @@ import static org.marid.io.Xmls.content;
 /**
  * @author Dmitry Ovchinnikov
  */
-public final class BeanMethodArg {
+public class BeanMethodArg {
 
     @Nonnull
     public final String name;

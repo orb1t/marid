@@ -22,14 +22,10 @@
 package org.marid.runtime.context;
 
 import org.marid.runtime.beans.Bean;
-import org.marid.runtime.beans.BeanEvent;
+import org.marid.runtime.event.*;
 
-import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.ServiceLoader;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -44,11 +40,20 @@ import static org.marid.logging.Log.log;
  */
 public final class MaridContext implements AutoCloseable {
 
-    final LinkedHashMap<String, Object> beans;
-    final MaridContextListener[] listeners;
+    private final MaridConfiguration configuration;
+    private final MaridContext parent;
+    private final LinkedHashMap<String, Object> beans;
+    private final LinkedList<MaridContext> children = new LinkedList<>();
+    private final MaridContextListener[] listeners;
 
-    public MaridContext(@Nonnull MaridConfiguration configuration, @Nonnull ClassLoader classLoader) {
-        this.beans = new LinkedHashMap<>(configuration.beans.length);
+    private MaridContext(MaridConfiguration configuration,
+                         MaridContext parent,
+                         MaridCreationContext parentCreationContext,
+                         Bean root,
+                         ClassLoader classLoader) {
+        this.configuration = configuration;
+        this.parent = parent;
+        this.beans = new LinkedHashMap<>(root.children.size());
         try {
             final ServiceLoader<MaridContextListener> serviceLoader = load(MaridContextListener.class, classLoader);
             final Stream<MaridContextListener> listenerStream = stream(serviceLoader.spliterator(), false);
@@ -57,38 +62,56 @@ public final class MaridContext implements AutoCloseable {
             throw new IllegalStateException("Unable to load context listeners", x);
         }
 
-        try (final MaridBeanCreationContext cc = new MaridBeanCreationContext(configuration, classLoader, this)) {
-            fireEvent(false, l -> l.bootstrap(cc.runtime));
-            for (final Bean bean : configuration.beans) {
+        try (final MaridCreationContext cc = new MaridCreationContext(parentCreationContext, root, this)) {
+            fireEvent(false, l -> l.bootstrap(new ContextBootstrapEvent(this, cc.runtime)));
+            for (final Bean bean : root.children) {
                 try {
+                    if (!bean.children.isEmpty()) {
+                        children.add(new MaridContext(configuration, this, cc, bean, classLoader));
+                    }
                     cc.getOrCreate(bean.name);
                 } catch (Throwable x) {
-                    fireEvent(false, MaridContextListener::onFail);
-                    return;
+                    fireEvent(false, l -> l.onFail(new ContextFailEvent(this, bean.name, x)));
+                    throw x;
                 }
             }
-            fireEvent(false, MaridContextListener::onStart);
+            fireEvent(false, l -> l.onStart(new ContextStartEvent(this)));
+        } catch (Throwable x) {
+            close();
+            throw x;
         }
     }
 
-    public MaridContext(@Nonnull MaridConfiguration configuration) {
-        this(configuration, Thread.currentThread().getContextClassLoader());
+    public MaridContext(Bean root, ClassLoader classLoader, Properties systemProperties) {
+        this(new MaridConfiguration(classLoader, systemProperties), null, null, root, classLoader);
+    }
+
+    public MaridContext(Bean root) {
+        this(root, Thread.currentThread().getContextClassLoader(), System.getProperties());
+    }
+
+    public LinkedHashMap<String, Object> getBeans() {
+        return beans;
+    }
+
+    public MaridPlaceholderResolver getPlaceholderResolver() {
+        return configuration.placeholderResolver;
+    }
+
+    public MaridContext getParent() {
+        return parent;
     }
 
     void initialize(String name, Object bean) {
-        fireEvent(false, l -> l.onEvent(new BeanEvent(bean, name, "PRE_INIT")));
-        fireEvent(false, l -> l.onInitialize(name, bean));
-        fireEvent(false, l -> l.onEvent(new BeanEvent(bean, name, "POST_INIT")));
+        fireEvent(false, l -> l.onEvent(new BeanEvent(this, name, bean, "PRE_INIT")));
+        fireEvent(false, l -> l.onPostConstruct(new BeanPostConstructEvent(this, name, bean)));
+        fireEvent(false, l -> l.onEvent(new BeanEvent(this, name, bean, "POST_INIT")));
     }
 
     private void destroy(String name, Object bean, Consumer<Throwable> errorConsumer) {
-        fireEvent(true, l -> l.onEvent(new BeanEvent(bean, name, "PRE_DESTROY")));
-        fireEvent(true, l -> l.onDestroy(name, bean, errorConsumer));
-        fireEvent(true, l -> l.onEvent(new BeanEvent(bean, name, "POST_DESTROY")));
-    }
-
-    boolean isActive() {
-        return !beans.isEmpty();
+        fireEvent(true, l -> l.onEvent(new BeanEvent(this, name, bean, "PRE_DESTROY")));
+        fireEvent(true, l -> l.onPreDestroy(new BeanPreDestroyEvent(this, name, bean, errorConsumer)));
+        fireEvent(true, l -> l.onEvent(new BeanEvent(this, name, bean, "POST_DESTROY")));
     }
 
     private void fireEvent(boolean reverse, Consumer<MaridContextListener> event) {
@@ -104,7 +127,8 @@ public final class MaridContext implements AutoCloseable {
 
     @Override
     public void close() {
-        fireEvent(true, MaridContextListener::onStop);
+        children.forEach(MaridContext::close);
+        fireEvent(true, l -> l.onStop(new ContextStopEvent(this)));
         final IllegalStateException e = new IllegalStateException("Runtime close exception");
         final List<Entry<String, Object>> entries = new ArrayList<>(beans.entrySet());
         beans.clear();
@@ -115,8 +139,7 @@ public final class MaridContext implements AutoCloseable {
             destroy(name, instance, x -> e.addSuppressed(new IllegalStateException(format("[%s] Close", name), x)));
         }
         if (e.getSuppressed().length > 0) {
-            throw e;
+            log(WARNING, "Error on close {0}", e, this);
         }
     }
-
 }

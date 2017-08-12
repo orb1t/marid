@@ -45,12 +45,12 @@ public class BeanEditorContext {
     }
 
     public Type formalType(BeanMethodArgData arg) {
-        final BeanTypeInfo typeInfo = resolver.resolve(profile.getBeanContext(), arg.parent.parent.getName());
+        final BeanTypeInfo typeInfo = resolver.resolve(profile.getBeanContext(), arg.parent.parent);
         return typeInfo.getParameter(arg);
     }
 
     public Type actualType(BeanMethodArgData arg) {
-        final BeanTypeInfo typeInfo = resolver.resolve(profile.getBeanContext(), arg.parent.parent.getName());
+        final BeanTypeInfo typeInfo = resolver.resolve(profile.getBeanContext(), arg.parent.parent);
         return typeInfo.getArgument(arg);
     }
 }

@@ -21,45 +21,27 @@
 
 package org.marid.runtime.context;
 
-import org.marid.io.Xmls;
-import org.marid.runtime.beans.Bean;
-import org.w3c.dom.Element;
+import java.io.*;
+import java.util.Properties;
 
-import javax.annotation.Nonnull;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
-import static org.marid.misc.Builder.build;
+public class MaridConfiguration {
 
-/**
- * @author Dmitry Ovchinnikov
- */
-public final class MaridConfiguration {
+    public final MaridPlaceholderResolver placeholderResolver;
 
-    @Nonnull
-    public final Bean[] beans;
-
-    public MaridConfiguration(@Nonnull Bean... beans) {
-        this.beans = beans;
-    }
-
-    public MaridConfiguration(@Nonnull Element element) {
-        this.beans = Xmls.nodes(element, Element.class)
-                .filter(e -> "bean".equals(e.getTagName()))
-                .map(Bean::new)
-                .toArray(Bean[]::new);
-    }
-
-    public void writeTo(@Nonnull Element element) {
-        for (final Bean bean : beans) {
-            element.appendChild(build(element.getOwnerDocument().createElement("bean"), bean::writeTo));
+    public MaridConfiguration(ClassLoader classLoader, Properties systemProperties) {
+        final Properties properties = new Properties(systemProperties);
+        try (final InputStream inputStream = classLoader.getResourceAsStream("application.properties")) {
+            if (inputStream != null) {
+                try (final Reader reader = new InputStreamReader(inputStream, UTF_8)) {
+                    properties.load(reader);
+                }
+            }
+        } catch (IOException x) {
+            throw new UncheckedIOException(x);
         }
-    }
 
-    @Override
-    public String toString() {
-        return String.format("Context(%s)",
-                Stream.of(beans).map(Bean::toString).collect(Collectors.joining(",\n\t", "\n\t", ""))
-        );
+        placeholderResolver = new MaridPlaceholderResolver(classLoader, properties);
     }
 }

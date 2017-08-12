@@ -20,19 +20,14 @@
 
 package org.marid.ide.model;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.io.Xmls;
 import org.marid.runtime.beans.Bean;
-import org.marid.runtime.context.MaridConfiguration;
-import org.w3c.dom.Element;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static java.util.logging.Level.WARNING;
-import static java.util.stream.Stream.of;
 import static org.marid.ide.project.ProjectFileType.BEANS_XML;
 import static org.marid.io.Xmls.read;
 import static org.marid.logging.Log.log;
@@ -40,38 +35,27 @@ import static org.marid.logging.Log.log;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class BeanFile {
+public class BeanFile extends BeanData {
 
-    public final ObservableList<BeanData> beans = FXCollections.observableArrayList(BeanData::observables);
+    public BeanFile(ProjectProfile profile) {
+        final Path file = profile.get(BEANS_XML);
+        if (Files.notExists(file)) {
+            save(profile);
+        } else {
+            read(file, Bean::new).children.forEach(this::add);
+        }
+    }
 
     public void save(ProjectProfile profile) {
-        final Bean[] array = beans.stream().map(BeanData::toBean).toArray(Bean[]::new);
-        final MaridConfiguration context = new MaridConfiguration(array);
         try {
-            Xmls.writeFormatted(d -> {
-                final Element root = d.createElement("beans");
-                d.appendChild(root);
-                context.writeTo(root);
-            }, profile.get(BEANS_XML));
+            Xmls.writeFormatted("beans", e -> toBean().writeTo(e), profile.get(BEANS_XML));
         } catch (Exception x) {
             log(WARNING, "Unable to save {0}", x, profile.get(BEANS_XML));
         }
     }
 
-    public void load(ProjectProfile profile) {
-        final Path file = profile.get(BEANS_XML);
-        if (Files.notExists(file)) {
-            save(profile);
-            return;
-        }
-        try {
-            beans.setAll(of(read(file, MaridConfiguration::new).beans).map(BeanData::new).toArray(BeanData[]::new));
-        } catch (Exception x) {
-            log(WARNING, "Unable to load {0}", x, profile.get(BEANS_XML));
-        }
-    }
-
-    public Bean[] toBeans() {
-        return beans.stream().map(BeanData::toBean).toArray(Bean[]::new);
+    @Override
+    public String toString() {
+        return "";
     }
 }

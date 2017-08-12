@@ -29,17 +29,39 @@ import org.marid.runtime.converter.ValueConverters;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
+import java.util.Properties;
 import java.util.TreeMap;
-
-import static com.google.common.reflect.Reflection.newProxy;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class IdeValueConverterManager extends DefaultValueConvertersManager {
 
+    private final ClassLoader classLoader;
+
     public IdeValueConverterManager(ClassLoader classLoader) {
-        super(classLoader, newProxy(MaridRuntime.class, (proxy, method, args) -> null));
+        super(new MaridRuntime() {
+            @Override
+            public Object getBean(String name) {
+                return null;
+            }
+
+            @Override
+            public ClassLoader getClassLoader() {
+                return classLoader;
+            }
+
+            @Override
+            public String resolvePlaceholders(String value) {
+                return value;
+            }
+
+            @Override
+            public Properties getApplicationProperties() {
+                return System.getProperties();
+            }
+        });
+        this.classLoader = classLoader;
     }
 
     public TreeMap<String, MetaLiteral> getMatchedConverters(Type target) {

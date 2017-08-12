@@ -58,7 +58,7 @@ public class BeanTable extends MaridTableView<BeanData> {
 
     @Autowired
     public BeanTable(ProjectProfile profile, SignatureResolver resolver) {
-        super(profile.getBeanFile().beans);
+        super(profile.getBeanFile().children);
         setEditable(true);
 
         nameColumn = build(new TableColumn<>(), column -> {
@@ -119,10 +119,10 @@ public class BeanTable extends MaridTableView<BeanData> {
                                 AppearanceSettings appearanceSettings) {
         typeColumn.setCellValueFactory(param -> Bindings.createStringBinding(
                 () -> {
-                    final BeanTypeInfo type = typeResolver.resolve(profile.getBeanContext(), param.getValue().getName());
+                    final BeanTypeInfo type = typeResolver.resolve(profile.getBeanContext(), param.getValue());
                     return signatureResolver.postProcess(type.getType().getTypeName());
                 },
-                profile.getBeanFile().beans,
+                profile.getBeanFile().children,
                 appearanceSettings.showFullNamesProperty())
         );
     }

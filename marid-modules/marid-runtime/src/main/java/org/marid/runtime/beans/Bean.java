@@ -37,7 +37,7 @@ import static org.marid.misc.Builder.build;
 /**
  * @author Dmitry Ovchinnikov
  */
-public final class Bean extends BeanMethod {
+public class Bean extends BeanMethod {
 
     @Nonnull
     public final String name;
@@ -49,7 +49,11 @@ public final class Bean extends BeanMethod {
     public final List<BeanMethod> initializers;
 
     @Nonnull
-    public final List<Bean> children = new ArrayList<>();
+    public final List<Bean> children;
+
+    public Bean() {
+        this("", "", "");
+    }
 
     public Bean(@Nonnull String name,
                 @Nonnull String factory,
@@ -59,6 +63,7 @@ public final class Bean extends BeanMethod {
         this.name = name;
         this.factory = factory;
         this.initializers = new ArrayList<>();
+        this.children = new ArrayList<>();
     }
 
     public Bean(@Nonnull String name,
@@ -69,6 +74,7 @@ public final class Bean extends BeanMethod {
         this.name = name;
         this.factory = factory;
         this.initializers = new ArrayList<>();
+        this.children = new ArrayList<>();
     }
 
     public Bean(@Nonnull String name,
@@ -79,6 +85,7 @@ public final class Bean extends BeanMethod {
         this.name = name;
         this.factory = factory;
         this.initializers = new ArrayList<>();
+        this.children = new ArrayList<>();
     }
 
     public Bean(@Nonnull String name,
@@ -89,6 +96,7 @@ public final class Bean extends BeanMethod {
         this.name = name;
         this.factory = factory;
         this.initializers = new ArrayList<>();
+        this.children = new ArrayList<>();
     }
 
     public Bean(@Nonnull Element element) {
@@ -99,6 +107,10 @@ public final class Bean extends BeanMethod {
                 .filter(e -> "initializer".equals(e.getTagName()))
                 .map(BeanMethod::new)
                 .collect(Collectors.toList());
+        this.children = Xmls.nodes(element, Element.class)
+                .filter(e -> "bean".equals(e.getTagName()))
+                .map(Bean::new)
+                .collect(Collectors.toList());
     }
 
     public Bean add(BeanMethod... initializers) {
@@ -106,9 +118,8 @@ public final class Bean extends BeanMethod {
         return this;
     }
 
-    public Bean addInitializers(Collection<BeanMethod> initializers) {
+    public void addInitializers(Collection<BeanMethod> initializers) {
         this.initializers.addAll(initializers);
-        return this;
     }
 
     public Bean add(Bean... beans) {
@@ -116,9 +127,8 @@ public final class Bean extends BeanMethod {
         return this;
     }
 
-    public Bean addChildren(Collection<Bean> beans) {
+    public void addChildren(Collection<Bean> beans) {
         children.addAll(beans);
-        return this;
     }
 
     @Override
@@ -149,6 +159,10 @@ public final class Bean extends BeanMethod {
 
         for (final BeanMethod i : initializers) {
             i.writeTo(build(element.getOwnerDocument().createElement("initializer"), element::appendChild));
+        }
+
+        for (final Bean b : children) {
+            b.writeTo(build(element.getOwnerDocument().createElement("bean"), element::appendChild));
         }
     }
 

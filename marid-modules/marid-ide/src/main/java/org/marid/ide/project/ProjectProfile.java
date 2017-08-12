@@ -57,7 +57,6 @@ import static java.util.Collections.singletonList;
 import static java.util.EnumSet.allOf;
 import static java.util.logging.Level.WARNING;
 import static java.util.stream.Collectors.toMap;
-import static org.marid.ide.model.BeanDataNormalizer.registerNormalizer;
 import static org.marid.ide.project.ProjectFileType.*;
 import static org.marid.logging.Log.log;
 import static org.marid.misc.Builder.build;
@@ -98,7 +97,7 @@ public class ProjectProfile {
         logger = Logger.getLogger(getName());
         model = loadModel();
         model.setModelVersion("4.0.0");
-        beanFile = new BeanFile();
+        beanFile = new BeanFile(this);
         init();
         enabled = new SimpleBooleanProperty(true);
         enabled.addListener((o, oV, nV) -> {
@@ -109,8 +108,6 @@ public class ProjectProfile {
     }
 
     private void init() {
-        registerNormalizer(beanFile);
-        beanFile.load(this);
         updateClassLoader();
     }
 
@@ -203,7 +200,7 @@ public class ProjectProfile {
             final URL[] urls = Urls.classpath(get(TARGET_LIB), get(TARGET_CLASSES));
             final ClassLoader parent = Thread.currentThread().getContextClassLoader();
             classLoader = new URLClassLoader(urls, parent);
-            beanContext = new BeanContext(beanFile.beans, classLoader);
+            beanContext = new BeanContext(beanFile, classLoader);
             onUpdate.removeIf(ref -> {
                 final Consumer<ProjectProfile> c = ref.get();
                 if (c == null) {

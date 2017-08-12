@@ -74,12 +74,12 @@ public class BeanMethodActions {
                 .bindText("Add a bean reference")
                 .setIcon("D_LINK_VARIANT")
                 .setSpecialAction(addAction)
-                .setChildren(profile.getBeanFile().beans.stream()
+                .setChildren(profile.getBeanFile().children.stream()
                         .filter(b -> !a.parent.parent.getName().equals(b.getName()))
-                        .map(b -> new Pair<>(b, resolver.resolve(profile.getBeanContext(), b.getName())))
+                        .map(b -> new Pair<>(b, resolver.resolve(profile.getBeanContext(), b)))
                         .filter(p -> {
                             final BeanTypeInfo i = p.getValue();
-                            final BeanTypeInfo c = resolver.resolve(profile.getBeanContext(), a.parent.parent.getName());
+                            final BeanTypeInfo c = resolver.resolve(profile.getBeanContext(), a.parent.parent);
 
                             final Type bt = i.getType();
                             final Type at = c.getParameter(a);

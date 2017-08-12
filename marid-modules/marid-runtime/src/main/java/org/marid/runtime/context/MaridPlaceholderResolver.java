@@ -31,10 +31,24 @@ import java.util.Properties;
  */
 public class MaridPlaceholderResolver {
 
+    private final ClassLoader classLoader;
     private final Properties properties;
 
-    public MaridPlaceholderResolver(Properties properties) {
+    public MaridPlaceholderResolver(ClassLoader classLoader, Properties properties) {
+        this.classLoader = classLoader;
         this.properties = properties;
+    }
+
+    public MaridPlaceholderResolver(Properties properties) {
+        this(Thread.currentThread().getContextClassLoader(), properties);
+    }
+
+    public ClassLoader getClassLoader() {
+        return classLoader;
+    }
+
+    public Properties getProperties() {
+        return properties;
     }
 
     public String resolvePlaceholders(String value) {

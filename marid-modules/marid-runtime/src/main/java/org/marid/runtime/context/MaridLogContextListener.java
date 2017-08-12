@@ -21,14 +21,11 @@
 
 package org.marid.runtime.context;
 
-import org.marid.runtime.beans.BeanEvent;
+import org.marid.runtime.event.*;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.function.Consumer;
 
 import static java.util.logging.Level.INFO;
-import static java.util.logging.Level.WARNING;
 import static org.marid.logging.Log.log;
 
 /**
@@ -37,8 +34,8 @@ import static org.marid.logging.Log.log;
 public class MaridLogContextListener implements MaridContextListener {
 
     @Override
-    public void bootstrap(MaridRuntime runtime) {
-
+    public void bootstrap(@Nonnull ContextBootstrapEvent contextBootstrapEvent) {
+        log(INFO, "{0}", contextBootstrapEvent);
     }
 
     @Override
@@ -47,26 +44,28 @@ public class MaridLogContextListener implements MaridContextListener {
     }
 
     @Override
-    public void onInitialize(@Nonnull String name, @Nullable Object bean) {
+    public void onPostConstruct(@Nonnull BeanPostConstructEvent postConstructEvent) {
+        log(INFO, "{0}", postConstructEvent);
     }
 
     @Override
-    public void onDestroy(@Nonnull String name, @Nullable Object bean, @Nonnull Consumer<Throwable> throwableConsumer) {
+    public void onPreDestroy(@Nonnull BeanPreDestroyEvent preDestroyEvent) {
+        log(INFO, "{0}", preDestroyEvent);
     }
 
     @Override
-    public void onStart() {
-        log(INFO, "Started");
+    public void onStart(@Nonnull ContextStartEvent contextStartEvent) {
+        log(INFO, "{0}", contextStartEvent);
     }
 
     @Override
-    public void onStop() {
-        log(INFO, "Stopped");
+    public void onStop(@Nonnull ContextStopEvent contextStopEvent) {
+        log(INFO, "{0}", contextStopEvent);
     }
 
     @Override
-    public void onFail() {
-        log(WARNING, "Failed");
+    public void onFail(@Nonnull ContextFailEvent contextFailEvent) {
+        log(INFO, "{0}", contextFailEvent);
     }
 
     @Override

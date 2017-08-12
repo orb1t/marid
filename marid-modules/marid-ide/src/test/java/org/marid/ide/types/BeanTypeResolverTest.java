@@ -23,14 +23,12 @@ package org.marid.ide.types;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.marid.ide.model.BeanData;
-import org.marid.ide.model.BeanFile;
 import org.marid.test.NormalTests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 
-import java.lang.reflect.Type;
-import java.util.function.Function;
+import java.util.List;
 
 import static java.util.logging.Level.INFO;
 import static org.marid.logging.Log.log;
@@ -43,18 +41,18 @@ import static org.marid.logging.Log.log;
 public class BeanTypeResolverTest extends AbstractJUnit4SpringContextTests {
 
     @Autowired
-    private Function<String, Type> typeResolver;
+    private BeanTypeResolver resolver;
 
     @Autowired
-    private Function<String, BeanTypeInfo> typeInfoResolver;
+    private List<BeanData> beans;
 
     @Autowired
-    private BeanFile file;
+    private BeanContext context;
 
     @Test
     public void allBeans() {
-        for (final BeanData bean : file.beans) {
-            final BeanTypeInfo type = typeInfoResolver.apply(bean.getName());
+        for (final BeanData bean : beans) {
+            final BeanTypeInfo type = resolver.resolve(context, bean);
             log(INFO, "{0}: {1}", bean.getName(), type);
         }
     }

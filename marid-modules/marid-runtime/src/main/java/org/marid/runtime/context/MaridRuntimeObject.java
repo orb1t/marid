@@ -21,12 +21,8 @@
 
 package org.marid.runtime.context;
 
-import java.io.*;
 import java.util.Properties;
-import java.util.function.BooleanSupplier;
 import java.util.function.Function;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -34,26 +30,11 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public final class MaridRuntimeObject implements MaridRuntime {
 
     private final Function<String, Object> beanFunc;
-    private final BooleanSupplier active;
-    private final ClassLoader classLoader;
-    private final Properties properties;
     private final MaridPlaceholderResolver placeholderResolver;
 
-    public MaridRuntimeObject(MaridContext context, ClassLoader classLoader, Function<String, Object> beanFunc) {
+    public MaridRuntimeObject(MaridPlaceholderResolver resolver, Function<String, Object> beanFunc) {
         this.beanFunc = beanFunc;
-        this.active = context::isActive;
-        this.classLoader = classLoader;
-        this.properties = new Properties(System.getProperties());
-        try (final InputStream inputStream = classLoader.getResourceAsStream("application.properties")) {
-            if (inputStream != null) {
-                try (final Reader reader = new InputStreamReader(inputStream, UTF_8)) {
-                    properties.load(reader);
-                }
-            }
-        } catch (IOException x) {
-            throw new UncheckedIOException(x);
-        }
-        this.placeholderResolver = new MaridPlaceholderResolver(properties);
+        this.placeholderResolver = resolver;
     }
 
     @Override
@@ -62,13 +43,8 @@ public final class MaridRuntimeObject implements MaridRuntime {
     }
 
     @Override
-    public boolean isActive() {
-        return active.getAsBoolean();
-    }
-
-    @Override
     public ClassLoader getClassLoader() {
-        return classLoader;
+        return placeholderResolver.getClassLoader();
     }
 
     @Override
@@ -78,6 +54,6 @@ public final class MaridRuntimeObject implements MaridRuntime {
 
     @Override
     public Properties getApplicationProperties() {
-        return properties;
+        return placeholderResolver.getProperties();
     }
 }

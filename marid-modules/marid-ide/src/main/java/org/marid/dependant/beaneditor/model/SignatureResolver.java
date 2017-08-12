@@ -63,7 +63,7 @@ public class SignatureResolver {
 
     public ObservableStringValue signature(ObservableValue<BeanMethodData> methodData, Observable... observables) {
         final Observable[] deps = Arrays.copyOf(observables, observables.length + 3);
-        deps[observables.length] = profile.getBeanFile().beans;
+        deps[observables.length] = profile.getBeanFile().children;
         deps[observables.length + 1] = appearanceSettings.showFullNamesProperty();
         deps[observables.length + 2] = methodData;
         return Bindings.createStringBinding(() -> textSafe(methodData.getValue()), deps);
@@ -82,7 +82,7 @@ public class SignatureResolver {
             return null;
         }
         try {
-            final BeanTypeInfo typeInfo = resolver.resolve(profile.getBeanContext(), data.parent.getName());
+            final BeanTypeInfo typeInfo = resolver.resolve(profile.getBeanContext(), data.parent);
             final Type[] types = typeInfo.getParameters(data);
             return postProcess(MaridRuntimeUtils.toCanonicalWithArgs(data.getSignature(), types));
         } catch (Exception x) {

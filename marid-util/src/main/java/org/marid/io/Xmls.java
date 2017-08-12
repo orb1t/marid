@@ -106,6 +106,14 @@ public interface Xmls {
         }
     }
 
+    static void writeFormatted(String documentElement, Consumer<Element> elementConsumer, Path file) {
+        writeFormatted(d -> {
+            final Element element = d.createElement(documentElement);
+            elementConsumer.accept(element);
+            d.appendChild(element);
+        }, file);
+    }
+
     static <T> T read(Function<Document, T> documentReader, Path file) {
         try (final BufferedReader reader = newBufferedReader(file, UTF_8)) {
             return read(documentReader, reader);

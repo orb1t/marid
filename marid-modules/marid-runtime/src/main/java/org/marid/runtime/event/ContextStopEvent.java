@@ -19,33 +19,13 @@
  * #L%
  */
 
-package org.marid.runtime.exception;
+package org.marid.runtime.event;
 
-import java.util.Set;
+import org.marid.runtime.context.MaridContext;
 
-/**
- * @author Dmitry Ovchinnikov
- */
-public class MaridCircularBeanException extends RuntimeException {
+public final class ContextStopEvent extends MaridEvent {
 
-    private final Set<String> current;
-    private final String name;
-
-    public MaridCircularBeanException(Set<String> current, String name) {
-        this.current = current;
-        this.name = name;
-    }
-
-    @Override
-    public String getMessage() {
-        return name + "/" + current;
-    }
-
-    public Set<String> getCurrent() {
-        return current;
-    }
-
-    public String getName() {
-        return name;
+    public ContextStopEvent(MaridContext context) {
+        super(context);
     }
 }

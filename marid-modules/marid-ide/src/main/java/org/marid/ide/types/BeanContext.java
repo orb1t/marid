@@ -21,80 +21,70 @@
 package org.marid.ide.types;
 
 import javafx.beans.InvalidationListener;
-import javafx.collections.ObservableList;
 import org.marid.ide.model.BeanData;
 import org.marid.runtime.exception.MaridBeanNotFoundException;
-import org.marid.runtime.exception.MaridCircularBeanException;
 
-import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Function;
-import java.util.function.Supplier;
+
+import static java.util.Collections.newSetFromMap;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class BeanContext implements AutoCloseable {
 
-    private final ObservableList<BeanData> beanList;
+    private final BeanData root;
     private final InvalidationListener listChangeListener = o -> reset();
-    private final ConcurrentSkipListSet<String> processing = new ConcurrentSkipListSet<>();
     private final IdeValueConverterManager converters;
+    private final ConcurrentHashMap<BeanData, BeanTypeInfo> typeInfoMap = new ConcurrentHashMap<>();
+    private final Set<BeanData> processing = newSetFromMap(new ConcurrentHashMap<>());
 
-    final ConcurrentHashMap<String, BeanTypeInfo> typeInfoMap = new ConcurrentHashMap<>();
-
-    public BeanContext(ObservableList<BeanData> beans, ClassLoader classLoader) {
-        beanList = beans;
-        converters = new IdeValueConverterManager(classLoader);
-        beanList.addListener(listChangeListener);
+    public BeanContext(BeanData root, ClassLoader classLoader) {
+        this.root = root;
+        this.converters = new IdeValueConverterManager(classLoader);
+        this.root.children.addListener(listChangeListener);
     }
 
-    public Optional<BeanData> getBean(String name) {
-        return beanList.parallelStream()
-                .filter(b -> Objects.equals(name, b.getName()))
-                .findAny();
+    public Optional<BeanData> getBean(BeanData base, String name) {
+        return base.parents()
+                .flatMap(p -> p.children.stream())
+                .filter(b -> b.getName().equals(name))
+                .findFirst();
     }
 
-    public BeanTypeInfo get(String beanName, Function<BeanData, BeanTypeInfo> typeInfoFunc) {
-        return getBean(beanName)
-                .map(d -> process(beanName, () -> typeInfoMap.computeIfAbsent(beanName, name -> typeInfoFunc.apply(d))))
-                .orElse(new EmptyBeanTypeInfo(new MaridBeanNotFoundException(beanName)));
+    public BeanTypeInfo get(BeanData beanData, Function<BeanData, BeanTypeInfo> typeInfoFunc) {
+        return typeInfoMap.computeIfAbsent(beanData, d -> {
+            if (processing.add(d)) {
+                try {
+                    return typeInfoFunc.apply(d);
+                } finally {
+                    processing.remove(d);
+                }
+            } else {
+                return new EmptyBeanTypeInfo(new MaridBeanNotFoundException(beanData.getName()));
+            }
+        });
     }
 
     public IdeValueConverterManager getConverters() {
         return converters;
     }
 
-    public boolean containsBean(String name) {
-        return beanList.parallelStream().anyMatch(b -> name.equals(b.getName()));
-    }
-
     public void reset() {
-        typeInfoMap.clear();
         processing.clear();
+        typeInfoMap.clear();
     }
 
     public ClassLoader getClassLoader() {
         return converters.getClassLoader();
     }
 
-    public <T> T process(String beanName, Supplier<T> supplier) {
-        try {
-            if (processing.add(beanName)) {
-                return supplier.get();
-            } else {
-                throw new MaridCircularBeanException(processing, beanName);
-            }
-        } finally {
-            processing.remove(beanName);
-        }
-    }
-
     @Override
     public void close() {
         typeInfoMap.clear();
-        beanList.removeListener(listChangeListener);
+        root.children.removeListener(listChangeListener);
     }
 }

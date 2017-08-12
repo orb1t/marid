@@ -72,7 +72,7 @@ public class BeanFactoryInfo {
         if (isRoot(returnMember)) {
             factoryToken = of(returnMember.getDeclaringClass()).getSupertype(Casts.cast(returnMember.getDeclaringClass()));
         } else {
-            factoryToken = of(resolver.resolve(context, beanData.getFactory()).getType());
+            factoryToken = of(resolver.resolve(context, beanData, beanData.getFactory()).getType());
         }
         genericReturnType = returnMember instanceof Field
                 ? ((Field) returnMember).getGenericType()

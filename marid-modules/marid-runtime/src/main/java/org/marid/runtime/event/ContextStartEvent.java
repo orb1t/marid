@@ -19,20 +19,13 @@
  * #L%
  */
 
-package org.marid.runtime.context;
+package org.marid.runtime.event;
 
-import java.util.Properties;
+import org.marid.runtime.context.MaridContext;
 
-/**
- * @author Dmitry Ovchinnikov
- */
-public interface MaridRuntime {
+public final class ContextStartEvent extends MaridEvent {
 
-    Object getBean(String name);
-
-    ClassLoader getClassLoader();
-
-    String resolvePlaceholders(String value);
-
-    Properties getApplicationProperties();
+    public ContextStartEvent(MaridContext context) {
+        super(context);
+    }
 }

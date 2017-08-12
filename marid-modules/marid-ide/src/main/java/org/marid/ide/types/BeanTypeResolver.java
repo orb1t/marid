@@ -25,6 +25,7 @@ import com.google.common.reflect.TypeToken;
 import org.marid.ide.model.BeanData;
 import org.marid.ide.model.BeanMethodArgData;
 import org.marid.misc.Casts;
+import org.marid.runtime.exception.MaridBeanNotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.lang.invoke.MethodHandle;
@@ -45,11 +46,13 @@ import static org.marid.runtime.context.MaridRuntimeUtils.initializer;
 @Component
 public class BeanTypeResolver {
 
-    public BeanTypeInfo resolve(BeanContext context, String beanName) {
-        return context.get(beanName, d -> resolve(context, d));
+    public BeanTypeInfo resolve(BeanContext context, BeanData base, String name) {
+        return context.getBean(base, name)
+                .map(b -> resolve(context, b))
+                .orElseGet(() -> new EmptyBeanTypeInfo(new MaridBeanNotFoundException(name)));
     }
 
-    private BeanTypeInfo resolve(BeanContext context, BeanData beanData) {
+    public BeanTypeInfo resolve(BeanContext context, BeanData beanData) {
         try {
             return resolveUnsafe(context, beanData);
         } catch (Exception x) {
@@ -131,7 +134,7 @@ public class BeanTypeResolver {
     private Type actualType(BeanContext context, BeanMethodArgData arg, Type formalType) {
         switch (arg.getType()) {
             case "ref":
-                return resolve(context, arg.getValue()).getType();
+                return resolve(context, arg.parent.parent, arg.getValue()).getType();
             case "of":
                 if (TypeToken.of(formalType).getRawType() == Class.class && arg.getValue() != null) {
                     return TypeUtilities.classType(context.getClassLoader(), arg.getValue());

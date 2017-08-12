@@ -21,16 +21,14 @@
 
 package org.marid.runtime.context;
 
-import org.marid.runtime.beans.BeanEvent;
+import org.marid.runtime.event.*;
 import org.marid.runtime.exception.MaridBeanInitializationException;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.TreeSet;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static java.lang.System.getProperties;
@@ -42,7 +40,8 @@ import static org.marid.runtime.context.MaridRuntimeUtils.methods;
 public class MaridDefaultContextListener implements MaridContextListener {
 
     @Override
-    public void bootstrap(MaridRuntime runtime) {
+    public void bootstrap(@Nonnull ContextBootstrapEvent contextBootstrapEvent) {
+        final MaridRuntime runtime = contextBootstrapEvent.getRuntime();
         for (final String key : runtime.getApplicationProperties().stringPropertyNames()) {
             if (key.startsWith("system.")) {
                 getProperties().setProperty(key.substring(7), runtime.getApplicationProperties().getProperty(key));
@@ -55,62 +54,62 @@ public class MaridDefaultContextListener implements MaridContextListener {
     }
 
     @Override
-    public void onInitialize(@Nonnull String name, @Nullable Object bean) {
-        if (bean == null) {
+    public void onPostConstruct(@Nonnull BeanPostConstructEvent postConstructEvent) {
+        if (postConstructEvent.getBean() == null) {
             return;
         }
         final Comparator<Method> byClass = this::cmp;
         final Comparator<Method> cmp = byClass.thenComparing(Method::getName);
-        final TreeSet<Method> methods = methods(bean, this::isPostConstruct, cmp);
+        final TreeSet<Method> methods = methods(postConstructEvent.getBean(), this::isPostConstruct, cmp);
         final HashSet<String> passed = new HashSet<>();
         for (final Method method : methods) {
             if (passed.add(method.getName())) {
                 try {
-                    method.invoke(bean);
+                    method.invoke(postConstructEvent.getBean());
                 } catch (Throwable x) {
-                    throw new MaridBeanInitializationException(name, x);
+                    throw new MaridBeanInitializationException(postConstructEvent.getName(), x);
                 }
             }
         }
     }
 
     @Override
-    public void onDestroy(@Nonnull String name, @Nullable Object bean, @Nonnull Consumer<Throwable> throwableConsumer) {
-        if (bean == null) {
+    public void onPreDestroy(@Nonnull BeanPreDestroyEvent preDestroyEvent) {
+        if (preDestroyEvent.getBean() == null) {
             return;
         }
         final Comparator<Method> byClass = this::cmp;
         final Comparator<Method> cmp = byClass.thenComparing(Method::getName).reversed();
-        final TreeSet<Method> methods = methods(bean, this::isPreDestroy, cmp);
+        final TreeSet<Method> methods = methods(preDestroyEvent.getBean(), this::isPreDestroy, cmp);
         final HashSet<String> passed = new HashSet<>();
         for (final Method method : methods) {
             if (passed.add(method.getName())) {
                 try {
-                    method.invoke(bean);
+                    method.invoke(preDestroyEvent.getBean());
                 } catch (Throwable x) {
-                    throwableConsumer.accept(x);
+                    preDestroyEvent.getExceptionConsumer().accept(x);
                 }
             }
         }
-        if (bean instanceof AutoCloseable) {
+        if (preDestroyEvent.getBean() instanceof AutoCloseable) {
             try {
-                ((AutoCloseable) bean).close();
+                ((AutoCloseable) preDestroyEvent.getBean()).close();
             } catch (Throwable x) {
-                throwableConsumer.accept(x);
+                preDestroyEvent.getExceptionConsumer().accept(x);
             }
         }
     }
 
     @Override
-    public void onStart() {
+    public void onStart(@Nonnull ContextStartEvent contextStartEvent) {
     }
 
     @Override
-    public void onStop() {
+    public void onStop(@Nonnull ContextStopEvent contextStopEvent) {
     }
 
     @Override
-    public void onFail() {
+    public void onFail(@Nonnull ContextFailEvent contextFailEvent) {
     }
 
     @Override

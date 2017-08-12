@@ -19,46 +19,38 @@
  * #L%
  */
 
-package org.marid.runtime.beans;
+package org.marid.runtime.event;
+
+import org.marid.runtime.context.MaridContext;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.EventObject;
 
-/**
- * @author Dmitry Ovchinnikov
- */
-public final class BeanEvent extends EventObject {
+public final class ContextFailEvent extends MaridEvent {
 
     @Nonnull
-    private final String name;
+    private final Throwable cause;
 
     @Nonnull
-    private final String type;
+    private final String beanName;
 
-    public BeanEvent(@Nullable Object source, @Nonnull String name, @Nonnull String type) {
-        super(source == null ? name : source);
-        this.name = name;
-        this.type = type;
-    }
-
-    @Override
-    public Object getSource() {
-        return super.getSource() == name ? null : super.getSource();
+    public ContextFailEvent(@Nonnull MaridContext context, @Nonnull String beanName, @Nonnull Throwable cause) {
+        super(context);
+        this.beanName = beanName;
+        this.cause = cause;
     }
 
     @Nonnull
-    public String getName() {
-        return name;
+    public String getBeanName() {
+        return beanName;
     }
 
     @Nonnull
-    public String getType() {
-        return type;
+    public Throwable getCause() {
+        return cause;
     }
 
     @Override
     public String toString() {
-        return String.format("%s[%s,%s]", getClass().getSimpleName(), type, name);
+        return getClass().getSimpleName() + "(" + cause + ")";
     }
 }
