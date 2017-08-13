@@ -26,7 +26,6 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
 import org.marid.runtime.beans.Bean;
 import org.marid.runtime.beans.BeanMethod;
-import org.marid.runtime.beans.BeanMethodArg;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
