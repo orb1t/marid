@@ -25,6 +25,7 @@ import org.marid.io.Xmls;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -42,7 +43,7 @@ public class Bean extends BeanMethod {
     @Nonnull
     public final String name;
 
-    @Nonnull
+    @Nullable
     public final String factory;
 
     @Nonnull
@@ -52,11 +53,11 @@ public class Bean extends BeanMethod {
     public final List<Bean> children;
 
     public Bean() {
-        this("", "", "");
+        this("", null, "");
     }
 
     public Bean(@Nonnull String name,
-                @Nonnull String factory,
+                @Nullable String factory,
                 @Nonnull String signature,
                 @Nonnull BeanMethodArg... args) {
         super(signature, args);
@@ -67,7 +68,7 @@ public class Bean extends BeanMethod {
     }
 
     public Bean(@Nonnull String name,
-                @Nonnull String factory,
+                @Nullable String factory,
                 @Nonnull Constructor<?> constructor,
                 @Nonnull BeanMethodArg... args) {
         super(constructor, args);
@@ -78,7 +79,7 @@ public class Bean extends BeanMethod {
     }
 
     public Bean(@Nonnull String name,
-                @Nonnull String factory,
+                @Nullable String factory,
                 @Nonnull Method method,
                 @Nonnull BeanMethodArg... args) {
         super(method, args);
@@ -89,7 +90,7 @@ public class Bean extends BeanMethod {
     }
 
     public Bean(@Nonnull String name,
-                @Nonnull String factory,
+                @Nullable String factory,
                 @Nonnull Field field,
                 @Nonnull BeanMethodArg... args) {
         super(field, args);
@@ -102,7 +103,7 @@ public class Bean extends BeanMethod {
     public Bean(@Nonnull Element element) {
         super(element);
         this.name = attribute(element, "name").orElseThrow(NullPointerException::new);
-        this.factory = attribute(element, "factory").orElseThrow(NullPointerException::new);
+        this.factory = attribute(element, "factory").orElse(null);
         this.initializers = Xmls.nodes(element, Element.class)
                 .filter(e -> "initializer".equals(e.getTagName()))
                 .map(BeanMethod::new)
@@ -155,7 +156,10 @@ public class Bean extends BeanMethod {
         super.writeTo(element);
 
         element.setAttribute("name", name);
-        element.setAttribute("factory", factory);
+
+        if (factory != null) {
+            element.setAttribute("factory", factory);
+        }
 
         for (final BeanMethod i : initializers) {
             i.writeTo(build(element.getOwnerDocument().createElement("initializer"), element::appendChild));

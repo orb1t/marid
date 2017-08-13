@@ -26,10 +26,12 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
 import org.marid.runtime.beans.Bean;
 import org.marid.runtime.beans.BeanMethod;
+import org.marid.runtime.beans.BeanMethodArg;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -56,6 +58,15 @@ public class BeanData extends BeanMethodData {
         args.setAll(of(bean.args).map(b -> new BeanMethodArgData(this, b)).collect(toList()));
         initializers.setAll(bean.initializers.stream().map(p -> new BeanMethodData(this, p)).collect(toList()));
         children.setAll(bean.children.stream().map(b -> new BeanData(this, b)).collect(toList()));
+        name.addListener((o, oldName, newName) -> {
+            if (parentBean != null && oldName != null) {
+                checkNameUniqueness();
+                parentBean.children.filtered(b -> b != this).forEach(b -> b.changeName(oldName, newName));
+            }
+        });
+        if (parentBean != null) {
+            checkNameUniqueness();
+        }
     }
 
     public BeanData() {
@@ -105,6 +116,26 @@ public class BeanData extends BeanMethodData {
 
     public Observable[] observables() {
         return new Observable[]{name, factory, signature, args, initializers, children};
+    }
+
+    private void checkNameUniqueness() {
+        while (parent.children.stream().anyMatch(b -> b != this && b.getName().equals(name.get()))) {
+            name.set(name.get() + "_new");
+        }
+    }
+
+    private void changeName(String oldName, String newName) {
+        if (oldName.equals(getFactory())) {
+            factory.set(newName);
+        }
+        final Consumer<BeanMethodArgData> argConsumer = a -> {
+            if ("ref".equals(a.getType()) && oldName.equals(a.getValue())) {
+                a.value.set(newName);
+            }
+        };
+        args.forEach(argConsumer);
+        initializers.forEach(i -> i.args.forEach(argConsumer));
+        children.forEach(b -> b.changeName(oldName, newName));
     }
 
     @Override
