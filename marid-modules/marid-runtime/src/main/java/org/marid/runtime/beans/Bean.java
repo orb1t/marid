@@ -22,6 +22,7 @@
 package org.marid.runtime.beans;
 
 import org.marid.io.Xmls;
+import org.marid.misc.Calls;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
@@ -53,7 +54,7 @@ public class Bean extends BeanMethod {
     public final List<Bean> children;
 
     public Bean() {
-        this("", null, "");
+        this("runtime", Object.class.getName(), Calls.<Constructor<?>>call(Object.class::getConstructor));
     }
 
     public Bean(@Nonnull String name,

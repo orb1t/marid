@@ -23,24 +23,21 @@ package org.marid.dependant.beaneditor;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.cell.TextFieldTreeTableCell;
 import org.marid.dependant.beaneditor.model.SignatureResolver;
 import org.marid.ide.model.BeanData;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.settings.AppearanceSettings;
 import org.marid.ide.types.BeanTypeInfo;
 import org.marid.ide.types.BeanTypeResolver;
-import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.SpecialActions;
 import org.marid.jfx.icons.FontIcons;
-import org.marid.jfx.table.MaridTableView;
+import org.marid.jfx.table.MaridTreeTableView;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.function.Function;
 
 import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.misc.Builder.build;
@@ -49,66 +46,68 @@ import static org.marid.misc.Builder.build;
  * @author Dmitry Ovchinnikov
  */
 @Component
-public class BeanTable extends MaridTableView<BeanData> {
+public class BeanTable extends MaridTreeTableView<BeanData> {
 
-    private final TableColumn<BeanData, String> nameColumn;
-    private final TableColumn<BeanData, Label> factoryColumn;
-    private final TableColumn<BeanData, String> producerColumn;
-    private final TableColumn<BeanData, String> typeColumn;
+    private final TreeTableColumn<BeanData, String> nameColumn;
+    private final TreeTableColumn<BeanData, Label> factoryColumn;
+    private final TreeTableColumn<BeanData, String> producerColumn;
+    private final TreeTableColumn<BeanData, String> typeColumn;
 
     @Autowired
-    public BeanTable(ProjectProfile profile, SignatureResolver resolver) {
-        super(profile.getBeanFile().children);
+    public BeanTable(ProjectProfile profile, SignatureResolver resolver, BeanTableListeners listeners) {
+        super(listeners.wrap(profile.getBeanFile()));
         setEditable(true);
 
-        nameColumn = build(new TableColumn<>(), column -> {
+        nameColumn = build(new TreeTableColumn<>(), column -> {
             column.textProperty().bind(ls("Name"));
             column.setMinWidth(100);
             column.setPrefWidth(100);
             column.setMaxWidth(400);
-            column.setCellValueFactory(param -> param.getValue().name);
-            column.setCellFactory(TextFieldTableCell.forTableColumn());
+            column.setCellValueFactory(param -> param.getValue().getValue().name);
+            column.setCellFactory(TextFieldTreeTableCell.forTreeTableColumn());
             column.setEditable(true);
             getColumns().add(column);
         });
 
-        factoryColumn = build(new TableColumn<>(), column -> {
+        factoryColumn = build(new TreeTableColumn<>(), column -> {
             column.textProperty().bind(ls("Factory"));
             column.setMinWidth(150);
             column.setPrefWidth(200);
             column.setMaxWidth(600);
             column.setCellValueFactory(param -> {
                 final Label label = new Label();
-                label.textProperty().bind(resolver.factory(param.getValue().factory));
+                label.textProperty().bind(resolver.factory(param.getValue().getValue().factory));
                 label.graphicProperty().bind(Bindings.createObjectBinding(() -> {
-                    final String factory = param.getValue().getFactory();
+                    final String factory = param.getValue().getValue().getFactory();
                     return FontIcons.glyphIcon(factory.contains(".") ? "D_LIBRARY" : "D_LINK");
-                }, param.getValue().factory));
+                }, param.getValue().getValue().factory));
                 return new SimpleObjectProperty<>(label);
             });
             getColumns().add(column);
         });
 
-        producerColumn = build(new TableColumn<>(), column -> {
+        producerColumn = build(new TreeTableColumn<>(), column -> {
             column.textProperty().bind(ls("Producer"));
             column.setMinWidth(150);
             column.setPrefWidth(200);
             column.setMaxWidth(700);
-            column.setCellValueFactory(param -> resolver.signature(new SimpleObjectProperty<>(param.getValue())));
+            column.setCellValueFactory(param -> resolver.signature(new SimpleObjectProperty<>(param.getValue().getValue())));
             getColumns().add(column);
         });
 
-        typeColumn = build(new TableColumn<>(), column -> {
+        typeColumn = build(new TreeTableColumn<>(), column -> {
             column.textProperty().bind(ls("Type"));
             column.setMinWidth(100);
             column.setPrefWidth(400);
             column.setMaxWidth(700);
             getColumns().add(column);
         });
+
+        getRoot().setExpanded(true);
     }
 
     @Autowired
-    private void initActions(@Qualifier("beanTable") List<Function<BeanData, FxAction>> actions) {
+    private void initActions(List<BeanTableAction> actions) {
         actions().addAll(actions);
     }
 
@@ -119,7 +118,7 @@ public class BeanTable extends MaridTableView<BeanData> {
                                 AppearanceSettings appearanceSettings) {
         typeColumn.setCellValueFactory(param -> Bindings.createStringBinding(
                 () -> {
-                    final BeanTypeInfo type = typeResolver.resolve(profile.getBeanContext(), param.getValue());
+                    final BeanTypeInfo type = typeResolver.resolve(profile.getBeanContext(), param.getValue().getValue());
                     return signatureResolver.postProcess(type.getType().getTypeName());
                 },
                 profile.getBeanFile().children,

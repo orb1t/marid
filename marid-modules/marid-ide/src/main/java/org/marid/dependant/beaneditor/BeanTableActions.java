@@ -34,7 +34,6 @@ import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.SpecialAction;
 import org.marid.runtime.context.MaridRuntimeUtils;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
@@ -60,10 +59,7 @@ import static org.marid.l10n.L10n.s;
 public class BeanTableActions {
 
     @Bean
-    @Qualifier("beanTable")
-    public Function<BeanData, FxAction> addRootBeans(SpecialAction addAction,
-                                                     LibraryBeanDao dao,
-                                                     ProjectProfile profile) {
+    public BeanTableAction addRootBeanAction(SpecialAction addAction, LibraryBeanDao dao, ProjectProfile profile) {
         return data -> {
             final FxAction action = new FxAction("add", "add", "add")
                     .setSpecialAction(addAction)
@@ -73,11 +69,10 @@ public class BeanTableActions {
                 final Function<LibraryBean, FxAction> function = bean -> new FxAction("bean", bean.literal.group)
                         .setIcon(bean.literal.icon)
                         .bindText(ls("%s%s%s", lo(bean.literal)))
-                        .setEventHandler(event -> profile.getBeanFile().add(bean.bean));
+                        .setEventHandler(event -> data.add(bean.bean));
                 final Map<String, List<FxAction>> grouped = dao.beans()
                         .collect(groupingBy(b -> b.literal.group, TreeMap::new, mapping(function, toList())));
                 action.setChildren(children(grouped));
-                action.setDisabled(action.getChildren().isEmpty());
             };
             action.anchors.add(listener);
             listener.accept(profile);
@@ -87,14 +82,8 @@ public class BeanTableActions {
     }
 
     @Bean
-    @Qualifier("beanTable")
-    public Function<BeanData, FxAction> factoryBeans(SpecialAction addAction,
-                                                     LibraryBeanDao dao,
-                                                     ProjectProfile profile) {
+    public BeanTableAction factoryBeans(SpecialAction addAction, LibraryBeanDao dao, ProjectProfile profile) {
         return data -> {
-            if (data == null) {
-                return null;
-            }
             final FxAction action = new FxAction("add", "add", "add")
                     .setSpecialAction(addAction)
                     .bindText("Add a factory bean")
@@ -110,7 +99,6 @@ public class BeanTableActions {
                 final Map<String, List<FxAction>> grouped = dao.beans(data)
                         .collect(groupingBy(b -> b.literal.group, TreeMap::new, mapping(function, toList())));
                 action.setChildren(children(grouped));
-                action.setDisabled(action.getChildren().isEmpty());
             };
             action.anchors.add(listener);
             listener.accept(profile);
@@ -119,15 +107,9 @@ public class BeanTableActions {
         };
     }
 
-    @Qualifier("beanTable")
     @Bean
-    public Function<BeanData, FxAction> initializerAdder(ProjectProfile profile,
-                                                         LibraryBeanDao dao,
-                                                         SpecialAction addAction) {
+    public BeanTableAction initializerAdder(ProjectProfile profile, LibraryBeanDao dao, SpecialAction addAction) {
         return data -> {
-            if (data == null) {
-                return null;
-            }
             final FxAction action = new FxAction("add", "add", "add")
                     .bindText("Add an initializer")
                     .setIcon("D_PLUS")
@@ -143,7 +125,6 @@ public class BeanTableActions {
                 final Map<String, List<FxAction>> grouped = dao.initializers(data)
                         .collect(groupingBy(b -> b.literal.group, TreeMap::new, mapping(function, toList())));
                 action.setChildren(children(grouped));
-                action.setDisabled(action.getChildren().isEmpty());
             };
             action.anchors.add(listener);
             listener.accept(profile);
@@ -152,11 +133,8 @@ public class BeanTableActions {
         };
     }
 
-    @Qualifier("beanTable")
     @Bean
-    public Function<BeanData, FxAction> wildBeanAdder(ProjectProfile profile,
-                                                      LibraryBeanDao dao,
-                                                      SpecialAction addAction) {
+    public BeanTableAction wildBeanAdder(ProjectProfile profile, LibraryBeanDao dao, SpecialAction addAction) {
         return data -> new FxAction("add", "add", "add")
                 .setSpecialAction(addAction)
                 .bindText("Add a wild bean")

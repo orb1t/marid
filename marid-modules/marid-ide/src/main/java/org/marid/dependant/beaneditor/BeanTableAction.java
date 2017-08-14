@@ -20,24 +20,24 @@
 
 package org.marid.dependant.beaneditor;
 
-import javafx.collections.FXCollections;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import javafx.scene.control.TreeItem;
+import org.marid.ide.model.BeanData;
+import org.marid.jfx.action.FxAction;
 
-/**
- * @author Dmitry Ovchinnikov
- */
-@Component
-public class BeanArgTable extends BeanMethodArgTable {
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.function.Function;
 
-    @Autowired
-    private void initSelectionListener(BeanTable table) {
-        table.getSelectionModel().selectedItemProperty().addListener((o, oV, nV) -> {
-            if (nV == null) {
-                setItems(FXCollections.emptyObservableList());
-            } else {
-                setItems(nV.getValue().args);
-            }
-        });
+@FunctionalInterface
+public interface BeanTableAction extends Function<TreeItem<BeanData>, FxAction> {
+
+    @Override
+    default FxAction apply(TreeItem<BeanData> beanDataTreeItem) {
+        return beanDataTreeItem == null || beanDataTreeItem.getValue() == null
+                ? null :
+                get(beanDataTreeItem.getValue());
     }
+
+    @Nullable
+    FxAction get(@Nonnull BeanData beanData);
 }

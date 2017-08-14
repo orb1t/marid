@@ -57,7 +57,7 @@ public class BeanInitializerList extends MaridListView<BeanMethodData> {
             if (nV == null) {
                 setItems(FXCollections.observableArrayList());
             } else {
-                setItems(nV.initializers);
+                setItems(nV.getValue().initializers);
             }
         });
     }
