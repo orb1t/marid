@@ -93,7 +93,7 @@ public class BeanTableActions {
                         .setIcon(bean.literal.icon)
                         .bindText(ls("%s%s%s", lo(bean.literal)))
                         .setEventHandler(event -> {
-                            final BeanData beanData = profile.getBeanFile().add(bean.bean);
+                            final BeanData beanData = data.add(bean.bean);
                             beanData.factory.set(data.getName());
                         });
                 final Map<String, List<FxAction>> grouped = dao.beans(data)
@@ -134,7 +134,7 @@ public class BeanTableActions {
     }
 
     @Bean
-    public BeanTableAction wildBeanAdder(ProjectProfile profile, LibraryBeanDao dao, SpecialAction addAction) {
+    public BeanTableAction wildBeanAdder(LibraryBeanDao dao, SpecialAction addAction) {
         return data -> new FxAction("add", "add", "add")
                 .setSpecialAction(addAction)
                 .bindText("Add a wild bean")
@@ -153,7 +153,7 @@ public class BeanTableActions {
                         d.setTitle(s("Bean selector"));
                         d.setHeaderText(m("Select a bean: "));
                         d.initModality(Modality.APPLICATION_MODAL);
-                        d.showAndWait().ifPresent(bean -> profile.getBeanFile().add(bean.bean));
+                        d.showAndWait().ifPresent(bean -> data.add(bean.bean));
                     });
                 });
     }
