@@ -40,20 +40,18 @@ import static org.marid.logging.Log.log;
  */
 public final class MaridContext implements AutoCloseable {
 
-    private final MaridConfiguration configuration;
+    final LinkedHashMap<String, Object> beans;
+
     private final MaridContext parent;
-    private final LinkedHashMap<String, Object> beans;
-    private final LinkedList<MaridContext> children = new LinkedList<>();
+    private final ArrayList<MaridContext> children = new ArrayList<>();
     private final MaridContextListener[] listeners;
 
-    private MaridContext(MaridConfiguration configuration,
-                         MaridContext parent,
-                         MaridCreationContext parentCreationContext,
-                         Bean root,
-                         ClassLoader classLoader) {
-        this.configuration = configuration;
+    private MaridContext(MaridConfiguration configuration, MaridContext parent, MaridCreationContext pcc, Bean root) {
         this.parent = parent;
         this.beans = new LinkedHashMap<>(root.children.size());
+
+        final ClassLoader classLoader = configuration.getClassLoader();
+
         try {
             final ServiceLoader<MaridContextListener> serviceLoader = load(MaridContextListener.class, classLoader);
             final Stream<MaridContextListener> listenerStream = stream(serviceLoader.spliterator(), false);
@@ -62,12 +60,12 @@ public final class MaridContext implements AutoCloseable {
             throw new IllegalStateException("Unable to load context listeners", x);
         }
 
-        try (final MaridCreationContext cc = new MaridCreationContext(parentCreationContext, root, this)) {
+        try (final MaridCreationContext cc = new MaridCreationContext(pcc, root, this, configuration.placeholderResolver)) {
             fireEvent(false, l -> l.bootstrap(new ContextBootstrapEvent(this, cc.runtime)));
             for (final Bean bean : root.children) {
                 try {
                     if (!bean.children.isEmpty()) {
-                        children.add(new MaridContext(configuration, this, cc, bean, classLoader));
+                        children.add(new MaridContext(configuration, this, pcc, bean));
                     }
                     cc.getOrCreate(bean.name);
                 } catch (Throwable x) {
@@ -76,6 +74,7 @@ public final class MaridContext implements AutoCloseable {
                 }
             }
             fireEvent(false, l -> l.onStart(new ContextStartEvent(this)));
+            children.trimToSize();
         } catch (Throwable x) {
             close();
             throw x;
@@ -83,23 +82,23 @@ public final class MaridContext implements AutoCloseable {
     }
 
     public MaridContext(Bean root, ClassLoader classLoader, Properties systemProperties) {
-        this(new MaridConfiguration(classLoader, systemProperties), null, null, root, classLoader);
+        this(new MaridConfiguration(classLoader, systemProperties), null, null, root);
     }
 
     public MaridContext(Bean root) {
         this(root, Thread.currentThread().getContextClassLoader(), System.getProperties());
     }
 
-    public LinkedHashMap<String, Object> getBeans() {
-        return beans;
-    }
-
-    public MaridPlaceholderResolver getPlaceholderResolver() {
-        return configuration.placeholderResolver;
+    public Map<String, Object> getBeans() {
+        return Collections.unmodifiableMap(beans);
     }
 
     public MaridContext getParent() {
         return parent;
+    }
+
+    public List<MaridContext> getChildren() {
+        return children;
     }
 
     void initialize(String name, Object bean) {

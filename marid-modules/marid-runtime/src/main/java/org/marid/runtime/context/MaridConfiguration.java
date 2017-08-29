@@ -44,4 +44,8 @@ public class MaridConfiguration {
 
         placeholderResolver = new MaridPlaceholderResolver(classLoader, properties);
     }
+
+    public ClassLoader getClassLoader() {
+        return placeholderResolver.getClassLoader();
+    }
 }

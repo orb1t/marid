@@ -48,18 +48,23 @@ final class MaridCreationContext implements AutoCloseable {
 
     final MaridRuntimeObject runtime;
 
-    MaridCreationContext(MaridCreationContext parent, Bean bean, MaridContext context) {
+    MaridCreationContext(MaridCreationContext parent, Bean bean, MaridContext context, MaridPlaceholderResolver resolver) {
         this.parent = parent;
         this.bean = bean;
         this.context = context;
-        this.runtime = new MaridRuntimeObject(context.getPlaceholderResolver(), this::getOrCreate);
+        this.runtime = new MaridRuntimeObject(resolver, this::getOrCreate);
         this.convertersManager = new DefaultValueConvertersManager(runtime);
     }
 
     Object getOrCreate(String name) {
+        for (final MaridContext c : context.getChildren()) {
+            if (c.beans.containsKey(name)) {
+                return c.beans.get(name);
+            }
+        }
         for (MaridContext c = context; c != null; c = c.getParent()) {
-            if (c.getBeans().containsKey(name)) {
-                return c.getBeans().get(name);
+            if (c.beans.containsKey(name)) {
+                return c.beans.get(name);
             }
         }
         return create(name);
@@ -72,9 +77,7 @@ final class MaridCreationContext implements AutoCloseable {
                 if (b != null) {
                     if (c.processing.add(name)) {
                         try {
-                            final Object instance = c.create0(b);
-                            c.context.getBeans().put(name, instance);
-                            return instance;
+                            return c.create0(b);
                         } finally {
                             c.processing.remove(name);
                         }
@@ -118,6 +121,9 @@ final class MaridCreationContext implements AutoCloseable {
             }
             context.initialize(bean.name, instance);
         }
+
+        context.beans.put(bean.name, instance);
+
         return instance;
     }
 
