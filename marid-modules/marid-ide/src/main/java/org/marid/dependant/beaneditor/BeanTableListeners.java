@@ -54,6 +54,11 @@ public class BeanTableListeners {
         };
         changeListeners.put(beanData, listChangeListener);
         beanData.children.addListener(listChangeListener);
+        item.getChildren().addListener((ListChangeListener<TreeItem<BeanData>>) c -> {
+            while (c.next()) {
+                c.getRemoved().forEach(i -> beanData.children.removeIf(d -> d == i.getValue()));
+            }
+        });
         return item;
     }
 }

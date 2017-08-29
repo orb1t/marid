@@ -141,6 +141,11 @@ public class MaridTreeTableView<T> extends TreeTableView<T> implements MaridActi
 
     @Override
     public void clearAll() {
-        getRoot().getChildren().clear();
+        final TreeItem<T> item = getSelectionModel().getSelectedItem();
+        if (item != null) {
+            item.getChildren().clear();
+        } else {
+            getRoot().getChildren().clear();
+        }
     }
 }

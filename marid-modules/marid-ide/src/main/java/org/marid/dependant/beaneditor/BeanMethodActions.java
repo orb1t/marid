@@ -70,34 +70,38 @@ public class BeanMethodActions {
     public Function<BeanMethodArgData, FxAction> refAction(BeanTypeResolver resolver,
                                                            ProjectProfile profile,
                                                            SpecialAction addAction) {
-        return a -> a == null ? null : new FxAction("misc", "misc", "misc")
-                .bindText("Add a bean reference")
-                .setIcon("D_LINK_VARIANT")
-                .setSpecialAction(addAction)
-                .setChildren(profile.getBeanFile().children.stream()
-                        .filter(b -> !a.parent.parent.getName().equals(b.getName()))
-                        .map(b -> new Pair<>(b, resolver.resolve(profile.getBeanContext(), b)))
-                        .filter(p -> {
-                            final BeanTypeInfo i = p.getValue();
-                            final BeanTypeInfo c = resolver.resolve(profile.getBeanContext(), a.parent.parent);
+        return a -> {
+            if (a == null) {
+                return null;
+            }
+            return new FxAction("misc", "misc", "misc")
+                    .bindText("Add a bean reference")
+                    .setIcon("D_LINK_VARIANT")
+                    .setSpecialAction(addAction)
+                    .setChildren(a.getBean().stream()
+                            .filter(b -> !a.parent.parent.getName().equals(b.getName()))
+                            .map(b -> new Pair<>(b, resolver.resolve(profile.getBeanContext(), b)))
+                            .filter(p -> {
+                                final BeanTypeInfo i = p.getValue();
+                                final BeanTypeInfo c = resolver.resolve(profile.getBeanContext(), a.parent.parent);
+                                final Type bt = i.getType();
+                                final Type at = c.getParameter(a);
+                                final Type atUnrolled = unrollVariables(emptyMap(), at);
 
-                            final Type bt = i.getType();
-                            final Type at = c.getParameter(a);
-                            final Type atUnrolled = unrollVariables(emptyMap(), at);
-
-                            return TypeUtils.isAssignable(bt, atUnrolled);
-                        })
-                        .map(p -> new FxAction("", "", "")
-                                .bindText(new SimpleStringProperty(p.getKey().getName()))
-                                .setIcon("D_LINK")
-                                .setEventHandler(event -> {
-                                    a.type.set("ref");
-                                    a.value.set(p.getKey().getName());
-                                })
-                        )
-                        .collect(Collectors.toList())
-                )
-                .setDisabled(false);
+                                return TypeUtils.isAssignable(bt, atUnrolled);
+                            })
+                            .map(p -> new FxAction("", "", "")
+                                    .bindText(new SimpleStringProperty(p.getKey().getName()))
+                                    .setIcon("D_LINK")
+                                    .setEventHandler(event -> {
+                                        a.type.set("ref");
+                                        a.value.set(p.getKey().getName());
+                                    })
+                            )
+                            .collect(Collectors.toList())
+                    )
+                    .setDisabled(false);
+        };
     }
 
     @Bean

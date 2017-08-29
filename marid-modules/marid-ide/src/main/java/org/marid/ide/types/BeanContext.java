@@ -48,11 +48,8 @@ public class BeanContext implements AutoCloseable {
         this.root.children.addListener(listChangeListener);
     }
 
-    public Optional<BeanData> getBean(BeanData base, String name) {
-        return base.parents()
-                .flatMap(p -> p.children.stream())
-                .filter(b -> b.getName().equals(name))
-                .findFirst();
+    Optional<BeanData> getBean(BeanData base, String name) {
+        return base.stream().filter(b -> b.getName().equals(name)).findFirst();
     }
 
     public BeanTypeInfo get(BeanData beanData, Function<BeanData, BeanTypeInfo> typeInfoFunc) {
@@ -73,12 +70,12 @@ public class BeanContext implements AutoCloseable {
         return converters;
     }
 
-    public void reset() {
+    private void reset() {
         processing.clear();
         typeInfoMap.clear();
     }
 
-    public ClassLoader getClassLoader() {
+    ClassLoader getClassLoader() {
         return converters.getClassLoader();
     }
 

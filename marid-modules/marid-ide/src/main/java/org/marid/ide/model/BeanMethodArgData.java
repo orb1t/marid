@@ -66,6 +66,10 @@ public final class BeanMethodArgData {
         return new Observable[] {name, type, value};
     }
 
+    public BeanData getBean() {
+        return parent instanceof BeanData ? (BeanData) parent : parent.parent;
+    }
+
     @Override
     public String toString() {
         return toArg().toString();
