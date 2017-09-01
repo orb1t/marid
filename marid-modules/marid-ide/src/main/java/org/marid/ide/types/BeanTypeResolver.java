@@ -34,7 +34,6 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.UnaryOperator;
-import java.util.stream.Stream;
 
 import static com.google.common.reflect.TypeToken.of;
 import static org.marid.runtime.context.MaridRuntimeUtils.fromSignature;
@@ -102,26 +101,11 @@ public class BeanTypeResolver {
     }
 
     private TypeToken<?> commonAncestor(Entry<TypeToken<?>, List<TypeToken<?>>> entry) {
-        final List<TypeToken<?>> tokens = entry.getValue();
-        if (tokens.size() == 1 || tokens.stream().allMatch(t -> t.equals(tokens.get(0)))) {
-            return tokens.get(0);
-        } else {
-            final TypeToken<?>[][] sets = tokens.stream()
-                    .map(s -> s.getTypes().toArray(new TypeToken<?>[0]))
-                    .toArray(TypeToken<?>[][]::new);
-            final int max = Stream.of(sets).mapToInt(s -> s.length).max().orElse(0);
-            for (int i = 0; i < max; i++) {
-                for (final TypeToken<?>[] set : sets) {
-                    if (i < set.length) {
-                        final TypeToken<?> candidate = set[i];
-                        if (tokens.stream().allMatch(t -> t.isSubtypeOf(candidate))) {
-                            return candidate;
-                        }
-                    }
-                }
-            }
-            return entry.getKey();
-        }
+        final Optional<? extends TypeToken<?>> token = entry.getValue().stream()
+                .flatMap(t -> t.getTypes().stream())
+                .filter(c -> entry.getValue().stream().allMatch(t -> t.isSubtypeOf(c)))
+                .findFirst();
+        return token.isPresent() ? token.get() : entry.getKey();
     }
 
     private Type[] formalTypes(MethodHandle handle, boolean getters) throws IllegalAccessException {
