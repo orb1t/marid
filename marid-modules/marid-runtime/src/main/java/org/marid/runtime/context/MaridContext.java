@@ -23,6 +23,7 @@ package org.marid.runtime.context;
 
 import org.marid.runtime.beans.Bean;
 import org.marid.runtime.event.*;
+import org.marid.runtime.exception.MaridBeanNotFoundException;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -41,11 +42,11 @@ import static org.marid.logging.Log.log;
 public final class MaridContext implements AutoCloseable {
 
     final LinkedHashMap<String, Object> beans;
+    final List<MaridContext> children;
 
     private final String name;
     private final MaridConfiguration configuration;
     private final MaridContext parent;
-    private final List<MaridContext> children;
 
     private MaridContext(MaridConfiguration configuration,
                          MaridContext parent,
@@ -92,7 +93,14 @@ public final class MaridContext implements AutoCloseable {
     }
 
     public Object getBean(String name) {
-        return beans.get(name);
+        if (beans.containsKey(name)) {
+            return beans.get(name);
+        }
+        if (parent == null) {
+            throw new MaridBeanNotFoundException(name);
+        } else {
+            return parent.getBean(name);
+        }
     }
 
     void initialize(String name, Object bean) {

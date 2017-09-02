@@ -57,17 +57,16 @@ final class MaridCreationContext implements AutoCloseable {
     }
 
     Object getOrCreate(String name) {
-        for (final MaridContext c : context.getChildren()) {
-            if (c.beans.containsKey(name)) {
-                return c.beans.get(name);
+        for (final MaridContext context : context.children) {
+            if (context.beans.containsKey(name)) {
+                return context.beans.get(name);
             }
         }
-        for (MaridContext c = context; c != null; c = c.getParent()) {
-            if (c.beans.containsKey(name)) {
-                return c.beans.get(name);
-            }
+        try {
+            return context.getBean(name);
+        } catch (MaridBeanNotFoundException x) {
+            return create(name);
         }
-        return create(name);
     }
 
     private Object create(String name) {
