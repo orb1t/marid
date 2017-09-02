@@ -32,6 +32,7 @@ import org.marid.runtime.exception.*;
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Member;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 
 import static org.marid.runtime.context.MaridRuntimeUtils.*;
 
@@ -72,14 +73,12 @@ final class MaridCreationContext implements AutoCloseable {
     private Object create(String name) {
         try {
             for (MaridCreationContext c = this; c != null; c = c.parent) {
-                final Bean b = c.bean.children.stream().filter(e -> e.name.equals(name)).findFirst().orElse(null);
-                if (b != null) {
-                    if (c.processing.add(name)) {
-                        try {
-                            return c.create0(b);
-                        } finally {
-                            c.processing.remove(name);
-                        }
+                final Optional<Bean> b = c.bean.children.stream().filter(e -> e.name.equals(name)).findFirst();
+                if (b.isPresent() && c.processing.add(name)) {
+                    try {
+                        return c.create(b.get());
+                    } finally {
+                        c.processing.remove(name);
                     }
                 }
             }
@@ -91,7 +90,7 @@ final class MaridCreationContext implements AutoCloseable {
         throw new MaridBeanNotFoundException(name);
     }
 
-    private Object create0(Bean bean) {
+    private Object create(Bean bean) {
         final Member factory = fromSignature(bean.signature, runtime.getClassLoader());
         final Object factoryObject = isRoot(factory) ? null : getOrCreate(bean.factory);
         final MethodHandle constructor = bind(bean, producer(factory), factoryObject);
