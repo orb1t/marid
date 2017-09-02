@@ -64,6 +64,6 @@ public final class BeanEvent extends MaridEvent {
 
     @Override
     public String toString() {
-        return String.format("%s[%s,%s]", getClass().getSimpleName(), type, name);
+        return String.format("%s[%s,%s]", super.toString(), type, name);
     }
 }

@@ -51,6 +51,6 @@ public final class ContextFailEvent extends MaridEvent {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "(" + cause + ")";
+        return super.toString() + "(" + cause + ")";
     }
 }

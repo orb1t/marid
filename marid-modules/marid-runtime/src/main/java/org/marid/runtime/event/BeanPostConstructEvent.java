@@ -52,6 +52,6 @@ public final class BeanPostConstructEvent extends MaridEvent {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "(" + name + ")";
+        return super.toString() + "(" + name + ")";
     }
 }

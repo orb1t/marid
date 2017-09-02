@@ -38,6 +38,6 @@ public abstract class MaridEvent extends EventObject {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName();
+        return getClass().getSimpleName() + "[" + getSource() + "]";
     }
 }
