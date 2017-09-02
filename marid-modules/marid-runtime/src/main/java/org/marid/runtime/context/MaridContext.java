@@ -41,11 +41,11 @@ import static org.marid.logging.Log.log;
  */
 public final class MaridContext implements AutoCloseable {
 
+    final MaridConfiguration configuration;
     final LinkedHashMap<String, Object> beans;
     final List<MaridContext> children;
 
     private final String name;
-    private final MaridConfiguration configuration;
     private final MaridContext parent;
 
     private MaridContext(MaridConfiguration configuration,
@@ -58,7 +58,7 @@ public final class MaridContext implements AutoCloseable {
         this.configuration = configuration;
         this.children = new ArrayList<>(bean.children.size());
 
-        try (final MaridCreationContext cc = new MaridCreationContext(pcc, bean, this, configuration.placeholderResolver)) {
+        try (final MaridCreationContext cc = new MaridCreationContext(pcc, bean, this)) {
             configuration.fireEvent(false, l -> l.bootstrap(new ContextBootstrapEvent(this, cc.runtime)));
             for (final Bean b : bean.children) {
                 try {

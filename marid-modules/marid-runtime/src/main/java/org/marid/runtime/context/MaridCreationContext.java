@@ -49,11 +49,11 @@ final class MaridCreationContext implements AutoCloseable {
 
     final MaridRuntimeObject runtime;
 
-    MaridCreationContext(MaridCreationContext parent, Bean bean, MaridContext context, MaridPlaceholderResolver resolver) {
+    MaridCreationContext(MaridCreationContext parent, Bean bean, MaridContext context) {
         this.parent = parent;
         this.bean = bean;
         this.context = context;
-        this.runtime = new MaridRuntimeObject(resolver, this::getOrCreate);
+        this.runtime = new MaridRuntimeObject(context.configuration.placeholderResolver, this::getOrCreate);
         this.convertersManager = new DefaultValueConvertersManager(runtime);
     }
 
