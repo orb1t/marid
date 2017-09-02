@@ -27,12 +27,9 @@ import org.marid.runtime.event.*;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 import static java.lang.String.format;
-import static java.util.ServiceLoader.load;
 import static java.util.logging.Level.WARNING;
-import static java.util.stream.StreamSupport.stream;
 import static org.marid.logging.Log.log;
 
 /**
@@ -42,26 +39,17 @@ public final class MaridContext implements AutoCloseable {
 
     final LinkedHashMap<String, Object> beans;
 
+    private final MaridConfiguration configuration;
     private final MaridContext parent;
     private final ArrayList<MaridContext> children = new ArrayList<>();
-    private final MaridContextListener[] listeners;
 
     private MaridContext(MaridConfiguration configuration, MaridContext parent, MaridCreationContext pcc, Bean root) {
         this.parent = parent;
+        this.configuration = configuration;
         this.beans = new LinkedHashMap<>(root.children.size());
 
-        final ClassLoader classLoader = configuration.getClassLoader();
-
-        try {
-            final ServiceLoader<MaridContextListener> serviceLoader = load(MaridContextListener.class, classLoader);
-            final Stream<MaridContextListener> listenerStream = stream(serviceLoader.spliterator(), false);
-            listeners = listenerStream.sorted().toArray(MaridContextListener[]::new);
-        } catch (Throwable x) {
-            throw new IllegalStateException("Unable to load context listeners", x);
-        }
-
         try (final MaridCreationContext cc = new MaridCreationContext(pcc, root, this, configuration.placeholderResolver)) {
-            fireEvent(false, l -> l.bootstrap(new ContextBootstrapEvent(this, cc.runtime)));
+            configuration.fireEvent(false, l -> l.bootstrap(new ContextBootstrapEvent(this, cc.runtime)));
             for (final Bean bean : root.children) {
                 try {
                     if (!bean.children.isEmpty()) {
@@ -69,11 +57,11 @@ public final class MaridContext implements AutoCloseable {
                     }
                     cc.getOrCreate(bean.name);
                 } catch (Throwable x) {
-                    fireEvent(false, l -> l.onFail(new ContextFailEvent(this, bean.name, x)));
+                    configuration.fireEvent(false, l -> l.onFail(new ContextFailEvent(this, bean.name, x)));
                     throw x;
                 }
             }
-            fireEvent(false, l -> l.onStart(new ContextStartEvent(this)));
+            configuration.fireEvent(false, l -> l.onStart(new ContextStartEvent(this)));
             children.trimToSize();
         } catch (Throwable x) {
             close();
@@ -102,32 +90,21 @@ public final class MaridContext implements AutoCloseable {
     }
 
     void initialize(String name, Object bean) {
-        fireEvent(false, l -> l.onEvent(new BeanEvent(this, name, bean, "PRE_INIT")));
-        fireEvent(false, l -> l.onPostConstruct(new BeanPostConstructEvent(this, name, bean)));
-        fireEvent(false, l -> l.onEvent(new BeanEvent(this, name, bean, "POST_INIT")));
+        configuration.fireEvent(false, l -> l.onEvent(new BeanEvent(this, name, bean, "PRE_INIT")));
+        configuration.fireEvent(false, l -> l.onPostConstruct(new BeanPostConstructEvent(this, name, bean)));
+        configuration.fireEvent(false, l -> l.onEvent(new BeanEvent(this, name, bean, "POST_INIT")));
     }
 
     private void destroy(String name, Object bean, Consumer<Throwable> errorConsumer) {
-        fireEvent(true, l -> l.onEvent(new BeanEvent(this, name, bean, "PRE_DESTROY")));
-        fireEvent(true, l -> l.onPreDestroy(new BeanPreDestroyEvent(this, name, bean, errorConsumer)));
-        fireEvent(true, l -> l.onEvent(new BeanEvent(this, name, bean, "POST_DESTROY")));
-    }
-
-    private void fireEvent(boolean reverse, Consumer<MaridContextListener> event) {
-        for (int i = listeners.length - 1; i >= 0; i--) {
-            final MaridContextListener listener = listeners[reverse ? i : listeners.length - i - 1];
-            try {
-                event.accept(listener);
-            } catch (Throwable x) {
-                log(WARNING, "Error in {0}", x, listener);
-            }
-        }
+        configuration.fireEvent(true, l -> l.onEvent(new BeanEvent(this, name, bean, "PRE_DESTROY")));
+        configuration.fireEvent(true, l -> l.onPreDestroy(new BeanPreDestroyEvent(this, name, bean, errorConsumer)));
+        configuration.fireEvent(true, l -> l.onEvent(new BeanEvent(this, name, bean, "POST_DESTROY")));
     }
 
     @Override
     public void close() {
         children.forEach(MaridContext::close);
-        fireEvent(true, l -> l.onStop(new ContextStopEvent(this)));
+        configuration.fireEvent(true, l -> l.onStop(new ContextStopEvent(this)));
         final IllegalStateException e = new IllegalStateException("Runtime close exception");
         final List<Entry<String, Object>> entries = new ArrayList<>(beans.entrySet());
         beans.clear();

@@ -23,14 +23,22 @@ package org.marid.runtime.context;
 
 import java.io.*;
 import java.util.Properties;
+import java.util.ServiceLoader;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.ServiceLoader.load;
+import static java.util.logging.Level.WARNING;
+import static java.util.stream.StreamSupport.stream;
+import static org.marid.logging.Log.log;
 
-public class MaridConfiguration {
+class MaridConfiguration {
 
-    public final MaridPlaceholderResolver placeholderResolver;
+    final MaridPlaceholderResolver placeholderResolver;
+    private final MaridContextListener[] listeners;
 
-    public MaridConfiguration(ClassLoader classLoader, Properties systemProperties) {
+    MaridConfiguration(ClassLoader classLoader, Properties systemProperties) {
         final Properties properties = new Properties(systemProperties);
         try (final InputStream inputStream = classLoader.getResourceAsStream("application.properties")) {
             if (inputStream != null) {
@@ -43,9 +51,28 @@ public class MaridConfiguration {
         }
 
         placeholderResolver = new MaridPlaceholderResolver(classLoader, properties);
+
+        try {
+            final ServiceLoader<MaridContextListener> serviceLoader = load(MaridContextListener.class, classLoader);
+            final Stream<MaridContextListener> listenerStream = stream(serviceLoader.spliterator(), false);
+            listeners = listenerStream.sorted().toArray(MaridContextListener[]::new);
+        } catch (Throwable x) {
+            throw new IllegalStateException("Unable to load context listeners", x);
+        }
     }
 
-    public ClassLoader getClassLoader() {
+    ClassLoader getClassLoader() {
         return placeholderResolver.getClassLoader();
+    }
+
+    void fireEvent(boolean reverse, Consumer<MaridContextListener> event) {
+        for (int i = listeners.length - 1; i >= 0; i--) {
+            final MaridContextListener listener = listeners[reverse ? i : listeners.length - i - 1];
+            try {
+                event.accept(listener);
+            } catch (Throwable x) {
+                log(WARNING, "Error in {0}", x, listener);
+            }
+        }
     }
 }
