@@ -76,13 +76,13 @@ public class MaridContextTest {
                 )
         );
         try (final MaridContext runtime = new MaridContext(root)) {
-            assertEquals("bean1", new Bean1(1, "abc", new BigDecimal("1.23")).setA(true), runtime.getBeans().get("bean1"));
-            assertEquals("bean2", new BigDecimal("1.23"), runtime.getBeans().get("bean2"));
-            assertEquals("bean3", "abc", runtime.getBeans().get("bean3"));
-            assertEquals("bean4", singletonList(1), runtime.getBeans().get("bean4"));
-            assertEquals("bean5", asList(1, 2), runtime.getBeans().get("bean5"));
-            assertEquals("bean6", "a1", runtime.getBeans().get("bean6"));
-            assertEquals("bean1", 10, ((Bean1) runtime.getBeans().get("bean1")).q);
+            assertEquals("bean1", new Bean1(1, "abc", new BigDecimal("1.23")).setA(true), runtime.getBean("bean1"));
+            assertEquals("bean2", new BigDecimal("1.23"), runtime.getBean("bean2"));
+            assertEquals("bean3", "abc", runtime.getBean("bean3"));
+            assertEquals("bean4", singletonList(1), runtime.getBean("bean4"));
+            assertEquals("bean5", asList(1, 2), runtime.getBean("bean5"));
+            assertEquals("bean6", "a1", runtime.getBean("bean6"));
+            assertEquals("bean1", 10, ((Bean1) runtime.getBean("bean1")).q);
         }
     }
 
@@ -121,7 +121,7 @@ public class MaridContextTest {
                 m("x", "of", "1.2")
         ));
         try (final MaridContext context = new MaridContext(root)) {
-            final Bean1 b = (Bean1) context.getBeans().get("b1");
+            final Bean1 b = (Bean1) context.getBean("b1");
             assertEquals(new BigDecimal("1.2"), b.getZ());
         } catch (MaridContextException x) {
             throw x.getSuppressed()[0];
