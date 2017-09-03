@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static java.lang.String.format;
 import static java.util.logging.Level.WARNING;
@@ -41,39 +42,35 @@ public final class MaridContext implements MaridRuntime, AutoCloseable {
 
     final List<MaridContext> children;
     final MaridConfiguration configuration;
+    final Object value;
 
     private final String name;
-    private final Object value;
     private final MaridContext parent;
 
-    MaridContext(MaridConfiguration conf, MaridContext parent, MaridCreationContext pcc, Bean bean, Object value) {
+    MaridContext(MaridConfiguration conf, MaridContext p, MaridCreationContext pcc, Bean bean, Function<MaridCreationContext, Object> v) {
         this.name = bean.name;
-        this.value = value;
-        this.parent = parent;
+        this.parent = p;
         this.configuration = conf;
         this.children = new ArrayList<>(bean.children.size());
 
         try (final MaridCreationContext cc = new MaridCreationContext(pcc, bean, this)) {
             conf.fireEvent(false, l -> l.bootstrap(new ContextBootstrapEvent(this)));
             for (final Bean b : bean.children) {
-                try {
-                    if (children.stream().noneMatch(c -> c.name.equals(b.name))) {
-                        children.add(new MaridContext(conf, this, cc, b, cc.create(b)));
-                    }
-                } catch (Throwable x) {
-                    conf.fireEvent(false, l -> l.onFail(new ContextFailEvent(this, b.name, x)));
-                    throw x;
+                if (children.stream().noneMatch(c -> c.name.equals(b.name))) {
+                    children.add(new MaridContext(conf, this, cc, b, c -> c.create(b)));
                 }
             }
+            this.value = v.apply(cc);
             conf.fireEvent(false, l -> l.onStart(new ContextStartEvent(this)));
         } catch (Throwable x) {
             close();
+            conf.fireEvent(false, l -> l.onFail(new ContextFailEvent(this, name, x)));
             throw x;
         }
     }
 
     public MaridContext(Bean root, ClassLoader classLoader, Properties systemProperties) {
-        this(new MaridConfiguration(classLoader, systemProperties), null, null, root, null);
+        this(new MaridConfiguration(classLoader, systemProperties), null, null, root, c -> null);
     }
 
     public MaridContext(Bean root) {

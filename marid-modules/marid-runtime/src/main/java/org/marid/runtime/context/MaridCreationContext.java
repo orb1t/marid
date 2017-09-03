@@ -64,12 +64,13 @@ final class MaridCreationContext implements AutoCloseable {
 
     private Object create(String name) {
         try {
-            final Optional<Bean> b = bean.children.stream().filter(e -> e.name.equals(name)).findFirst();
-            if (b.isPresent() && processing.add(name)) {
+            final Optional<Bean> bo = bean.children.stream().filter(e -> e.name.equals(name)).findFirst();
+            if (bo.isPresent() && processing.add(name)) {
+                final Bean b = bo.get();
                 try {
-                    final Object v = create(b.get());
-                    context.children.add(new MaridContext(context.configuration, context, this, b.get(), v));
-                    return v;
+                    final MaridContext c = new MaridContext(context.configuration, context, this, b, cc -> cc.create(b));
+                    context.children.add(c);
+                    return c.value;
                 } finally {
                     processing.remove(name);
                 }

@@ -25,6 +25,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.Label;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
+import javafx.util.converter.DefaultStringConverter;
 import org.marid.dependant.beaneditor.model.SignatureResolver;
 import org.marid.ide.model.BeanData;
 import org.marid.ide.project.ProjectProfile;
@@ -64,7 +65,7 @@ public class BeanTable extends MaridTreeTableView<BeanData> {
             column.setPrefWidth(100);
             column.setMaxWidth(400);
             column.setCellValueFactory(param -> param.getValue().getValue().name);
-            column.setCellFactory(TextFieldTreeTableCell.forTreeTableColumn());
+            column.setCellFactory(param -> new TextFieldTreeTableCell<>(new DefaultStringConverter()));
             column.setEditable(true);
             getColumns().add(column);
         });
