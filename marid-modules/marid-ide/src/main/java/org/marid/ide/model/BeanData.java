@@ -93,17 +93,12 @@ public class BeanData extends BeanMethodData {
         return factory.get();
     }
 
-    public Stream<BeanData> reversedPath() {
-        return parent == null ? of(this) : concat(of(this), parent.reversedPath());
-    }
-
     public Stream<BeanData> parents() {
-        return parent == null ? Stream.empty() : parent.reversedPath();
+        return parent == null ? Stream.empty() : concat(of(parent), parent.parents());
     }
 
     public Stream<BeanData> referents() {
-        return parents()
-                .flatMap(b -> b.children.stream())
+        return concat(children.stream(), parents().flatMap(b -> b.children.stream()))
                 .filter(b -> b != this)
                 .filter(b -> b.parent != null);
     }

@@ -177,27 +177,27 @@ public final class MaridContext implements MaridRuntime, AutoCloseable {
             try {
                 return getBean(name);
             } catch (MaridBeanNotFoundException x) {
-                return create(name);
+                try {
+                    return create(name);
+                } catch (RuntimeException rx) {
+                    throw rx;
+                } catch (Throwable tx) {
+                    throw new MaridBeanInitializationException(name, tx);
+                }
             }
         }
 
         private Object create(String name) {
-            try {
-                final Optional<Bean> bo = bean.children.stream().filter(e -> e.name.equals(name)).findFirst();
-                if (bo.isPresent() && processing.add(name)) {
-                    final Bean b = bo.get();
-                    try {
-                        final MaridContext c = child(this, b, cc -> cc.create(b));
-                        children.add(c);
-                        return c.value;
-                    } finally {
-                        processing.remove(name);
-                    }
+            final Optional<Bean> bo = bean.children.stream().filter(e -> e.name.equals(name)).findFirst();
+            if (bo.isPresent() && processing.add(name)) {
+                final Bean b = bo.get();
+                try {
+                    final MaridContext c = child(this, b, cc -> cc.create(b));
+                    children.add(c);
+                    return c.value;
+                } finally {
+                    processing.remove(name);
                 }
-            } catch (RuntimeException x) {
-                throw x;
-            } catch (Throwable x) {
-                throw new MaridBeanInitializationException(name, x);
             }
             if (parent != null) {
                 return parent.create(name);
