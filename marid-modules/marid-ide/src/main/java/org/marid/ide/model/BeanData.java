@@ -101,8 +101,11 @@ public class BeanData extends BeanMethodData {
         return parent == null ? Stream.empty() : parent.reversedPath();
     }
 
-    public Stream<BeanData> stream() {
-        return Stream.concat(children.stream(), parents().flatMap(p -> p.children.stream()));
+    public Stream<BeanData> referents() {
+        return parents()
+                .flatMap(b -> b.children.stream())
+                .filter(b -> b != this)
+                .filter(b -> b.parent != null);
     }
 
     public Bean toBean() {

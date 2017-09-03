@@ -49,7 +49,9 @@ public class BeanContext implements AutoCloseable {
     }
 
     Optional<BeanData> getBean(BeanData base, String name) {
-        return base.stream().filter(b -> b.getName().equals(name)).findFirst();
+        return base.referents()
+                .filter(b -> b.getName().equals(name))
+                .findFirst();
     }
 
     public BeanTypeInfo get(BeanData beanData, Function<BeanData, BeanTypeInfo> typeInfoFunc) {

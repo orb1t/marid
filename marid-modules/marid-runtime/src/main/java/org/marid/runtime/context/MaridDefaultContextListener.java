@@ -41,7 +41,7 @@ public class MaridDefaultContextListener implements MaridContextListener {
 
     @Override
     public void bootstrap(@Nonnull ContextBootstrapEvent contextBootstrapEvent) {
-        final MaridRuntime runtime = contextBootstrapEvent.getRuntime();
+        final MaridRuntime runtime = contextBootstrapEvent.getSource();
         for (final String key : runtime.getApplicationProperties().stringPropertyNames()) {
             if (key.startsWith("system.")) {
                 getProperties().setProperty(key.substring(7), runtime.getApplicationProperties().getProperty(key));

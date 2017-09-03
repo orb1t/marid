@@ -65,7 +65,6 @@ public class DefaultValueConverters extends AbstractValueConverters {
         redirect(l("Basic", "BigInteger", "D_NUMERIC", "BigInteger"), BigInteger.class, valueOf()::apply);
         redirect(l("Basic", "BigDecimal", "D_NUMERIC", "BigDecimal"), BigDecimal.class, valueOf()::apply);
 
-        register(l("Special", "ref", "D_SERVER", "Bean by name"), Object.class, (v, c) -> runtime.getBean(v));
         register(l("Special", "runtime", "D_RUN", "Runtime"), MaridRuntime.class, (v, c) -> runtime);
     }
 

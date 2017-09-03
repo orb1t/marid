@@ -54,7 +54,7 @@ public class Bean extends BeanMethod {
     public final List<Bean> children;
 
     public Bean() {
-        this("runtime", Object.class.getName(), Calls.<Constructor<?>>call(Object.class::getConstructor));
+        this("", Object.class.getName(), Calls.<Constructor<?>>call(Object.class::getConstructor));
     }
 
     public Bean(@Nonnull String name,

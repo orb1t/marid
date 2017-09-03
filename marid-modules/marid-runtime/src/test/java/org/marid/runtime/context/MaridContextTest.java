@@ -73,6 +73,18 @@ public class MaridContextTest {
                         "bean6",
                         String.class.getName(),
                         String.class.getMethod("valueOf", Object.class), m("arg0", "js", "'a' + 1")
+                ),
+                new Bean(
+                        "bean7",
+                        String.class.getName(),
+                        String.class.getConstructor(String.class),
+                        m("arg", "ref", "bean8")
+                ),
+                new Bean(
+                        "bean8",
+                        String.class.getName(),
+                        String.class.getConstructor(String.class),
+                        m("arg", "of", "x")
                 )
         );
         try (final MaridContext runtime = new MaridContext(root)) {
@@ -83,6 +95,7 @@ public class MaridContextTest {
             assertEquals("bean5", asList(1, 2), runtime.getBean("bean5"));
             assertEquals("bean6", "a1", runtime.getBean("bean6"));
             assertEquals("bean1", 10, ((Bean1) runtime.getBean("bean1")).q);
+            assertEquals("bean7", "x", runtime.getBean("bean7"));
         }
     }
 
@@ -100,29 +113,6 @@ public class MaridContextTest {
         )));
         try (final MaridContext context = new MaridContext(root)) {
             assertNull(context);
-        } catch (MaridContextException x) {
-            throw x.getSuppressed()[0];
-        }
-    }
-
-    @Test
-    public void beanTree() throws Throwable {
-        final Bean root = new Bean();
-        final Bean b1;
-        root.add(b1 = new Bean(
-                "b1",
-                Bean1.class.getName(),
-                Bean1.class.getConstructor(int.class, String.class, BigDecimal.class),
-                m("x", "of", "1"), m("y", "of", "2"), m("z", "ref", "b2")));
-        b1.add(new Bean(
-                "b2",
-                BigDecimal.class.getName(),
-                BigDecimal.class.getConstructor(String.class),
-                m("x", "of", "1.2")
-        ));
-        try (final MaridContext context = new MaridContext(root)) {
-            final Bean1 b = (Bean1) context.getBean("b1");
-            assertEquals(new BigDecimal("1.2"), b.getZ());
         } catch (MaridContextException x) {
             throw x.getSuppressed()[0];
         }

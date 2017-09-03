@@ -26,9 +26,7 @@ import org.marid.runtime.event.*;
 import org.marid.runtime.exception.MaridBeanNotFoundException;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.function.Consumer;
 
@@ -39,37 +37,35 @@ import static org.marid.logging.Log.log;
 /**
  * @author Dmitry Ovchinnikov
  */
-public final class MaridContext implements AutoCloseable {
+public final class MaridContext implements MaridRuntime, AutoCloseable {
 
-    final MaridConfiguration configuration;
-    final LinkedHashMap<String, Object> beans;
     final List<MaridContext> children;
+    final MaridConfiguration configuration;
 
     private final String name;
+    private final Object value;
     private final MaridContext parent;
 
-    private MaridContext(MaridConfiguration configuration,
-                         MaridContext parent,
-                         MaridCreationContext pcc,
-                         Bean bean) {
+    MaridContext(MaridConfiguration conf, MaridContext parent, MaridCreationContext pcc, Bean bean, Object value) {
         this.name = bean.name;
-        this.beans = new LinkedHashMap<>(bean.children.size());
+        this.value = value;
         this.parent = parent;
-        this.configuration = configuration;
+        this.configuration = conf;
         this.children = new ArrayList<>(bean.children.size());
 
         try (final MaridCreationContext cc = new MaridCreationContext(pcc, bean, this)) {
-            configuration.fireEvent(false, l -> l.bootstrap(new ContextBootstrapEvent(this, cc.runtime)));
+            conf.fireEvent(false, l -> l.bootstrap(new ContextBootstrapEvent(this)));
             for (final Bean b : bean.children) {
                 try {
-                    children.add(new MaridContext(configuration, this, pcc, b));
-                    cc.getOrCreate(b.name);
+                    if (children.stream().noneMatch(c -> c.name.equals(b.name))) {
+                        children.add(new MaridContext(conf, this, cc, b, cc.create(b)));
+                    }
                 } catch (Throwable x) {
-                    configuration.fireEvent(false, l -> l.onFail(new ContextFailEvent(this, b.name, x)));
+                    conf.fireEvent(false, l -> l.onFail(new ContextFailEvent(this, b.name, x)));
                     throw x;
                 }
             }
-            configuration.fireEvent(false, l -> l.onStart(new ContextStartEvent(this)));
+            conf.fireEvent(false, l -> l.onStart(new ContextStartEvent(this)));
         } catch (Throwable x) {
             close();
             throw x;
@@ -77,7 +73,7 @@ public final class MaridContext implements AutoCloseable {
     }
 
     public MaridContext(Bean root, ClassLoader classLoader, Properties systemProperties) {
-        this(new MaridConfiguration(classLoader, systemProperties), null, null, root);
+        this(new MaridConfiguration(classLoader, systemProperties), null, null, root, null);
     }
 
     public MaridContext(Bean root) {
@@ -92,15 +88,33 @@ public final class MaridContext implements AutoCloseable {
         return children;
     }
 
+    @Override
     public Object getBean(String name) {
-        if (beans.containsKey(name)) {
-            return beans.get(name);
+        for (final MaridContext child : children) {
+            if (child.name.equals(name)) {
+                return child.value;
+            }
         }
         if (parent == null) {
             throw new MaridBeanNotFoundException(name);
         } else {
             return parent.getBean(name);
         }
+    }
+
+    @Override
+    public ClassLoader getClassLoader() {
+        return configuration.getClassLoader();
+    }
+
+    @Override
+    public String resolvePlaceholders(String value) {
+        return configuration.placeholderResolver.resolvePlaceholders(value);
+    }
+
+    @Override
+    public Properties getApplicationProperties() {
+        return configuration.placeholderResolver.getProperties();
     }
 
     void initialize(String name, Object bean) {
@@ -118,13 +132,12 @@ public final class MaridContext implements AutoCloseable {
     @Override
     public void close() {
         final IllegalStateException e = new IllegalStateException("Runtime close exception");
-        final ArrayList<Entry<String, Object>> entries = new ArrayList<>(beans.entrySet());
-        beans.clear();
-        for (int i = entries.size() - 1; i >= 0; i--) {
-            final Entry<String, Object> entry = entries.get(i);
-            final String name = entry.getKey();
-            final Object instance = entry.getValue();
-            destroy(name, instance, x -> e.addSuppressed(new IllegalStateException(format("[%s] Close", name), x)));
+        for (int i = children.size() - 1; i >= 0; i--) {
+            final MaridContext child = children.get(i);
+            destroy(child.name, child.value, x -> {
+                final IllegalStateException ex = new IllegalStateException(format("[%s] Close", child.name), x);
+                e.addSuppressed(ex);
+            });
         }
         configuration.fireEvent(true, l -> l.onStop(new ContextStopEvent(this)));
         if (e.getSuppressed().length > 0) {

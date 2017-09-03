@@ -47,22 +47,14 @@ final class MaridCreationContext implements AutoCloseable {
     private final DefaultValueConvertersManager convertersManager;
     private final LinkedHashSet<String> processing = new LinkedHashSet<>();
 
-    final MaridRuntimeObject runtime;
-
     MaridCreationContext(MaridCreationContext parent, Bean bean, MaridContext context) {
         this.parent = parent;
         this.bean = bean;
         this.context = context;
-        this.runtime = new MaridRuntimeObject(context.configuration.placeholderResolver, this::getOrCreate);
-        this.convertersManager = new DefaultValueConvertersManager(runtime);
+        this.convertersManager = new DefaultValueConvertersManager(context);
     }
 
-    Object getOrCreate(String name) {
-        for (final MaridContext context : context.children) {
-            if (context.beans.containsKey(name)) {
-                return context.beans.get(name);
-            }
-        }
+    private Object getOrCreate(String name) {
         try {
             return context.getBean(name);
         } catch (MaridBeanNotFoundException x) {
@@ -72,14 +64,14 @@ final class MaridCreationContext implements AutoCloseable {
 
     private Object create(String name) {
         try {
-            for (MaridCreationContext c = this; c != null; c = c.parent) {
-                final Optional<Bean> b = c.bean.children.stream().filter(e -> e.name.equals(name)).findFirst();
-                if (b.isPresent() && c.processing.add(name)) {
-                    try {
-                        return c.create(b.get());
-                    } finally {
-                        c.processing.remove(name);
-                    }
+            final Optional<Bean> b = bean.children.stream().filter(e -> e.name.equals(name)).findFirst();
+            if (b.isPresent() && processing.add(name)) {
+                try {
+                    final Object v = create(b.get());
+                    context.children.add(new MaridContext(context.configuration, context, this, b.get(), v));
+                    return v;
+                } finally {
+                    processing.remove(name);
                 }
             }
         } catch (RuntimeException x) {
@@ -87,11 +79,15 @@ final class MaridCreationContext implements AutoCloseable {
         } catch (Throwable x) {
             throw new MaridBeanInitializationException(name, x);
         }
-        throw new MaridBeanNotFoundException(name);
+        if (parent != null) {
+            return parent.create(name);
+        } else {
+            throw new MaridBeanNotFoundException(name);
+        }
     }
 
-    private Object create(Bean bean) {
-        final Member factory = fromSignature(bean.signature, runtime.getClassLoader());
+    Object create(Bean bean) {
+        final Member factory = fromSignature(bean.signature, context.getClassLoader());
         final Object factoryObject = isRoot(factory) ? null : getOrCreate(bean.factory);
         final MethodHandle constructor = bind(bean, producer(factory), factoryObject);
 
@@ -108,7 +104,7 @@ final class MaridCreationContext implements AutoCloseable {
 
         if (instance != null) {
             for (final BeanMethod initializer : bean.initializers) {
-                final Member member = fromSignature(initializer.signature, runtime.getClassLoader());
+                final Member member = fromSignature(initializer.signature, context.getClassLoader());
                 final MethodHandle handle = bind(initializer, initializer(member), instance);
                 final Class<?>[] argTypes = handle.type().parameterArray();
                 final Object[] args = new Object[argTypes.length];
@@ -119,8 +115,6 @@ final class MaridCreationContext implements AutoCloseable {
             }
             context.initialize(bean.name, instance);
         }
-
-        context.beans.put(bean.name, instance);
 
         return instance;
     }
@@ -135,10 +129,16 @@ final class MaridCreationContext implements AutoCloseable {
 
     private Object arg(Bean bean, BeanMethod method, BeanMethodArg methodArg, Class<?> type) {
         try {
-            final ValueConverter converter = convertersManager
-                    .getConverter(methodArg.type)
-                    .orElseThrow(() -> new MaridBeanArgConverterNotFoundException(bean, method, methodArg));
-            return converter.convert(runtime.resolvePlaceholders(methodArg.value), Casts.cast(type));
+            switch (methodArg.type) {
+                case "ref":
+                    return getOrCreate(methodArg.value);
+                default: {
+                    final ValueConverter converter = convertersManager
+                            .getConverter(methodArg.type)
+                            .orElseThrow(() -> new MaridBeanArgConverterNotFoundException(bean, method, methodArg));
+                    return converter.convert(context.resolvePlaceholders(methodArg.value), Casts.cast(type));
+                }
+            }
         } catch (RuntimeException x) {
             throw x;
         } catch (Throwable x) {

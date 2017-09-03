@@ -22,18 +22,10 @@
 package org.marid.runtime.event;
 
 import org.marid.runtime.context.MaridContext;
-import org.marid.runtime.context.MaridRuntime;
 
 public final class ContextBootstrapEvent extends MaridEvent {
 
-    private final MaridRuntime runtime;
-
-    public ContextBootstrapEvent(MaridContext context, MaridRuntime runtime) {
+    public ContextBootstrapEvent(MaridContext context) {
         super(context);
-        this.runtime = runtime;
-    }
-
-    public MaridRuntime getRuntime() {
-        return runtime;
     }
 }
