@@ -21,46 +21,51 @@
 
 package org.marid.runtime.context;
 
+import org.marid.misc.Casts;
 import org.marid.runtime.beans.Bean;
+import org.marid.runtime.beans.BeanMethod;
+import org.marid.runtime.beans.BeanMethodArg;
+import org.marid.runtime.converter.DefaultValueConvertersManager;
+import org.marid.runtime.converter.ValueConverter;
 import org.marid.runtime.event.*;
-import org.marid.runtime.exception.MaridBeanNotFoundException;
+import org.marid.runtime.exception.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.lang.invoke.MethodHandle;
+import java.lang.reflect.Member;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static java.lang.String.format;
 import static java.util.logging.Level.WARNING;
 import static org.marid.logging.Log.log;
+import static org.marid.runtime.context.MaridRuntimeUtils.*;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public final class MaridContext implements MaridRuntime, AutoCloseable {
 
-    final List<MaridContext> children;
-    final MaridConfiguration configuration;
-    final Object value;
-
+    private final MaridConfiguration configuration;
     private final String name;
+    private final Object value;
     private final MaridContext parent;
+    private final List<MaridContext> children;
 
-    MaridContext(MaridConfiguration conf, MaridContext p, MaridCreationContext pcc, Bean bean, Function<MaridCreationContext, Object> v) {
+    MaridContext(MaridConfiguration conf, MaridContext p, Creator pcc, Bean bean, Function<Creator, Object> v) {
         this.name = bean.name;
         this.parent = p;
         this.configuration = conf;
         this.children = new ArrayList<>(bean.children.size());
 
-        try (final MaridCreationContext cc = new MaridCreationContext(pcc, bean, this)) {
+        try (final Creator creator = new Creator(pcc, bean)) {
             conf.fireEvent(false, l -> l.bootstrap(new ContextBootstrapEvent(this)));
             for (final Bean b : bean.children) {
                 if (children.stream().noneMatch(c -> c.name.equals(b.name))) {
-                    children.add(new MaridContext(conf, this, cc, b, c -> c.create(b)));
+                    children.add(child(creator, b, c -> c.create(b)));
                 }
             }
-            this.value = v.apply(cc);
+            this.value = v.apply(creator);
             conf.fireEvent(false, l -> l.onStart(new ContextStartEvent(this)));
         } catch (Throwable x) {
             close();
@@ -75,6 +80,10 @@ public final class MaridContext implements MaridRuntime, AutoCloseable {
 
     public MaridContext(Bean root) {
         this(root, Thread.currentThread().getContextClassLoader(), System.getProperties());
+    }
+
+    private MaridContext child(Creator pcc, Bean bean, Function<Creator, Object> v) {
+        return new MaridContext(configuration, this, pcc, bean, v);
     }
 
     public MaridContext getParent() {
@@ -114,7 +123,7 @@ public final class MaridContext implements MaridRuntime, AutoCloseable {
         return configuration.placeholderResolver.getProperties();
     }
 
-    void initialize(String name, Object bean) {
+    private void initialize(String name, Object bean) {
         configuration.fireEvent(false, l -> l.onEvent(new BeanEvent(this, name, bean, "PRE_INIT")));
         configuration.fireEvent(false, l -> l.onPostConstruct(new BeanPostConstructEvent(this, name, bean)));
         configuration.fireEvent(false, l -> l.onEvent(new BeanEvent(this, name, bean, "POST_INIT")));
@@ -149,5 +158,125 @@ public final class MaridContext implements MaridRuntime, AutoCloseable {
             builder.insert(0, c.name + "/");
         }
         return builder.toString();
+    }
+
+    private final class Creator implements AutoCloseable {
+
+        private final Creator parent;
+        private final Bean bean;
+        private final DefaultValueConvertersManager convertersManager;
+        private final LinkedHashSet<String> processing = new LinkedHashSet<>();
+
+        private Creator(Creator parent, Bean bean) {
+            this.parent = parent;
+            this.bean = bean;
+            this.convertersManager = new DefaultValueConvertersManager(MaridContext.this);
+        }
+
+        private Object getOrCreate(String name) {
+            try {
+                return getBean(name);
+            } catch (MaridBeanNotFoundException x) {
+                return create(name);
+            }
+        }
+
+        private Object create(String name) {
+            try {
+                final Optional<Bean> bo = bean.children.stream().filter(e -> e.name.equals(name)).findFirst();
+                if (bo.isPresent() && processing.add(name)) {
+                    final Bean b = bo.get();
+                    try {
+                        final MaridContext c = child(this, b, cc -> cc.create(b));
+                        children.add(c);
+                        return c.value;
+                    } finally {
+                        processing.remove(name);
+                    }
+                }
+            } catch (RuntimeException x) {
+                throw x;
+            } catch (Throwable x) {
+                throw new MaridBeanInitializationException(name, x);
+            }
+            if (parent != null) {
+                return parent.create(name);
+            } else {
+                throw new MaridBeanNotFoundException(name);
+            }
+        }
+
+        private Object create(Bean bean) {
+            final Member factory = fromSignature(bean.signature, getClassLoader());
+            final Object factoryObject = isRoot(factory) ? null : getOrCreate(bean.factory);
+            final MethodHandle constructor = bind(bean, producer(factory), factoryObject);
+
+            final Object instance;
+            {
+                final Class<?>[] argTypes = constructor.type().parameterArray();
+                final Object[] args = new Object[argTypes.length];
+                for (int i = 0; i < args.length; i++) {
+                    final BeanMethodArg arg = bean.args[i];
+                    args[i] = arg(bean, bean, arg, argTypes[i]);
+                }
+                instance = invoke(bean, bean, constructor, args);
+            }
+
+            if (instance != null) {
+                for (final BeanMethod initializer : bean.initializers) {
+                    final Member member = fromSignature(initializer.signature, getClassLoader());
+                    final MethodHandle handle = bind(initializer, initializer(member), instance);
+                    final Class<?>[] argTypes = handle.type().parameterArray();
+                    final Object[] args = new Object[argTypes.length];
+                    for (int i = 0; i < args.length; i++) {
+                        args[i] = arg(bean, initializer, initializer.args[i], argTypes[i]);
+                    }
+                    invoke(bean, initializer, handle, args);
+                }
+                initialize(bean.name, instance);
+            }
+
+            return instance;
+        }
+
+        private Object invoke(Bean bean, BeanMethod method, MethodHandle handle, Object... args) {
+            try {
+                return handle.asFixedArity().invokeWithArguments(args);
+            } catch (Throwable x) {
+                throw new MaridBeanMethodInvocationException(bean.name, method.signature, x);
+            }
+        }
+
+        private Object arg(Bean bean, BeanMethod method, BeanMethodArg methodArg, Class<?> type) {
+            try {
+                switch (methodArg.type) {
+                    case "ref":
+                        return getOrCreate(methodArg.value);
+                    default: {
+                        final ValueConverter converter = convertersManager
+                                .getConverter(methodArg.type)
+                                .orElseThrow(() -> new MaridBeanArgConverterNotFoundException(bean, method, methodArg));
+                        return converter.convert(resolvePlaceholders(methodArg.value), Casts.cast(type));
+                    }
+                }
+            } catch (RuntimeException x) {
+                throw x;
+            } catch (Throwable x) {
+                throw new MaridBeanMethodArgException(bean.name, method.signature, methodArg.name, x);
+            }
+        }
+
+        private MethodHandle bind(BeanMethod producer, MethodHandle handle, Object instance) {
+            if (handle.type().parameterCount() == producer.args.length + 1) {
+                return handle.bindTo(instance);
+            } else {
+                return handle;
+            }
+        }
+
+        @Override
+        public void close() {
+            processing.clear();
+        }
     }
 }
