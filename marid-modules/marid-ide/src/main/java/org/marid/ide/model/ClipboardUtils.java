@@ -20,9 +20,43 @@
 
 package org.marid.ide.model;
 
+import javafx.scene.input.Clipboard;
 import javafx.scene.input.DataFormat;
+import org.marid.io.Xmls;
+import org.marid.runtime.beans.Bean;
+
+import javax.xml.transform.stream.StreamResult;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.Optional;
+
+import static java.util.Collections.singletonMap;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
+import static org.marid.io.Xmls.writeFormatted;
 
 public interface ClipboardUtils {
 
     DataFormat BEAN_DATA_FORMAT = new DataFormat("text/x-bean-data");
+
+    static boolean hasBeanData(Clipboard clipboard) {
+        return clipboard.hasContent(BEAN_DATA_FORMAT);
+    }
+
+    static Optional<Bean> load(Clipboard clipboard) {
+        if (hasBeanData(clipboard)) {
+            final String xml = clipboard.getContent(BEAN_DATA_FORMAT).toString();
+            try (final StringReader reader = new StringReader(xml)) {
+                return of(Xmls.read(reader, Bean::new));
+            }
+        } else {
+            return empty();
+        }
+    }
+
+    static void save(Bean bean, Clipboard clipboard) {
+        final StringWriter writer = new StringWriter();
+        writeFormatted("beans", bean::writeTo, new StreamResult(writer));
+        clipboard.setContent(singletonMap(BEAN_DATA_FORMAT, writer.toString()));
+    }
 }

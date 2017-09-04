@@ -22,7 +22,6 @@ package org.marid.dependant.beaneditor;
 
 import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.TextInputDialog;
-import javafx.scene.input.ClipboardContent;
 import javafx.stage.Modality;
 import org.marid.annotation.MetaLiteral;
 import org.marid.dependant.beaneditor.dao.LibraryBeanDao;
@@ -48,7 +47,10 @@ import java.util.stream.Collectors;
 
 import static java.util.logging.Level.WARNING;
 import static java.util.stream.Collectors.*;
+import static javafx.scene.input.Clipboard.getSystemClipboard;
 import static org.marid.ide.IdeNotifications.n;
+import static org.marid.ide.model.ClipboardUtils.load;
+import static org.marid.ide.model.ClipboardUtils.save;
 import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.l10n.L10n.m;
 import static org.marid.l10n.L10n.s;
@@ -61,13 +63,36 @@ public class BeanTableActions {
 
     @Bean
     public BeanTableAction cutBeanAction(SpecialAction cutAction) {
-        return data -> new FxAction("cut", "cut", "cut")
-                .setSpecialAction(cutAction)
-                .bindText("Cut")
-                .setIcon("D_CONTENT_CUT")
-                .setEventHandler(event -> {
-                    final ClipboardContent content = new ClipboardContent();
-                });
+        return data -> {
+            if (data.parent == null) {
+                return null;
+            }
+            return new FxAction("ccv", "ccv", "Edit")
+                    .setSpecialAction(cutAction)
+                    .bindText("Cut")
+                    .setIcon("D_CONTENT_CUT")
+                    .setEventHandler(event -> {
+                        save(data.toBean(), getSystemClipboard());
+                        data.parent.children.remove(data);
+                    });
+        };
+    }
+
+    @Bean
+    public BeanTableAction pasteBeanAction(SpecialAction pasteAction) {
+        return data -> {
+            final FxAction action = new FxAction("ccv", "ccv", "Edit")
+                    .setSpecialAction(pasteAction)
+                    .bindText("Paste")
+                    .setIcon("D_CONTENT_PASTE")
+                    .setEventHandler(event -> {
+                        load(getSystemClipboard()).ifPresent(bean -> {
+                            final BeanData beanData = new BeanData(data, bean);
+                            data.children.add(beanData);
+                        });
+                    });
+            return action;
+        };
     }
 
     @Bean

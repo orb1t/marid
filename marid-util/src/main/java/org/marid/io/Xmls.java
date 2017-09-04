@@ -77,9 +77,9 @@ public interface Xmls {
     }
 
     static <T> T read(Consumer<DocumentBuilderFactory> documentBuilderFactoryConfigurer,
-                     Consumer<DocumentBuilder> documentBuilderConfigurer,
-                     Function<Document, T> documentReader,
-                     InputSource source) {
+                      Consumer<DocumentBuilder> documentBuilderConfigurer,
+                      Function<Document, T> documentReader,
+                      InputSource source) {
         final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         documentBuilderFactoryConfigurer.accept(factory);
         try {
@@ -94,24 +94,36 @@ public interface Xmls {
         }
     }
 
+    static void writeFormatted(Consumer<Document> documentConsumer, Result result) {
+        write(f -> {}, b -> {}, documentConsumer, f -> {}, t -> {
+            t.setOutputProperty(OutputKeys.INDENT, "yes");
+            t.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+            t.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+        }, result);
+    }
+
     static void writeFormatted(Consumer<Document> documentConsumer, Path file) {
         try (final BufferedWriter writer = Files.newBufferedWriter(file, UTF_8)) {
-            write(f -> {}, b -> {}, documentConsumer, f -> {}, t -> {
-                t.setOutputProperty(OutputKeys.INDENT, "yes");
-                t.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-                t.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-            }, new StreamResult(writer));
+            writeFormatted(documentConsumer, new StreamResult(writer));
         } catch (IOException x) {
             throw new UncheckedIOException(x);
         }
     }
 
-    static void writeFormatted(String documentElement, Consumer<Element> elementConsumer, Path file) {
+    static void writeFormatted(String documentElement, Consumer<Element> elementConsumer, Result result) {
         writeFormatted(d -> {
             final Element element = d.createElement(documentElement);
             elementConsumer.accept(element);
             d.appendChild(element);
-        }, file);
+        }, result);
+    }
+
+    static void writeFormatted(String documentElement, Consumer<Element> elementConsumer, Path path) {
+        try (final BufferedWriter writer = Files.newBufferedWriter(path, UTF_8)) {
+            writeFormatted(documentElement, elementConsumer, new StreamResult(writer));
+        } catch (IOException x) {
+            throw new UncheckedIOException(x);
+        }
     }
 
     static <T> T read(Function<Document, T> documentReader, Path file) {
