@@ -27,23 +27,27 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.input.ContextMenuEvent;
+import javafx.scene.input.Dragboard;
 import org.marid.jfx.action.FxAction;
+import org.marid.jfx.action.SpecialAction;
 import org.marid.jfx.action.SpecialActions;
-import org.marid.jfx.tree.TreeUtils;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
+import static javafx.scene.input.TransferMode.COPY_OR_MOVE;
+import static javafx.scene.input.TransferMode.MOVE;
+import static org.marid.jfx.action.SpecialActionType.COPY;
+import static org.marid.jfx.action.SpecialActionType.PASTE;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -77,6 +81,7 @@ public class MaridTreeTableView<T> extends TreeTableView<T> implements MaridActi
                     final Collection<FxAction> fxActions = actions(row.getTreeItem());
                     row.setContextMenu(fxActions.isEmpty() ? null : FxAction.grouped(fxActions));
                 });
+                initDnd(row, specialActions);
                 return row;
             });
             addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> {
@@ -92,9 +97,7 @@ public class MaridTreeTableView<T> extends TreeTableView<T> implements MaridActi
                 }
             });
         });
-        onDestroy.add(() -> {
-            observables.forEach(o -> o.removeListener(invalidationListener));
-        });
+        onDestroy.add(() -> observables.forEach(o -> o.removeListener(invalidationListener)));
     }
 
     private Collection<FxAction> actions(TreeItem<T> element) {
@@ -147,5 +150,56 @@ public class MaridTreeTableView<T> extends TreeTableView<T> implements MaridActi
         } else {
             getRoot().getChildren().clear();
         }
+    }
+
+    private void initDnd(TreeTableRow<T> row, SpecialActions specialActions) {
+        final SpecialAction copyAction = specialActions.get(COPY);
+        final SpecialAction pasteAction = specialActions.get(PASTE);
+
+        row.setOnDragDetected(event -> {
+            final TreeItem<T> item = row.getTreeItem();
+            final Optional<FxAction> copy = actions.stream()
+                    .map(f -> f.apply(item))
+                    .filter(e -> e != null && e.specialAction == copyAction && !e.isDisabled())
+                    .findFirst();
+            if (copy.isPresent()) {
+                final Dragboard dragboard = row.startDragAndDrop(COPY_OR_MOVE);
+                copy.get().getEventHandler().handle(new ActionEvent(dragboard, row));
+                dragboard.setDragView(row.snapshot(null, null));
+                event.consume();
+            }
+        });
+        row.setOnDragDone(event -> {
+            final TreeItem<T> item = row.getTreeItem();
+            if (item != null && item.getParent() != null && event.getTransferMode() == MOVE) {
+                item.getParent().getChildren().remove(item);
+            }
+            event.consume();
+        });
+        row.setOnDragOver(event -> {
+            final TreeItem<T> item = row.getTreeItem();
+            final Optional<FxAction> paste = actions.stream()
+                    .map(f -> f.apply(item))
+                    .filter(e -> e != null && e.specialAction == pasteAction && !e.isDisabled())
+                    .findFirst();
+            if (paste.isPresent()) {
+                event.acceptTransferModes(COPY_OR_MOVE);
+            }
+            event.consume();
+        });
+        row.setOnDragDropped(event -> {
+            final TreeItem<T> item = row.getTreeItem();
+            final Optional<FxAction> paste = actions.stream()
+                    .map(f -> f.apply(item))
+                    .filter(e -> e != null && e.specialAction == pasteAction && !e.isDisabled())
+                    .findFirst();
+            if (paste.isPresent()) {
+                paste.get().getEventHandler().handle(new ActionEvent(event.getDragboard(), row));
+                event.setDropCompleted(true);
+            } else {
+                event.setDropCompleted(false);
+            }
+            event.consume();
+        });
     }
 }

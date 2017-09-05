@@ -265,6 +265,14 @@ public class FxAction {
         return this;
     }
 
+    public boolean isDisabled() {
+        return disabled.get();
+    }
+
+    public EventHandler<ActionEvent> getEventHandler() {
+        return eventHandler.get();
+    }
+
     @Override
     public String toString() {
         return String.format("%s,%s,%s", group, toolbarGroup, menu);
