@@ -46,6 +46,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.logging.Level.WARNING;
 import static java.util.stream.Collectors.*;
 import static javafx.beans.binding.Bindings.createBooleanBinding;
@@ -131,11 +132,11 @@ public class BeanTableActions {
     }
 
     @Bean
-    public BeanTableAction factoryBeans(SpecialAction addAction, LibraryBeanDao dao, ProjectProfile profile) {
+    public BeanTableAction factoryBeansC(SpecialAction addAction, LibraryBeanDao dao, ProjectProfile profile) {
         return data -> {
             final FxAction action = new FxAction("add", "add", "add")
                     .setSpecialAction(addAction)
-                    .bindText("Add a factory bean")
+                    .bindText("Add a factory bean (as a child)")
                     .setIcon("D_SERVER_PLUS");
             final Consumer<ProjectProfile> listener = p -> {
                 final Function<LibraryBean, FxAction> function = bean -> new FxAction("bean", bean.literal.group)
@@ -144,6 +145,36 @@ public class BeanTableActions {
                         .setEventHandler(event -> {
                             final BeanData beanData = data.add(bean.bean);
                             beanData.factory.set(data.getName());
+                        });
+                final Map<String, List<FxAction>> grouped = dao.beans(data)
+                        .collect(groupingBy(b -> b.literal.group, TreeMap::new, mapping(function, toList())));
+                action.setChildren(children(grouped));
+            };
+            action.anchors.add(listener);
+            listener.accept(profile);
+            profile.addOnUpdate(listener);
+            return action;
+        };
+    }
+
+    @Bean
+    public BeanTableAction factoryBeansS(SpecialAction addAction, LibraryBeanDao dao, ProjectProfile profile) {
+        return data -> {
+            final FxAction action = new FxAction("add", "add", "add")
+                    .setSpecialAction(addAction)
+                    .bindText("Add a factory bean (at the same level)")
+                    .setIcon("D_SERVER_PLUS");
+            final Consumer<ProjectProfile> listener = p -> {
+                final Function<LibraryBean, FxAction> function = bean -> new FxAction("bean", bean.literal.group)
+                        .setIcon(bean.literal.icon)
+                        .bindText(ls("%s%s%s", lo(bean.literal)))
+                        .setDisabled(data.parent == null)
+                        .setEventHandler(event -> {
+                            final BeanData parent = requireNonNull(data.parent);
+                            final int index = parent.children.indexOf(data);
+                            final BeanData beanData = new BeanData(parent, bean.bean);
+                            beanData.factory.set(data.getName());
+                            parent.children.add(index + 1, beanData);
                         });
                 final Map<String, List<FxAction>> grouped = dao.beans(data)
                         .collect(groupingBy(b -> b.literal.group, TreeMap::new, mapping(function, toList())));
