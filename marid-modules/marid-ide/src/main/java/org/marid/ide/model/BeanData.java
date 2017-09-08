@@ -60,7 +60,8 @@ public class BeanData extends BeanMethodData {
         name.addListener((o, oldName, newName) -> {
             if (parentBean != null && oldName != null) {
                 checkNameUniqueness();
-                parentBean.children.filtered(b -> b != this).forEach(b -> b.changeName(oldName, newName));
+                parentBean.changeName(oldName, newName);
+                parentBean.children.filtered(b -> b != this).forEach(b -> b.changeNameRecursively(oldName, newName));
             }
         });
         if (parentBean != null) {
@@ -126,9 +127,6 @@ public class BeanData extends BeanMethodData {
     }
 
     private void changeName(String oldName, String newName) {
-        if (oldName.equals(getFactory())) {
-            factory.set(newName);
-        }
         final Consumer<BeanMethodArgData> argConsumer = a -> {
             if ("ref".equals(a.getType()) && oldName.equals(a.getValue())) {
                 a.value.set(newName);
@@ -136,7 +134,16 @@ public class BeanData extends BeanMethodData {
         };
         args.forEach(argConsumer);
         initializers.forEach(i -> i.args.forEach(argConsumer));
-        children.forEach(b -> b.changeName(oldName, newName));
+    }
+
+    private void changeNameRecursively(String oldName, String newName) {
+        if (oldName.equals(getFactory())) {
+            factory.set(newName);
+        }
+        changeName(oldName, newName);
+        if (!oldName.equals(getName())) {
+            children.forEach(b -> b.changeNameRecursively(oldName, newName));
+        }
     }
 
     @Override
