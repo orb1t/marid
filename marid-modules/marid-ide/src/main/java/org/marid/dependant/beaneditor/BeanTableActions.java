@@ -33,8 +33,10 @@ import org.marid.ide.model.BeanMethodData;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.SpecialAction;
+import org.marid.jfx.dnd.DndManager;
 import org.marid.jfx.track.PeriodicObservable;
 import org.marid.runtime.context.MaridRuntimeUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
@@ -49,12 +51,9 @@ import java.util.stream.Collectors;
 import static java.util.Objects.requireNonNull;
 import static java.util.logging.Level.WARNING;
 import static java.util.stream.Collectors.*;
-import static javafx.beans.binding.Bindings.createBooleanBinding;
-import static javafx.scene.input.Clipboard.getSystemClipboard;
 import static org.marid.ide.IdeNotifications.n;
 import static org.marid.ide.model.ClipboardUtils.*;
 import static org.marid.jfx.LocalizedStrings.ls;
-import static org.marid.jfx.dnd.DndUtils.clipboard;
 import static org.marid.l10n.L10n.m;
 import static org.marid.l10n.L10n.s;
 
@@ -63,6 +62,13 @@ import static org.marid.l10n.L10n.s;
  */
 @Component
 public class BeanTableActions {
+
+    private final DndManager dndManager;
+
+    @Autowired
+    public BeanTableActions(DndManager dndManager) {
+        this.dndManager = dndManager;
+    }
 
     @Bean
     public BeanTableAction cutBeanAction(SpecialAction cutAction) {
@@ -75,7 +81,7 @@ public class BeanTableActions {
                     .bindText("Cut")
                     .setIcon("D_CONTENT_CUT")
                     .setEventHandler(event -> {
-                        save(data.toBean(), clipboard(event));
+                        save(data.toBean(), dndManager.clipboard());
                         data.parent.children.remove(data);
                     });
         };
@@ -87,8 +93,8 @@ public class BeanTableActions {
                 .setSpecialAction(pasteAction)
                 .bindText("Paste")
                 .setIcon("D_CONTENT_PASTE")
-                .bindDisabled(bySeconds.b(() -> !hasBeanData(getSystemClipboard())))
-                .setEventHandler(event -> load(clipboard(event)).ifPresent(bean -> {
+                .bindDisabled(bySeconds.b(() -> !hasBeanData(dndManager.clipboard())))
+                .setEventHandler(event -> load(dndManager.clipboard()).ifPresent(bean -> {
                     final BeanData beanData = new BeanData(data, bean);
                     data.children.add(beanData);
                 }));
@@ -104,7 +110,7 @@ public class BeanTableActions {
                     .setSpecialAction(copyAction)
                     .bindText("Copy")
                     .setIcon("D_CONTENT_COPY")
-                    .setEventHandler(event -> save(data.toBean(), clipboard(event)));
+                    .setEventHandler(event -> save(data.toBean(), dndManager.clipboard()));
         };
     }
 

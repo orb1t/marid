@@ -36,6 +36,7 @@ import javafx.scene.input.Dragboard;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.SpecialAction;
 import org.marid.jfx.action.SpecialActions;
+import org.marid.jfx.dnd.DndManager;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -61,6 +62,9 @@ public class MaridTreeTableView<T> extends TreeTableView<T> implements MaridActi
     private final List<Runnable> onConstruct = new ArrayList<>();
     private final List<Runnable> onDestroy = new ArrayList<>();
 
+    @Resource
+    protected DndManager dndManager;
+
     public MaridTreeTableView(TreeItem<T> root) {
         super(root);
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
@@ -81,7 +85,7 @@ public class MaridTreeTableView<T> extends TreeTableView<T> implements MaridActi
                     final Collection<FxAction> fxActions = actions(row.getTreeItem());
                     row.setContextMenu(fxActions.isEmpty() ? null : FxAction.grouped(fxActions));
                 });
-                initDnd(row, specialActions);
+                initDnd(row, specialActions, dndManager);
                 return row;
             });
             addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> {
@@ -152,7 +156,7 @@ public class MaridTreeTableView<T> extends TreeTableView<T> implements MaridActi
         }
     }
 
-    private void initDnd(TreeTableRow<T> row, SpecialActions specialActions) {
+    private void initDnd(TreeTableRow<T> row, SpecialActions specialActions, DndManager dndManager) {
         final SpecialAction copyAction = specialActions.get(COPY);
         final SpecialAction pasteAction = specialActions.get(PASTE);
 
@@ -164,6 +168,7 @@ public class MaridTreeTableView<T> extends TreeTableView<T> implements MaridActi
                     .findFirst();
             if (copy.isPresent()) {
                 final Dragboard dragboard = row.startDragAndDrop(COPY_OR_MOVE);
+                dndManager.updateDragboard(dragboard);
                 copy.get().getEventHandler().handle(new ActionEvent(dragboard, row));
                 dragboard.setDragView(row.snapshot(null, null));
                 event.consume();

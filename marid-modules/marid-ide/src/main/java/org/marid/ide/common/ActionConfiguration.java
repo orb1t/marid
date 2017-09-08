@@ -21,6 +21,7 @@
 package org.marid.ide.common;
 
 import org.marid.jfx.action.FxAction;
+import org.marid.jfx.dnd.DndManager;
 import org.marid.jfx.track.PeriodicObservable;
 import org.marid.spring.annotation.IdeAction;
 import org.springframework.beans.factory.ObjectFactory;
@@ -54,5 +55,10 @@ public class ActionConfiguration {
     @Bean
     public PeriodicObservable bySeconds(ScheduledThreadPoolExecutor scheduledExecutorService) {
         return new PeriodicObservable(scheduledExecutorService, 1L, TimeUnit.SECONDS);
+    }
+
+    @Bean
+    public DndManager dndManager() {
+        return new DndManager();
     }
 }
