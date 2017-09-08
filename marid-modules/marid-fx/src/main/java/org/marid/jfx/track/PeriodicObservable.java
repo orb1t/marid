@@ -24,11 +24,15 @@ package org.marid.jfx.track;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 
+import java.util.Arrays;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 
 public class PeriodicObservable implements Observable, AutoCloseable {
@@ -61,5 +65,15 @@ public class PeriodicObservable implements Observable, AutoCloseable {
     @Override
     public void close() {
         timerTask.cancel(false);
+    }
+
+    public BooleanBinding b(BooleanSupplier supplier, Observable... observables) {
+        return Bindings.createBooleanBinding(supplier::getAsBoolean, observables(observables));
+    }
+
+    private Observable[] observables(Observable... observables) {
+        final Observable[] result = Arrays.copyOf(observables, observables.length + 1);
+        result[observables.length] = this;
+        return result;
     }
 }

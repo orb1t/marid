@@ -87,7 +87,7 @@ public class BeanTableActions {
                 .setSpecialAction(pasteAction)
                 .bindText("Paste")
                 .setIcon("D_CONTENT_PASTE")
-                .bindDisabled(createBooleanBinding(() -> !hasBeanData(getSystemClipboard()), bySeconds))
+                .bindDisabled(bySeconds.b(() -> !hasBeanData(getSystemClipboard())))
                 .setEventHandler(event -> load(clipboard(event)).ifPresent(bean -> {
                     final BeanData beanData = new BeanData(data, bean);
                     data.children.add(beanData);
