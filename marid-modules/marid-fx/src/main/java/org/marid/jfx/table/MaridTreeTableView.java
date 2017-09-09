@@ -175,6 +175,7 @@ public class MaridTreeTableView<T> extends TreeTableView<T> implements MaridActi
             }
         });
         row.setOnDragDone(event -> {
+            dndManager.updateDragboard(event.getDragboard());
             final TreeItem<T> item = row.getTreeItem();
             if (item != null && item.getParent() != null && event.getTransferMode() == MOVE) {
                 item.getParent().getChildren().remove(item);
@@ -182,6 +183,7 @@ public class MaridTreeTableView<T> extends TreeTableView<T> implements MaridActi
             event.consume();
         });
         row.setOnDragOver(event -> {
+            dndManager.updateDragboard(event.getDragboard());
             final TreeItem<T> item = row.getTreeItem();
             final Optional<FxAction> paste = actions.stream()
                     .map(f -> f.apply(item))
@@ -193,6 +195,7 @@ public class MaridTreeTableView<T> extends TreeTableView<T> implements MaridActi
             event.consume();
         });
         row.setOnDragDropped(event -> {
+            dndManager.updateDragboard(event.getDragboard());
             final TreeItem<T> item = row.getTreeItem();
             final Optional<FxAction> paste = actions.stream()
                     .map(f -> f.apply(item))
