@@ -48,12 +48,12 @@ import java.util.stream.Collectors;
  */
 public class MaridTableView<T> extends TableView<T> implements MaridActionsControl<T>, AutoCloseable {
 
-    protected final ObjectProperty<Supplier<TableRow<T>>> rowSupplier = new SimpleObjectProperty<>(TableRow::new);
-
     private final ObservableList<Function<T, FxAction>> actions = FXCollections.observableArrayList();
     private final List<Observable> observables = new ArrayList<>();
     private final List<Runnable> onDestroy = new ArrayList<>();
     private final List<Runnable> onConstruct = new ArrayList<>();
+
+    protected Supplier<TableRow<T>> rowSupplier = TableRow::new;
 
     public MaridTableView(ObservableList<T> list) {
         super(list);
@@ -74,7 +74,7 @@ public class MaridTableView<T> extends TableView<T> implements MaridActionsContr
         onConstruct.add(() -> {
             observables.forEach(o -> o.addListener(invalidationListener));
             setRowFactory(param -> {
-                final TableRow<T> row = rowSupplier.get().get();
+                final TableRow<T> row = rowSupplier.get();
                 row.addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> {
                     final Collection<FxAction> fxActions = actions(row.getItem());
                     row.setContextMenu(fxActions.isEmpty() ? null : FxAction.grouped(fxActions));

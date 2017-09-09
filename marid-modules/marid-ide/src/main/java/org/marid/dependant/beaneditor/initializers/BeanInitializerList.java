@@ -44,11 +44,11 @@ public class BeanInitializerList extends MaridListView<BeanMethodData> {
     public BeanInitializerList(SignatureResolver signatureResolver) {
         setBorder(new Border(new BorderStroke(TRANSPARENT, BorderStrokeStyle.NONE, null, null)));
         setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, null, null)));
-        cellSupplier.set(() -> {
+        cellSupplier = () -> {
             final ListCell<BeanMethodData> cell = new ListCell<>();
             cell.textProperty().bind(signatureResolver.signature(cell.itemProperty()));
             return cell;
-        });
+        };
     }
 
     @Autowired

@@ -23,8 +23,6 @@ package org.marid.jfx.table;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -55,8 +53,6 @@ import static org.marid.jfx.action.SpecialActionType.PASTE;
  */
 public class MaridTreeTableView<T> extends TreeTableView<T> implements MaridActionsControl<TreeItem<T>>, AutoCloseable {
 
-    protected final ObjectProperty<Supplier<TreeTableRow<T>>> rowSupplier = new SimpleObjectProperty<>(TreeTableRow::new);
-
     private final ObservableList<Function<TreeItem<T>, FxAction>> actions = FXCollections.observableArrayList();
     private final List<Observable> observables = new ArrayList<>();
     private final List<Runnable> onConstruct = new ArrayList<>();
@@ -64,6 +60,8 @@ public class MaridTreeTableView<T> extends TreeTableView<T> implements MaridActi
 
     @Resource
     protected DndManager dndManager;
+
+    protected Supplier<TreeTableRow<T>> rowSupplier = TreeTableRow::new;
 
     public MaridTreeTableView(TreeItem<T> root) {
         super(root);
@@ -80,7 +78,7 @@ public class MaridTreeTableView<T> extends TreeTableView<T> implements MaridActi
         onConstruct.add(() -> {
             observables.forEach(o -> o.addListener(invalidationListener));
             setRowFactory(param -> {
-                final TreeTableRow<T> row = rowSupplier.get().get();
+                final TreeTableRow<T> row = rowSupplier.get();
                 row.addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> {
                     final Collection<FxAction> fxActions = actions(row.getTreeItem());
                     row.setContextMenu(fxActions.isEmpty() ? null : FxAction.grouped(fxActions));

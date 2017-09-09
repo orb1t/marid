@@ -23,8 +23,6 @@ package org.marid.jfx.table;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ListCell;
@@ -49,12 +47,12 @@ import java.util.stream.Collectors;
  */
 public class MaridListView<T> extends ListView<T> implements MaridActionsControl<T>, AutoCloseable {
 
-    protected final ObjectProperty<Supplier<ListCell<T>>> cellSupplier = new SimpleObjectProperty<>(TextFieldListCell::new);
-
     private final ObservableList<Function<T, FxAction>> actions = FXCollections.observableArrayList();
     private final List<Observable> observables = new ArrayList<>();
     private final List<Runnable> onDestroy = new ArrayList<>();
     private final List<Runnable> onConstruct = new ArrayList<>();
+
+    protected Supplier<ListCell<T>> cellSupplier = TextFieldListCell::new;
 
     public MaridListView(ObservableList<T> list) {
         super(list);
@@ -74,7 +72,7 @@ public class MaridListView<T> extends ListView<T> implements MaridActionsControl
         onConstruct.add(() -> {
             observables.forEach(o -> o.addListener(invalidationListener));
             setCellFactory(param -> {
-                final ListCell<T> cell = cellSupplier.get().get();
+                final ListCell<T> cell = cellSupplier.get();
                 cell.addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> {
                     final Collection<FxAction> fxActions = actions(cell.getItem());
                     cell.setContextMenu(fxActions.isEmpty() ? null : FxAction.grouped(fxActions));
