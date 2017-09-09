@@ -76,10 +76,7 @@ public class BeanTableActions {
             if (data.parent == null) {
                 return null;
             }
-            return new FxAction("ccv", "ccv", "Edit")
-                    .setSpecialAction(cutAction)
-                    .bindText("Cut")
-                    .setIcon("D_CONTENT_CUT")
+            return new FxAction("ccv", cutAction)
                     .setEventHandler(event -> {
                         save(data.toBean(), dndManager.clipboard());
                         data.parent.children.remove(data);
@@ -89,10 +86,7 @@ public class BeanTableActions {
 
     @Bean
     public BeanTableAction pasteBeanAction(SpecialAction pasteAction, PeriodicObservable bySeconds) {
-        return data -> new FxAction("ccv", "ccv", "Edit")
-                .setSpecialAction(pasteAction)
-                .bindText("Paste")
-                .setIcon("D_CONTENT_PASTE")
+        return data -> new FxAction("ccv", pasteAction)
                 .bindDisabled(bySeconds.b(() -> !hasBeanData(dndManager.clipboard())))
                 .setEventHandler(event -> load(dndManager.clipboard()).ifPresent(bean -> {
                     final BeanData beanData = new BeanData(data, bean);
@@ -106,9 +100,7 @@ public class BeanTableActions {
             if (data.parent == null) {
                 return null;
             }
-            return new FxAction("ccv", "ccv", "Edit")
-                    .setSpecialAction(copyAction)
-                    .bindText("Copy")
+            return new FxAction("ccv", copyAction)
                     .setIcon("D_CONTENT_COPY")
                     .setEventHandler(event -> save(data.toBean(), dndManager.clipboard()));
         };
@@ -117,8 +109,7 @@ public class BeanTableActions {
     @Bean
     public BeanTableAction addRootBeanAction(SpecialAction addAction, LibraryBeanDao dao, ProjectProfile profile) {
         return data -> {
-            final FxAction action = new FxAction("add", "add", "add")
-                    .setSpecialAction(addAction)
+            final FxAction action = new FxAction("add", addAction)
                     .bindText("Add a bean")
                     .setIcon("D_SERVER_PLUS");
             final Consumer<ProjectProfile> listener = p -> {
@@ -140,8 +131,7 @@ public class BeanTableActions {
     @Bean
     public BeanTableAction factoryBeansC(SpecialAction addAction, LibraryBeanDao dao, ProjectProfile profile) {
         return data -> {
-            final FxAction action = new FxAction("add", "add", "add")
-                    .setSpecialAction(addAction)
+            final FxAction action = new FxAction("add", addAction)
                     .bindText("Add a factory bean (as a child)")
                     .setIcon("D_SERVER_PLUS");
             final Consumer<ProjectProfile> listener = p -> {
@@ -166,8 +156,7 @@ public class BeanTableActions {
     @Bean
     public BeanTableAction factoryBeansS(SpecialAction addAction, LibraryBeanDao dao, ProjectProfile profile) {
         return data -> {
-            final FxAction action = new FxAction("add", "add", "add")
-                    .setSpecialAction(addAction)
+            final FxAction action = new FxAction("add", addAction)
                     .bindText("Add a factory bean (at the same level)")
                     .setIcon("D_SERVER_PLUS");
             final Consumer<ProjectProfile> listener = p -> {
@@ -196,10 +185,9 @@ public class BeanTableActions {
     @Bean
     public BeanTableAction initializerAdder(ProjectProfile profile, LibraryBeanDao dao, SpecialAction addAction) {
         return data -> {
-            final FxAction action = new FxAction("add", "add", "add")
+            final FxAction action = new FxAction("add", addAction)
                     .bindText("Add an initializer")
-                    .setIcon("D_PLUS")
-                    .setSpecialAction(addAction);
+                    .setIcon("D_PLUS");
             final Consumer<ProjectProfile> listener = p -> {
                 final Function<LibraryMethod, FxAction> function = m -> new FxAction("bean", m.literal.group)
                         .setIcon(m.literal.icon)
@@ -221,8 +209,7 @@ public class BeanTableActions {
 
     @Bean
     public BeanTableAction wildBeanAdder(LibraryBeanDao dao, SpecialAction addAction) {
-        return data -> new FxAction("add", "add", "add")
-                .setSpecialAction(addAction)
+        return data -> new FxAction("add", addAction)
                 .bindText("Add a wild bean")
                 .setIcon("D_SERVER_NETWORK")
                 .setEventHandler(event -> {

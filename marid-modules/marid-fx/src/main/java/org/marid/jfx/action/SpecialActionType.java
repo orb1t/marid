@@ -35,5 +35,7 @@ public enum SpecialActionType {
     PASTE,
     EDIT,
     MISC,
-    RENAME
+    RENAME,
+    UP,
+    DOWN
 }

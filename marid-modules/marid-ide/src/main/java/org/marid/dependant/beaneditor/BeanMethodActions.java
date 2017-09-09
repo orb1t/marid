@@ -50,10 +50,9 @@ public class BeanMethodActions {
     @Bean
     @Qualifier("methodArg")
     public Function<BeanMethodArgData, FxAction> converterAction(ConvertersDao dao, SpecialAction miscAction) {
-        return a -> a == null ? null : new FxAction("misc", "misc", "misc")
+        return a -> a == null ? null : new FxAction(miscAction)
                 .bindText("Set a converter")
                 .setIcon("D_CLIPPY")
-                .setSpecialAction(miscAction)
                 .setChildren(dao.getConverters(a).entrySet().stream()
                         .map(e -> new FxAction("", "", "")
                                 .bindText(new SimpleStringProperty(e.getValue().name))
@@ -74,10 +73,9 @@ public class BeanMethodActions {
             if (a == null) {
                 return null;
             }
-            return new FxAction("misc", "misc", "misc")
+            return new FxAction(addAction)
                     .bindText("Add a bean reference")
                     .setIcon("D_LINK_VARIANT")
-                    .setSpecialAction(addAction)
                     .setChildren(a.getBean().referents()
                             .map(b -> new Pair<>(b, resolver.resolve(profile.getBeanContext(), b)))
                             .filter(p -> {
@@ -106,10 +104,9 @@ public class BeanMethodActions {
     @Bean
     @Qualifier("methodArg")
     public Function<BeanMethodArgData, FxAction> resetArgAction(SpecialAction removeAction) {
-        return a -> a == null ? null : new FxAction("misc", "misc", "misc")
+        return a -> a == null ? null : new FxAction(removeAction)
                 .bindText("Clear argument")
                 .setIcon("D_NEEDLE")
-                .setSpecialAction(removeAction)
                 .setEventHandler(event -> {
                     a.type.set("of");
                     a.value.set(null);

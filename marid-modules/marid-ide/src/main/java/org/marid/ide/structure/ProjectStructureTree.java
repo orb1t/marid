@@ -136,11 +136,13 @@ public class ProjectStructureTree extends MaridTreeTableView<Path> {
                     final Path file = item.getValue();
                     final Runnable task = editor.getEditAction(file);
                     if (task != null) {
-                        return new FxAction(name, editor.getGroup(), "Actions")
+                        final FxAction action = editor.getSpecialAction() != null
+                                ? new FxAction(editor.getSpecialAction())
+                                : new FxAction(name, editor.getGroup(), "Actions");
+                        return action
                                 .bindText(LocalizedStrings.ls(editor.getName()))
                                 .bindIcon(new SimpleStringProperty(editor.getIcon()))
                                 .setDisabled(false)
-                                .setSpecialAction(editor.getSpecialAction())
                                 .setEventHandler(e -> task.run());
                     } else {
                         return null;

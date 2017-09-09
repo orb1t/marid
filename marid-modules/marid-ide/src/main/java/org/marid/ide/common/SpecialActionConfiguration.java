@@ -20,6 +20,8 @@
 
 package org.marid.ide.common;
 
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import org.marid.jfx.action.SpecialAction;
 import org.marid.jfx.action.SpecialActions;
@@ -116,6 +118,24 @@ public class SpecialActionConfiguration {
                 .bindText("Select All")
                 .setAccelerator(KeyCombination.valueOf("Ctrl+A"))
                 .setIcon("D_SELECT_ALL")
+                .setDisabled(true);
+    }
+
+    @IdeAction
+    public SpecialAction upAction() {
+        return new SpecialAction("ed1", "ed1", "Edit")
+                .bindText("Up")
+                .setAccelerator(new KeyCodeCombination(KeyCode.UP, KeyCombination.CONTROL_DOWN))
+                .setIcon("D_ARROW_UP")
+                .setDisabled(true);
+    }
+
+    @IdeAction
+    public SpecialAction downAction() {
+        return new SpecialAction("ed1", "ed1", "Edit")
+                .bindText("Down")
+                .setAccelerator(new KeyCodeCombination(KeyCode.DOWN, KeyCombination.CONTROL_DOWN))
+                .setIcon("D_ARROW_DOWN")
                 .setDisabled(true);
     }
 

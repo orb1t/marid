@@ -88,6 +88,16 @@ public class SpecialActions {
         actionMap.put(RENAME, renameAction);
     }
 
+    @Resource
+    public void setUpAction(SpecialAction upAction) {
+        actionMap.put(UP, upAction);
+    }
+
+    @Resource
+    public void setDownAction(SpecialAction downAction) {
+        actionMap.put(DOWN, downAction);
+    }
+
     public SpecialAction get(SpecialActionType type) {
         return actionMap.get(type);
     }

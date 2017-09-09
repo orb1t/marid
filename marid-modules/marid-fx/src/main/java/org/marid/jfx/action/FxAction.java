@@ -53,8 +53,8 @@ public class FxAction {
     public final String toolbarGroup;
     public final String group;
     public final String menu;
+    public final SpecialAction specialAction;
 
-    protected final ObservableList<FxAction> children = observableArrayList();
     public final List<Object> anchors = new LinkedList<>();
 
     protected final StringProperty text = new SimpleStringProperty(this, "text");
@@ -65,12 +65,21 @@ public class FxAction {
     protected final ObjectProperty<Boolean> selected = new SimpleObjectProperty<>(this, "selected");
     protected final ObjectProperty<EventHandler<ActionEvent>> eventHandler = new SimpleObjectProperty<>(this, "eventHandler");
 
-    public SpecialAction specialAction;
+    protected final ObservableList<FxAction> children = observableArrayList();
 
-    public FxAction(String toolbarGroup, String group, String menu) {
+    public FxAction(String toolbarGroup, String group, String menu, SpecialAction specialAction) {
         this.toolbarGroup = toolbarGroup;
         this.group = group;
         this.menu = menu;
+        this.specialAction = specialAction;
+    }
+
+    public FxAction(String group, SpecialAction specialAction) {
+        this(specialAction.toolbarGroup, group, specialAction.menu, specialAction);
+    }
+
+    public FxAction(String toolbarGroup, String group, String menu) {
+        this(toolbarGroup, group, menu, null);
     }
 
     public FxAction(String toolbarGroup) {
@@ -79,6 +88,10 @@ public class FxAction {
 
     public FxAction(String group, String menu) {
         this(null, group, menu);
+    }
+
+    public FxAction(SpecialAction specialAction) {
+        this(specialAction.toolbarGroup, specialAction.group, specialAction.menu, specialAction);
     }
 
     public String getText() {
@@ -139,11 +152,6 @@ public class FxAction {
         return bindEventHandler(new SimpleObjectProperty<>(eventHandler));
     }
 
-    public FxAction setSpecialAction(SpecialAction value) {
-        specialAction = value;
-        return this;
-    }
-
     public FxAction bindSelected(ObservableValue<Boolean> value) {
         selected.bind(value);
         return this;
@@ -197,8 +205,18 @@ public class FxAction {
             item.disableProperty().bind(disabled);
         }
         item.acceleratorProperty().bind(accelerator);
-        item.textProperty().bind(text);
-        item.graphicProperty().bind(icon(16));
+
+        if (text.isBound() || specialAction == null) {
+            item.textProperty().bind(text);
+        } else {
+            item.textProperty().bind(((FxAction) specialAction).text);
+        }
+
+        if (icon.isBound() || specialAction == null) {
+            item.graphicProperty().bind(icon(16));
+        } else {
+            item.graphicProperty().bind(specialAction.icon(20));
+        }
 
         final AtomicReference<WeakInvalidationListener> listener = new AtomicReference<>();
         final InvalidationListener updater = o -> {
@@ -219,17 +237,28 @@ public class FxAction {
     public Button button() {
         final Button button = new Button();
         button.setFocusTraversable(false);
-        button.graphicProperty().bind(icon(20));
+
+        if (icon.isBound() || specialAction == null) {
+            button.graphicProperty().bind(icon(20));
+        } else {
+            button.graphicProperty().bind(specialAction.icon(20));
+        }
+
+        final ObservableValue<String> textProperty = text.isBound() || specialAction == null
+                ? text
+                : ((FxAction) specialAction).text;
+
         button.tooltipProperty().bind(Bindings.createObjectBinding(() -> {
-            final String hint = getText();
+            final String hint = textProperty.getValue();
             if (hint == null || hint.isEmpty()) {
                 return null;
             } else {
                 final Tooltip tooltip = new Tooltip();
-                tooltip.textProperty().bind(text);
+                tooltip.textProperty().bind(textProperty);
                 return tooltip;
             }
-        }, text));
+        }, textProperty));
+
         button.setOnAction(event -> {
             if (children.isEmpty()) {
                 final EventHandler<ActionEvent> h = eventHandler.get();
