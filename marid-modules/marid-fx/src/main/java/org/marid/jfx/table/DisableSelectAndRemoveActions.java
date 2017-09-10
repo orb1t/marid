@@ -21,26 +21,10 @@
 
 package org.marid.jfx.table;
 
-import javafx.beans.Observable;
-import javafx.collections.ObservableList;
-import javafx.scene.control.MultipleSelectionModel;
-import org.marid.jfx.action.FxAction;
+import java.lang.annotation.*;
 
-import java.util.List;
-import java.util.function.Function;
-
-/**
- * @author Dmitry Ovchinnikov
- */
-public interface MaridActionsControl<T> {
-
-    ObservableList<Function<T, FxAction>> actions();
-
-    MultipleSelectionModel<T> getSelectionModel();
-
-    List<Observable> observables();
-
-    List<Runnable> onConstructListeners();
-
-    List<Runnable> onDestroyListeners();
+@Inherited
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface DisableSelectAndRemoveActions {
 }

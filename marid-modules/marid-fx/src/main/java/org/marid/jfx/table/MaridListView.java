@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class MaridListView<T> extends ListView<T> implements MaridActionsControl<T>, AutoCloseable {
+public class MaridListView<T> extends ListView<T> implements MaridActionsListControl<T>, AutoCloseable {
 
     private final ObservableList<Function<T, FxAction>> actions = FXCollections.observableArrayList();
     private final List<Observable> observables = new ArrayList<>();
@@ -130,15 +130,5 @@ public class MaridListView<T> extends ListView<T> implements MaridActionsControl
     @Override
     public List<Runnable> onDestroyListeners() {
         return onDestroy;
-    }
-
-    @Override
-    public void remove(List<? extends T> list) {
-        getItems().removeAll(list);
-    }
-
-    @Override
-    public void clearAll() {
-        getItems().clear();
     }
 }

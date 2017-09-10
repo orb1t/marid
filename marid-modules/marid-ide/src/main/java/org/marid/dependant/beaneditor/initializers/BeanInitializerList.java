@@ -27,7 +27,6 @@ import javafx.scene.paint.Color;
 import org.marid.dependant.beaneditor.BeanTable;
 import org.marid.dependant.beaneditor.model.SignatureResolver;
 import org.marid.ide.model.BeanMethodData;
-import org.marid.jfx.action.SpecialActions;
 import org.marid.jfx.table.MaridListView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -60,11 +59,5 @@ public class BeanInitializerList extends MaridListView<BeanMethodData> {
                 setItems(nV.getValue().initializers);
             }
         });
-    }
-
-    @Override
-    @Autowired
-    public void installActions(SpecialActions specialActions) {
-        super.installActions(specialActions);
     }
 }

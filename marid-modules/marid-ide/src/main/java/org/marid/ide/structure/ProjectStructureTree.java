@@ -40,6 +40,7 @@ import org.marid.ide.structure.editor.FileEditor;
 import org.marid.ide.structure.icons.FileIcons;
 import org.marid.jfx.LocalizedStrings;
 import org.marid.jfx.action.FxAction;
+import org.marid.jfx.table.DisableSelectAndRemoveActions;
 import org.marid.jfx.table.MaridTreeTableView;
 import org.marid.misc.Builder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +63,7 @@ import static org.marid.logging.Log.log;
 /**
  * @author Dmitry Ovchinnikov
  */
+@DisableSelectAndRemoveActions
 @Component
 public class ProjectStructureTree extends MaridTreeTableView<Path> {
 

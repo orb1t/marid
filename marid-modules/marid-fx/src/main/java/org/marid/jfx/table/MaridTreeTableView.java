@@ -42,6 +42,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static javafx.scene.input.TransferMode.COPY_OR_MOVE;
 import static javafx.scene.input.TransferMode.MOVE;
@@ -51,7 +52,7 @@ import static org.marid.jfx.action.SpecialActionType.PASTE;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class MaridTreeTableView<T> extends TreeTableView<T> implements MaridActionsControl<TreeItem<T>>, AutoCloseable {
+public class MaridTreeTableView<T> extends TreeTableView<T> implements MaridActionsTreeControl<T>, AutoCloseable {
 
     private final ObservableList<Function<TreeItem<T>, FxAction>> actions = FXCollections.observableArrayList();
     private final List<Observable> observables = new ArrayList<>();
@@ -139,21 +140,6 @@ public class MaridTreeTableView<T> extends TreeTableView<T> implements MaridActi
         return onDestroy;
     }
 
-    @Override
-    public void remove(List<? extends TreeItem<T>> list) {
-        list.forEach(e -> e.getParent().getChildren().remove(e));
-    }
-
-    @Override
-    public void clearAll() {
-        final TreeItem<T> item = getSelectionModel().getSelectedItem();
-        if (item != null) {
-            item.getChildren().clear();
-        } else {
-            getRoot().getChildren().clear();
-        }
-    }
-
     private void initDnd(TreeTableRow<T> row, SpecialActions specialActions, DndManager dndManager) {
         final SpecialAction copyAction = specialActions.get(COPY);
         final SpecialAction pasteAction = specialActions.get(PASTE);
@@ -180,13 +166,13 @@ public class MaridTreeTableView<T> extends TreeTableView<T> implements MaridActi
             }
             event.consume();
         });
+
+        final Function<TreeItem<T>, Stream<FxAction>> pasteFunc = item -> actions.stream()
+                .map(f -> f.apply(item))
+                .filter(e -> e != null && e.specialAction == pasteAction && !e.isDisabled());
         row.setOnDragOver(event -> {
             dndManager.updateDragboard(event.getDragboard());
-            final TreeItem<T> item = row.getTreeItem();
-            final Optional<FxAction> paste = actions.stream()
-                    .map(f -> f.apply(item))
-                    .filter(e -> e != null && e.specialAction == pasteAction && !e.isDisabled())
-                    .findFirst();
+            final Optional<FxAction> paste = pasteFunc.apply(row.getTreeItem()).findFirst();
             if (paste.isPresent()) {
                 event.acceptTransferModes(COPY_OR_MOVE);
             }
@@ -194,11 +180,7 @@ public class MaridTreeTableView<T> extends TreeTableView<T> implements MaridActi
         });
         row.setOnDragDropped(event -> {
             dndManager.updateDragboard(event.getDragboard());
-            final TreeItem<T> item = row.getTreeItem();
-            final Optional<FxAction> paste = actions.stream()
-                    .map(f -> f.apply(item))
-                    .filter(e -> e != null && e.specialAction == pasteAction && !e.isDisabled())
-                    .findFirst();
+            final Optional<FxAction> paste = pasteFunc.apply(row.getTreeItem()).findFirst();
             if (paste.isPresent()) {
                 paste.get().getEventHandler().handle(new ActionEvent(event.getDragboard(), row));
                 event.setDropCompleted(true);

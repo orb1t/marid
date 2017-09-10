@@ -23,8 +23,6 @@ package org.marid.jfx.table;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableRow;
@@ -46,7 +44,7 @@ import java.util.stream.Collectors;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class MaridTableView<T> extends TableView<T> implements MaridActionsControl<T>, AutoCloseable {
+public class MaridTableView<T> extends TableView<T> implements MaridActionsListControl<T>, AutoCloseable {
 
     private final ObservableList<Function<T, FxAction>> actions = FXCollections.observableArrayList();
     private final List<Observable> observables = new ArrayList<>();
@@ -132,15 +130,5 @@ public class MaridTableView<T> extends TableView<T> implements MaridActionsContr
     @Override
     public List<Runnable> onDestroyListeners() {
         return onDestroy;
-    }
-
-    @Override
-    public void remove(List<? extends T> list) {
-        getItems().removeAll(list);
-    }
-
-    @Override
-    public void clearAll() {
-        getItems().clear();
     }
 }

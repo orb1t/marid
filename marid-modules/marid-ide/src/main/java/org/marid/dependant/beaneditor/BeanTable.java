@@ -32,7 +32,6 @@ import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.settings.AppearanceSettings;
 import org.marid.ide.types.BeanTypeInfo;
 import org.marid.ide.types.BeanTypeResolver;
-import org.marid.jfx.action.SpecialActions;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.jfx.table.MaridTreeTableView;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -123,13 +122,7 @@ public class BeanTable extends MaridTreeTableView<BeanData> {
                     return signatureResolver.postProcess(type.getType().getTypeName());
                 },
                 profile.getBeanFile().children,
-                appearanceSettings.showFullNamesProperty())
-        );
-    }
-
-    @Autowired
-    @Override
-    public void installActions(SpecialActions specialActions) {
-        super.installActions(specialActions);
+                appearanceSettings.showFullNamesProperty()
+        ));
     }
 }
