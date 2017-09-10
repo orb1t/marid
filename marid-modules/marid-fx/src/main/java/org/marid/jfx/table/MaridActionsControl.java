@@ -55,21 +55,15 @@ public interface MaridActionsControl<T> {
     default void installActions(SpecialActions specialActions) {
         actions().add(e -> new FxAction(specialActions.get(SpecialActionType.REMOVE))
                 .bindDisabled(Bindings.isEmpty(getSelectionModel().getSelectedItems()))
-                .bindText("Remove selected items")
-                .setIcon("F_REMOVE")
                 .setEventHandler(event -> remove(getSelectionModel().getSelectedItems()))
         );
 
         actions().add(e -> new FxAction(specialActions.get(SpecialActionType.SELECT_ALL))
                 .setDisabled(getSelectionModel().getSelectionMode().equals(SelectionMode.SINGLE))
-                .bindText("Select all items")
-                .setIcon("D_SELECT_ALL")
                 .setEventHandler(event -> getSelectionModel().selectAll())
         );
 
         actions().add(e -> new FxAction(specialActions.get(SpecialActionType.CLEAR_ALL))
-                .bindText("Clear all items")
-                .setIcon("D_DELETE")
                 .setEventHandler(event -> clearAll())
         );
     }

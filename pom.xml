@@ -295,14 +295,14 @@
 
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.6.2</version>
+                    <version>3.7.0</version>
                     <configuration>
                         <showWarnings>true</showWarnings>
                         <showDeprecation>true</showDeprecation>
                         <optimize>true</optimize>
+                        <parameters>true</parameters>
                         <compilerArgs>
                             <arg>-Xlint:unchecked</arg>
-                            <arg>-parameters</arg>
                         </compilerArgs>
                     </configuration>
                 </plugin>
@@ -436,7 +436,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>license-maven-plugin</artifactId>
-                    <version>1.13</version>
+                    <version>1.14</version>
                 </plugin>
             </plugins>
         </pluginManagement>
