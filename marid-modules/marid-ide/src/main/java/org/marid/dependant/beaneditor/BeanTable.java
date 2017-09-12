@@ -33,7 +33,7 @@ import org.marid.ide.settings.AppearanceSettings;
 import org.marid.ide.types.BeanTypeInfo;
 import org.marid.ide.types.BeanTypeResolver;
 import org.marid.jfx.icons.FontIcons;
-import org.marid.jfx.table.MaridTreeTableView;
+import org.marid.jfx.control.MaridTreeTableView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

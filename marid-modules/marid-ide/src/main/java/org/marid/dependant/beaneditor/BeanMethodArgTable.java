@@ -20,7 +20,6 @@
 
 package org.marid.dependant.beaneditor;
 
-import com.google.common.reflect.TypeToken;
 import javafx.beans.binding.Bindings;
 import javafx.geometry.Orientation;
 import javafx.scene.control.Label;
@@ -34,7 +33,7 @@ import org.marid.dependant.beaneditor.model.SignatureResolver;
 import org.marid.ide.model.BeanMethodArgData;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
-import org.marid.jfx.table.MaridTableView;
+import org.marid.jfx.control.MaridTableView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 

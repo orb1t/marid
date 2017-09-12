@@ -19,7 +19,7 @@
  * #L%
  */
 
-package org.marid.jfx.table;
+package org.marid.jfx.control;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
