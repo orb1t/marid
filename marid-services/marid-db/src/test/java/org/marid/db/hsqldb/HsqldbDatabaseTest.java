@@ -23,32 +23,33 @@ package org.marid.db.hsqldb;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.marid.db.dao.NumericWriter;
 import org.marid.db.data.DataRecord;
 import org.marid.db.data.DataRecordKey;
-import org.marid.test.NormalTests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Stream;
 
 import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.stream.Collectors.toSet;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-@Category({NormalTests.class})
+@Tag("normal")
 @ContextConfiguration(classes = {HsqldbDatabaseTestConf.class})
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class HsqldbDatabaseTest extends AbstractJUnit4SpringContextTests {
+@ExtendWith(SpringExtension.class)
+public class HsqldbDatabaseTest {
 
     private final long from = Instant.parse("2000-01-01T00:00:00Z").toEpochMilli();
     private final long to = Instant.parse("2000-01-01T00:10:00Z").toEpochMilli();
@@ -56,8 +57,20 @@ public class HsqldbDatabaseTest extends AbstractJUnit4SpringContextTests {
     @Autowired
     private NumericWriter numericWriter;
 
-    @Test
-    public void test_01_Insert() {
+    @TestFactory
+    public Stream<DynamicTest> tests() {
+        return Stream.of(
+                dynamicTest("test01", this::test01),
+                dynamicTest("test02", this::test02),
+                dynamicTest("test03", this::test03),
+                dynamicTest("test04", this::test04),
+                dynamicTest("test05", this::test05),
+                dynamicTest("test06", this::test06),
+                dynamicTest("test07", this::test07)
+        );
+    }
+
+    private void test01() {
         final List<DataRecord<Double>> expected = new ArrayList<>();
         for (long t = from / 1000L; t < to / 1000L; t += 10L) {
             final Instant instant = Instant.ofEpochSecond(t);
@@ -68,15 +81,14 @@ public class HsqldbDatabaseTest extends AbstractJUnit4SpringContextTests {
         assertEquals(
                 expected.stream().map(DataRecord::getTimestamp).collect(toSet()),
                 insertResult.stream().map(DataRecordKey::getTimestamp).collect(toSet()));
-        final List<DataRecord<Double>> actual = numericWriter.fetchRecords(new long[] {0L}, from, to);
+        final List<DataRecord<Double>> actual = numericWriter.fetchRecords(new long[]{0L}, from, to);
         assertEquals(actual, expected);
         final long max = expected.stream().mapToLong(DataRecord::getTimestamp).max().orElse(0L);
-        final List<DataRecord<Double>> actualMinus1 = numericWriter.fetchRecords(new long[] {0L}, from, max);
+        final List<DataRecord<Double>> actualMinus1 = numericWriter.fetchRecords(new long[]{0L}, from, max);
         assertEquals(expected.size() - 1, actualMinus1.size());
     }
 
-    @Test
-    public void test_02_Merge() {
+    private void test02() {
         final long t1 = Instant.parse("2000-01-01T00:00:10Z").toEpochMilli();
         final long t2 = Instant.parse("2000-01-01T00:00:40Z").toEpochMilli();
         final long t3 = Instant.parse("2000-01-01T00:00:50Z").toEpochMilli();
@@ -91,20 +103,17 @@ public class HsqldbDatabaseTest extends AbstractJUnit4SpringContextTests {
         assertEquals(3.3, numericWriter.fetchRecord(0, t3).getValue(), 1e-3);
     }
 
-    @Test
-    public void test_03_Delete() {
+    private void test03() {
         final long tf = Instant.parse("2000-01-01T00:00:10Z").toEpochMilli();
         final long tt = Instant.parse("2000-01-01T00:00:40Z").toEpochMilli();
         assertEquals(3L, numericWriter.delete(tf, tt));
     }
 
-    @Test
-    public void test_04_RecordCount() {
+    private void test04() {
         assertEquals(57L, numericWriter.getRecordCount());
     }
 
-    @Test
-    public void test_05_HashCodesNotIncludingData() {
+    private void test05() {
         final Map<Long, String> hashBefore = numericWriter.hash(from, to, false, "MD5");
         final long t = Instant.parse("2000-01-01T00:00:50Z").toEpochMilli();
         assertEquals(1L, numericWriter.delete(t, t + 1000L));
@@ -112,8 +121,7 @@ public class HsqldbDatabaseTest extends AbstractJUnit4SpringContextTests {
         assertNotEquals(hashBefore, hashAfter);
     }
 
-    @Test
-    public void test_06_Tags() {
+    private void test06() {
         final List<DataRecord<Double>> expected = new ArrayList<>();
         for (long t = from / 1000L; t < to / 1000L; t += 10L) {
             final Instant instant = Instant.ofEpochSecond(t);
@@ -124,16 +132,15 @@ public class HsqldbDatabaseTest extends AbstractJUnit4SpringContextTests {
         assertEquals(
                 expected.stream().map(DataRecord::getTimestamp).collect(toSet()),
                 insertResult.stream().map(DataRecordKey::getTimestamp).collect(toSet()));
-        final List<DataRecord<Double>> actual = numericWriter.fetchRecords(new long[] {1L}, from, to);
+        final List<DataRecord<Double>> actual = numericWriter.fetchRecords(new long[]{1L}, from, to);
         assertEquals(actual, expected);
-        assertArrayEquals(new long[] {0L, 1L}, numericWriter.tags(from, to));
+        assertArrayEquals(new long[]{0L, 1L}, numericWriter.tags(from, to));
         assertEquals(2, numericWriter.tagCount(from, to));
     }
 
-    @Test
-    public void test_07_DeleteAll() {
+    private void test07() {
         assertEquals(56L + 60L, numericWriter.delete(from, from + DAYS.toMillis(1L)));
-        assertEquals(Collections.emptyList(), numericWriter.fetchRecords(new long[] {0L, 1L}, from, to));
+        assertEquals(Collections.emptyList(), numericWriter.fetchRecords(new long[]{0L, 1L}, from, to));
         assertEquals(0L, numericWriter.getRecordCount());
     }
 }

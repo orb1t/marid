@@ -21,28 +21,29 @@
 package org.marid.ide.types;
 
 import com.google.common.reflect.TypeToken;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.marid.ide.model.BeanData;
-import org.marid.test.NormalTests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 import static java.util.logging.Level.INFO;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Category({NormalTests.class})
+@Tag("normal")
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {BeanTypeResolverTestContext.class})
-public class BeanTypeResolverTest extends AbstractJUnit4SpringContextTests {
+public class BeanTypeResolverTest {
 
     @Autowired
     private BeanTypeResolver resolver;

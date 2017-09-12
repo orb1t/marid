@@ -21,19 +21,18 @@
 
 package org.marid.runtime.converter;
 
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.marid.runtime.context.MaridRuntime;
-import org.marid.test.NormalTests;
 import org.mockito.Mockito;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Category({NormalTests.class})
+@Tag("normal")
 public class DefaultValueConvertersTest {
 
     private static final DefaultValueConvertersFactory FACTORY = new DefaultValueConvertersFactory();

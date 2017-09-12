@@ -25,17 +25,16 @@ import net.wimpi.modbus.ModbusCoupler;
 import net.wimpi.modbus.net.ModbusTCPListener;
 import net.wimpi.modbus.procimg.SimpleProcessImage;
 import net.wimpi.modbus.procimg.SimpleRegister;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.marid.io.IOSupplier;
 import org.marid.proto.StdProtoBus;
 import org.marid.proto.StdProtoBusProps;
 import org.marid.proto.StdProtoRoot;
 import org.marid.proto.io.ProtoIO;
 import org.marid.proto.io.StdProtoSocketIO;
-import org.marid.test.SlowTests;
 
 import java.lang.reflect.Field;
 import java.net.ServerSocket;
@@ -49,13 +48,13 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 
 import static java.net.InetAddress.getLocalHost;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Category({SlowTests.class})
+@Tag("slow")
 public class ModbusTest {
 
     private static final SimpleProcessImage IMAGE = new SimpleProcessImage();
@@ -63,7 +62,7 @@ public class ModbusTest {
 
     private static int port;
 
-    @BeforeClass
+    @BeforeAll
     public static void init() throws Exception {
         //System.setProperty("net.wimpi.modbus.debug", "true");
 
@@ -94,7 +93,7 @@ public class ModbusTest {
         }
     }
 
-    @AfterClass
+    @AfterAll
     public static void stop() throws Exception {
         LISTENER.stop();
     }

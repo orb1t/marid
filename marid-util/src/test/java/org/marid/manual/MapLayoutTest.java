@@ -21,9 +21,8 @@
 
 package org.marid.manual;
 
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
-import org.marid.test.ManualTests;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.openjdk.jol.info.GraphLayout;
 
 import java.util.HashMap;
@@ -32,7 +31,7 @@ import java.util.Map;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Category({ManualTests.class})
+@Tag("manual")
 public class MapLayoutTest {
 
     @Test

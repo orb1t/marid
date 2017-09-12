@@ -21,26 +21,26 @@
 
 package org.marid.runtime.context;
 
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.marid.runtime.beans.Bean;
 import org.marid.runtime.beans.BeanMethod;
 import org.marid.runtime.exception.MaridBeanNotFoundException;
-import org.marid.test.NormalTests;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.marid.runtime.context.MaridContextTestUtils.m;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Category({NormalTests.class})
+@Tag("normal")
 public class MaridContextTest {
 
     @Test
@@ -88,34 +88,36 @@ public class MaridContextTest {
                 )
         );
         try (final MaridContext runtime = new MaridContext(root)) {
-            assertEquals("bean1", new Bean1(1, "abc", new BigDecimal("1.23")).setA(true), runtime.getBean("bean1"));
-            assertEquals("bean2", new BigDecimal("1.23"), runtime.getBean("bean2"));
-            assertEquals("bean3", "abc", runtime.getBean("bean3"));
-            assertEquals("bean4", singletonList(1), runtime.getBean("bean4"));
-            assertEquals("bean5", asList(1, 2), runtime.getBean("bean5"));
-            assertEquals("bean6", "a1", runtime.getBean("bean6"));
-            assertEquals("bean1", 10, ((Bean1) runtime.getBean("bean1")).q);
-            assertEquals("bean7", "x", runtime.getBean("bean7"));
+            assertEquals(new Bean1(1, "abc", new BigDecimal("1.23")).setA(true), runtime.getBean("bean1"));
+            assertEquals(new BigDecimal("1.23"), runtime.getBean("bean2"));
+            assertEquals("abc", runtime.getBean("bean3"));
+            assertEquals(singletonList(1), runtime.getBean("bean4"));
+            assertEquals(asList(1, 2), runtime.getBean("bean5"));
+            assertEquals("a1", runtime.getBean("bean6"));
+            assertEquals(10, ((Bean1) runtime.getBean("bean1")).q);
+            assertEquals("x", runtime.getBean("bean7"));
         }
     }
 
-    @Test(expected = MaridBeanNotFoundException.class)
+    @Test
     public void circularReferenceDetection() throws Throwable {
-        final Bean root = new Bean();
-        root.add(new Bean(
-                "bean1",
-                Bean1.class.getName(),
-                Bean1.class.getConstructor(int.class, String.class, BigDecimal.class),
-                m("x", "of", "1"), m("y", "ref", "bean1"), m("z", "of", "1.23")
-        ).add(new BeanMethod(
-                Bean1.class.getMethod("setA", boolean.class),
-                m("a", "boolean", "true")
-        )));
-        try (final MaridContext context = new MaridContext(root)) {
-            assertNull(context);
-        } catch (MaridContextException x) {
-            throw x.getSuppressed()[0];
-        }
+        Assertions.assertThrows(MaridBeanNotFoundException.class, () -> {
+            final Bean root = new Bean();
+            root.add(new Bean(
+                    "bean1",
+                    Bean1.class.getName(),
+                    Bean1.class.getConstructor(int.class, String.class, BigDecimal.class),
+                    m("x", "of", "1"), m("y", "ref", "bean1"), m("z", "of", "1.23")
+            ).add(new BeanMethod(
+                    Bean1.class.getMethod("setA", boolean.class),
+                    m("a", "boolean", "true")
+            )));
+            try (final MaridContext context = new MaridContext(root)) {
+                assertNull(context);
+            } catch (MaridContextException x) {
+                throw x.getSuppressed()[0];
+            }
+        });
     }
 
     @Test

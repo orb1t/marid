@@ -21,38 +21,42 @@
 
 package org.marid.runtime.context;
 
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.marid.runtime.exception.MaridCircularPlaceholderException;
-import org.marid.test.NormalTests;
 
 import java.util.Properties;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Category({NormalTests.class})
+@Tag("normal")
 public class MaridPlaceholderResolverTest {
 
-    @Test(expected = MaridCircularPlaceholderException.class)
+    @Test
     public void circular1() {
-        final Properties properties = new Properties();
-        properties.setProperty("x1", "2");
-        properties.setProperty("x2", "${x3}");
-        properties.setProperty("x3", "${x2}");
-        final MaridPlaceholderResolver resolver = new MaridPlaceholderResolver(properties);
-        resolver.resolvePlaceholders("abc ${x2}");
+        assertThrows(MaridCircularPlaceholderException.class, () -> {
+            final Properties properties = new Properties();
+            properties.setProperty("x1", "2");
+            properties.setProperty("x2", "${x3}");
+            properties.setProperty("x3", "${x2}");
+            final MaridPlaceholderResolver resolver = new MaridPlaceholderResolver(properties);
+            resolver.resolvePlaceholders("abc ${x2}");
+        });
     }
 
-    @Test(expected = MaridCircularPlaceholderException.class)
+    @Test
     public void circular2() {
-        final Properties properties = new Properties();
-        properties.setProperty("x1", "2");
-        properties.setProperty("x2", "${x2}");
-        final MaridPlaceholderResolver resolver = new MaridPlaceholderResolver(properties);
-        resolver.resolvePlaceholders("abc ${x2}");
+        assertThrows(MaridCircularPlaceholderException.class, () -> {
+            final Properties properties = new Properties();
+            properties.setProperty("x1", "2");
+            properties.setProperty("x2", "${x2}");
+            final MaridPlaceholderResolver resolver = new MaridPlaceholderResolver(properties);
+            resolver.resolvePlaceholders("abc ${x2}");
+        });
     }
 
     @Test
