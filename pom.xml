@@ -240,6 +240,14 @@
         </license>
     </licenses>
 
+    <repositories>
+        <repository>
+            <id>repository.spring.milestone</id>
+            <name>Spring Milestone Repository</name>
+            <url>http://repo.spring.io/milestone</url>
+        </repository>
+    </repositories>
+
     <modules>
         <module>marid-modules</module>
         <module>marid-test</module>
@@ -523,7 +531,7 @@
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-framework-bom</artifactId>
                 <type>pom</type>
-                <version>4.3.10.RELEASE</version>
+                <version>5.0.0.RC4</version>
                 <scope>import</scope>
             </dependency>
 
