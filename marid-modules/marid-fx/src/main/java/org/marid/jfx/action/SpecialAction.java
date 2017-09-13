@@ -51,14 +51,6 @@ public class SpecialAction extends FxAction {
         super(toolbarGroup, group, menu);
     }
 
-    public SpecialAction(@Nonnull String toolbarGroup) {
-        super(toolbarGroup);
-    }
-
-    public SpecialAction(@Nonnull String group, @Nonnull String menu) {
-        super(group, menu);
-    }
-
     @Override
     public SpecialAction bindAccelerator(ObservableValue<KeyCombination> value) {
         if (!sealed) accelerator = value;
