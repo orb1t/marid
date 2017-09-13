@@ -28,6 +28,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.input.KeyCombination;
+import org.marid.jfx.LocalizedStrings;
 
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
@@ -59,7 +60,7 @@ public class SpecialAction extends FxAction {
 
     @Override
     public SpecialAction setAccelerator(KeyCombination value) {
-        return (SpecialAction) super.setAccelerator(value);
+        return bindAccelerator(new SimpleObjectProperty<>(value));
     }
 
     @Override
@@ -76,7 +77,7 @@ public class SpecialAction extends FxAction {
 
     @Override
     public SpecialAction bindText(String format, Object... args) {
-        return (SpecialAction) super.bindText(format, args);
+        return bindText(LocalizedStrings.ls(format, args));
     }
 
     @Override
@@ -87,7 +88,7 @@ public class SpecialAction extends FxAction {
 
     @Override
     public SpecialAction setDisabled(boolean value) {
-        return (SpecialAction) super.setDisabled(value);
+        return bindDisabled(new SimpleBooleanProperty(value));
     }
 
     @Override
@@ -104,7 +105,7 @@ public class SpecialAction extends FxAction {
 
     @Override
     public SpecialAction setIcon(String value) {
-        return (SpecialAction) super.setIcon(value);
+        return bindIcon(new SimpleStringProperty(value));
     }
 
     @Override
@@ -115,7 +116,7 @@ public class SpecialAction extends FxAction {
 
     @Override
     public SpecialAction setEventHandler(EventHandler<ActionEvent> value) {
-        return (SpecialAction) super.setEventHandler(value);
+        return bindEventHandler(new SimpleObjectProperty<>(value));
     }
 
     @PostConstruct
