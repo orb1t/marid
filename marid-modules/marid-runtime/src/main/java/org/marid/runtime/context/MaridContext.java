@@ -188,8 +188,11 @@ public final class MaridContext implements MaridRuntime, AutoCloseable {
         }
 
         private Object create(String name) {
-            final Optional<Bean> bo = bean.children.stream().filter(e -> e.name.equals(name)).findFirst();
-            if (bo.isPresent() && processing.add(name)) {
+            final Optional<Bean> bo = bean.children.stream()
+                    .filter(e -> e.name.equals(name))
+                    .filter(e -> processing.add(e.name))
+                    .findFirst();
+            if (bo.isPresent()) {
                 final Bean b = bo.get();
                 try {
                     final MaridContext c = child(this, b, cc -> cc.create(b));
