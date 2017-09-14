@@ -33,6 +33,8 @@ import org.marid.dependant.beaneditor.model.SignatureResolver;
 import org.marid.ide.model.BeanMethodArgData;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.FxAction;
+import org.marid.jfx.annotation.DisableStdSelectAndRemoveActions;
+import org.marid.jfx.annotation.DisableStdUpAndDownActions;
 import org.marid.jfx.control.MaridTableView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -47,6 +49,8 @@ import static org.marid.misc.Builder.build;
 /**
  * @author Dmitry Ovchinnikov
  */
+@DisableStdUpAndDownActions
+@DisableStdSelectAndRemoveActions
 public abstract class BeanMethodArgTable extends MaridTableView<BeanMethodArgData> {
 
     protected final TableColumn<BeanMethodArgData, HBox> nameColumn;
