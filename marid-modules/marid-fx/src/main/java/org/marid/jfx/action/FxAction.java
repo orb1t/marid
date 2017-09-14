@@ -193,7 +193,7 @@ public class FxAction {
             final CheckMenuItem checkMenuItem = new CheckMenuItem();
             item = checkMenuItem;
             item.onActionProperty().bind(eventHandler);
-            checkMenuItem.selectedProperty().bindBidirectional(selected);
+            selected.addListener((o, oV, nV) -> checkMenuItem.setSelected(nV));
             item.disableProperty().bind(disabled);
         } else if (!children.isEmpty()) {
             final Menu menu = new Menu();
