@@ -58,6 +58,10 @@ import static org.marid.logging.Log.log;
 @MaridBean
 public final class HsqldbDatabase implements Closeable {
 
+    static {
+        System.setProperty("hsqldb.reconfig_logging", "false");
+    }
+
     private final Server server;
     private final File directory;
     private final long shutdownTimeout;

@@ -100,7 +100,7 @@ public interface MaridRuntimeUtils {
 
     @Nonnull
     static String signature(@Nonnull Field field) {
-        return String.format("F|%04X|%s|%s",
+        return String.format("F %04X %s %s",
                 field.getModifiers(),
                 field.getDeclaringClass().getCanonicalName(),
                 field.getName()
@@ -109,7 +109,7 @@ public interface MaridRuntimeUtils {
 
     @Nonnull
     static String signature(@Nonnull Method method) {
-        return String.format("M|%04X|%s|%s|%s",
+        return String.format("M %04X %s %s %s",
                 method.getModifiers(),
                 method.getDeclaringClass().getCanonicalName(),
                 method.getName(),
@@ -119,7 +119,7 @@ public interface MaridRuntimeUtils {
 
     @Nonnull
     static String signature(@Nonnull Constructor<?> constructor) {
-        return String.format("C|%04X|%s|%s",
+        return String.format("C %04X %s %s",
                 constructor.getModifiers(),
                 constructor.getDeclaringClass().getCanonicalName(),
                 args(constructor)
@@ -133,8 +133,8 @@ public interface MaridRuntimeUtils {
 
     @Nonnull
     static String toCanonical(@Nonnull String signature) {
-        final int limit = (int) signature.chars().filter(c -> c == '|').count() + 1;
-        final String[] parts = signature.split("[|]", limit);
+        final int limit = (int) signature.chars().filter(c -> c == ' ').count() + 1;
+        final String[] parts = signature.split(" ", limit);
         final String mods = Modifier.toString(Integer.parseUnsignedInt(parts[1], 16));
         switch (parts[0]) {
             case "F": return String.format("%s %s.%s", mods, parts[2], parts[3]);
@@ -146,8 +146,8 @@ public interface MaridRuntimeUtils {
 
     @Nonnull
     static String toCanonicalWithArgs(@Nonnull String signature, Type... types) {
-        final int limit = (int) signature.chars().filter(c -> c == '|').count() + 1;
-        final String[] parts = signature.split("[|]", limit);
+        final int limit = (int) signature.chars().filter(c -> c == ' ').count() + 1;
+        final String[] parts = signature.split(" ", limit);
         final String mods = Modifier.toString(Integer.parseUnsignedInt(parts[1], 16));
         final String args = of(types).map(Type::getTypeName).collect(joining(","));
         switch (parts[0]) {
@@ -160,8 +160,8 @@ public interface MaridRuntimeUtils {
 
     static Member fromSignature(@Nonnull String signature, @Nonnull ClassLoader classLoader) {
         try {
-            final int limit = (int) signature.chars().filter(c -> c == '|').count() + 1;
-            final String[] parts = signature.split("[|]", limit);
+            final int limit = (int) signature.chars().filter(c -> c == ' ').count() + 1;
+            final String[] parts = signature.split(" ", limit);
             final Class<?> declaringClass = Class.forName(parts[2], false, classLoader);
             switch (parts[0]) {
                 case "F":
