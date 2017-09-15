@@ -23,10 +23,12 @@ package org.marid.ide.project;
 import org.apache.maven.model.*;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.marid.ide.common.IdeValues;
+import org.marid.ide.settings.JavaSettings;
 import org.marid.ide.settings.MavenSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.Properties;
 
 import static java.util.Collections.singletonList;
@@ -39,11 +41,13 @@ import static org.marid.misc.Builder.build;
 public class ProjectPrerequisites {
 
     private final MavenSettings mavenSettings;
+    private final JavaSettings javaSettings;
     private final IdeValues ideValues;
 
     @Autowired
-    public ProjectPrerequisites(MavenSettings mavenSettings, IdeValues ideValues) {
+    public ProjectPrerequisites(MavenSettings mavenSettings, JavaSettings javaSettings, IdeValues ideValues) {
         this.mavenSettings = mavenSettings;
+        this.javaSettings = javaSettings;
         this.ideValues = ideValues;
     }
 
@@ -51,7 +55,6 @@ public class ProjectPrerequisites {
         final Builder builder = new Builder(profile);
         builder.applyProperties();
         builder.applyBuild();
-        builder.applyPluginManagement();
         builder.applyRuntimeDependency();
         builder.applyPlugins();
     }
@@ -87,28 +90,12 @@ public class ProjectPrerequisites {
             }
         }
 
-        private void applyPluginManagement() {
-            if (model.getBuild().getPluginManagement() == null) {
-                model.getBuild().setPluginManagement(new PluginManagement());
-            }
-            applyExecMavenPluginManagement();
-        }
-
-        private void applyExecMavenPluginManagement() {
-            final PluginManagement pluginManagement = model.getBuild().getPluginManagement();
-            pluginManagement.getPlugins().removeIf(p -> is(p, "org.codehaus.mojo", "exec-maven-plugin"));
-            final Plugin plugin = new Plugin();
-            plugin.setGroupId("org.codehaus.mojo");
-            plugin.setArtifactId("exec-maven-plugin");
-            plugin.setVersion("1.4.0");
-            pluginManagement.addPlugin(plugin);
-        }
-
         private void applyPlugins() {
             applyCompilerPlugin();
             applyJarPlugin();
             applyDependencyMavenPlugin();
-            applyResourcesPluginVersion();
+            applyResourcesPlugin();
+            applyExecPlugin();
         }
 
         private void applyCompilerPlugin() {
@@ -119,6 +106,7 @@ public class ProjectPrerequisites {
                 plugin.setConfiguration(build(new Xpp3Dom("configuration"), configuration -> {
                     addChild(configuration, "showWarnings", "true");
                     addChild(configuration, "showDeprecation", "true");
+                    addChild(configuration, "parameters", "true");
                 }));
             }));
         }
@@ -171,7 +159,7 @@ public class ProjectPrerequisites {
             addChild(configuration, "overWriteSnapshots", "true");
         }
 
-        private void applyResourcesPluginVersion() {
+        private void applyResourcesPlugin() {
             final Plugin resourcesPlugin = model.getBuild().getPlugins().stream()
                     .filter(p -> "maven-resources-plugin".equals(p.getArtifactId()))
                     .findAny()
@@ -182,6 +170,41 @@ public class ProjectPrerequisites {
                         return plugin;
                     });
             resourcesPlugin.setVersion(mavenSettings.resourcesPluginVersion.get());
+        }
+
+        private void applyExecPlugin() {
+            final Plugin plugin = model.getBuild().getPlugins().stream()
+                    .filter(p -> "exec-maven-plugin".equals(p.getArtifactId()))
+                    .findAny()
+                    .orElseGet(() -> {
+                        final Plugin p = new Plugin();
+                        p.setGroupId("org.codehaus.mojo");
+                        p.setArtifactId("exec-maven-plugin");
+                        model.getBuild().getPlugins().add(p);
+                        return p;
+                    });
+            plugin.setVersion(mavenSettings.execPluginVersion.get());
+            final PluginExecution execExecution = plugin.getExecutions().stream()
+                    .filter(e -> "default-cli".equals(e.getId()))
+                    .findAny()
+                    .orElseGet(() -> {
+                        final PluginExecution execution = new PluginExecution();
+                        plugin.getExecutions().add(execution);
+                        return execution;
+                    });
+            execExecution.setGoals(Collections.singletonList("exec"));
+            execExecution.setId("default-cli");
+
+            final Xpp3Dom configuration = new Xpp3Dom("configuration");
+            execExecution.setConfiguration(configuration);
+
+            addChild(configuration, "executable", javaSettings.getJavaExecutable());
+            addChild(configuration, "workingDirectory", "${project.build.directory}");
+
+            final Xpp3Dom arguments = new Xpp3Dom("arguments");
+            configuration.addChild(arguments);
+            addChild(arguments, "argument", "-jar");
+            addChild(arguments, "argument", "${project.build.finalName}.${project.packaging}");
         }
 
         private void applyRuntimeDependency() {
