@@ -265,7 +265,7 @@ public final class MaridContext implements MaridRuntime, AutoCloseable {
             } catch (RuntimeException x) {
                 throw x;
             } catch (Throwable x) {
-                throw new MaridBeanMethodArgException(bean.name, method.signature, methodArg.name, x);
+                throw new MaridBeanMethodArgException(bean.name, method.signature, methodArg.index(method), x);
             }
         }
 

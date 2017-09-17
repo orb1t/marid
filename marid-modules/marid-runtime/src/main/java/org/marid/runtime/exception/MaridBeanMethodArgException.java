@@ -28,13 +28,13 @@ public class MaridBeanMethodArgException extends RuntimeException {
 
     private final String beanName;
     private final String methodName;
-    private final String argName;
+    private final int argIndex;
 
-    public MaridBeanMethodArgException(String beanName, String methodName, String argName, Throwable cause) {
+    public MaridBeanMethodArgException(String beanName, String methodName, int argIndex, Throwable cause) {
         super(cause);
         this.beanName = beanName;
         this.methodName = methodName;
-        this.argName = argName;
+        this.argIndex = argIndex;
     }
 
     public String getBeanName() {
@@ -45,12 +45,12 @@ public class MaridBeanMethodArgException extends RuntimeException {
         return methodName;
     }
 
-    public String getArgName() {
-        return argName;
+    public int getArgIndex() {
+        return argIndex;
     }
 
     @Override
     public String getMessage() {
-        return beanName + "." + methodName + "(" + argName + ")";
+        return beanName + "." + methodName + "(" + argIndex + ")";
     }
 }

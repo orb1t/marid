@@ -32,18 +32,18 @@ public class MaridBeanArgConverterNotFoundException extends RuntimeException {
 
     private final String beanName;
     private final String methodName;
-    private final String argName;
+    private final int argIndex;
     private final String type;
 
-    public MaridBeanArgConverterNotFoundException(String beanName, String methodName, String argName, String type) {
+    public MaridBeanArgConverterNotFoundException(String beanName, String methodName, int argIndex, String type) {
         this.beanName = beanName;
         this.methodName = methodName;
-        this.argName = argName;
+        this.argIndex = argIndex;
         this.type = type;
     }
 
     public MaridBeanArgConverterNotFoundException(Bean bean, BeanMethod method, BeanMethodArg arg) {
-        this(bean.name, method.signature, arg.name, arg.type);
+        this(bean.name, method.signature, arg.index(method), arg.type);
     }
 
     public String getBeanName() {
@@ -54,8 +54,8 @@ public class MaridBeanArgConverterNotFoundException extends RuntimeException {
         return methodName;
     }
 
-    public String getArgName() {
-        return argName;
+    public int getArgIndex() {
+        return argIndex;
     }
 
     public String getType() {
@@ -64,6 +64,6 @@ public class MaridBeanArgConverterNotFoundException extends RuntimeException {
 
     @Override
     public String getMessage() {
-        return String.format("%s.%s(%s:%s)", beanName, methodName, argName, type);
+        return String.format("%s.%s(%s:%s)", beanName, methodName, argIndex, type);
     }
 }

@@ -52,39 +52,39 @@ public class MaridContextTest {
                         "bean1",
                         Bean1.class.getName(),
                         Bean1.class.getConstructor(int.class, String.class, BigDecimal.class),
-                        m("x", "of", "1"),
-                        m("y", "of", "abc"),
-                        m("z", "of", "1.23")
-                ).add(new BeanMethod(Bean1.class.getMethod("setA", boolean.class), m("a", "of", "true"))),
+                        m("of", "1"),
+                        m("of", "abc"),
+                        m("of", "1.23")
+                ).add(new BeanMethod(Bean1.class.getMethod("setA", boolean.class), m("of", "true"))),
                 new Bean("bean3", "bean1", Bean1.class.getField("y")),
                 new Bean(
                         "bean4",
                         Bean1.class.getName(),
                         Bean1.class.getMethod("list")
-                ).add(new BeanMethod(List.class.getMethod("add", Object.class), m("e", "Integer", "1"))),
+                ).add(new BeanMethod(List.class.getMethod("add", Object.class), m("Integer", "1"))),
                 new Bean(
                         "bean5",
                         Bean1.class.getName(),
                         Bean1.class.getMethod("list")
                 ).add(
-                        new BeanMethod(List.class.getMethod("add", Object.class), m("e", "Integer", "1")),
-                        new BeanMethod(List.class.getMethod("add", Object.class), m("e", "Integer", "2"))),
+                        new BeanMethod(List.class.getMethod("add", Object.class), m("Integer", "1")),
+                        new BeanMethod(List.class.getMethod("add", Object.class), m("Integer", "2"))),
                 new Bean(
                         "bean6",
                         String.class.getName(),
-                        String.class.getMethod("valueOf", Object.class), m("arg0", "js", "'a' + 1")
+                        String.class.getMethod("valueOf", Object.class), m("js", "'a' + 1")
                 ),
                 new Bean(
                         "bean7",
                         String.class.getName(),
                         String.class.getConstructor(String.class),
-                        m("arg", "ref", "bean8")
+                        m("ref", "bean8")
                 ),
                 new Bean(
                         "bean8",
                         String.class.getName(),
                         String.class.getConstructor(String.class),
-                        m("arg", "of", "x")
+                        m("of", "x")
                 )
         );
         try (final MaridContext runtime = new MaridContext(root)) {
@@ -107,10 +107,10 @@ public class MaridContextTest {
                     "bean1",
                     Bean1.class.getName(),
                     Bean1.class.getConstructor(int.class, String.class, BigDecimal.class),
-                    m("x", "of", "1"), m("y", "ref", "bean1"), m("z", "of", "1.23")
+                    m("of", "1"), m("ref", "bean1"), m("of", "1.23")
             ).add(new BeanMethod(
                     Bean1.class.getMethod("setA", boolean.class),
-                    m("a", "boolean", "true")
+                    m("boolean", "true")
             )));
             try (final MaridContext context = new MaridContext(root)) {
                 assertNull(context);
@@ -128,12 +128,12 @@ public class MaridContextTest {
                 "b1",
                 Bean1.class.getName(),
                 Bean1.class.getConstructor(int.class, String.class, BigDecimal.class),
-                m("x", "of", "1"), m("y", "of", "2"), m("z", "ref", "b2")));
+                m("of", "1"), m("of", "2"), m("ref", "b2")));
         b1.add(new Bean(
                 "b2",
                 BigDecimal.class.getName(),
                 BigDecimal.class.getConstructor(String.class),
-                m("x", "of", "1.2")
+                m("of", "1.2")
         ));
         try (final MaridContext context = new MaridContext(root)) {
             final Bean1 b = (Bean1) context.getBean("b1");

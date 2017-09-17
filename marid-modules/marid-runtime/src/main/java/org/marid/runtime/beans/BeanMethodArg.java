@@ -27,6 +27,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Objects;
 
+import static java.util.stream.IntStream.range;
 import static org.marid.io.Xmls.attribute;
 import static org.marid.io.Xmls.content;
 
@@ -36,28 +37,26 @@ import static org.marid.io.Xmls.content;
 public class BeanMethodArg {
 
     @Nonnull
-    public final String name;
-
-    @Nonnull
     public final String type;
 
     @Nullable
     public final String value;
 
-    public BeanMethodArg(@Nonnull String name, @Nonnull String type, @Nullable String value) {
-        this.name = name;
+    public BeanMethodArg(@Nonnull String type, @Nullable String value) {
         this.type = type;
         this.value = value;
     }
 
     public BeanMethodArg(@Nonnull Element element) {
-        name = attribute(element, "name").orElseThrow(NullPointerException::new);
         type = attribute(element, "type").orElseThrow(NullPointerException::new);
         value = content(element).orElse(null);
     }
 
+    public int index(BeanMethod method) {
+        return range(0, method.args.length).filter(i -> method.args[i] == this).findFirst().orElse(-1);
+    }
+
     public void writeTo(@Nonnull Element element) {
-        element.setAttribute("name", name);
         element.setAttribute("type", type);
         if (value != null) {
             element.setTextContent(value);
@@ -72,19 +71,17 @@ public class BeanMethodArg {
             return false;
         } else {
             final BeanMethodArg that = (BeanMethodArg) o;
-            return Objects.equals(name, that.name) &&
-                    Objects.equals(type, that.type) &&
-                    Objects.equals(value, that.value);
+            return Objects.equals(type, that.type) && Objects.equals(value, that.value);
         }
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, type, value);
+        return Objects.hash(type, value);
     }
 
     @Override
     public String toString() {
-        return String.format("%s(%s,%s)", name, type, value);
+        return String.format("%s(%s)", type, value);
     }
 }

@@ -53,7 +53,7 @@ public class BeanTypeResolverTestContext {
         return root.add(new B("bean1",
                 ArrayList.class.getName(),
                 ArrayList.class.getConstructor(Collection.class),
-                new BeanMethodArg("arg0", "ref", "bean2")));
+                new BeanMethodArg("ref", "bean2")));
     }
 
     @Bean
@@ -61,7 +61,7 @@ public class BeanTypeResolverTestContext {
         return root.add(new B("bean2",
                 Arrays.class.getName(),
                 Arrays.class.getMethod("asList", Object[].class),
-                new BeanMethodArg("arg0", "String[]", "a,b,c")));
+                new BeanMethodArg("String[]", "a,b,c")));
     }
 
     @Bean
@@ -69,7 +69,7 @@ public class BeanTypeResolverTestContext {
         return root.add(new B("bean3", ArrayList.class.getName(), ArrayList.class.getConstructor())
                 .add(new BeanMethod(
                         ArrayList.class.getMethod("add", Object.class),
-                        new BeanMethodArg("arg0", "ref", "bean1")
+                        new BeanMethodArg("ref", "bean1")
                 ))
         );
     }
@@ -79,8 +79,8 @@ public class BeanTypeResolverTestContext {
         return root.add(new B("bean4",
                 ComplexBean.class.getName(),
                 ComplexBean.class.getConstructor(Set.class, Object.class),
-                new BeanMethodArg("arg0", "ref", "bean5"),
-                new BeanMethodArg("arg1", "Integer", "8")));
+                new BeanMethodArg("ref", "bean5"),
+                new BeanMethodArg("Integer", "8")));
     }
 
     @Bean
@@ -88,7 +88,7 @@ public class BeanTypeResolverTestContext {
         return root.add(new B("bean5",
                 Collections.class.getName(),
                 Collections.class.getMethod("singleton", Object.class),
-                new BeanMethodArg("arg0", "String", "v")));
+                new BeanMethodArg("String", "v")));
     }
 
     @Bean
@@ -101,7 +101,7 @@ public class BeanTypeResolverTestContext {
         return root.add(new B("bean7",
                 Collections.class.getName(),
                 Collections.class.getMethod("singleton", Object.class),
-                new BeanMethodArg("arg0", "Integer", "1")));
+                new BeanMethodArg("Integer", "1")));
     }
 
     @Bean
@@ -109,8 +109,8 @@ public class BeanTypeResolverTestContext {
         return root.add(new B("bean8",
                 AnotherComplexBean.class.getName(),
                 AnotherComplexBean.class.getConstructor(Object.class, Object.class),
-                new BeanMethodArg("arg0", "Integer", "1"),
-                new BeanMethodArg("arg1", "Long", "2")));
+                new BeanMethodArg("Integer", "1"),
+                new BeanMethodArg("Long", "2")));
     }
 
     @Bean
@@ -118,8 +118,8 @@ public class BeanTypeResolverTestContext {
         return root.add(new B("bean9",
                 ComplexBean.class.getName(),
                 ComplexBean.class.getConstructor(Set.class, Object.class),
-                new BeanMethodArg("arg0", "of", null),
-                new BeanMethodArg("arg1", "Integer", "1")));
+                new BeanMethodArg("of", null),
+                new BeanMethodArg("Integer", "1")));
     }
 
     @Bean

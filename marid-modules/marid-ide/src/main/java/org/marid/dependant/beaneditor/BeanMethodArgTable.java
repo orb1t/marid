@@ -37,11 +37,13 @@ import org.marid.jfx.annotation.DisableStdUpAndDownActions;
 import org.marid.jfx.control.MaridTableView;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.PostConstruct;
+import java.lang.reflect.Executable;
+import java.lang.reflect.Member;
 import java.util.List;
 
 import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.misc.Builder.build;
+import static org.marid.runtime.context.MaridRuntimeUtils.fromSignature;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -98,10 +100,17 @@ public abstract class BeanMethodArgTable extends MaridTableView<BeanMethodArgDat
         }, profile.getBeanFile().children));
     }
 
-    @PostConstruct
-    public void initNameColumn() {
+    @Autowired
+    public void initNameColumn(ProjectProfile profile) {
         nameColumn.setCellValueFactory(param -> Bindings.createObjectBinding(() -> {
-            final String name = param.getValue().getName();
+            final Member member = fromSignature(param.getValue().parent.getSignature(), profile.getClassLoader());
+            final int index = param.getValue().parent.args.indexOf(param.getValue());
+            final String name;
+            if (member instanceof Executable && index >= 0 && index < ((Executable) member).getParameterCount()) {
+                name = ((Executable) member).getParameters()[index].getName();
+            } else {
+                name = Integer.toString(index);
+            }
             final String type = param.getValue().getType();
             final HBox box = new HBox(3);
             box.getChildren().add(new Label(name));
@@ -112,7 +121,7 @@ public abstract class BeanMethodArgTable extends MaridTableView<BeanMethodArgDat
                 box.getChildren().add(label);
             }
             return box;
-        }, param.getValue().name, param.getValue().type));
+        }, param.getValue().parent.signature, param.getValue().type));
     }
 
     @Autowired

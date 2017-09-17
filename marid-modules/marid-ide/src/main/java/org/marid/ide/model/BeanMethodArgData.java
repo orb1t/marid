@@ -35,13 +35,11 @@ public final class BeanMethodArgData {
     @Nonnull
     public final BeanMethodData parent;
 
-    public final StringProperty name = new SimpleStringProperty();
     public final StringProperty type = new SimpleStringProperty();
     public final StringProperty value = new SimpleStringProperty();
 
     public BeanMethodArgData(@Nonnull BeanMethodData parent, @Nonnull BeanMethodArg member) {
         this.parent = parent;
-        this.name.set(member.name);
         this.type.set(member.type);
         this.value.set(member.value);
     }
@@ -50,20 +48,16 @@ public final class BeanMethodArgData {
         return type.get();
     }
 
-    public String getName() {
-        return name.get();
-    }
-
     public String getValue() {
         return value.get();
     }
 
     public BeanMethodArg toArg() {
-        return new BeanMethodArg(getName(), getType(), getValue());
+        return new BeanMethodArg(getType(), getValue());
     }
 
     public Observable[] observables() {
-        return new Observable[] {name, type, value};
+        return new Observable[] {type, value};
     }
 
     public BeanData getBean() {
