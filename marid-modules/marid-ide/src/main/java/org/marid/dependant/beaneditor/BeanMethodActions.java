@@ -24,18 +24,15 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.util.Pair;
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.marid.dependant.beaneditor.dao.ConvertersDao;
-import org.marid.ide.model.BeanMethodArgData;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.types.BeanTypeInfo;
 import org.marid.ide.types.BeanTypeResolver;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.SpecialAction;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyMap;
@@ -48,8 +45,7 @@ import static org.apache.commons.lang3.reflect.TypeUtils.unrollVariables;
 public class BeanMethodActions {
 
     @Bean
-    @Qualifier("methodArg")
-    public Function<BeanMethodArgData, FxAction> converterAction(ConvertersDao dao, SpecialAction miscAction) {
+    public BeanMethodArgAction converterAction(ConvertersDao dao, SpecialAction miscAction) {
         return a -> a == null ? null : new FxAction(miscAction)
                 .bindText("Set a converter")
                 .setIcon("D_CLIPPY")
@@ -65,10 +61,9 @@ public class BeanMethodActions {
     }
 
     @Bean
-    @Qualifier("methodArg")
-    public Function<BeanMethodArgData, FxAction> refAction(BeanTypeResolver resolver,
-                                                           ProjectProfile profile,
-                                                           SpecialAction addAction) {
+    public BeanMethodArgAction refAction(BeanTypeResolver resolver,
+                                         ProjectProfile profile,
+                                         SpecialAction addAction) {
         return a -> {
             if (a == null) {
                 return null;
@@ -102,8 +97,7 @@ public class BeanMethodActions {
     }
 
     @Bean
-    @Qualifier("methodArg")
-    public Function<BeanMethodArgData, FxAction> resetArgAction(SpecialAction removeAction) {
+    public BeanMethodArgAction resetArgAction(SpecialAction removeAction) {
         return a -> a == null ? null : new FxAction(removeAction)
                 .bindText("Clear argument")
                 .setIcon("D_NEEDLE")
@@ -112,5 +106,13 @@ public class BeanMethodActions {
                     a.value.set(null);
                 })
                 .setDisabled(false);
+    }
+
+    @Bean
+    public BeanMethodArgAction createChildBeanAction(SpecialAction addAction) {
+        return a -> a == null ? null : new FxAction(addAction)
+                .setEventHandler(event -> {
+
+                });
     }
 }

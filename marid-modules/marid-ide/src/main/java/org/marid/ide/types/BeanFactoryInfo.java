@@ -38,46 +38,34 @@ import static org.marid.runtime.context.MaridRuntimeUtils.*;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class BeanFactoryInfo {
+class BeanFactoryInfo {
 
     @Nonnull
-    public final Bean bean;
+    final Bean bean;
 
     @Nonnull
-    public final TypeToken<?> factoryToken;
+    final TypeToken<?> factoryToken;
 
     @Nonnull
-    public final MethodHandle returnHandle;
+    final MethodHandle returnHandle;
 
     @Nonnull
-    public final Member returnMember;
+    final Type returnType;
 
-    @Nonnull
-    public final Class<?> returnClass;
-
-    @Nonnull
-    public final Type genericReturnType;
-
-    @Nonnull
-    public final TypeToken<?> genericReturnToken;
-
-    @Nonnull
-    public final Type returnType;
-
-    public BeanFactoryInfo(BeanData beanData, BeanTypeResolver resolver, BeanContext context) throws Exception {
+    BeanFactoryInfo(BeanData beanData, BeanTypeResolver resolver, BeanContext context) throws Exception {
         bean = beanData.toBean();
-        returnMember = fromSignature(beanData.getSignature(), context.getClassLoader());
-        returnHandle = producer(returnMember);
-        returnClass = returnHandle.type().returnType();
-        if (isRoot(returnMember)) {
-            factoryToken = of(returnMember.getDeclaringClass()).getSupertype(Casts.cast(returnMember.getDeclaringClass()));
+        final Member member = fromSignature(beanData.getSignature(), context.getClassLoader());
+        returnHandle = producer(member);
+        final Class<?> returnClass = returnHandle.type().returnType();
+        if (isRoot(member)) {
+            factoryToken = of(member.getDeclaringClass()).getSupertype(Casts.cast(member.getDeclaringClass()));
         } else {
             factoryToken = of(resolver.resolve(context, beanData, beanData.getFactory()).getType());
         }
-        genericReturnType = returnMember instanceof Field
-                ? ((Field) returnMember).getGenericType()
-                : ((Executable) returnMember).getAnnotatedReturnType().getType();
-        genericReturnToken = genericReturnType instanceof Class<?>
+        final Type genericReturnType = member instanceof Field
+                ? ((Field) member).getGenericType()
+                : ((Executable) member).getAnnotatedReturnType().getType();
+        final TypeToken<?> genericReturnToken = genericReturnType instanceof Class<?>
                 ? of(genericReturnType).getSupertype(Casts.cast(returnClass))
                 : of(genericReturnType);
         returnType = factoryToken.resolveType(genericReturnToken.getType()).getType();

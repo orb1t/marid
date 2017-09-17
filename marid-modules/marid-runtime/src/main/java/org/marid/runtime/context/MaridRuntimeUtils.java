@@ -21,6 +21,7 @@
 
 package org.marid.runtime.context;
 
+import org.marid.misc.StringUtils;
 import org.marid.runtime.exception.MaridUnknownSignatureException;
 
 import javax.annotation.Nonnull;
@@ -133,7 +134,7 @@ public interface MaridRuntimeUtils {
 
     @Nonnull
     static String toCanonical(@Nonnull String signature) {
-        final int limit = (int) signature.chars().filter(c -> c == ' ').count() + 1;
+        final int limit = StringUtils.count(signature, ' ') + 1;
         final String[] parts = signature.split(" ", limit);
         final String mods = Modifier.toString(Integer.parseUnsignedInt(parts[1], 16));
         switch (parts[0]) {
@@ -146,7 +147,7 @@ public interface MaridRuntimeUtils {
 
     @Nonnull
     static String toCanonicalWithArgs(@Nonnull String signature, Type... types) {
-        final int limit = (int) signature.chars().filter(c -> c == ' ').count() + 1;
+        final int limit = StringUtils.count(signature, ' ') + 1;
         final String[] parts = signature.split(" ", limit);
         final String mods = Modifier.toString(Integer.parseUnsignedInt(parts[1], 16));
         final String args = of(types).map(Type::getTypeName).collect(joining(","));
@@ -160,7 +161,7 @@ public interface MaridRuntimeUtils {
 
     static Member fromSignature(@Nonnull String signature, @Nonnull ClassLoader classLoader) {
         try {
-            final int limit = (int) signature.chars().filter(c -> c == ' ').count() + 1;
+            final int limit = StringUtils.count(signature, ' ') + 1;
             final String[] parts = signature.split(" ", limit);
             final Class<?> declaringClass = Class.forName(parts[2], false, classLoader);
             switch (parts[0]) {

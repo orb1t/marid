@@ -32,16 +32,13 @@ import javafx.util.converter.DefaultStringConverter;
 import org.marid.dependant.beaneditor.model.SignatureResolver;
 import org.marid.ide.model.BeanMethodArgData;
 import org.marid.ide.project.ProjectProfile;
-import org.marid.jfx.action.FxAction;
 import org.marid.jfx.annotation.DisableStdSelectAndRemoveActions;
 import org.marid.jfx.annotation.DisableStdUpAndDownActions;
 import org.marid.jfx.control.MaridTableView;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
-import java.util.function.Function;
 
 import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.misc.Builder.build;
@@ -119,7 +116,7 @@ public abstract class BeanMethodArgTable extends MaridTableView<BeanMethodArgDat
     }
 
     @Autowired
-    public void initRowFactory(@Qualifier("methodArg") List<Function<BeanMethodArgData, FxAction>> actionProviders) {
+    public void initRowFactory(List<BeanMethodArgAction> actionProviders) {
         actions().addAll(actionProviders);
     }
 }

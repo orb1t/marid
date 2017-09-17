@@ -61,4 +61,12 @@ public interface StringUtils {
             return text.toString();
         }
     }
+
+    static int count(String string, char c) {
+        int count = 0, i = -1;
+        while ((i = string.indexOf(c, i + 1)) >= 0) {
+            count++;
+        }
+        return count;
+    }
 }
