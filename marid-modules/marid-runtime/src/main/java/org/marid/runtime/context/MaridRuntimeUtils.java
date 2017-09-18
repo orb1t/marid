@@ -149,14 +149,19 @@ public interface MaridRuntimeUtils {
     static String toCanonicalWithArgs(@Nonnull String signature, Type... types) {
         final int limit = StringUtils.count(signature, ' ') + 1;
         final String[] parts = signature.split(" ", limit);
-        final String mods = Modifier.toString(Integer.parseUnsignedInt(parts[1], 16));
         final String args = of(types).map(Type::getTypeName).collect(joining(","));
         switch (parts[0]) {
-            case "F": return String.format("%s %s.%s", mods, parts[2], parts[3]);
-            case "C": return String.format("%s %s(%s)", mods, parts[2], args);
-            case "M": return String.format("%s %s.%s(%s)", mods, parts[2], parts[3], args);
+            case "F": return String.format("%s.%s", parts[2], parts[3]);
+            case "C": return String.format("%s(%s)", parts[2], args);
+            case "M": return String.format("%s.%s(%s)", parts[2], parts[3], args);
             default: throw new IllegalArgumentException(signature);
         }
+    }
+
+    static int modifiers(@Nonnull String signature) {
+        final int limit = StringUtils.count(signature, ' ') + 1;
+        final String[] parts = signature.split(" ", limit);
+        return Integer.parseUnsignedInt(parts[1], 16);
     }
 
     static Member fromSignature(@Nonnull String signature, @Nonnull ClassLoader classLoader) {

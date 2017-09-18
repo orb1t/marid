@@ -61,7 +61,7 @@ public class SignatureResolver {
         this.resolver = resolver;
     }
 
-    public ObservableStringValue signature(ObservableValue<BeanMethodData> methodData, Observable... observables) {
+    public ObservableStringValue signature(ObservableValue<? extends BeanMethodData> methodData, Observable... observables) {
         final Observable[] deps = Arrays.copyOf(observables, observables.length + 3);
         deps[observables.length] = profile.getBeanFile().children;
         deps[observables.length + 1] = appearanceSettings.showFullNamesProperty();
