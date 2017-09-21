@@ -21,11 +21,11 @@
 
 package org.marid.runtime.event;
 
-import org.marid.runtime.context.MaridContext;
+import org.marid.runtime.context.MaridRuntime;
 
 public final class ContextStartEvent extends MaridEvent {
 
-    public ContextStartEvent(MaridContext context) {
+    public ContextStartEvent(MaridRuntime context) {
         super(context);
     }
 }

@@ -19,38 +19,29 @@
  * #L%
  */
 
-package org.marid.runtime.event;
-
-import org.marid.runtime.context.MaridRuntime;
+package org.marid.runtime.model;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.List;
 
-public final class ContextFailEvent extends MaridEvent {
-
-    @Nonnull
-    private final Throwable cause;
-
-    @Nonnull
-    private final String beanName;
-
-    public ContextFailEvent(@Nonnull MaridRuntime context, @Nonnull String beanName, @Nonnull Throwable cause) {
-        super(context);
-        this.beanName = beanName;
-        this.cause = cause;
-    }
+public interface MaridBean extends MaridMethod {
 
     @Nonnull
-    public String getBeanName() {
-        return beanName;
-    }
+    String getName();
+
+    @Nullable
+    String getFactory();
 
     @Nonnull
-    public Throwable getCause() {
-        return cause;
-    }
+    List<? extends MaridMethod> getInitializers();
 
-    @Override
-    public String toString() {
-        return super.toString() + "(" + cause + ")";
-    }
+    @Nonnull
+    List<? extends MaridBean> getChildren();
+
+    @Nonnull
+    MaridBean add(@Nonnull String name, @Nullable String factory, @Nonnull String signature, @Nonnull String... arguments);
+
+    @Nonnull
+    MaridMethod add(@Nonnull String signature, @Nonnull String... arguments);
 }

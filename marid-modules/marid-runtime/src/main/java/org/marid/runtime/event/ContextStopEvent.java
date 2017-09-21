@@ -21,11 +21,11 @@
 
 package org.marid.runtime.event;
 
-import org.marid.runtime.context.MaridContext;
+import org.marid.runtime.context.MaridRuntime;
 
 public final class ContextStopEvent extends MaridEvent {
 
-    public ContextStopEvent(MaridContext context) {
+    public ContextStopEvent(MaridRuntime context) {
         super(context);
     }
 }

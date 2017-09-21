@@ -19,38 +19,48 @@
  * #L%
  */
 
-package org.marid.runtime.event;
+package org.marid.runtime.model;
 
-import org.marid.runtime.context.MaridRuntime;
+import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
-public final class ContextFailEvent extends MaridEvent {
+import static org.marid.io.Xmls.content;
 
-    @Nonnull
-    private final Throwable cause;
+public class MaridRuntimeArgument implements MaridArgument {
 
-    @Nonnull
-    private final String beanName;
+    private final MaridRuntimeMethod parent;
+    private final String value;
 
-    public ContextFailEvent(@Nonnull MaridRuntime context, @Nonnull String beanName, @Nonnull Throwable cause) {
-        super(context);
-        this.beanName = beanName;
-        this.cause = cause;
+    public MaridRuntimeArgument(@Nonnull MaridRuntimeMethod parent, @Nullable String value) {
+        this.parent = parent;
+        this.value = value;
+    }
+
+    public MaridRuntimeArgument(@Nonnull MaridRuntimeMethod parent, @Nonnull Element element) {
+        this.parent = parent;
+        this.value = content(element).orElse(null);
     }
 
     @Nonnull
-    public String getBeanName() {
-        return beanName;
+    @Override
+    public MaridMethod getParent() {
+        return parent;
     }
 
-    @Nonnull
-    public Throwable getCause() {
-        return cause;
+    @Nullable
+    @Override
+    public String getValue() {
+        return value;
+    }
+
+    public void writeTo(Element element) {
+        if (element != null) element.setTextContent(value);
     }
 
     @Override
     public String toString() {
-        return super.toString() + "(" + cause + ")";
+        return value;
     }
 }

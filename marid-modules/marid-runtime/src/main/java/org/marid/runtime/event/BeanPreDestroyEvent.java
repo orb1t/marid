@@ -21,7 +21,7 @@
 
 package org.marid.runtime.event;
 
-import org.marid.runtime.context.MaridContext;
+import org.marid.runtime.context.MaridRuntime;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -38,7 +38,7 @@ public class BeanPreDestroyEvent extends MaridEvent {
     @Nonnull
     private final Consumer<Throwable> exceptionConsumer;
 
-    public BeanPreDestroyEvent(@Nonnull MaridContext context,
+    public BeanPreDestroyEvent(@Nonnull MaridRuntime context,
                                @Nonnull String name,
                                @Nullable Object bean,
                                @Nonnull Consumer<Throwable> exceptionConsumer) {

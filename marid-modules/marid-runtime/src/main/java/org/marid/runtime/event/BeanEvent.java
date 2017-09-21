@@ -21,7 +21,7 @@
 
 package org.marid.runtime.event;
 
-import org.marid.runtime.context.MaridContext;
+import org.marid.runtime.context.MaridRuntime;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -40,7 +40,7 @@ public final class BeanEvent extends MaridEvent {
     @Nonnull
     private final String type;
 
-    public BeanEvent(@Nullable MaridContext source, @Nonnull String name, @Nullable Object bean, @Nonnull String type) {
+    public BeanEvent(@Nullable MaridRuntime source, @Nonnull String name, @Nullable Object bean, @Nonnull String type) {
         super(source);
         this.name = name;
         this.bean = bean;

@@ -21,19 +21,19 @@
 
 package org.marid.runtime.event;
 
-import org.marid.runtime.context.MaridContext;
+import org.marid.runtime.context.MaridRuntime;
 
 import java.util.EventObject;
 
 public abstract class MaridEvent extends EventObject {
 
-    public MaridEvent(MaridContext context) {
+    public MaridEvent(MaridRuntime context) {
         super(context);
     }
 
     @Override
-    public MaridContext getSource() {
-        return (MaridContext) super.getSource();
+    public MaridRuntime getSource() {
+        return (MaridRuntime) super.getSource();
     }
 
     @Override
