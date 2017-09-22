@@ -19,17 +19,28 @@
  * #L%
  */
 
-package org.marid.runtime.model;
+package org.marid.runtime.expression;
 
-import org.marid.runtime.expression.Expression;
+import org.w3c.dom.Element;
 
-import javax.annotation.Nonnull;
+public class NullExpression extends Expression {
 
-public interface MaridArgument {
+    public static final NullExpression NULL = new NullExpression();
 
-    @Nonnull
-    MaridMethod getParent();
+    private NullExpression() {
+    }
 
-    @Nonnull
-    Expression getExpression();
+    @Override
+    public String getTag() {
+        return "null";
+    }
+
+    @Override
+    public void saveTo(Element element) {
+    }
+
+    @Override
+    public String toString() {
+        return "null";
+    }
 }

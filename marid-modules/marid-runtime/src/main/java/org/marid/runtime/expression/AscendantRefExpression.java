@@ -19,17 +19,39 @@
  * #L%
  */
 
-package org.marid.runtime.model;
+package org.marid.runtime.expression;
 
-import org.marid.runtime.expression.Expression;
+import org.marid.io.Xmls;
+import org.w3c.dom.Element;
 
-import javax.annotation.Nonnull;
+public class AscendantRefExpression extends Expression {
 
-public interface MaridArgument {
+    private final String reference;
 
-    @Nonnull
-    MaridMethod getParent();
+    public AscendantRefExpression(String reference) {
+        this.reference = reference;
+    }
 
-    @Nonnull
-    Expression getExpression();
+    public AscendantRefExpression(Element element) {
+        this.reference = Xmls.attribute(element, "ref").orElseThrow(IllegalStateException::new);
+    }
+
+    public String getReference() {
+        return reference;
+    }
+
+    @Override
+    public String getTag() {
+        return "ref-asc";
+    }
+
+    @Override
+    public void saveTo(Element element) {
+        element.setAttribute("ref", reference);
+    }
+
+    @Override
+    public String toString() {
+        return "@" + reference;
+    }
 }

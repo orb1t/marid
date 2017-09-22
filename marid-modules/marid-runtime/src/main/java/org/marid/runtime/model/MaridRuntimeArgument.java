@@ -21,26 +21,19 @@
 
 package org.marid.runtime.model;
 
+import org.marid.runtime.expression.Expression;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import static org.marid.io.Xmls.content;
 
 public class MaridRuntimeArgument implements MaridArgument {
 
     private final MaridRuntimeMethod parent;
-    private final String value;
+    private final Expression expression;
 
-    public MaridRuntimeArgument(@Nonnull MaridRuntimeMethod parent, @Nullable String value) {
+    public MaridRuntimeArgument(@Nonnull MaridRuntimeMethod parent, @Nonnull Expression expression) {
         this.parent = parent;
-        this.value = value;
-    }
-
-    public MaridRuntimeArgument(@Nonnull MaridRuntimeMethod parent, @Nonnull Element element) {
-        this.parent = parent;
-        this.value = content(element).orElse(null);
+        this.expression = expression;
     }
 
     @Nonnull
@@ -49,18 +42,18 @@ public class MaridRuntimeArgument implements MaridArgument {
         return parent;
     }
 
-    @Nullable
+    @Nonnull
     @Override
-    public String getValue() {
-        return value;
+    public Expression getExpression() {
+        return expression;
     }
 
     public void writeTo(Element element) {
-        if (element != null) element.setTextContent(value);
+        expression.saveTo(element);
     }
 
     @Override
     public String toString() {
-        return value;
+        return expression.toString();
     }
 }

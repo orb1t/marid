@@ -22,6 +22,7 @@
 package org.marid.runtime.model;
 
 import org.marid.io.Xmls;
+import org.marid.runtime.expression.Expression;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
@@ -47,11 +48,11 @@ public class MaridRuntimeBean extends MaridRuntimeMethod implements MaridBean {
     private final List<MaridRuntimeMethod> initializers = new ArrayList<>();
     private final List<MaridRuntimeBean> children = new ArrayList<>();
 
-    private MaridRuntimeBean(@Nullable MaridRuntimeBean parent,
+    public MaridRuntimeBean(@Nullable MaridRuntimeBean parent,
                              @Nonnull String name,
                              @Nullable String factory,
                              @Nonnull String signature,
-                             @Nonnull String... arguments) {
+                             @Nonnull Expression... arguments) {
         super(parent, signature, arguments);
         this.name = name;
         this.factory = factory;
@@ -82,7 +83,7 @@ public class MaridRuntimeBean extends MaridRuntimeMethod implements MaridBean {
     public MaridRuntimeBean add(@Nonnull String name,
                                 @Nullable String factory,
                                 @Nonnull String signature,
-                                @Nonnull String... arguments) {
+                                @Nonnull Expression... arguments) {
         final MaridRuntimeBean child = new MaridRuntimeBean(this, name, factory, signature, arguments);
         children.add(child);
         return child;
@@ -90,7 +91,7 @@ public class MaridRuntimeBean extends MaridRuntimeMethod implements MaridBean {
 
     @Nonnull
     @Override
-    public MaridRuntimeMethod add(@Nonnull String signature, @Nonnull String... arguments) {
+    public MaridRuntimeMethod add(@Nonnull String signature, @Nonnull Expression... arguments) {
         final MaridRuntimeMethod method = new MaridRuntimeMethod(this, signature, arguments);
         initializers.add(method);
         return method;
@@ -99,51 +100,51 @@ public class MaridRuntimeBean extends MaridRuntimeMethod implements MaridBean {
     public MaridRuntimeBean add(@Nonnull String name,
                                 @Nullable String factory,
                                 @Nonnull Constructor<?> constructor,
-                                @Nonnull String... arguments) {
+                                @Nonnull Expression... arguments) {
         return add(name, factory, signature(constructor), arguments);
     }
 
     public MaridRuntimeBean add(@Nonnull String name,
                                 @Nonnull Constructor<?> constructor,
-                                @Nonnull String... arguments) {
+                                @Nonnull Expression... arguments) {
         return add(name, null, constructor, arguments);
     }
 
     public MaridRuntimeBean add(@Nonnull String name,
                                 @Nullable String factory,
                                 @Nonnull Method method,
-                                @Nonnull String... arguments) {
+                                @Nonnull Expression... arguments) {
         return add(name, factory, signature(method), arguments);
     }
 
     public MaridRuntimeBean add(@Nonnull String name,
                                 @Nonnull Method method,
-                                @Nonnull String... arguments) {
+                                @Nonnull Expression... arguments) {
         return add(name, null, method, arguments);
     }
 
     public MaridRuntimeBean add(@Nonnull String name,
                                 @Nullable String factory,
                                 @Nonnull Field field,
-                                @Nonnull String... arguments) {
+                                @Nonnull Expression... arguments) {
         return add(name, factory, signature(field), arguments);
     }
 
     public MaridRuntimeBean add(@Nonnull String name,
                                 @Nonnull Field field,
-                                @Nonnull String... arguments) {
+                                @Nonnull Expression... arguments) {
         return add(name, null, field, arguments);
     }
 
-    public MaridRuntimeMethod add(@Nonnull Constructor<?> constructor, @Nonnull String... arguments) {
+    public MaridRuntimeMethod add(@Nonnull Constructor<?> constructor, @Nonnull Expression... arguments) {
         return add(signature(constructor), arguments);
     }
 
-    public MaridRuntimeMethod add(@Nonnull Method method, @Nonnull String... arguments) {
+    public MaridRuntimeMethod add(@Nonnull Method method, @Nonnull Expression... arguments) {
         return add(signature(method), arguments);
     }
 
-    public MaridRuntimeMethod add(@Nonnull Field field, @Nonnull String... arguments) {
+    public MaridRuntimeMethod add(@Nonnull Field field, @Nonnull Expression... arguments) {
         return add(signature(field), arguments);
     }
 

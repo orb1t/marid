@@ -19,17 +19,22 @@
  * #L%
  */
 
-package org.marid.runtime.model;
+package org.marid.runtime.expression;
 
-import org.marid.runtime.expression.Expression;
+import org.w3c.dom.Element;
 
-import javax.annotation.Nonnull;
+public class LongExpression extends ValueExpression {
 
-public interface MaridArgument {
+    public LongExpression(String value) {
+        super(value);
+    }
 
-    @Nonnull
-    MaridMethod getParent();
+    public LongExpression(Element element) {
+        super(element);
+    }
 
-    @Nonnull
-    Expression getExpression();
+    @Override
+    public String getTag() {
+        return "long";
+    }
 }

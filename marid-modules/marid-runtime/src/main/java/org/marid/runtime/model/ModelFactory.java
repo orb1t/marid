@@ -24,12 +24,10 @@ package org.marid.runtime.model;
 import org.marid.runtime.expression.Expression;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
-public interface MaridArgument {
-
-    @Nonnull
-    MaridMethod getParent();
+public interface ModelFactory<B extends MaridBean, M extends MaridMethod, A extends MaridArgument> {
 
     @Nonnull
-    Expression getExpression();
+    B bean(@Nullable B parent, @Nonnull String name, @Nullable String factory, @Nonnull String signature, @Nonnull Expression... arguments);
 }

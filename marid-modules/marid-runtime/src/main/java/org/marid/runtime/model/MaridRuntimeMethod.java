@@ -21,6 +21,8 @@
 
 package org.marid.runtime.model;
 
+import org.marid.runtime.expression.Expression;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
@@ -32,7 +34,6 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.of;
 import static org.marid.io.Xmls.attribute;
 import static org.marid.io.Xmls.nodes;
-import static org.marid.misc.Builder.build;
 
 public class MaridRuntimeMethod implements MaridMethod {
 
@@ -42,7 +43,7 @@ public class MaridRuntimeMethod implements MaridMethod {
 
     public MaridRuntimeMethod(@Nullable MaridRuntimeBean parent,
                               @Nonnull String signature,
-                              @Nonnull String... arguments) {
+                              @Nonnull Expression... arguments) {
         this.parent = parent;
         this.signature = signature;
         this.arguments = of(arguments).map(a -> new MaridRuntimeArgument(this, a)).collect(toList());
@@ -52,8 +53,9 @@ public class MaridRuntimeMethod implements MaridMethod {
         this.parent = parent;
         this.signature = attribute(element, "signature").orElseThrow(NullPointerException::new);
         this.arguments = nodes(element, Element.class)
-                .filter(e -> "arg".equals(e.getTagName()))
-                .map(e -> new MaridRuntimeArgument(this, e))
+                .filter(e -> "args".equals(e.getTagName()))
+                .flatMap(e -> nodes(e, Element.class))
+                .map(e -> new MaridRuntimeArgument(this, Expression.from(e)))
                 .collect(Collectors.toList());
     }
 
@@ -77,8 +79,15 @@ public class MaridRuntimeMethod implements MaridMethod {
 
     public void writeTo(Element element) {
         element.setAttribute("signature", signature);
+
+        final Document document = element.getOwnerDocument();
+        final Element args = document.createElement("args");
+        element.appendChild(args);
+
         for (final MaridRuntimeArgument arg : arguments) {
-            arg.writeTo(build(element.getOwnerDocument().createElement("arg"), element::appendChild));
+            final Element e = document.createElement(arg.getExpression().getTag());
+            arg.getExpression().saveTo(e);
+            args.appendChild(e);
         }
     }
 
