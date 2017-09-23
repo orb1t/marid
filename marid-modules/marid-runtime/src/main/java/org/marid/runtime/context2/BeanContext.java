@@ -36,8 +36,12 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Properties;
+import java.util.stream.Stream;
 
 import static java.util.logging.Level.SEVERE;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Stream.concat;
+import static java.util.stream.Stream.of;
 import static org.marid.logging.Log.log;
 
 public final class BeanContext implements MaridRuntime, AutoCloseable {
@@ -59,7 +63,7 @@ public final class BeanContext implements MaridRuntime, AutoCloseable {
         configuration.fireEvent(false, l -> l.bootstrap(new ContextBootstrapEvent(this)));
 
         try {
-            this.instance = parent == null ? null : parent.create(bean);
+            this.instance = parent == null ? null : parent.create(bean, this);
             for (final Expression initializer : bean.getInitializers()) {
                 try {
                     initializer.execute(this);
@@ -163,10 +167,10 @@ public final class BeanContext implements MaridRuntime, AutoCloseable {
                 .orElseThrow(() -> new MaridBeanNotFoundException(name));
     }
 
-    private Object create(MaridBean bean) {
+    private Object create(MaridBean bean, BeanContext context) {
         if (processing.add(bean)) {
             try {
-                return bean.getFactory().execute(this);
+                return bean.getFactory().execute(context);
             } finally {
                 processing.remove(bean);
             }
@@ -178,7 +182,6 @@ public final class BeanContext implements MaridRuntime, AutoCloseable {
     @Override
     public void close() {
         final IllegalStateException e = new IllegalStateException("Runtime close exception");
-        configuration.fireEvent(true, l -> l.onPreDestroy(new BeanPreDestroyEvent(this, bean.getName(), instance, e::addSuppressed)));
         for (int i = children.size() - 1; i >= 0; i--) {
             final BeanContext child = children.get(i);
             try {
@@ -187,9 +190,19 @@ public final class BeanContext implements MaridRuntime, AutoCloseable {
                 e.addSuppressed(x);
             }
         }
+        configuration.fireEvent(true, l -> l.onPreDestroy(new BeanPreDestroyEvent(this, bean.getName(), instance, e::addSuppressed)));
         if (e.getSuppressed().length > 0) {
             log(SEVERE, "Unable to close {0}", e, this);
         }
+    }
+
+    private Stream<BeanContext> contexts() {
+        return parent == null ? of(this) : concat(parent.contexts(), of(this));
+    }
+
+    @Override
+    public String toString() {
+        return contexts().map(c -> c.bean.getName()).collect(joining("/"));
     }
 
     private static final class CircularBeanException extends RuntimeException {

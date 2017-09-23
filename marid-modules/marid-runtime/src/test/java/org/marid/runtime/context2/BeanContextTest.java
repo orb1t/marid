@@ -23,8 +23,7 @@ package org.marid.runtime.context2;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.marid.runtime.expression.ClassExpression;
-import org.marid.runtime.expression.FieldAccessExpression;
+import org.marid.runtime.expression.*;
 import org.marid.runtime.model.MaridRuntimeBean;
 
 import java.util.Properties;
@@ -33,16 +32,32 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Tag("normal")
-public class BeanContextTest {
+class BeanContextTest {
 
     private static final ClassLoader CLASS_LOADER = Thread.currentThread().getContextClassLoader();
     private static final Properties PROPERTIES = new Properties();
 
     @Test
-    public void testOneBean() {
+    void testOneBean() {
         final BeanContextConfiguration configuration = new BeanContextConfiguration(CLASS_LOADER, PROPERTIES);
         final MaridRuntimeBean root = new MaridRuntimeBean()
                 .add("bean1", new FieldAccessExpression(new ClassExpression(TimeUnit.class.getName()), "SECONDS"))
+                .getParent();
+        try (final BeanContext context = new BeanContext(configuration, root)) {
+            final Object seconds = context.getDescendant("bean1");
+            assertEquals(TimeUnit.SECONDS, seconds);
+        }
+    }
+
+    @Test
+    void testTwoBeans() {
+        final BeanContextConfiguration configuration = new BeanContextConfiguration(CLASS_LOADER, PROPERTIES);
+        final MaridRuntimeBean root = new MaridRuntimeBean()
+                .add("bean1", new MethodCallExpression(
+                        new ClassExpression(TimeUnit.class.getName()), "valueOf", new AscendantRefExpression("bean2"))
+                )
+                .getParent()
+                .add("bean2", new StringExpression("SECONDS"))
                 .getParent();
         try (final BeanContext context = new BeanContext(configuration, root)) {
             final Object seconds = context.getDescendant("bean1");
