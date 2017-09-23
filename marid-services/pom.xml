@@ -46,6 +46,12 @@
         </dependency>
 
         <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.marid</groupId>
             <artifactId>marid-test</artifactId>
             <scope>test</scope>
