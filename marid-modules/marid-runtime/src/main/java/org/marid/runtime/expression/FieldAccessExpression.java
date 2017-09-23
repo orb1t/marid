@@ -21,41 +21,75 @@
 
 package org.marid.runtime.expression;
 
-import org.marid.io.Xmls;
+import org.marid.runtime.context2.BeanContext;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import javax.annotation.Nonnull;
+import java.lang.reflect.Field;
+import java.util.NoSuchElementException;
+
+import static java.util.Objects.requireNonNull;
+import static org.marid.io.Xmls.attribute;
+import static org.marid.io.Xmls.elements;
 
 public class FieldAccessExpression extends Expression {
 
-    private final String target;
+    @Nonnull
+    private final Expression target;
+
+    @Nonnull
     private final String field;
 
-    public FieldAccessExpression(String target, String field) {
+    public FieldAccessExpression(@Nonnull Expression target, @Nonnull String field) {
         this.target = target;
         this.field = field;
     }
 
-    public FieldAccessExpression(Element element) {
-        target = Xmls.attribute(element, "target").orElseThrow(() -> new NullPointerException("target"));
-        field = Xmls.attribute(element, "field").orElseThrow(() -> new NullPointerException("field"));
+    public FieldAccessExpression(@Nonnull Element element) {
+        target = elements(element).map(Expression::from).findFirst().orElseThrow(NoSuchElementException::new);
+        field = attribute(element, "field").orElseThrow(() -> new NullPointerException("field"));
     }
 
-    public String getTarget() {
+    @Nonnull
+    public Expression getTarget() {
         return target;
     }
 
+    @Nonnull
     public String getField() {
         return field;
     }
 
+    @Nonnull
     @Override
     public String getTag() {
         return "get";
     }
 
     @Override
-    public void saveTo(Element element) {
-        element.setAttribute("target", target);
+    public void saveTo(@Nonnull Element element) {
+        final Document document = element.getOwnerDocument();
+        final Element t = document.createElement(target.getTag());
+        element.appendChild(t);
+        target.saveTo(t);
+
         element.setAttribute("field", field);
+    }
+
+    @Override
+    public Object execute(@Nonnull BeanContext context) {
+        final String field = context.resolvePlaceholders(this.field);
+        final Object t = requireNonNull(target.execute(context), "target");
+        try {
+            final Field f = t.getClass().getField(field);
+            f.setAccessible(true);
+            return f.get(t);
+        } catch (NoSuchFieldException x) {
+            throw new NoSuchElementException(field);
+        } catch (IllegalAccessException x) {
+            throw new IllegalStateException(x);
+        }
     }
 
     @Override

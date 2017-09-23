@@ -21,7 +21,10 @@
 
 package org.marid.runtime.expression;
 
+import org.marid.runtime.context2.BeanContext;
 import org.w3c.dom.Element;
+
+import javax.annotation.Nonnull;
 
 public class StringExpression extends Expression {
 
@@ -35,14 +38,20 @@ public class StringExpression extends Expression {
         this.value = element.getTextContent();
     }
 
+    @Nonnull
     @Override
     public String getTag() {
         return "string";
     }
 
     @Override
-    public void saveTo(Element element) {
+    public void saveTo(@Nonnull Element element) {
         element.setTextContent(value);
+    }
+
+    @Override
+    public Object execute(@Nonnull BeanContext context) {
+        return context.resolvePlaceholders(value);
     }
 
     @Override

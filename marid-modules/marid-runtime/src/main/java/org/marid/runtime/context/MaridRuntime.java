@@ -28,6 +28,8 @@ import java.util.Properties;
  */
 public interface MaridRuntime {
 
+    MaridRuntime getParent();
+
     Object getBean(String name);
 
     ClassLoader getClassLoader();

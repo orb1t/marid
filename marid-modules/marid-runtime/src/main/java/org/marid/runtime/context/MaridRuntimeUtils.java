@@ -25,6 +25,7 @@ import org.marid.misc.StringUtils;
 import org.marid.runtime.exception.MaridUnknownSignatureException;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.*;
 import java.util.Comparator;
@@ -215,6 +216,43 @@ public interface MaridRuntimeUtils {
             return call(() -> publicLookup().unreflect((Method) member));
         } else {
             return call(() -> publicLookup().unreflectSetter((Field) member));
+        }
+    }
+
+    static @Nullable Object value(@Nonnull Class<?> target, @Nullable Object v) {
+        if (target.isPrimitive()) {
+            if (v == null) {
+                switch (target.getName()) {
+                    case "int": return 0;
+                    case "long": return 0L;
+                    case "short": return (short) 0;
+                    case "byte": return (byte) 0;
+                    case "char": return (char) 0;
+                    case "double": return 0d;
+                    case "float": return 0f;
+                    case "boolean": return false;
+                    default: throw new IllegalArgumentException(target.getName());
+                }
+            } else {
+                return v;
+            }
+        } else {
+            return v;
+        }
+    }
+
+    static boolean compatible(@Nonnull Executable executable, @Nonnull Object... args) {
+        if (executable.getParameterCount() == args.length) {
+            final Class<?>[] types = executable.getParameterTypes();
+            for (int i = 0; i < args.length; i++) {
+                final Class<?> type = types[i];
+                if (!type.isInstance(args[i])) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            return false;
         }
     }
 }

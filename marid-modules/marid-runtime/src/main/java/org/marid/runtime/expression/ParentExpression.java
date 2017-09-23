@@ -19,41 +19,32 @@
  * #L%
  */
 
-package org.marid.runtime.model;
+package org.marid.runtime.expression;
 
-import org.marid.runtime.expression.Expression;
+import org.marid.runtime.context2.BeanContext;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 
-public class MaridRuntimeArgument implements MaridArgument {
+public class ParentExpression extends Expression {
 
-    private final MaridRuntimeMethod parent;
-    private final Expression expression;
+    public static final ParentExpression PARENT = new ParentExpression();
 
-    public MaridRuntimeArgument(@Nonnull MaridRuntimeMethod parent, @Nonnull Expression expression) {
-        this.parent = parent;
-        this.expression = expression;
+    private ParentExpression() {
     }
 
     @Nonnull
     @Override
-    public MaridMethod getParent() {
-        return parent;
-    }
-
-    @Nonnull
-    @Override
-    public Expression getExpression() {
-        return expression;
-    }
-
-    public void writeTo(Element element) {
-        expression.saveTo(element);
+    public String getTag() {
+        return "parent";
     }
 
     @Override
-    public String toString() {
-        return expression.toString();
+    public void saveTo(@Nonnull Element element) {
+    }
+
+    @Override
+    public Object execute(@Nonnull BeanContext context) {
+        return context.getParent().getInstance();
     }
 }

@@ -21,7 +21,10 @@
 
 package org.marid.runtime.expression;
 
+import org.marid.runtime.context2.BeanContext;
 import org.w3c.dom.Element;
+
+import javax.annotation.Nonnull;
 
 public class NullExpression extends Expression {
 
@@ -30,13 +33,19 @@ public class NullExpression extends Expression {
     private NullExpression() {
     }
 
+    @Nonnull
     @Override
     public String getTag() {
         return "null";
     }
 
     @Override
-    public void saveTo(Element element) {
+    public void saveTo(@Nonnull Element element) {
+    }
+
+    @Override
+    public Object execute(@Nonnull BeanContext context) {
+        return null;
     }
 
     @Override

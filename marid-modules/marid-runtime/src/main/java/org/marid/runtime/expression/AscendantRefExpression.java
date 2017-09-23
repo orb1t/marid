@@ -22,32 +22,43 @@
 package org.marid.runtime.expression;
 
 import org.marid.io.Xmls;
+import org.marid.runtime.context2.BeanContext;
 import org.w3c.dom.Element;
+
+import javax.annotation.Nonnull;
 
 public class AscendantRefExpression extends Expression {
 
+    @Nonnull
     private final String reference;
 
-    public AscendantRefExpression(String reference) {
+    public AscendantRefExpression(@Nonnull String reference) {
         this.reference = reference;
     }
 
-    public AscendantRefExpression(Element element) {
+    public AscendantRefExpression(@Nonnull Element element) {
         this.reference = Xmls.attribute(element, "ref").orElseThrow(IllegalStateException::new);
     }
 
+    @Nonnull
     public String getReference() {
         return reference;
     }
 
+    @Nonnull
     @Override
     public String getTag() {
         return "ref-asc";
     }
 
     @Override
-    public void saveTo(Element element) {
+    public void saveTo(@Nonnull Element element) {
         element.setAttribute("ref", reference);
+    }
+
+    @Override
+    public Object execute(@Nonnull BeanContext context) {
+        return context.getAscendant(context.resolvePlaceholders(reference));
     }
 
     @Override

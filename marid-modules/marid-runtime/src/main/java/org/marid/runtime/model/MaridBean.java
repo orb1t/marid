@@ -24,26 +24,22 @@ package org.marid.runtime.model;
 import org.marid.runtime.expression.Expression;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.List;
 
-public interface MaridBean extends MaridMethod {
+public interface MaridBean {
 
     @Nonnull
     String getName();
 
-    @Nullable
-    String getFactory();
+    @Nonnull
+    Expression getFactory();
 
     @Nonnull
-    List<? extends MaridMethod> getInitializers();
+    List<Expression> getInitializers();
 
     @Nonnull
     List<? extends MaridBean> getChildren();
 
     @Nonnull
-    MaridBean add(@Nonnull String name, @Nullable String factory, @Nonnull String signature, @Nonnull Expression... arguments);
-
-    @Nonnull
-    MaridMethod add(@Nonnull String signature, @Nonnull Expression... arguments);
+    MaridBean add(@Nonnull String name, @Nonnull Expression factory, @Nonnull Expression... initializers);
 }

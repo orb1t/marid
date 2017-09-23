@@ -22,25 +22,25 @@
 package org.marid.runtime.context2;
 
 import org.marid.runtime.context.MaridRuntime;
+import org.marid.runtime.event.BeanPostConstructEvent;
+import org.marid.runtime.event.BeanPreDestroyEvent;
 import org.marid.runtime.event.ContextBootstrapEvent;
+import org.marid.runtime.event.ContextFailEvent;
+import org.marid.runtime.exception.MaridBeanInitializationException;
 import org.marid.runtime.exception.MaridBeanNotFoundException;
+import org.marid.runtime.expression.Expression;
 import org.marid.runtime.model.MaridBean;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.lang.invoke.MethodHandle;
-import java.lang.reflect.Member;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Properties;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
-import static java.util.stream.Stream.concat;
-import static java.util.stream.Stream.of;
-import static org.marid.runtime.context.MaridRuntimeUtils.*;
+import static java.util.logging.Level.SEVERE;
+import static org.marid.logging.Log.log;
 
-public final class BeanContext implements MaridRuntime {
+public final class BeanContext implements MaridRuntime, AutoCloseable {
 
     private final BeanContext parent;
     private final BeanContextConfiguration configuration;
@@ -51,34 +51,54 @@ public final class BeanContext implements MaridRuntime {
 
     public BeanContext(@Nullable BeanContext parent,
                        @Nonnull BeanContextConfiguration configuration,
-                       @Nonnull MaridBean bean,
-                       @Nonnull Supplier<Object> instance) {
+                       @Nonnull MaridBean bean) {
         this.parent = parent;
         this.configuration = configuration;
         this.bean = bean;
 
         configuration.fireEvent(false, l -> l.bootstrap(new ContextBootstrapEvent(this)));
 
-        for (final MaridBean child : bean.getChildren()) {
-            if (children.stream().noneMatch(b -> b.bean.getName().equals(child.getName()))) {
-
+        try {
+            this.instance = parent == null ? null : parent.create(bean);
+            for (final Expression initializer : bean.getInitializers()) {
+                try {
+                    initializer.execute(this);
+                } catch (Throwable x) {
+                    throw new MaridBeanInitializationException(bean.getName(), x);
+                }
             }
-        }
+            configuration.fireEvent(false, l -> l.onPostConstruct(new BeanPostConstructEvent(this, bean.getName(), instance)));
 
-        this.instance = instance.get();
+            for (final MaridBean child : bean.getChildren()) {
+                if (children.stream().noneMatch(b -> b.bean.getName().equals(child.getName()))) {
+                    children.add(new BeanContext(this, configuration, child));
+                }
+            }
+        } catch (Throwable x) {
+            configuration.fireEvent(false, l -> l.onFail(new ContextFailEvent(this, bean.getName(), x)));
+
+            close();
+
+            throw x;
+        }
     }
 
     public BeanContext(BeanContextConfiguration configuration, MaridBean root) {
-        this(null, configuration, root, () -> null);
+        this(null, configuration, root);
     }
 
-    private Stream<BeanContext> descendants() {
-        return children.stream().flatMap(c -> concat(of(c), c.descendants()));
+    @Override
+    public BeanContext getParent() {
+        return parent;
+    }
+
+    public Object getInstance() {
+        return instance;
     }
 
     @Override
     public Object getBean(String name) {
-        return null;
+        return getAscendant(name);
     }
 
     @Override
@@ -109,8 +129,7 @@ public final class BeanContext implements MaridRuntime {
                                 .findFirst()
                                 .map(c -> c.instance)
                                 .orElseGet(() -> {
-                                    final Supplier<Object> v = () -> parent.create(brother);
-                                    final BeanContext c = new BeanContext(parent, configuration, brother, v);
+                                    final BeanContext c = new BeanContext(parent, configuration, brother);
                                     parent.children.add(c);
                                     return c.instance;
                                 });
@@ -125,9 +144,17 @@ public final class BeanContext implements MaridRuntime {
 
     @Override
     public Object getDescendant(String name) {
-        return descendants()
-                .filter(c -> c.bean.getName().equals(name))
-                .map(c -> c.instance)
+        return bean.getChildren().stream()
+                .filter(child -> child.getName().equals(name))
+                .map(child -> children.stream()
+                        .filter(c -> c.bean == child)
+                        .findFirst()
+                        .map(c -> c.instance)
+                        .orElseGet(() -> {
+                            final BeanContext c = new BeanContext(this, configuration, child);
+                            children.add(c);
+                            return c.instance;
+                        }))
                 .findFirst()
                 .orElseThrow(() -> new MaridBeanNotFoundException(name));
     }
@@ -135,17 +162,32 @@ public final class BeanContext implements MaridRuntime {
     private Object create(MaridBean bean) {
         if (processing.add(bean)) {
             try {
-                final Member member = fromSignature(bean.getSignature(), getClassLoader());
-                final MethodHandle producer = producer(member);
-                final MethodHandle producerHandle = isRoot(member)
-                        ? producer.asFixedArity()
-                        : producer.bindTo(getAscendant(bean.getFactory())).asFixedArity();
-                return null;
+                return bean.getFactory().execute(this);
             } finally {
                 processing.remove(bean);
             }
         } else {
             throw new CircularBeanException();
+        }
+    }
+
+    @Override
+    public void close() {
+        final IllegalStateException e = new IllegalStateException("Runtime close exception");
+        configuration.fireEvent(true, l -> l.onPreDestroy(new BeanPreDestroyEvent(this, bean.getName(), instance, e::addSuppressed)));
+        for (int i = children.size() - 1; i >= 0; i--) {
+            final BeanContext child = children.get(i);
+            try {
+                child.close();
+            } catch (Throwable x) {
+                e.addSuppressed(x);
+            }
+        }
+        if (e.getSuppressed().length > 0) {
+            log(SEVERE, "Unable to close {0}", e, this);
+        }
+        if (parent != null) {
+            parent.close();
         }
     }
 

@@ -19,17 +19,37 @@
  * #L%
  */
 
-package org.marid.runtime.model;
+package org.marid.runtime.expression;
 
-import org.marid.runtime.expression.Expression;
+import org.marid.runtime.context2.BeanContext;
+import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 
-public interface MaridArgument {
+public class ThisExpression extends Expression {
+
+    public static final ThisExpression THIS = new ThisExpression();
+
+    private ThisExpression() {
+    }
 
     @Nonnull
-    MaridMethod getParent();
+    @Override
+    public String getTag() {
+        return "this";
+    }
 
-    @Nonnull
-    Expression getExpression();
+    @Override
+    public void saveTo(@Nonnull Element element) {
+    }
+
+    @Override
+    public Object execute(@Nonnull BeanContext context) {
+        return context.getInstance();
+    }
+
+    @Override
+    public String toString() {
+        return getTag();
+    }
 }

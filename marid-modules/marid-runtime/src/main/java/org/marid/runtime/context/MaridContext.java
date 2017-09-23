@@ -86,6 +86,7 @@ public final class MaridContext implements MaridRuntime, AutoCloseable {
         return new MaridContext(configuration, this, pcc, bean, v);
     }
 
+    @Override
     public MaridContext getParent() {
         return parent;
     }

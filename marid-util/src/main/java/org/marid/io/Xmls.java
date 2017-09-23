@@ -162,6 +162,10 @@ public interface Xmls {
                 .map(type::cast);
     }
 
+    static Stream<Element> elements(Node node) {
+        return nodes(node, Element.class);
+    }
+
     static Optional<String> attribute(Element element, String name) {
         return element.hasAttribute(name)
                 ? Optional.of(element.getAttribute(name))

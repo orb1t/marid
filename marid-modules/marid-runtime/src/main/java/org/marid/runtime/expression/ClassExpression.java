@@ -26,38 +26,44 @@ import org.marid.runtime.context2.BeanContext;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
+import java.util.NoSuchElementException;
 
-public class DescendantRefExpression extends Expression {
+public class ClassExpression extends Expression {
 
     @Nonnull
-    private final String reference;
+    private final String className;
 
-    public DescendantRefExpression(@Nonnull String reference) {
-        this.reference = reference;
+    public ClassExpression(@Nonnull String className) {
+        this.className = className;
     }
 
-    public DescendantRefExpression(@Nonnull Element element) {
-        this.reference = Xmls.attribute(element, "ref").orElseThrow(IllegalStateException::new);
+    public ClassExpression(@Nonnull Element element) {
+        className = Xmls.attribute(element, "class").orElseThrow(() -> new NullPointerException("class"));
     }
 
     @Nonnull
     @Override
     public String getTag() {
-        return "desc-ref";
+        return "class";
     }
 
     @Override
     public void saveTo(@Nonnull Element element) {
-        element.setAttribute("ref", reference);
+        element.setAttribute("class", className);
     }
 
     @Override
     public Object execute(@Nonnull BeanContext context) {
-        return context.getDescendant(context.resolvePlaceholders(reference));
+        final String className = context.resolvePlaceholders(this.className);
+        try {
+            return context.getClassLoader().loadClass(className);
+        } catch (ClassNotFoundException x) {
+            throw new NoSuchElementException(className);
+        }
     }
 
     @Override
     public String toString() {
-        return "#" + reference;
+        return "&" + className;
     }
 }

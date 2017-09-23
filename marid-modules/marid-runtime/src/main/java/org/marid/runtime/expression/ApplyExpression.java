@@ -21,35 +21,55 @@
 
 package org.marid.runtime.expression;
 
+import org.marid.io.Xmls;
+import org.marid.runtime.context2.BeanContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.AbstractMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import javax.annotation.Nonnull;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandleProxies;
+import java.lang.invoke.MethodHandles;
+import java.lang.reflect.*;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.NoSuchElementException;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toMap;
-import static org.marid.io.Xmls.attribute;
-import static org.marid.io.Xmls.nodes;
+import static java.util.stream.Stream.of;
+import static org.marid.io.Xmls.*;
 
 public class ApplyExpression extends Expression {
 
-    private final String target;
+    @Nonnull
+    private final Expression target;
+
+    @Nonnull
     private final String method;
+
+    @Nonnull
     private final String type;
+
+    @Nonnull
     private final Map<String, Expression> args;
 
-    public ApplyExpression(String target, String method, String type, Map<String, Expression> args) {
+    public ApplyExpression(@Nonnull Expression target,
+                           @Nonnull String method,
+                           @Nonnull String type,
+                           @Nonnull Map<String, Expression> args) {
         this.target = target;
         this.method = method;
         this.type = type;
         this.args = args;
     }
 
-    public ApplyExpression(Element element) {
-        target = attribute(element, "target").orElseThrow(() -> new NullPointerException("target"));
+    public ApplyExpression(@Nonnull Element element) {
+        target = elements(element)
+                .filter(e -> "target".equals(e.getTagName()))
+                .flatMap(Xmls::elements)
+                .map(Expression::from)
+                .findFirst()
+                .orElseThrow(() -> new NoSuchElementException("target"));
         method = attribute(element, "method").orElseThrow(() -> new NullPointerException("method"));
         type = attribute(element, "type").orElseThrow(() -> new NullPointerException("type"));
         args = nodes(element, Element.class)
@@ -65,32 +85,37 @@ public class ApplyExpression extends Expression {
                 .collect(toMap(Entry::getKey, Entry::getValue, (v1, v2) -> v2, LinkedHashMap::new));
     }
 
-    public String getTarget() {
+    @Nonnull
+    public Expression getTarget() {
         return target;
     }
 
+    @Nonnull
     public String getMethod() {
         return method;
     }
 
+    @Nonnull
     public String getType() {
         return type;
     }
 
+    @Nonnull
     public Map<String, Expression> getArgs() {
         return args;
     }
 
+    @Nonnull
     @Override
     public String getTag() {
         return "apply";
     }
 
     @Override
-    public void saveTo(Element element) {
-        element.setAttribute("target", target);
+    public void saveTo(@Nonnull Element element) {
         element.setAttribute("method", method);
         element.setAttribute("type", type);
+        MethodCallExpression.target(element, target);
 
         final Document document = element.getOwnerDocument();
 
@@ -102,6 +127,109 @@ public class ApplyExpression extends Expression {
             e.appendChild(v);
             arg.saveTo(v);
         });
+    }
+
+    @Override
+    public Object execute(@Nonnull BeanContext context) {
+        final Object t = requireNonNull(target.execute(context), "target");
+        final Class<?> c = target instanceof ClassExpression ? (Class<?>) t : target.getClass();
+        final String typeName = context.resolvePlaceholders(this.type);
+        final Class<?> type;
+        try {
+            type = context.getClassLoader().loadClass(typeName);
+        } catch (ClassNotFoundException x) {
+            throw new IllegalArgumentException(typeName);
+        }
+        if (!type.isInterface()) {
+            throw new IllegalArgumentException("Wrong interface " + type);
+        }
+        final Method fMethod = of(type.getMethods())
+                .filter(m -> !m.isDefault())
+                .findFirst()
+                .orElseThrow(() -> new NoSuchElementException("No functional interface: " + typeName));
+        final String mName = context.resolvePlaceholders(method);
+        final Map<String, Object> ps = args.entrySet().stream()
+                .collect(toMap(e -> context.resolvePlaceholders(e.getKey()), e -> e.getValue().execute(context)));
+
+        final MethodHandles.Lookup lookup = MethodHandles.lookup();
+        if ("new".equals(mName) && target instanceof ClassExpression) {
+            for (final Constructor<?> ct : c.getConstructors()) {
+                if (ct.getParameterCount() != args.size() + fMethod.getParameterCount()) {
+                    continue;
+                }
+                final Parameter[] parameters = ct.getParameters();
+                final Map<String, Integer> indices = new HashMap<>(ps.size());
+                for (int i = 0; i < parameters.length; i++) {
+                    if (ps.containsKey(parameters[i].getName())) {
+                        indices.put(parameters[i].getName(), i);
+                    }
+                }
+                if (indices.size() != ps.size()) {
+                    continue;
+                }
+                try {
+                    ct.setAccessible(true);
+                    MethodHandle h = lookup.unreflectConstructor(ct).asFixedArity();
+                    for (final Entry<String, Integer> e : indices.entrySet()) {
+                        h = MethodHandles.insertArguments(h, e.getValue(), ps.get(e.getKey()));
+                    }
+                    return MethodHandleProxies.asInterfaceInstance(type, h);
+                } catch (IllegalAccessException x) {
+                    throw new IllegalStateException(x);
+                }
+            }
+            throw new NoSuchElementException();
+        } else {
+            for (final Method m : c.getMethods()) {
+                if (m.getParameterCount() != args.size() + fMethod.getParameterCount()) {
+                    continue;
+                }
+                if (!m.getName().equals(mName)) {
+                    continue;
+                }
+                final Parameter[] parameters = m.getParameters();
+                final Map<String, Integer> indices = new HashMap<>(ps.size());
+                for (int i = 0; i < parameters.length; i++) {
+                    if (ps.containsKey(parameters[i].getName())) {
+                        indices.put(parameters[i].getName(), i);
+                    }
+                }
+                if (indices.size() != ps.size()) {
+                    continue;
+                }
+                try {
+                    m.setAccessible(true);
+                    MethodHandle h = lookup.unreflect(m).asFixedArity();
+                    if (!Modifier.isStatic(m.getModifiers())) {
+                        h = h.bindTo(t);
+                    }
+                    for (final Entry<String, Integer> e : indices.entrySet()) {
+                        h = MethodHandles.insertArguments(h, e.getValue(), ps.get(e.getKey()));
+                    }
+                    return MethodHandleProxies.asInterfaceInstance(type, h);
+                } catch (IllegalAccessException x) {
+                    throw new IllegalStateException(x);
+                }
+            }
+            if (ps.isEmpty() && fMethod.getParameterCount() == 0) {
+                for (final Field f : c.getFields()) {
+                    if (!f.getName().equals(mName)) {
+                        continue;
+                    }
+                    try {
+                        f.setAccessible(true);
+                        MethodHandle h = lookup.unreflectGetter(f);
+                        if (!Modifier.isStatic(f.getModifiers())) {
+                            h = h.bindTo(t);
+                        }
+                        return MethodHandleProxies.asInterfaceInstance(type, h);
+                    } catch (IllegalAccessException x) {
+                        throw new IllegalStateException(x);
+                    }
+                }
+            }
+            throw new NoSuchElementException();
+        }
     }
 
     @Override

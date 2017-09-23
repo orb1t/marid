@@ -21,29 +21,42 @@
 
 package org.marid.runtime.expression;
 
+import org.jetbrains.annotations.NotNull;
 import org.marid.io.Xmls;
+import org.marid.runtime.context2.BeanContext;
 import org.w3c.dom.Element;
+
+import javax.annotation.Nonnull;
 
 public abstract class ValueExpression extends Expression {
 
+    @Nonnull
     private final String value;
 
-    public ValueExpression(String value) {
+    public ValueExpression(@Nonnull String value) {
         this.value = value;
     }
 
-    public ValueExpression(Element element) {
+    public ValueExpression(@Nonnull Element element) {
         value = Xmls.attribute(element, "value").orElseThrow(() -> new NullPointerException("value"));
     }
 
     @Override
-    public void saveTo(Element element) {
+    public void saveTo(@NotNull Element element) {
         element.setAttribute("value", value);
     }
 
+    @Nonnull
     public String getValue() {
         return value;
     }
+
+    @Override
+    public Object execute(@Nonnull BeanContext context) {
+        return null;
+    }
+
+    protected abstract Object parseSubstituted(@Nonnull String substituted);
 
     @Override
     public String toString() {

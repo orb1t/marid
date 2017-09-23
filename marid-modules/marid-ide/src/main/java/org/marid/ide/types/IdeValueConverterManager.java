@@ -42,6 +42,11 @@ public class IdeValueConverterManager extends DefaultValueConvertersManager {
     public IdeValueConverterManager(ClassLoader classLoader) {
         super(new MaridRuntime() {
             @Override
+            public MaridRuntime getParent() {
+                return null;
+            }
+
+            @Override
             public Object getBean(String name) {
                 return null;
             }

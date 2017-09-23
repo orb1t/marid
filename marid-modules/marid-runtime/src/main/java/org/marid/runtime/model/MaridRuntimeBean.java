@@ -21,8 +21,8 @@
 
 package org.marid.runtime.model;
 
-import org.marid.io.Xmls;
 import org.marid.runtime.expression.Expression;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
@@ -30,122 +30,56 @@ import javax.annotation.Nullable;
 import javax.xml.transform.stream.StreamResult;
 import java.io.Reader;
 import java.io.Writer;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
 
+import static java.util.stream.Collectors.toList;
 import static org.marid.io.Xmls.*;
 import static org.marid.misc.Builder.build;
-import static org.marid.misc.Calls.call;
-import static org.marid.runtime.context.MaridRuntimeUtils.signature;
+import static org.marid.runtime.expression.NullExpression.NULL;
 
-public class MaridRuntimeBean extends MaridRuntimeMethod implements MaridBean {
+public class MaridRuntimeBean implements MaridBean {
 
+    private final MaridRuntimeBean parent;
     private final String name;
-    private final String factory;
-    private final List<MaridRuntimeMethod> initializers = new ArrayList<>();
-    private final List<MaridRuntimeBean> children = new ArrayList<>();
+    private final Expression factory;
+    private final List<Expression> initializers;
+    private final List<MaridRuntimeBean> children;
 
     public MaridRuntimeBean(@Nullable MaridRuntimeBean parent,
-                             @Nonnull String name,
-                             @Nullable String factory,
-                             @Nonnull String signature,
-                             @Nonnull Expression... arguments) {
-        super(parent, signature, arguments);
+                            @Nonnull String name,
+                            @Nonnull Expression factory,
+                            @Nonnull Expression... initializers) {
+        this.parent = parent;
         this.name = name;
         this.factory = factory;
+        this.initializers = Arrays.asList(initializers);
+        this.children = new ArrayList<>();
     }
 
     public MaridRuntimeBean(MaridRuntimeBean parent, Element element) {
-        super(parent, element);
-        this.name = attribute(element, "name").orElseThrow(NullPointerException::new);
-        this.factory = attribute(element, "factory").orElse(null);
-
-        Xmls.nodes(element, Element.class)
+        this.parent = parent;
+        this.name = attribute(element, "name").orElseThrow(() -> new NullPointerException("name"));
+        this.factory = elements(element)
+                .filter(e -> "factory".equals(e.getTagName()))
+                .flatMap(e -> elements(e).map(Expression::from))
+                .findFirst()
+                .orElseThrow(() -> new NoSuchElementException("factory"));
+        this.initializers = elements(element)
                 .filter(e -> "initializer".equals(e.getTagName()))
-                .map(e -> new MaridRuntimeMethod(this, e))
-                .forEach(initializers::add);
-
-        Xmls.nodes(element, Element.class)
+                .map(e -> elements(e).map(Expression::from).findFirst().orElseThrow(NoSuchElementException::new))
+                .collect(toList());
+        this.children = elements(element)
                 .filter(e -> "bean".equals(e.getTagName()))
                 .map(e -> new MaridRuntimeBean(this, e))
-                .forEach(children::add);
+                .collect(toList());
+
     }
 
     public MaridRuntimeBean() {
-        this(null, "beans", null, call(() -> signature(Object.class.getConstructor())));
-    }
-
-    @Nonnull
-    @Override
-    public MaridRuntimeBean add(@Nonnull String name,
-                                @Nullable String factory,
-                                @Nonnull String signature,
-                                @Nonnull Expression... arguments) {
-        final MaridRuntimeBean child = new MaridRuntimeBean(this, name, factory, signature, arguments);
-        children.add(child);
-        return child;
-    }
-
-    @Nonnull
-    @Override
-    public MaridRuntimeMethod add(@Nonnull String signature, @Nonnull Expression... arguments) {
-        final MaridRuntimeMethod method = new MaridRuntimeMethod(this, signature, arguments);
-        initializers.add(method);
-        return method;
-    }
-
-    public MaridRuntimeBean add(@Nonnull String name,
-                                @Nullable String factory,
-                                @Nonnull Constructor<?> constructor,
-                                @Nonnull Expression... arguments) {
-        return add(name, factory, signature(constructor), arguments);
-    }
-
-    public MaridRuntimeBean add(@Nonnull String name,
-                                @Nonnull Constructor<?> constructor,
-                                @Nonnull Expression... arguments) {
-        return add(name, null, constructor, arguments);
-    }
-
-    public MaridRuntimeBean add(@Nonnull String name,
-                                @Nullable String factory,
-                                @Nonnull Method method,
-                                @Nonnull Expression... arguments) {
-        return add(name, factory, signature(method), arguments);
-    }
-
-    public MaridRuntimeBean add(@Nonnull String name,
-                                @Nonnull Method method,
-                                @Nonnull Expression... arguments) {
-        return add(name, null, method, arguments);
-    }
-
-    public MaridRuntimeBean add(@Nonnull String name,
-                                @Nullable String factory,
-                                @Nonnull Field field,
-                                @Nonnull Expression... arguments) {
-        return add(name, factory, signature(field), arguments);
-    }
-
-    public MaridRuntimeBean add(@Nonnull String name,
-                                @Nonnull Field field,
-                                @Nonnull Expression... arguments) {
-        return add(name, null, field, arguments);
-    }
-
-    public MaridRuntimeMethod add(@Nonnull Constructor<?> constructor, @Nonnull Expression... arguments) {
-        return add(signature(constructor), arguments);
-    }
-
-    public MaridRuntimeMethod add(@Nonnull Method method, @Nonnull Expression... arguments) {
-        return add(signature(method), arguments);
-    }
-
-    public MaridRuntimeMethod add(@Nonnull Field field, @Nonnull Expression... arguments) {
-        return add(signature(field), arguments);
+        this(null, "beans", NULL);
     }
 
     @Nonnull
@@ -154,15 +88,15 @@ public class MaridRuntimeBean extends MaridRuntimeMethod implements MaridBean {
         return name;
     }
 
-    @Nullable
+    @Nonnull
     @Override
-    public String getFactory() {
+    public Expression getFactory() {
         return factory;
     }
 
     @Nonnull
     @Override
-    public List<MaridRuntimeMethod> getInitializers() {
+    public List<Expression> getInitializers() {
         return initializers;
     }
 
@@ -172,23 +106,28 @@ public class MaridRuntimeBean extends MaridRuntimeMethod implements MaridBean {
         return children;
     }
 
+    @Nonnull
     @Override
-    public void writeTo(Element element) {
-        super.writeTo(element);
+    public MaridRuntimeBean add(@Nonnull String name, @Nonnull Expression factory, @Nonnull Expression... initializers) {
+        final MaridRuntimeBean bean = new MaridRuntimeBean(this, name, factory, initializers);
+        children.add(bean);
+        return bean;
+    }
 
+    public void writeTo(Element element) {
         element.setAttribute("name", name);
 
-        if (factory != null) {
-            element.setAttribute("factory", factory);
+        final Document document = element.getOwnerDocument();
+
+        final Element factoryElement = build(document.createElement("factory"), element::appendChild);
+        factory.saveTo(build(document.createElement(factory.getTag()), factoryElement::appendChild));
+
+        for (final Expression initializer : initializers) {
+            final Element ee = build(document.createElement(initializer.getTag()), initializer::saveTo);
+            element.appendChild(build(document.createElement("initializer"), i -> i.appendChild(ee)));
         }
 
-        for (final MaridRuntimeMethod m : initializers) {
-            m.writeTo(build(element.getOwnerDocument().createElement("initializer"), element::appendChild));
-        }
-
-        for (final MaridRuntimeBean b : children) {
-            b.writeTo(build(element.getOwnerDocument().createElement("bean"), element::appendChild));
-        }
+        children.forEach(b -> b.writeTo(build(document.createElement("bean"), element::appendChild)));
     }
 
     public static MaridRuntimeBean load(MaridRuntimeBean parent, Reader reader) {
@@ -201,8 +140,6 @@ public class MaridRuntimeBean extends MaridRuntimeMethod implements MaridBean {
 
     @Override
     public String toString() {
-        return factory == null
-                ? name + initializers + "(" + super.toString() +")" + children
-                : name + "(" + factory + ")" + initializers + "(" + super.toString() + ")" + children;
+        return name + "(" + factory + initializers + children + ")";
     }
 }
