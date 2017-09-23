@@ -24,9 +24,13 @@ package org.marid.runtime.model;
 import org.marid.runtime.expression.Expression;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 
 public interface MaridBean {
+
+    @Nullable
+    MaridBean getParent();
 
     @Nonnull
     String getName();

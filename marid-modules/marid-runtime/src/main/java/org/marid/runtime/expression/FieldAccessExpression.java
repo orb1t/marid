@@ -81,8 +81,9 @@ public class FieldAccessExpression extends Expression {
     public Object execute(@Nonnull BeanContext context) {
         final String field = context.resolvePlaceholders(this.field);
         final Object t = requireNonNull(target.execute(context), "target");
+        final Class<?> c = target instanceof ClassExpression ? (Class<?>) t : t.getClass();
         try {
-            final Field f = t.getClass().getField(field);
+            final Field f = c.getField(field);
             f.setAccessible(true);
             return f.get(t);
         } catch (NoSuchFieldException x) {

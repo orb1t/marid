@@ -87,6 +87,10 @@ public final class BeanContext implements MaridRuntime, AutoCloseable {
         this(null, configuration, root);
     }
 
+    public ArrayList<BeanContext> getChildren() {
+        return children;
+    }
+
     @Override
     public BeanContext getParent() {
         return parent;
@@ -185,9 +189,6 @@ public final class BeanContext implements MaridRuntime, AutoCloseable {
         }
         if (e.getSuppressed().length > 0) {
             log(SEVERE, "Unable to close {0}", e, this);
-        }
-        if (parent != null) {
-            parent.close();
         }
     }
 

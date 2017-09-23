@@ -82,6 +82,12 @@ public class MaridRuntimeBean implements MaridBean {
         this(null, "beans", NULL);
     }
 
+    @Nullable
+    @Override
+    public MaridRuntimeBean getParent() {
+        return parent;
+    }
+
     @Nonnull
     @Override
     public String getName() {
