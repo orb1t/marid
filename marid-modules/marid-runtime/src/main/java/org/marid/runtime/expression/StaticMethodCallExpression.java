@@ -22,28 +22,27 @@
 package org.marid.runtime.expression;
 
 import org.marid.runtime.context2.BeanContext;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.of;
 import static org.marid.io.Xmls.attribute;
-import static org.marid.io.Xmls.elements;
-import static org.marid.misc.Builder.build;
 import static org.marid.runtime.context.MaridRuntimeUtils.compatible;
 import static org.marid.runtime.context.MaridRuntimeUtils.value;
+import static org.marid.runtime.expression.MethodCallExpression.args;
+import static org.marid.runtime.expression.MethodCallExpression.target;
 
-public class MethodCallExpression extends Expression {
+public class StaticMethodCallExpression extends Expression {
 
     @Nonnull
     private final Expression target;
@@ -54,13 +53,13 @@ public class MethodCallExpression extends Expression {
     @Nonnull
     private final List<Expression> args;
 
-    public MethodCallExpression(@Nonnull Expression target, @Nonnull String method, @Nonnull Expression... args) {
+    public StaticMethodCallExpression(@Nonnull Expression target, @Nonnull String method, @Nonnull Expression... args) {
         this.target = target;
         this.method = method;
-        this.args = Arrays.asList(args);
+        this.args = new ArrayList<>(Arrays.asList(args));
     }
 
-    public MethodCallExpression(@Nonnull Element element) {
+    public StaticMethodCallExpression(@Nonnull Element element) {
         target = target(element);
         method = attribute(element, "method").orElseThrow(() -> new NullPointerException("method"));
         args = args(element);
@@ -84,7 +83,7 @@ public class MethodCallExpression extends Expression {
     @Nonnull
     @Override
     public String getTag() {
-        return "call";
+        return "static-call";
     }
 
     @Override
@@ -96,10 +95,10 @@ public class MethodCallExpression extends Expression {
 
     @Override
     protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
-        final Object t = requireNonNull(target.evaluate(self, context), "target");
+        final Class<?> t = (Class<?>) requireNonNull(target.evaluate(self, context), "target");
         final String mName = context.resolvePlaceholders(method);
-        final Object[] ps = args.stream().map(p -> p.evaluate(self, context)).toArray();
-        final Method mt = of(t.getClass().getMethods())
+        final Object[] ps = args.stream().map(p -> p.execute(self, context)).toArray();
+        final Method mt = of(t.getMethods())
                 .filter(m -> mName.equals(m.getName()))
                 .filter(m -> compatible(m, ps))
                 .findFirst()
@@ -110,7 +109,7 @@ public class MethodCallExpression extends Expression {
         }
         try {
             mt.setAccessible(true);
-            return mt.invoke(t, ps);
+            return mt.invoke(null, ps);
         } catch (IllegalAccessException | InvocationTargetException x) {
             throw new IllegalStateException(x);
         }
@@ -118,33 +117,6 @@ public class MethodCallExpression extends Expression {
 
     @Override
     public String toString() {
-        return args.stream().map(Object::toString).collect(joining(",", target + "." + method + "(", ")"));
-    }
-
-    public static Expression target(Element element) {
-        return elements(element)
-                .filter(e -> "target".equals(e.getTagName()))
-                .flatMap(e -> elements(e).map(Expression::from))
-                .findFirst()
-                .orElseThrow(() -> new NoSuchElementException("target"));
-    }
-
-    public static void target(Element element, Expression target) {
-        final Document document = element.getOwnerDocument();
-        final Element targetElement = build(document.createElement("target"), element::appendChild);
-        target.saveTo(build(document.createElement(target.getTag()), targetElement::appendChild));
-    }
-
-    public static List<Expression> args(Element element) {
-        return elements(element)
-                .filter(e -> "args".equals(e.getTagName()))
-                .flatMap(e -> elements(e).map(Expression::from))
-                .collect(toList());
-    }
-
-    public static void args(Element element, List<Expression> args) {
-        final Document document = element.getOwnerDocument();
-        final Element argsElement = build(document.createElement("args"), element::appendChild);
-        args.forEach(arg -> arg.saveTo(build(document.createElement(arg.getTag()), argsElement::appendChild)));
+        return args.stream().map(Object::toString).collect(joining(",", target + "!" + method + "(", ")"));
     }
 }

@@ -26,6 +26,7 @@ import org.marid.runtime.context2.BeanContext;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.NoSuchElementException;
 
 public class ClassExpression extends Expression {
@@ -53,7 +54,7 @@ public class ClassExpression extends Expression {
     }
 
     @Override
-    public Object execute(@Nonnull BeanContext context) {
+    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
         final String className = context.resolvePlaceholders(this.className);
         try {
             return context.getClassLoader().loadClass(className);

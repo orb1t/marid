@@ -25,6 +25,7 @@ import org.marid.runtime.context2.BeanContext;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class ThisExpression extends Expression {
 
@@ -44,8 +45,8 @@ public class ThisExpression extends Expression {
     }
 
     @Override
-    public Object execute(@Nonnull BeanContext context) {
-        return context.getInstance();
+    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
+        return self;
     }
 
     @Override

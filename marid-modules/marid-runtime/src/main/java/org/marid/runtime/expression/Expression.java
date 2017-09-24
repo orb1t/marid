@@ -26,33 +26,49 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.marid.runtime.expression.NullExpression.NULL;
-import static org.marid.runtime.expression.ParentExpression.PARENT;
 import static org.marid.runtime.expression.ThisExpression.THIS;
 
 public abstract class Expression {
+
+    private final List<Expression> initializers = new ArrayList<>();
 
     @Nonnull
     public abstract String getTag();
 
     public abstract void saveTo(@Nonnull Element element);
 
-    public abstract Object execute(@Nonnull BeanContext context);
+    protected abstract Object execute(@Nullable Object self, @Nonnull BeanContext context);
+
+    public Object evaluate(@Nullable Object self, @Nonnull BeanContext context) {
+        final Object v = execute(self, context);
+        initializers.forEach(i -> i.evaluate(v, context));
+        return v;
+    }
+
+    public List<Expression> getInitializers() {
+        return initializers;
+    }
 
     @Nonnull
     public static Expression from(Element element) {
         switch (element.getTagName()) {
             case "null": return NULL;
             case "this": return THIS;
-            case "parent": return PARENT;
+            case "parent": return new ParentExpression(element);
             case "int": return new IntegerExpression(element);
             case "long": return new LongExpression(element);
             case "string": return new StringExpression(element);
-            case "asc-ref": return new AscendantRefExpression(element);
-            case "desc-ref": return new DescendantRefExpression(element);
+            case "ref": return new RefExpression(element);
             case "call": return new MethodCallExpression(element);
+            case "static-call": return new StaticMethodCallExpression(element);
+            case "new": return new ConstructorCallExpression(element);
             case "get": return new FieldAccessExpression(element);
+            case "static-get": return new StaticFieldAccessExpression(element);
             case "apply": return new ApplyExpression(element);
             case "class": return new ClassExpression(element);
             default: throw new UnsupportedOperationException("Unknown expression type: " + element.getTagName());

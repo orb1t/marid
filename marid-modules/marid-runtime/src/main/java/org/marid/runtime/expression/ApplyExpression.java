@@ -27,6 +27,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandleProxies;
 import java.lang.invoke.MethodHandles;
@@ -130,8 +131,8 @@ public class ApplyExpression extends Expression {
     }
 
     @Override
-    public Object execute(@Nonnull BeanContext context) {
-        final Object t = requireNonNull(target.execute(context), "target");
+    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
+        final Object t = requireNonNull(target.evaluate(self, context), "target");
         final Class<?> c = target instanceof ClassExpression ? (Class<?>) t : target.getClass();
         final String typeName = context.resolvePlaceholders(this.type);
         final Class<?> type;
@@ -149,7 +150,7 @@ public class ApplyExpression extends Expression {
                 .orElseThrow(() -> new NoSuchElementException("No functional interface: " + typeName));
         final String mName = context.resolvePlaceholders(method);
         final Map<String, Object> ps = args.entrySet().stream()
-                .collect(toMap(e -> context.resolvePlaceholders(e.getKey()), e -> e.getValue().execute(context)));
+                .collect(toMap(e -> context.resolvePlaceholders(e.getKey()), e -> e.getValue().evaluate(self, context)));
 
         final MethodHandles.Lookup lookup = MethodHandles.lookup();
         if ("new".equals(mName) && target instanceof ClassExpression) {

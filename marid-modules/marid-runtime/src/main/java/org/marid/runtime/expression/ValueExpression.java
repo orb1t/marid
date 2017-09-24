@@ -27,6 +27,7 @@ import org.marid.runtime.context2.BeanContext;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public abstract class ValueExpression extends Expression {
 
@@ -52,8 +53,8 @@ public abstract class ValueExpression extends Expression {
     }
 
     @Override
-    public Object execute(@Nonnull BeanContext context) {
-        return null;
+    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
+        return parseSubstituted(context.resolvePlaceholders(value));
     }
 
     protected abstract Object parseSubstituted(@Nonnull String substituted);

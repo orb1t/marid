@@ -65,16 +65,6 @@ public class IdeValueConverterManager extends DefaultValueConvertersManager {
             public Properties getApplicationProperties() {
                 return System.getProperties();
             }
-
-            @Override
-            public Object getAscendant(String name) {
-                return null;
-            }
-
-            @Override
-            public Object getDescendant(String name) {
-                return null;
-            }
         });
         this.classLoader = classLoader;
     }

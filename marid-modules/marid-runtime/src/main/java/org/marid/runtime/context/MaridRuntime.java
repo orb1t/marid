@@ -37,8 +37,4 @@ public interface MaridRuntime {
     String resolvePlaceholders(String value);
 
     Properties getApplicationProperties();
-
-    Object getAscendant(String name);
-
-    Object getDescendant(String name);
 }

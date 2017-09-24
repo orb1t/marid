@@ -246,7 +246,7 @@ public interface MaridRuntimeUtils {
             final Class<?>[] types = executable.getParameterTypes();
             for (int i = 0; i < args.length; i++) {
                 final Class<?> type = types[i];
-                if (!type.isInstance(args[i])) {
+                if (args[i] != null && !type.isInstance(args[i])) {
                     return false;
                 }
             }

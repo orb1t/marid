@@ -36,12 +36,12 @@ import static java.util.logging.Level.WARNING;
 import static java.util.stream.StreamSupport.stream;
 import static org.marid.logging.Log.log;
 
-public class BeanContextConfiguration {
+public class BeanConfiguration {
 
     private final MaridPlaceholderResolver placeholderResolver;
     private final MaridContextListener[] contextListeners;
 
-    public BeanContextConfiguration(ClassLoader classLoader, Properties applicationProperties) {
+    public BeanConfiguration(ClassLoader classLoader, Properties applicationProperties) {
         placeholderResolver = new MaridPlaceholderResolver(classLoader, applicationProperties);
 
         try {
@@ -53,7 +53,7 @@ public class BeanContextConfiguration {
         }
     }
 
-    public BeanContextConfiguration(ClassLoader classLoader) {
+    public BeanConfiguration(ClassLoader classLoader) {
         this(classLoader, applicationProperties(classLoader));
     }
 

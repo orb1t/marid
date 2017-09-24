@@ -21,29 +21,36 @@
 
 package org.marid.runtime.expression;
 
-import org.marid.io.Xmls;
 import org.marid.runtime.context2.BeanContext;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
-public class DescendantRefExpression extends Expression {
+import static org.marid.io.Xmls.attribute;
+
+public class RefExpression extends Expression {
 
     @Nonnull
     private final String reference;
 
-    public DescendantRefExpression(@Nonnull String reference) {
+    public RefExpression(@Nonnull String reference) {
         this.reference = reference;
     }
 
-    public DescendantRefExpression(@Nonnull Element element) {
-        this.reference = Xmls.attribute(element, "ref").orElseThrow(IllegalStateException::new);
+    public RefExpression(@Nonnull Element element) {
+        this.reference = attribute(element, "ref").orElseThrow(IllegalStateException::new);
+    }
+
+    @Nonnull
+    public String getReference() {
+        return reference;
     }
 
     @Nonnull
     @Override
     public String getTag() {
-        return "desc-ref";
+        return "ref";
     }
 
     @Override
@@ -52,12 +59,12 @@ public class DescendantRefExpression extends Expression {
     }
 
     @Override
-    public Object execute(@Nonnull BeanContext context) {
-        return context.getDescendant(context.resolvePlaceholders(reference));
+    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
+        return context.getBean(context.resolvePlaceholders(reference));
     }
 
     @Override
     public String toString() {
-        return "#" + reference;
+        return "@" + reference;
     }
 }

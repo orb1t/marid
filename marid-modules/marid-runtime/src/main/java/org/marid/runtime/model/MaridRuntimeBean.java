@@ -26,12 +26,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.xml.transform.stream.StreamResult;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -45,17 +43,12 @@ public class MaridRuntimeBean implements MaridBean {
     private final MaridRuntimeBean parent;
     private final String name;
     private final Expression factory;
-    private final List<Expression> initializers;
     private final List<MaridRuntimeBean> children;
 
-    public MaridRuntimeBean(@Nullable MaridRuntimeBean parent,
-                            @Nonnull String name,
-                            @Nonnull Expression factory,
-                            @Nonnull Expression... initializers) {
+    public MaridRuntimeBean(MaridRuntimeBean parent, @Nonnull String name, @Nonnull Expression factory) {
         this.parent = parent;
         this.name = name;
         this.factory = factory;
-        this.initializers = Arrays.asList(initializers);
         this.children = new ArrayList<>();
     }
 
@@ -67,10 +60,6 @@ public class MaridRuntimeBean implements MaridBean {
                 .flatMap(e -> elements(e).map(Expression::from))
                 .findFirst()
                 .orElseThrow(() -> new NoSuchElementException("factory"));
-        this.initializers = elements(element)
-                .filter(e -> "initializer".equals(e.getTagName()))
-                .map(e -> elements(e).map(Expression::from).findFirst().orElseThrow(NoSuchElementException::new))
-                .collect(toList());
         this.children = elements(element)
                 .filter(e -> "bean".equals(e.getTagName()))
                 .map(e -> new MaridRuntimeBean(this, e))
@@ -82,7 +71,6 @@ public class MaridRuntimeBean implements MaridBean {
         this(null, "beans", NULL);
     }
 
-    @Nullable
     @Override
     public MaridRuntimeBean getParent() {
         return parent;
@@ -102,20 +90,14 @@ public class MaridRuntimeBean implements MaridBean {
 
     @Nonnull
     @Override
-    public List<Expression> getInitializers() {
-        return initializers;
-    }
-
-    @Nonnull
-    @Override
     public List<MaridRuntimeBean> getChildren() {
         return children;
     }
 
     @Nonnull
     @Override
-    public MaridRuntimeBean add(@Nonnull String name, @Nonnull Expression factory, @Nonnull Expression... initializers) {
-        final MaridRuntimeBean bean = new MaridRuntimeBean(this, name, factory, initializers);
+    public MaridRuntimeBean add(@Nonnull String name, @Nonnull Expression factory) {
+        final MaridRuntimeBean bean = new MaridRuntimeBean(this, name, factory);
         children.add(bean);
         return bean;
     }
@@ -127,11 +109,6 @@ public class MaridRuntimeBean implements MaridBean {
 
         final Element factoryElement = build(document.createElement("factory"), element::appendChild);
         factory.saveTo(build(document.createElement(factory.getTag()), factoryElement::appendChild));
-
-        for (final Expression initializer : initializers) {
-            final Element ee = build(document.createElement(initializer.getTag()), initializer::saveTo);
-            element.appendChild(build(document.createElement("initializer"), i -> i.appendChild(ee)));
-        }
 
         children.forEach(b -> b.writeTo(build(document.createElement("bean"), element::appendChild)));
     }
@@ -146,6 +123,6 @@ public class MaridRuntimeBean implements MaridBean {
 
     @Override
     public String toString() {
-        return name + "(" + factory + initializers + children + ")";
+        return name + "(" + factory + children + ")";
     }
 }

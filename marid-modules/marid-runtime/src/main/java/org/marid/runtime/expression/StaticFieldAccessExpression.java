@@ -35,7 +35,7 @@ import static org.marid.io.Xmls.attribute;
 import static org.marid.io.Xmls.elements;
 import static org.marid.misc.Builder.build;
 
-public class FieldAccessExpression extends Expression {
+public class StaticFieldAccessExpression extends Expression {
 
     @Nonnull
     private final Expression target;
@@ -43,30 +43,20 @@ public class FieldAccessExpression extends Expression {
     @Nonnull
     private final String field;
 
-    public FieldAccessExpression(@Nonnull Expression target, @Nonnull String field) {
+    public StaticFieldAccessExpression(@Nonnull Expression target, @Nonnull String field) {
         this.target = target;
         this.field = field;
     }
 
-    public FieldAccessExpression(@Nonnull Element element) {
+    public StaticFieldAccessExpression(@Nonnull Element element) {
         target = elements(element).map(Expression::from).findFirst().orElseThrow(NoSuchElementException::new);
         field = attribute(element, "field").orElseThrow(() -> new NullPointerException("field"));
     }
 
     @Nonnull
-    public Expression getTarget() {
-        return target;
-    }
-
-    @Nonnull
-    public String getField() {
-        return field;
-    }
-
-    @Nonnull
     @Override
     public String getTag() {
-        return "get";
+        return "static-get";
     }
 
     @Override
@@ -80,11 +70,11 @@ public class FieldAccessExpression extends Expression {
     @Override
     protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
         final String field = context.resolvePlaceholders(this.field);
-        final Object t = requireNonNull(target.evaluate(self, context), "target");
+        final Class<?> t = (Class<?>) requireNonNull(target.evaluate(self, context), "target");
         try {
-            final Field f = t.getClass().getField(field);
+            final Field f = t.getField(field);
             f.setAccessible(true);
-            return f.get(t);
+            return f.get(null);
         } catch (NoSuchFieldException x) {
             throw new NoSuchElementException(field);
         } catch (IllegalAccessException x) {
@@ -94,6 +84,6 @@ public class FieldAccessExpression extends Expression {
 
     @Override
     public String toString() {
-        return target + "." + field;
+        return target + "!" + field;
     }
 }

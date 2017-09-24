@@ -19,47 +19,39 @@
  * #L%
  */
 
-package org.marid.runtime.context2;
+package org.marid.db.hsqldb;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.marid.runtime.context2.BeanConfiguration;
+import org.marid.runtime.context2.BeanContext;
 import org.marid.runtime.model.MaridRuntimeBean;
 
+import java.io.File;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.marid.runtime.expression.ExpressionHelper.*;
 
-@Tag("normal")
-class BeanContextTest {
+@Tag("manual")
+class DbBeanContextTest {
 
     private static final ClassLoader CLASS_LOADER = Thread.currentThread().getContextClassLoader();
     private static final Properties PROPERTIES = new Properties();
 
-    @Test
-    void testOneBean() {
-        final BeanConfiguration configuration = new BeanConfiguration(CLASS_LOADER, PROPERTIES);
-        final MaridRuntimeBean root = new MaridRuntimeBean()
-                .add("bean1", $("SECONDS", TimeUnit.class))
-                .getParent();
-        try (final BeanContext context = new BeanContext(configuration, root)) {
-            final Object seconds = context.findBean("bean1");
-            assertEquals(TimeUnit.SECONDS, seconds);
-        }
+    static {
+        PROPERTIES.setProperty("file", new File(System.getProperty("user.home"), "test").getAbsolutePath());
     }
 
     @Test
-    void testTwoBeans() {
+    void testDb() {
         final BeanConfiguration configuration = new BeanConfiguration(CLASS_LOADER, PROPERTIES);
         final MaridRuntimeBean root = new MaridRuntimeBean()
-                .add("bean1", $(TimeUnit.class, "valueOf", $r("bean2")))
-                .getParent()
-                .add("bean2", $s("SECONDS"))
+                .add("db", $(HsqldbDatabase.class, $init($(HsqldbProperties.class),
+                        $(THIS, "setDirectory", $(File.class, $s("${file}")))
+                )))
                 .getParent();
         try (final BeanContext context = new BeanContext(configuration, root)) {
-            final Object seconds = context.findBean("bean1");
-            assertEquals(TimeUnit.SECONDS, seconds);
+
         }
     }
 }

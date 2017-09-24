@@ -25,6 +25,7 @@ import org.marid.runtime.context2.BeanContext;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class StringExpression extends Expression {
 
@@ -50,7 +51,7 @@ public class StringExpression extends Expression {
     }
 
     @Override
-    public Object execute(@Nonnull BeanContext context) {
+    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
         return context.resolvePlaceholders(value);
     }
 

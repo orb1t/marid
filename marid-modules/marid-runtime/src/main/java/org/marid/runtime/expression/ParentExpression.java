@@ -25,12 +25,26 @@ import org.marid.runtime.context2.BeanContext;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.NoSuchElementException;
+
+import static java.lang.Integer.parseInt;
+import static org.marid.io.Xmls.attribute;
 
 public class ParentExpression extends Expression {
 
-    public static final ParentExpression PARENT = new ParentExpression();
+    private final int level;
 
-    private ParentExpression() {
+    public ParentExpression(int level) {
+        this.level = level;
+    }
+
+    public ParentExpression(@Nonnull Element element) {
+        level = parseInt(attribute(element, "level").orElseThrow(() -> new NullPointerException("level")));
+    }
+
+    public int getLevel() {
+        return level;
     }
 
     @Nonnull
@@ -41,10 +55,22 @@ public class ParentExpression extends Expression {
 
     @Override
     public void saveTo(@Nonnull Element element) {
+        element.setAttribute("level", Integer.toString(level));
     }
 
     @Override
-    public Object execute(@Nonnull BeanContext context) {
-        return context.getParent().getInstance();
+    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
+        int l = 0;
+        for (BeanContext c = context; c != null; c = c.getParent(), l++) {
+            if (level == l) {
+                return c.getInstance();
+            }
+        }
+        throw new NoSuchElementException();
+    }
+
+    @Override
+    public String toString() {
+        return "$" + level;
     }
 }

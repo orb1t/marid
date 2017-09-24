@@ -124,16 +124,6 @@ public final class MaridContext implements MaridRuntime, AutoCloseable {
         return configuration.placeholderResolver.getProperties();
     }
 
-    @Override
-    public Object getAscendant(String name) {
-        return null;
-    }
-
-    @Override
-    public Object getDescendant(String name) {
-        return null;
-    }
-
     private void initialize(String name, Object bean) {
         configuration.fireEvent(false, l -> l.onEvent(new BeanEvent(this, name, bean, "PRE_INIT")));
         configuration.fireEvent(false, l -> l.onPostConstruct(new BeanPostConstructEvent(this, name, bean)));
