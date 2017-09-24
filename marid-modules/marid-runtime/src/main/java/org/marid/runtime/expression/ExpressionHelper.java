@@ -21,6 +21,8 @@
 
 package org.marid.runtime.expression;
 
+import java.io.File;
+import java.nio.file.Paths;
 import java.util.Collections;
 
 public interface ExpressionHelper {
@@ -36,20 +38,20 @@ public interface ExpressionHelper {
         return new RefExpression(ref);
     }
 
-    static StaticMethodCallExpression $(Class<?> type, String name, Expression... args) {
-        return new StaticMethodCallExpression(new ClassExpression(type.getName()), name, args);
+    static MethodCallStaticExpression $(Class<?> type, String name, Expression... args) {
+        return new MethodCallStaticExpression(new ClassExpression(type.getName()), name, args);
     }
 
     static MethodCallExpression $(Expression target, String name, Expression... args) {
         return new MethodCallExpression(target, name, args);
     }
 
-    static StaticFieldAccessExpression $(String name, Class<?> type) {
-        return new StaticFieldAccessExpression(new ClassExpression(type.getName()), name);
+    static FieldGetStaticExpression $(String name, Class<?> type) {
+        return new FieldGetStaticExpression(new ClassExpression(type.getName()), name);
     }
 
-    static FieldAccessExpression $(String name, Expression target) {
-        return new FieldAccessExpression(target, name);
+    static FieldGetExpression $(String name, Expression target) {
+        return new FieldGetExpression(target, name);
     }
 
     static ConstructorCallExpression $(Expression target, Expression... args) {
@@ -70,6 +72,14 @@ public interface ExpressionHelper {
 
     static LongExpression $l(String value) {
         return new LongExpression(value);
+    }
+
+    static Expression $file(String value) {
+        return $(File.class, $s(value));
+    }
+
+    static Expression $path(String value) {
+        return $(Paths.class, "get", $s(value));
     }
 
     static <T extends Expression> T $init(T expression, Expression... initializers) {

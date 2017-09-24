@@ -34,8 +34,9 @@ import static java.util.Objects.requireNonNull;
 import static org.marid.io.Xmls.attribute;
 import static org.marid.io.Xmls.elements;
 import static org.marid.misc.Builder.build;
+import static org.marid.runtime.expression.MethodCallExpression.target;
 
-public class FieldAccessExpression extends Expression {
+public class FieldSetExpression extends Expression {
 
     @Nonnull
     private final Expression target;
@@ -43,48 +44,44 @@ public class FieldAccessExpression extends Expression {
     @Nonnull
     private final String field;
 
-    public FieldAccessExpression(@Nonnull Expression target, @Nonnull String field) {
+    @Nonnull
+    private final Expression value;
+
+    public FieldSetExpression(@Nonnull Expression target, @Nonnull String field, @Nonnull Expression value) {
         this.target = target;
         this.field = field;
+        this.value = value;
     }
 
-    public FieldAccessExpression(@Nonnull Element element) {
-        target = elements(element).map(Expression::from).findFirst().orElseThrow(NoSuchElementException::new);
+    public FieldSetExpression(@Nonnull Element element) {
         field = attribute(element, "field").orElseThrow(() -> new NullPointerException("field"));
-    }
-
-    @Nonnull
-    public Expression getTarget() {
-        return target;
-    }
-
-    @Nonnull
-    public String getField() {
-        return field;
+        target = target(element);
+        value = value(element);
     }
 
     @Nonnull
     @Override
     public String getTag() {
-        return "get";
+        return "set";
     }
 
     @Override
     public void saveTo(@Nonnull Element element) {
         element.setAttribute("field", field);
-
-        final Document document = element.getOwnerDocument();
-        target.saveTo(build(document.createElement(target.getTag()), element::appendChild));
+        target(element, target);
+        value(element, value);
     }
 
     @Override
     protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
         final String field = context.resolvePlaceholders(this.field);
         final Object t = requireNonNull(target.evaluate(self, context), "target");
+        final Object v = value.evaluate(self, context);
         try {
             final Field f = t.getClass().getField(field);
             f.setAccessible(true);
-            return f.get(t);
+            f.set(t, v);
+            return self;
         } catch (NoSuchFieldException x) {
             throw new NoSuchElementException(field);
         } catch (IllegalAccessException x) {
@@ -92,8 +89,17 @@ public class FieldAccessExpression extends Expression {
         }
     }
 
-    @Override
-    public String toString() {
-        return target + "." + field;
+    public static Expression value(Element element) {
+        return elements(element)
+                .filter(e -> "value".equals(e.getTagName()))
+                .flatMap(e -> elements(e).map(Expression::from))
+                .findFirst()
+                .orElseThrow(() -> new NoSuchElementException("value"));
+    }
+
+    public static void value(Element element, Expression target) {
+        final Document document = element.getOwnerDocument();
+        final Element targetElement = build(document.createElement("value"), element::appendChild);
+        target.saveTo(build(document.createElement(target.getTag()), targetElement::appendChild));
     }
 }

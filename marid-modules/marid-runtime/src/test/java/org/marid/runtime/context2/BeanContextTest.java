@@ -62,4 +62,9 @@ class BeanContextTest {
             assertEquals(TimeUnit.SECONDS, seconds);
         }
     }
+
+    @Test
+    void testCloseNestedContextsOnException() {
+
+    }
 }

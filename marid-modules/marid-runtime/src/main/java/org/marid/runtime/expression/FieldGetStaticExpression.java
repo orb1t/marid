@@ -35,7 +35,7 @@ import static org.marid.io.Xmls.attribute;
 import static org.marid.io.Xmls.elements;
 import static org.marid.misc.Builder.build;
 
-public class StaticFieldAccessExpression extends Expression {
+public class FieldGetStaticExpression extends Expression {
 
     @Nonnull
     private final Expression target;
@@ -43,12 +43,12 @@ public class StaticFieldAccessExpression extends Expression {
     @Nonnull
     private final String field;
 
-    public StaticFieldAccessExpression(@Nonnull Expression target, @Nonnull String field) {
+    public FieldGetStaticExpression(@Nonnull Expression target, @Nonnull String field) {
         this.target = target;
         this.field = field;
     }
 
-    public StaticFieldAccessExpression(@Nonnull Element element) {
+    public FieldGetStaticExpression(@Nonnull Element element) {
         target = elements(element).map(Expression::from).findFirst().orElseThrow(NoSuchElementException::new);
         field = attribute(element, "field").orElseThrow(() -> new NullPointerException("field"));
     }

@@ -31,8 +31,9 @@ import org.marid.runtime.model.MaridBean;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Properties;
 import java.util.stream.Stream;
 
@@ -48,7 +49,7 @@ public final class BeanContext implements MaridRuntime, AutoCloseable {
     private final BeanConfiguration configuration;
     private final MaridBean bean;
     private final Object instance;
-    private final ArrayList<BeanContext> children = new ArrayList<>();
+    private final LinkedList<BeanContext> children = new LinkedList<>();
     private final HashSet<MaridBean> processing = new HashSet<>();
 
     public BeanContext(@Nullable BeanContext parent, @Nonnull BeanConfiguration configuration, @Nonnull MaridBean bean) {
@@ -80,7 +81,7 @@ public final class BeanContext implements MaridRuntime, AutoCloseable {
         this(null, configuration, root);
     }
 
-    public ArrayList<BeanContext> getChildren() {
+    public LinkedList<BeanContext> getChildren() {
         return children;
     }
 
@@ -137,7 +138,7 @@ public final class BeanContext implements MaridRuntime, AutoCloseable {
     private Object create(MaridBean bean, BeanContext context) {
         if (processing.add(bean)) {
             try {
-                return bean.getFactory().evaluate(null, context);
+                return bean.getFactory().evaluate(context.instance, context);
             } finally {
                 processing.remove(bean);
             }
@@ -149,12 +150,16 @@ public final class BeanContext implements MaridRuntime, AutoCloseable {
     @Override
     public void close() {
         final IllegalStateException e = new IllegalStateException("Runtime close exception");
-        for (int i = children.size() - 1; i >= 0; i--) {
-            final BeanContext child = children.get(i);
+        for (final Iterator<BeanContext> i = children.descendingIterator(); i.hasNext(); ) {
+            final BeanContext child = i.next();
             try {
-                child.close();
-            } catch (Throwable x) {
-                e.addSuppressed(x);
+                try {
+                    child.close();
+                } catch (Throwable x) {
+                    e.addSuppressed(x);
+                }
+            } finally {
+                i.remove();
             }
         }
         configuration.fireEvent(true, l -> l.onPreDestroy(new BeanPreDestroyEvent(this, bean.getName(), instance, e::addSuppressed)));

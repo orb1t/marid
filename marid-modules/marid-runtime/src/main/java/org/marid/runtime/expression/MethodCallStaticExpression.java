@@ -42,7 +42,7 @@ import static org.marid.runtime.context.MaridRuntimeUtils.value;
 import static org.marid.runtime.expression.MethodCallExpression.args;
 import static org.marid.runtime.expression.MethodCallExpression.target;
 
-public class StaticMethodCallExpression extends Expression {
+public class MethodCallStaticExpression extends Expression {
 
     @Nonnull
     private final Expression target;
@@ -53,13 +53,13 @@ public class StaticMethodCallExpression extends Expression {
     @Nonnull
     private final List<Expression> args;
 
-    public StaticMethodCallExpression(@Nonnull Expression target, @Nonnull String method, @Nonnull Expression... args) {
+    public MethodCallStaticExpression(@Nonnull Expression target, @Nonnull String method, @Nonnull Expression... args) {
         this.target = target;
         this.method = method;
         this.args = new ArrayList<>(Arrays.asList(args));
     }
 
-    public StaticMethodCallExpression(@Nonnull Element element) {
+    public MethodCallStaticExpression(@Nonnull Element element) {
         target = target(element);
         method = attribute(element, "method").orElseThrow(() -> new NullPointerException("method"));
         args = args(element);

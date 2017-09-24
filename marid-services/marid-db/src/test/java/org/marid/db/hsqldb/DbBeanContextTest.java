@@ -47,7 +47,7 @@ class DbBeanContextTest {
         final BeanConfiguration configuration = new BeanConfiguration(CLASS_LOADER, PROPERTIES);
         final MaridRuntimeBean root = new MaridRuntimeBean()
                 .add("db", $(HsqldbDatabase.class, $init($(HsqldbProperties.class),
-                        $(THIS, "setDirectory", $(File.class, $s("${file}")))
+                        $(THIS, "setDirectory", $file("${file}"))
                 )))
                 .getParent();
         try (final BeanContext context = new BeanContext(configuration, root)) {
