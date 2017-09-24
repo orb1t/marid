@@ -153,11 +153,9 @@ public final class BeanContext implements MaridRuntime, AutoCloseable {
         for (final Iterator<BeanContext> i = children.descendingIterator(); i.hasNext(); ) {
             final BeanContext child = i.next();
             try {
-                try {
-                    child.close();
-                } catch (Throwable x) {
-                    e.addSuppressed(x);
-                }
+                child.close();
+            } catch (Throwable x) {
+                e.addSuppressed(x);
             } finally {
                 i.remove();
             }
