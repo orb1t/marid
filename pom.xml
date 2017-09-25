@@ -135,7 +135,7 @@
                                             <version>[3.5,)</version>
                                         </requireMavenVersion>
                                         <requireJavaVersion>
-                                            <version>[1.8,)</version>
+                                            <version>[1.9,)</version>
                                         </requireJavaVersion>
                                     </rules>
                                 </configuration>
@@ -308,6 +308,8 @@
                         <showDeprecation>true</showDeprecation>
                         <optimize>true</optimize>
                         <parameters>true</parameters>
+                        <release>9</release>
+                        <testRelease>9</testRelease>
                         <compilerArgs>
                             <arg>-Xlint:unchecked</arg>
                         </compilerArgs>
@@ -325,6 +327,7 @@
                         <properties>
                             <excludeTags>${excluded.tests}</excludeTags>
                         </properties>
+                        <argLine>-Djdk.attach.allowAttachSelf</argLine>
                     </configuration>
                     <dependencies>
                         <dependency>
