@@ -27,6 +27,7 @@ import javafx.scene.control.Tab;
 import javafx.stage.Window;
 import org.marid.ide.event.PropagatedEvent;
 import org.marid.ide.tabs.IdeTab;
+import org.marid.jfx.track.Tracks;
 import org.marid.spring.dependant.DependantConfiguration;
 import org.marid.spring.postprocessors.MaridCommonPostProcessor;
 import org.marid.spring.postprocessors.WindowAndDialogPostProcessor;
@@ -115,6 +116,7 @@ public class IdeDependants {
     private static class DependantContext extends AnnotationConfigApplicationContext {
 
         private final ParentListener parentListener;
+        private final int hash;
 
         private DependantContext(GenericApplicationContext parent) {
             parent.addApplicationListener(parentListener = new ParentListener(this, parent));
@@ -124,6 +126,16 @@ public class IdeDependants {
             getBeanFactory().addBeanPostProcessor(new MaridCommonPostProcessor());
             getBeanFactory().setParentBeanFactory(parent.getDefaultListableBeanFactory());
             register(IdeDependants.class);
+            hash = hashCode();
+            Tracks.CLEANER.register(this, () -> CONTEXTS.removeIf(ref -> {
+                final GenericApplicationContext c = ref.get();
+                if (c != null && c.hashCode() == hash) {
+                    Platform.runLater(c::close);
+                    return true;
+                } else {
+                    return false;
+                }
+            }));
         }
 
         @Override
@@ -143,11 +155,6 @@ public class IdeDependants {
                     return;
                 }
             }
-        }
-
-        @Override
-        protected void finalize() throws Throwable {
-            Platform.runLater(this::close);
         }
 
         private static class ParentListener extends WeakReference<GenericApplicationContext>

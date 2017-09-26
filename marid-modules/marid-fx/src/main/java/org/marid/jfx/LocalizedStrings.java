@@ -30,11 +30,13 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableStringValue;
 import javafx.beans.value.ObservableValue;
+import org.marid.jfx.track.Tracks;
 
 import java.util.Locale;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static java.util.Locale.getDefault;
 import static org.marid.l10n.L10n.s;
 
 /**
@@ -42,7 +44,7 @@ import static org.marid.l10n.L10n.s;
  */
 public class LocalizedStrings {
 
-    public static final ObjectProperty<Locale> LOCALE = new SimpleObjectProperty<>(null, "locale", Locale.getDefault());
+    public static final ObjectProperty<Locale> LOCALE = new SimpleObjectProperty<>(null, "locale", getDefault());
 
     public static ObservableStringValue ls(String text, Object... args) {
         final Observable[] observables = Stream.of(args)
@@ -62,28 +64,19 @@ public class LocalizedStrings {
     }
 
     private static ObservableStringValue value(Supplier<String> supplier, Observable... observables) {
-        return new SimpleStringProperty(supplier.get()) {
+        final SimpleStringProperty property = new SimpleStringProperty(supplier.get());
+        final InvalidationListener listener = o -> property.set(supplier.get());
+        LOCALE.addListener(listener);
+        for (final Observable observable : observables) {
+            observable.addListener(listener);
+        }
+        Tracks.CLEANER.register(property, () -> Platform.runLater(() -> {
+            LOCALE.removeListener(listener);
 
-            private final InvalidationListener listener = o -> set(supplier.get());
-
-            {
-                LOCALE.addListener(listener);
-
-                for (final Observable observable : observables) {
-                    observable.addListener(listener);
-                }
+            for (final Observable observable : observables) {
+                observable.removeListener(listener);
             }
-
-            @Override
-            protected void finalize() throws Throwable {
-                Platform.runLater(() -> {
-                    LOCALE.removeListener(listener);
-
-                    for (final Observable observable : observables) {
-                        observable.removeListener(listener);
-                    }
-                });
-            }
-        };
+        }));
+        return property;
     }
 }

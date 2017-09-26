@@ -40,7 +40,7 @@ import static javax.tools.StandardLocation.CLASS_OUTPUT;
 /**
  * @author Dmitry Ovchinnikov
  */
-@SupportedSourceVersion(SourceVersion.RELEASE_8)
+@SupportedSourceVersion(SourceVersion.RELEASE_9)
 @SupportedAnnotationTypes({"org.marid.runtime.annotation.MaridBean"})
 public class MaridAnnotationProcessor extends AbstractProcessor {
 

@@ -27,10 +27,14 @@ import javafx.scene.control.Control;
 import javafx.scene.control.ScrollToEvent;
 import javafx.scene.control.SelectionModel;
 
+import java.lang.ref.Cleaner;
+
 /**
  * @author Dmitry Ovchinnikov
  */
 public interface Tracks {
+
+    Cleaner CLEANER = Cleaner.create();
 
     static <T> void track(Control control, ObservableList<T> list, SelectionModel<T> selectionModel) {
         control.getProperties().put("TRACK_SELECTION", true);
