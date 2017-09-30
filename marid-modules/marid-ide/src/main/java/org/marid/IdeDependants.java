@@ -28,7 +28,7 @@ import javafx.stage.Window;
 import org.marid.ide.event.PropagatedEvent;
 import org.marid.ide.tabs.IdeTab;
 import org.marid.jfx.track.Tracks;
-import org.marid.spring.dependant.DependantConfiguration;
+import org.marid.misc.Casts;
 import org.marid.spring.postprocessors.MaridCommonPostProcessor;
 import org.marid.spring.postprocessors.WindowAndDialogPostProcessor;
 import org.springframework.beans.BeansException;
@@ -77,23 +77,16 @@ public class IdeDependants {
         });
     }
 
-    public <T> GenericApplicationContext start(Class<? extends DependantConfiguration<T>> conf, T param, Consumer<AnnotationConfigApplicationContext> consumer) {
+    public GenericApplicationContext start(Consumer<AnnotationConfigApplicationContext> consumer, Object conf) {
         return CONTEXTS.stream()
                 .map(Reference::get)
                 .filter(Objects::nonNull)
-                .filter(c -> {
-                    if (c.containsBean("params")) {
-                        final Object params = c.getBean("params");
-                        return params.equals(param);
-                    } else {
-                        return false;
-                    }
-                })
+                .filter(c -> c.containsBean("$conf") && c.getBean("$conf").equals(conf))
                 .findAny()
                 .map(IdeDependants::activate)
                 .orElseGet(() -> start(context -> {
-                    context.getBeanFactory().registerSingleton("params", param);
-                    context.register(conf);
+                    final Class<Object> type = Casts.cast(conf.getClass());
+                    context.registerBean("$conf", type, () -> conf);
                     consumer.accept(context);
                 }));
     }

@@ -29,11 +29,9 @@ import javafx.scene.control.TabPane;
 import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import org.apache.maven.model.Model;
-import org.marid.dependant.project.ProjectParams;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.control.MaridControls;
-import org.marid.spring.dependant.DependantConfiguration;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
@@ -51,11 +49,17 @@ import static org.marid.l10n.L10n.s;
  */
 @Component
 @ComponentScan(basePackageClasses = {ProjectConfigConfiguration.class})
-public class ProjectConfigConfiguration extends DependantConfiguration<ProjectParams> {
+public class ProjectConfigConfiguration {
+
+    private final ProjectProfile profile;
+
+    public ProjectConfigConfiguration(ProjectProfile profile) {
+        this.profile = profile;
+    }
 
     @Bean
     public ProjectProfile profile() {
-        return param.profile;
+        return profile;
     }
 
     @Bean
@@ -99,5 +103,20 @@ public class ProjectConfigConfiguration extends DependantConfiguration<ProjectPa
     @Bean
     public ApplicationListener<ContextStartedEvent> onStartListener(Dialog<Boolean> dialog) {
         return event -> dialog.showAndWait();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ProjectConfigConfiguration that = (ProjectConfigConfiguration) o;
+
+        return profile.equals(that.profile);
+    }
+
+    @Override
+    public int hashCode() {
+        return profile.hashCode();
     }
 }

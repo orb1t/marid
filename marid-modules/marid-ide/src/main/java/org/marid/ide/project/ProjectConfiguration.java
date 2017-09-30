@@ -24,7 +24,6 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.scene.input.KeyCombination;
 import org.marid.IdeDependants;
-import org.marid.dependant.project.ProjectParams;
 import org.marid.dependant.project.config.ProjectConfigConfiguration;
 import org.marid.ide.service.ProjectBuilderService;
 import org.marid.ide.service.ProjectRunService;
@@ -60,10 +59,10 @@ public class ProjectConfiguration {
                 .setIcon("O_TOOLS")
                 .setEventHandler(event -> {
                     final ProjectProfile profile = manager.getProfile();
-                    dependants.start(ProjectConfigConfiguration.class, new ProjectParams(profile), context -> {
+                    dependants.start(context -> {
                         context.setId("projectConfiguration");
                         context.setDisplayName("Project Configuration");
-                    });
+                    }, new ProjectConfigConfiguration(profile));
                 })
                 .bindDisabled(projectDisabled);
     }

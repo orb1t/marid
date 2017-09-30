@@ -22,7 +22,6 @@ package org.marid.ide.structure.editor;
 
 import org.marid.IdeDependants;
 import org.marid.dependant.beaneditor.BeanEditorConfiguration;
-import org.marid.dependant.beaneditor.BeanEditorParam;
 import org.marid.ide.project.ProjectManager;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.SpecialAction;
@@ -78,7 +77,7 @@ public class BeanFileEditor extends AbstractFileEditor<ProjectProfile> {
 
     @Override
     protected void edit(@Nonnull Path file, @Nonnull ProjectProfile context) {
-        dependants.start(BeanEditorConfiguration.class, new BeanEditorParam(context), c -> {});
+        dependants.start(c -> {}, new BeanEditorConfiguration(context));
     }
 
     @Nullable

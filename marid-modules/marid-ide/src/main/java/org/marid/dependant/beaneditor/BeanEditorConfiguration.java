@@ -25,7 +25,6 @@ import javafx.scene.Node;
 import javafx.scene.layout.HBox;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.LocalizedStrings;
-import org.marid.spring.dependant.DependantConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
@@ -39,11 +38,17 @@ import static org.marid.ide.common.IdeShapes.circle;
  */
 @Component
 @ComponentScan
-public class BeanEditorConfiguration extends DependantConfiguration<BeanEditorParam> {
+public class BeanEditorConfiguration {
+
+    private final ProjectProfile profile;
+
+    public BeanEditorConfiguration(ProjectProfile profile) {
+        this.profile = profile;
+    }
 
     @Bean
     public ProjectProfile profile() {
-        return param.profile;
+        return profile;
     }
 
     @Bean
@@ -54,5 +59,20 @@ public class BeanEditorConfiguration extends DependantConfiguration<BeanEditorPa
     @Bean
     public Supplier<Node> beanEditorGraphic(ProjectProfile profile) {
         return () -> new HBox(3, circle(profile.hashCode(), 16));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        BeanEditorConfiguration that = (BeanEditorConfiguration) o;
+
+        return profile.equals(that.profile);
+    }
+
+    @Override
+    public int hashCode() {
+        return profile.hashCode();
     }
 }
