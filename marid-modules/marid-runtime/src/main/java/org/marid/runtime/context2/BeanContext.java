@@ -38,11 +38,9 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Stream;
 
-import static java.util.logging.Level.SEVERE;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
-import static org.marid.logging.Log.log;
 
 public final class BeanContext implements MaridRuntime, AutoCloseable {
 
@@ -58,11 +56,11 @@ public final class BeanContext implements MaridRuntime, AutoCloseable {
         this.configuration = configuration;
         this.bean = bean;
 
-        configuration.fireEvent(false, l -> l.bootstrap(new ContextBootstrapEvent(this)));
-
         try {
+            configuration.fireEvent(l -> l.bootstrap(new ContextBootstrapEvent(this)), null);
+
             this.instance = parent == null ? null : parent.create(bean, this);
-            configuration.fireEvent(false, l -> l.onPostConstruct(new BeanPostConstructEvent(this, bean.getName(), instance)));
+            configuration.fireEvent(l -> l.onPostConstruct(new BeanPostConstructEvent(this, bean.getName(), instance)), null);
 
             for (final MaridBean child : bean.getChildren()) {
                 if (children.stream().noneMatch(b -> b.bean.getName().equals(child.getName()))) {
@@ -70,9 +68,13 @@ public final class BeanContext implements MaridRuntime, AutoCloseable {
                 }
             }
         } catch (Throwable x) {
-            configuration.fireEvent(false, l -> l.onFail(new ContextFailEvent(this, bean.getName(), x)));
+            configuration.fireEvent(l -> l.onFail(new ContextFailEvent(this, bean.getName(), x)), x::addSuppressed);
 
-            close();
+            try {
+                close();
+            } catch (Throwable t) {
+                x.addSuppressed(t);
+            }
 
             throw x;
         }
@@ -150,8 +152,8 @@ public final class BeanContext implements MaridRuntime, AutoCloseable {
 
     @Override
     public void close() {
+        final IllegalStateException e = new IllegalStateException("Runtime close exception");
         try {
-            final IllegalStateException e = new IllegalStateException("Runtime close exception");
             for (final Iterator<BeanContext> i = children.descendingIterator(); i.hasNext(); ) {
                 final BeanContext child = i.next();
                 try {
@@ -160,16 +162,17 @@ public final class BeanContext implements MaridRuntime, AutoCloseable {
                     e.addSuppressed(x);
                 }
             }
-            configuration.fireEvent(true, l -> l.onPreDestroy(
-                    new BeanPreDestroyEvent(this, bean.getName(), instance, e::addSuppressed))
-            );
-            if (e.getSuppressed().length > 0) {
-                log(SEVERE, "Unable to close {0}", e, this);
-            }
+            final BeanPreDestroyEvent event = new BeanPreDestroyEvent(this, bean.getName(), instance, e::addSuppressed);
+            configuration.fireEvent(l -> l.onPreDestroy(event), e::addSuppressed);
+        } catch (Throwable x) {
+            e.addSuppressed(x);
         } finally {
             if (parent != null) {
                 parent.children.remove(this);
             }
+        }
+        if (e.getSuppressed().length > 0) {
+            throw e;
         }
     }
 

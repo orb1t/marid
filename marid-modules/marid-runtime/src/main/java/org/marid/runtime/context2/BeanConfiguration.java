@@ -32,45 +32,38 @@ import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.ServiceLoader.load;
-import static java.util.logging.Level.WARNING;
 import static java.util.stream.StreamSupport.stream;
-import static org.marid.logging.Log.log;
 
 public class BeanConfiguration {
 
     private final MaridPlaceholderResolver placeholderResolver;
     private final MaridContextListener[] contextListeners;
-    private final Consumer<Throwable> errorConsumer;
 
-    public BeanConfiguration(ClassLoader cl, Properties ps, Consumer<Throwable> ec, MaridContextListener... listeners) {
+    public BeanConfiguration(ClassLoader cl, Properties ps, MaridContextListener... listeners) {
         this.placeholderResolver = new MaridPlaceholderResolver(cl, ps);
         this.contextListeners = listeners;
-        this.errorConsumer = ec;
-    }
-
-    public BeanConfiguration(ClassLoader classLoader, Properties properties, MaridContextListener... listeners) {
-        this(classLoader, properties, x -> log(WARNING, "Exception", x), listeners);
     }
 
     public BeanConfiguration(ClassLoader classLoader, Properties applicationProperties) {
         this(classLoader, applicationProperties, listeners(classLoader));
     }
 
-    public BeanConfiguration(ClassLoader classLoader) {
-        this(classLoader, applicationProperties(classLoader));
-    }
-
     public MaridPlaceholderResolver getPlaceholderResolver() {
         return placeholderResolver;
     }
 
-    public void fireEvent(boolean reverse, Consumer<MaridContextListener> event) {
+    void fireEvent(Consumer<MaridContextListener> event, Consumer<Throwable> errorConsumer) {
+        final boolean reverse = errorConsumer != null;
         for (int i = contextListeners.length - 1; i >= 0; i--) {
             final MaridContextListener listener = contextListeners[reverse ? i : contextListeners.length - i - 1];
             try {
                 event.accept(listener);
             } catch (Throwable x) {
-                errorConsumer.accept(x);
+                if (reverse) {
+                    errorConsumer.accept(x);
+                } else {
+                    throw x;
+                }
             }
         }
     }

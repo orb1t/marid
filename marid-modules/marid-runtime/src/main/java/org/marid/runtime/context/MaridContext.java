@@ -36,7 +36,6 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import static java.lang.String.format;
 import static java.util.logging.Level.WARNING;
 import static org.marid.logging.Log.log;
 import static org.marid.runtime.context.MaridRuntimeUtils.*;
@@ -141,10 +140,7 @@ public final class MaridContext implements MaridRuntime, AutoCloseable {
         final IllegalStateException e = new IllegalStateException("Runtime close exception");
         for (int i = children.size() - 1; i >= 0; i--) {
             final MaridContext child = children.get(i);
-            destroy(child.name, child.value, x -> {
-                final IllegalStateException ex = new IllegalStateException(format("[%s] Close", child.name), x);
-                e.addSuppressed(ex);
-            });
+            destroy(child.name, child.value, e::addSuppressed);
         }
         configuration.fireEvent(true, l -> l.onStop(new ContextStopEvent(this)));
         if (e.getSuppressed().length > 0) {

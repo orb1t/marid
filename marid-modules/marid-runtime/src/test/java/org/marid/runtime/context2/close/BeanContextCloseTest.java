@@ -47,7 +47,6 @@ class BeanContextCloseTest {
         final BeanConfiguration configuration = new BeanConfiguration(
                 Thread.currentThread().getContextClassLoader(),
                 new Properties(),
-                x -> {},
                 new MaridDefaultContextListener()
         );
         final MaridRuntimeBean root = new MaridRuntimeBean()
@@ -62,7 +61,7 @@ class BeanContextCloseTest {
                 .getParent()
                 .getParent();
         try (final BeanContext context = new BeanContext(configuration, root)) {
-            // do nothing
+            throw new AssertionError("Unreachable");
         } catch (Throwable x) {
             assertTrue(x instanceof MaridBeanInitializationException);
         }
