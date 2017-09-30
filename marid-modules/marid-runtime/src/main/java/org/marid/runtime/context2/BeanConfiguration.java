@@ -40,17 +40,20 @@ public class BeanConfiguration {
 
     private final MaridPlaceholderResolver placeholderResolver;
     private final MaridContextListener[] contextListeners;
+    private final Consumer<Throwable> errorConsumer;
+
+    public BeanConfiguration(ClassLoader cl, Properties ps, Consumer<Throwable> ec, MaridContextListener... listeners) {
+        this.placeholderResolver = new MaridPlaceholderResolver(cl, ps);
+        this.contextListeners = listeners;
+        this.errorConsumer = ec;
+    }
+
+    public BeanConfiguration(ClassLoader classLoader, Properties properties, MaridContextListener... listeners) {
+        this(classLoader, properties, x -> log(WARNING, "Exception", x), listeners);
+    }
 
     public BeanConfiguration(ClassLoader classLoader, Properties applicationProperties) {
-        placeholderResolver = new MaridPlaceholderResolver(classLoader, applicationProperties);
-
-        try {
-            final ServiceLoader<MaridContextListener> serviceLoader = load(MaridContextListener.class, classLoader);
-            final Stream<MaridContextListener> listenerStream = stream(serviceLoader.spliterator(), false);
-            contextListeners = listenerStream.sorted().toArray(MaridContextListener[]::new);
-        } catch (Throwable x) {
-            throw new IllegalStateException("Unable to load context listeners", x);
-        }
+        this(classLoader, applicationProperties, listeners(classLoader));
     }
 
     public BeanConfiguration(ClassLoader classLoader) {
@@ -67,8 +70,18 @@ public class BeanConfiguration {
             try {
                 event.accept(listener);
             } catch (Throwable x) {
-                log(WARNING, "Error in {0}", x, listener);
+                errorConsumer.accept(x);
             }
+        }
+    }
+
+    private static MaridContextListener[] listeners(ClassLoader classLoader) {
+        try {
+            final ServiceLoader<MaridContextListener> serviceLoader = load(MaridContextListener.class, classLoader);
+            final Stream<MaridContextListener> listenerStream = stream(serviceLoader.spliterator(), false);
+            return listenerStream.sorted().toArray(MaridContextListener[]::new);
+        } catch (Throwable x) {
+            throw new IllegalStateException("Unable to load context listeners", x);
         }
     }
 
