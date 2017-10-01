@@ -83,12 +83,10 @@ public class Ide extends Application {
     public void start(Stage primaryStage) throws Exception {
         Ide.primaryStage = primaryStage;
 
-        final MaridSplash maridSplash = new MaridSplash(primaryStage, IdeLogHandler.LOG_RECORDS);
-        maridSplash.init();
         final Stage splash = new Stage(StageStyle.UNDECORATED);
         splash.setTitle("Marid");
         splash.getIcons().addAll(MaridIconFx.getIcons(24, 32));
-        splash.setScene(new Scene(maridSplash));
+        splash.setScene(new Scene(new MaridSplash(primaryStage, IdeLogHandler.LOG_RECORDS)));
         splash.show();
 
         setUserAgentStylesheet(PREFERENCES.get("style", STYLESHEET_MODENA));

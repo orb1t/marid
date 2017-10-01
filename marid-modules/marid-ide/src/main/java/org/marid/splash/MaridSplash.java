@@ -136,9 +136,7 @@ public class MaridSplash extends BorderPane implements AutoCloseable {
                 }
             }
         };
-    }
 
-    public void init() {
         flow.getChildren().addAll(texts(records));
         records.addListener(listener);
         transition.play();
