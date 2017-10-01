@@ -47,6 +47,7 @@ import static org.springframework.beans.factory.config.ConfigurableBeanFactory.S
 @ComponentScan(basePackageClasses = IdeNotifications.class)
 @EnableScheduling
 @PropertySource({"meta.properties", "ide.properties"})
+@Configuration
 public class IdeContext {
 
     @Bean(destroyMethod = "shutdown")

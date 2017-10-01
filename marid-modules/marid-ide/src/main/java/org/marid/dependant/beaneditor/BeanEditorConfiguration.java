@@ -27,7 +27,7 @@ import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.LocalizedStrings;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.function.Supplier;
 
@@ -36,7 +36,7 @@ import static org.marid.ide.common.IdeShapes.circle;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
+@Configuration
 @ComponentScan
 public class BeanEditorConfiguration {
 

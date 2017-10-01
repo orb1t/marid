@@ -28,9 +28,9 @@ import org.marid.Ide;
 import org.marid.IdePrefs;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
 
 import java.util.Comparator;
 import java.util.List;
@@ -45,7 +45,7 @@ import static org.marid.l10n.L10n.s;
 /**
  * @author Dmitry Ovchinnikov.
  */
-@Component
+@Configuration
 @Import({LoggingFilter.class, LoggingTable.class})
 public class LogConfiguration {
 
