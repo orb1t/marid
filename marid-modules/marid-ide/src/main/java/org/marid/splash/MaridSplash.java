@@ -39,6 +39,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.marid.IdePrefs;
 import org.marid.image.MaridIconFx;
@@ -66,7 +67,11 @@ public class MaridSplash extends BorderPane implements AutoCloseable {
     private final Font monospaced;
     private final TextFlow flow;
 
-    public MaridSplash(ObservableList<LogRecord> logRecords) {
+    public MaridSplash(Stage stage, ObservableList<LogRecord> logRecords) {
+        stage.setOnShown(event -> {
+            close();
+            stage.setOnShown(null);
+        });
         records = logRecords;
         maxCount = IdePrefs.PREFERENCES.getInt("splashMaxLogRecords", 100);
         setBackground(new Background(new BackgroundFill(BACKGROUND, null, null)));

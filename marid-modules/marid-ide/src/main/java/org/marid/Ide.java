@@ -25,39 +25,57 @@ import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.marid.ide.logging.IdeLogConsoleHandler;
 import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.image.MaridIconFx;
 import org.marid.splash.MaridSplash;
-import org.marid.spring.postprocessors.IdeAppContext;
-import org.springframework.boot.SpringApplication;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.marid.spring.postprocessors.MaridCommonPostProcessor;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.awt.*;
 import java.util.Locale;
-import java.util.concurrent.locks.LockSupport;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
+import static java.util.logging.Level.WARNING;
 import static org.marid.IdePrefs.PREFERENCES;
+import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class Ide extends Application {
 
-    public static Ide ide;
-    public static Stage primaryStage;
+    public static volatile Stage primaryStage;
 
-    private volatile ConfigurableApplicationContext context;
+    private final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 
     @Override
     public void init() throws Exception {
-        ide = this;
-        final String[] args = getParameters().getRaw().toArray(new String[0]);
+        context.getBeanFactory().addBeanPostProcessor(new MaridCommonPostProcessor());
+        context.register(IdeContext.class);
+        context.setAllowBeanDefinitionOverriding(true);
+        context.setAllowCircularReferences(false);
+
         new Thread(() -> {
-            final SpringApplication application = new SpringApplication(IdeContext.class);
-            application.setApplicationContextClass(IdeAppContext.class);
-            context = application.run(args);
-            context.getBean(IdePane.class);
+            context.refresh();
+            final IdePane idePane = context.getBean(IdePane.class);
+
+            while (primaryStage == null) {
+                Thread.onSpinWait();
+            }
+
+            Platform.runLater(() -> {
+                context.start();
+                primaryStage.setMinWidth(750.0);
+                primaryStage.setMinHeight(550.0);
+                primaryStage.setTitle("Marid IDE");
+                primaryStage.setScene(new Scene(idePane, 1024, 768));
+                primaryStage.getIcons().addAll(MaridIconFx.getIcons(24, 32));
+                primaryStage.setMaximized(true);
+                primaryStage.show();
+            });
         }).start();
     }
 
@@ -65,45 +83,20 @@ public class Ide extends Application {
     public void start(Stage primaryStage) throws Exception {
         Ide.primaryStage = primaryStage;
 
-        final MaridSplash maridSplash = new MaridSplash(IdeLogHandler.LOG_RECORDS);
-
+        final MaridSplash maridSplash = new MaridSplash(primaryStage, IdeLogHandler.LOG_RECORDS);
+        maridSplash.init();
         final Stage splash = new Stage(StageStyle.UNDECORATED);
         splash.setTitle("Marid");
         splash.getIcons().addAll(MaridIconFx.getIcons(24, 32));
         splash.setScene(new Scene(maridSplash));
         splash.show();
-        maridSplash.init();
 
         setUserAgentStylesheet(PREFERENCES.get("style", STYLESHEET_MODENA));
-
-        final Thread contextStartThread = new Thread(() -> {
-            while (context == null) {
-                LockSupport.parkNanos(100_000_000L);
-            }
-            Platform.runLater(() -> {
-                try {
-                    context.start();
-                    primaryStage.setMinWidth(750.0);
-                    primaryStage.setMinHeight(550.0);
-                    primaryStage.setTitle("Marid IDE");
-                    primaryStage.setScene(new Scene(context.getBean(IdePane.class), 1024, 768));
-                    primaryStage.getIcons().addAll(MaridIconFx.getIcons(24, 32));
-                    primaryStage.setMaximized(true);
-                    primaryStage.show();
-                } finally {
-                    maridSplash.close();
-                }
-            });
-        });
-        contextStartThread.setDaemon(true);
-        contextStartThread.start();
     }
 
     @Override
     public void stop() throws Exception {
-        if (context != null) {
-            context.close();
-        }
+        context.close();
     }
 
     public static void main(String... args) throws Exception {
@@ -115,6 +108,12 @@ public class Ide extends Application {
         if (locale != null) {
             Locale.setDefault(Locale.forLanguageTag(locale));
         }
+
+        // logging
+        LogManager.getLogManager().reset();
+        Logger.getLogger("").addHandler(new IdeLogHandler());
+        Logger.getLogger("").addHandler(new IdeLogConsoleHandler());
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> log(WARNING, "Exception in {0}", e, t));
 
         // launch application
         Application.launch(args);

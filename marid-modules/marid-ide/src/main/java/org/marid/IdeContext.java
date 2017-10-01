@@ -20,16 +20,13 @@
 
 package org.marid;
 
+import org.marid.ide.IdeNotifications;
 import org.marid.ide.common.IdeValues;
 import org.marid.ide.common.MaridDirectories;
 import org.marid.ide.logging.IdeLogConsoleHandler;
 import org.marid.ide.logging.IdeLogHandler;
 import org.springframework.beans.factory.InjectionPoint;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.*;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.springframework.context.support.AbstractApplicationContext;
@@ -46,8 +43,8 @@ import static org.springframework.beans.factory.config.ConfigurableBeanFactory.S
 /**
  * @author Dmitry Ovchinnikov
  */
-@SpringBootApplication
 @Import({IdeDependants.class})
+@ComponentScan(basePackageClasses = IdeNotifications.class)
 @EnableScheduling
 @PropertySource({"meta.properties", "ide.properties"})
 public class IdeContext {
