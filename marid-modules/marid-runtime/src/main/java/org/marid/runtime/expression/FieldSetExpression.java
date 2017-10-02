@@ -60,6 +60,21 @@ public class FieldSetExpression extends Expression {
     }
 
     @Nonnull
+    public Expression getTarget() {
+        return target;
+    }
+
+    @Nonnull
+    public String getField() {
+        return field;
+    }
+
+    @Nonnull
+    public Expression getValue() {
+        return value;
+    }
+
+    @Nonnull
     @Override
     public String getTag() {
         return "set";
@@ -81,7 +96,7 @@ public class FieldSetExpression extends Expression {
             final Field f = t.getClass().getField(field);
             f.setAccessible(true);
             f.set(t, v);
-            return self;
+            return t;
         } catch (NoSuchFieldException x) {
             throw new NoSuchElementException(field);
         } catch (IllegalAccessException x) {

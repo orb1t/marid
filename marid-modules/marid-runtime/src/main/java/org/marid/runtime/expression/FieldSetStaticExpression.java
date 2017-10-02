@@ -79,7 +79,7 @@ public class FieldSetStaticExpression extends Expression {
             final Field f = t.getField(field);
             f.setAccessible(true);
             f.set(null, v);
-            return self;
+            return null;
         } catch (NoSuchFieldException x) {
             throw new NoSuchElementException(field);
         } catch (IllegalAccessException x) {

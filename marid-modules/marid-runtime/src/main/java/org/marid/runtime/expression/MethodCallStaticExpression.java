@@ -97,7 +97,7 @@ public class MethodCallStaticExpression extends Expression {
     protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
         final Class<?> t = (Class<?>) requireNonNull(target.evaluate(self, context), "target");
         final String mName = context.resolvePlaceholders(method);
-        final Object[] ps = args.stream().map(p -> p.execute(self, context)).toArray();
+        final Object[] ps = args.stream().map(p -> p.execute(null, context)).toArray();
         final Method mt = of(t.getMethods())
                 .filter(m -> mName.equals(m.getName()))
                 .filter(m -> compatible(m, ps))

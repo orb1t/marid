@@ -98,7 +98,7 @@ public class MethodCallExpression extends Expression {
     protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
         final Object t = requireNonNull(target.evaluate(self, context), "target");
         final String mName = context.resolvePlaceholders(method);
-        final Object[] ps = args.stream().map(p -> p.evaluate(self, context)).toArray();
+        final Object[] ps = args.stream().map(p -> p.evaluate(t, context)).toArray();
         final Method mt = of(t.getClass().getMethods())
                 .filter(m -> mName.equals(m.getName()))
                 .filter(m -> compatible(m, ps))
@@ -110,7 +110,12 @@ public class MethodCallExpression extends Expression {
         }
         try {
             mt.setAccessible(true);
-            return mt.invoke(t, ps);
+            if (mt.getReturnType() == void.class) {
+                mt.invoke(t, ps);
+                return t;
+            } else {
+                return mt.invoke(t, ps);
+            }
         } catch (IllegalAccessException | InvocationTargetException x) {
             throw new IllegalStateException(x);
         }

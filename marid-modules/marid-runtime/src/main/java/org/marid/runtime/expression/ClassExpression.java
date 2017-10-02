@@ -43,6 +43,11 @@ public class ClassExpression extends Expression {
     }
 
     @Nonnull
+    public String getClassName() {
+        return className;
+    }
+
+    @Nonnull
     @Override
     public String getTag() {
         return "class";

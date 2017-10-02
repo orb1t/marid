@@ -25,6 +25,9 @@ import org.marid.runtime.expression.Expression;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.stream.Stream;
+
+import static java.util.stream.Stream.*;
 
 public interface MaridBean {
 
@@ -41,4 +44,16 @@ public interface MaridBean {
 
     @Nonnull
     MaridBean add(@Nonnull String name, @Nonnull Expression factory);
+
+    default Stream<MaridBean> ancestors() {
+        return ofNullable(getParent()).flatMap(p -> concat(of(p), p.ancestors()));
+    }
+
+    default Stream<MaridBean> siblings() {
+        return ofNullable(getParent()).flatMap(p -> p.getChildren().stream().filter(c -> c != this));
+    }
+
+    default Stream<MaridBean> matchingCandidates() {
+        return ancestors().flatMap(p -> concat(of(p), p.siblings()));
+    }
 }
