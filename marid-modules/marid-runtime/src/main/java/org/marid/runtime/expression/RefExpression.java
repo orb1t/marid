@@ -21,50 +21,9 @@
 
 package org.marid.runtime.expression;
 
-import org.marid.runtime.context2.BeanContext;
-import org.w3c.dom.Element;
-
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-import static org.marid.io.Xmls.attribute;
-
-public class RefExpression extends Expression {
-
+public interface RefExpression extends Expression {
     @Nonnull
-    private final String reference;
-
-    public RefExpression(@Nonnull String reference) {
-        this.reference = reference;
-    }
-
-    public RefExpression(@Nonnull Element element) {
-        this.reference = attribute(element, "ref").orElseThrow(IllegalStateException::new);
-    }
-
-    @Nonnull
-    public String getReference() {
-        return reference;
-    }
-
-    @Nonnull
-    @Override
-    public String getTag() {
-        return "ref";
-    }
-
-    @Override
-    public void saveTo(@Nonnull Element element) {
-        element.setAttribute("ref", reference);
-    }
-
-    @Override
-    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
-        return context.getBean(context.resolvePlaceholders(reference));
-    }
-
-    @Override
-    public String toString() {
-        return "@" + reference;
-    }
+    String getReference();
 }

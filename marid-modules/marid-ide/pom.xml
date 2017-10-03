@@ -117,6 +117,7 @@
                         </goals>
                         <phase>package</phase>
                         <configuration>
+                            <includeScope>runtime</includeScope>
                             <outputDirectory>${project.build.directory}/lib</outputDirectory>
                         </configuration>
                     </execution>

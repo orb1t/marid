@@ -27,6 +27,8 @@ import org.marid.runtime.context.MaridDefaultContextListener;
 import org.marid.runtime.context2.BeanConfiguration;
 import org.marid.runtime.context2.BeanContext;
 import org.marid.runtime.exception.MaridBeanInitializationException;
+import org.marid.runtime.expression.ClassExpr;
+import org.marid.runtime.expression.ConstructorCallExpr;
 import org.marid.runtime.model.MaridRuntimeBean;
 
 import javax.annotation.PostConstruct;
@@ -35,7 +37,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.marid.runtime.expression.ExpressionHelper.$;
 
 @Tag("normal")
 class BeanContextCloseTest {
@@ -50,13 +51,13 @@ class BeanContextCloseTest {
                 new MaridDefaultContextListener()
         );
         final MaridRuntimeBean root = new MaridRuntimeBean()
-                .add("bean1", $(C1.class))
-                .add("bean11", $(C2.class))
+                .add("bean1", new ConstructorCallExpr(new ClassExpr(C1.class.getName())))
+                .add("bean11", new ConstructorCallExpr(new ClassExpr(C2.class.getName())))
                 .getParent()
                 .getParent()
-                .add("bean2", $(C2.class))
-                .add("bean21", $(C3.class))
-                .add("bean211", $(C4.class))
+                .add("bean2", new ConstructorCallExpr(new ClassExpr(C2.class.getName())))
+                .add("bean21", new ConstructorCallExpr(new ClassExpr(C3.class.getName())))
+                .add("bean211", new ConstructorCallExpr(new ClassExpr(C4.class.getName())))
                 .getParent()
                 .getParent()
                 .getParent();

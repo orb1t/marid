@@ -21,5 +21,20 @@
 
 package org.marid.runtime.expression;
 
-public interface FloatExpression extends ValueExpression {
+import javax.annotation.Nonnull;
+
+public class LongExpr extends ValueExpr implements LongExpression {
+
+    public LongExpr(@Nonnull String value) {
+        super(value);
+    }
+
+    public LongExpr() {
+        super("0");
+    }
+
+    @Override
+    protected Object parseSubstituted(@Nonnull String substituted) {
+        return Long.decode(substituted);
+    }
 }

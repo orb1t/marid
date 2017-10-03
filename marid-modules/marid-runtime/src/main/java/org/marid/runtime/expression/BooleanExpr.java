@@ -21,5 +21,20 @@
 
 package org.marid.runtime.expression;
 
-public interface FloatExpression extends ValueExpression {
+import javax.annotation.Nonnull;
+
+public class BooleanExpr extends ValueExpr implements BooleanExpression {
+
+    public BooleanExpr(@Nonnull String value) {
+        super(value);
+    }
+
+    public BooleanExpr() {
+        super("0");
+    }
+
+    @Override
+    protected Object parseSubstituted(@Nonnull String substituted) {
+        return Boolean.valueOf(substituted);
+    }
 }

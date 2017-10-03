@@ -21,28 +21,5 @@
 
 package org.marid.runtime.expression;
 
-import org.w3c.dom.Element;
-
-import javax.annotation.Nonnull;
-
-public class LongExpression extends ValueExpression {
-
-    public LongExpression(@Nonnull String value) {
-        super(value);
-    }
-
-    public LongExpression(@Nonnull Element element) {
-        super(element);
-    }
-
-    @Override
-    protected Object parseSubstituted(@Nonnull String substituted) {
-        return Long.decode(substituted);
-    }
-
-    @Nonnull
-    @Override
-    public String getTag() {
-        return "long";
-    }
+public interface LongExpression extends ValueExpression {
 }

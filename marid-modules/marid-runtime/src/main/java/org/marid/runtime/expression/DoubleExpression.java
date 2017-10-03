@@ -21,28 +21,5 @@
 
 package org.marid.runtime.expression;
 
-import org.w3c.dom.Element;
-
-import javax.annotation.Nonnull;
-
-public class DoubleExpression extends ValueExpression {
-
-    public DoubleExpression(@Nonnull String value) {
-        super(value);
-    }
-
-    public DoubleExpression(@Nonnull Element element) {
-        super(element);
-    }
-
-    @Override
-    protected Object parseSubstituted(@Nonnull String substituted) {
-        return Double.valueOf(substituted);
-    }
-
-    @Nonnull
-    @Override
-    public String getTag() {
-        return "double";
-    }
+public interface DoubleExpression extends ValueExpression {
 }

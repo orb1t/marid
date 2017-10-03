@@ -21,28 +21,5 @@
 
 package org.marid.runtime.expression;
 
-import org.w3c.dom.Element;
-
-import javax.annotation.Nonnull;
-
-public class IntegerExpression extends ValueExpression {
-
-    public IntegerExpression(@Nonnull String value) {
-        super(value);
-    }
-
-    public IntegerExpression(@Nonnull Element element) {
-        super(element);
-    }
-
-    @Override
-    protected Object parseSubstituted(@Nonnull String substituted) {
-        return Integer.decode(substituted);
-    }
-
-    @Nonnull
-    @Override
-    public String getTag() {
-        return "int";
-    }
+public interface IntegerExpression extends ValueExpression {
 }

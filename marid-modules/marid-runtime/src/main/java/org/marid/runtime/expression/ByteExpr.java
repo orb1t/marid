@@ -21,36 +21,20 @@
 
 package org.marid.runtime.expression;
 
-import org.marid.runtime.context2.BeanContext;
-import org.w3c.dom.Element;
-
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class ThisExpression extends Expression {
+public class ByteExpr extends ValueExpr implements ByteExpression {
 
-    public static final ThisExpression THIS = new ThisExpression();
-
-    private ThisExpression() {
+    public ByteExpr(@Nonnull String value) {
+        super(value);
     }
 
-    @Nonnull
-    @Override
-    public String getTag() {
-        return "this";
+    public ByteExpr() {
+        super("0");
     }
 
     @Override
-    public void saveTo(@Nonnull Element element) {
-    }
-
-    @Override
-    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
-        return self;
-    }
-
-    @Override
-    public String toString() {
-        return getTag();
+    protected Object parseSubstituted(@Nonnull String substituted) {
+        return Byte.decode(substituted);
     }
 }

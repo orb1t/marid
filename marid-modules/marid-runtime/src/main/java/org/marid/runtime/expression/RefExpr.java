@@ -26,36 +26,45 @@ import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
 
-public interface Expression {
+import static org.marid.io.Xmls.attribute;
 
-    void saveTo(@Nonnull Element element);
-
-    void loadFrom(@Nonnull Element element);
-
-    @Nullable
-    Object evaluate(@Nullable Object self, @Nonnull BeanContext context);
+public class RefExpr extends AbstractExpression implements RefExpression {
 
     @Nonnull
-    List<Expression> getInitializers();
+    private String reference;
 
-    @Nonnull
-    Expression newInstanceFrom(@Nonnull Element element);
-
-    @Nonnull
-    Element newElement(@Nonnull Element element);
-
-    @Nonnull
-    default Expression from(@Nonnull Element element) {
-        final Expression expression = newInstanceFrom(element);
-        expression.loadFrom(element);
-        return expression;
+    public RefExpr(@Nonnull String reference) {
+        this.reference = reference;
     }
 
-    default void to(@Nonnull Element element) {
-        final Element e = newElement(element);
-        saveTo(e);
-        element.appendChild(e);
+    public RefExpr() {
+        reference = "";
+    }
+
+    @Override
+    @Nonnull
+    public String getReference() {
+        return reference;
+    }
+
+    @Override
+    public void saveTo(@Nonnull Element element) {
+        element.setAttribute("ref", reference);
+    }
+
+    @Override
+    public void loadFrom(@Nonnull Element element) {
+        reference = attribute(element, "ref").orElseThrow(IllegalStateException::new);
+    }
+
+    @Override
+    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
+        return context.getBean(context.resolvePlaceholders(reference));
+    }
+
+    @Override
+    public String toString() {
+        return "@" + reference;
     }
 }

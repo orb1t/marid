@@ -21,42 +21,6 @@
 
 package org.marid.runtime.expression;
 
-import org.marid.runtime.context2.BeanContext;
-import org.w3c.dom.Element;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-public class StringExpression extends Expression {
-
-    private final String value;
-
-    public StringExpression(String value) {
-        this.value = value;
-    }
-
-    public StringExpression(Element element) {
-        this.value = element.getTextContent();
-    }
-
-    @Nonnull
-    @Override
-    public String getTag() {
-        return "string";
-    }
-
-    @Override
-    public void saveTo(@Nonnull Element element) {
-        element.setTextContent(value);
-    }
-
-    @Override
-    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
-        return context.resolvePlaceholders(value);
-    }
-
-    @Override
-    public String toString() {
-        return "\"" + value.replace("\"", "\\\"") + "\"";
-    }
+public interface StringExpression extends Expression {
+    String getValue();
 }

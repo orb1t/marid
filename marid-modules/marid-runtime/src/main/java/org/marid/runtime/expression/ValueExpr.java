@@ -21,56 +21,49 @@
 
 package org.marid.runtime.expression;
 
+import org.jetbrains.annotations.NotNull;
+import org.marid.io.Xmls;
 import org.marid.runtime.context2.BeanContext;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.NoSuchElementException;
 
-import static java.lang.Integer.parseInt;
-import static org.marid.io.Xmls.attribute;
-
-public class ParentExpression extends Expression {
-
-    private final int level;
-
-    public ParentExpression(int level) {
-        this.level = level;
-    }
-
-    public ParentExpression(@Nonnull Element element) {
-        level = parseInt(attribute(element, "level").orElseThrow(() -> new NullPointerException("level")));
-    }
-
-    public int getLevel() {
-        return level;
-    }
+public abstract class ValueExpr extends AbstractExpression implements ValueExpression {
 
     @Nonnull
-    @Override
-    public String getTag() {
-        return "parent";
+    private String value;
+
+    ValueExpr(@Nonnull String value) {
+        this.value = value;
     }
 
     @Override
-    public void saveTo(@Nonnull Element element) {
-        element.setAttribute("level", Integer.toString(level));
+    public void saveTo(@NotNull Element element) {
+        element.setAttribute("value", value);
     }
 
+    @Override
+    public void loadFrom(@Nonnull Element element) {
+        value = Xmls.attribute(element, "value").orElseThrow(() -> new NullPointerException("value"));
+    }
+
+    @Override
+    @Nonnull
+    public String getValue() {
+        return value;
+    }
+
+    @Nullable
     @Override
     protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
-        int l = 0;
-        for (BeanContext c = context; c != null; c = c.getParent(), l++) {
-            if (level == l) {
-                return c.getInstance();
-            }
-        }
-        throw new NoSuchElementException();
+        return parseSubstituted(context.resolvePlaceholders(value));
     }
+
+    protected abstract Object parseSubstituted(@Nonnull String substituted);
 
     @Override
     public String toString() {
-        return "$" + level;
+        return value;
     }
 }

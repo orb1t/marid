@@ -26,36 +26,41 @@ import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
 
-public interface Expression {
+public class StringExpr extends AbstractExpression implements StringExpression {
 
-    void saveTo(@Nonnull Element element);
+    private String value;
 
-    void loadFrom(@Nonnull Element element);
-
-    @Nullable
-    Object evaluate(@Nullable Object self, @Nonnull BeanContext context);
-
-    @Nonnull
-    List<Expression> getInitializers();
-
-    @Nonnull
-    Expression newInstanceFrom(@Nonnull Element element);
-
-    @Nonnull
-    Element newElement(@Nonnull Element element);
-
-    @Nonnull
-    default Expression from(@Nonnull Element element) {
-        final Expression expression = newInstanceFrom(element);
-        expression.loadFrom(element);
-        return expression;
+    public StringExpr(String value) {
+        this.value = value;
     }
 
-    default void to(@Nonnull Element element) {
-        final Element e = newElement(element);
-        saveTo(e);
-        element.appendChild(e);
+    public StringExpr() {
+        value = "";
+    }
+
+    @Override
+    public String getValue() {
+        return value;
+    }
+
+    @Override
+    public void saveTo(@Nonnull Element element) {
+        element.setTextContent(value);
+    }
+
+    @Override
+    public void loadFrom(@Nonnull Element element) {
+        value = element.getTextContent();
+    }
+
+    @Override
+    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
+        return context.resolvePlaceholders(value);
+    }
+
+    @Override
+    public String toString() {
+        return "\"" + value.replace("\"", "\\\"") + "\"";
     }
 }

@@ -21,5 +21,34 @@
 
 package org.marid.runtime.expression;
 
-public interface FloatExpression extends ValueExpression {
+import org.marid.runtime.context2.BeanContext;
+import org.w3c.dom.Element;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+public class NullExpr extends AbstractExpression implements NullExpression {
+
+    public static final NullExpression NULL = new NullExpr();
+
+    public NullExpr() {
+    }
+
+    @Override
+    public void saveTo(@Nonnull Element element) {
+    }
+
+    @Override
+    public void loadFrom(@Nonnull Element element) {
+    }
+
+    @Override
+    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
+        return null;
+    }
+
+    @Override
+    public String toString() {
+        return "null";
+    }
 }

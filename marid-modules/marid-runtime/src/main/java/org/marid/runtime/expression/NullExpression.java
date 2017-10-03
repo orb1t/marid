@@ -21,36 +21,5 @@
 
 package org.marid.runtime.expression;
 
-import org.marid.runtime.context2.BeanContext;
-import org.w3c.dom.Element;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-public class NullExpression extends Expression {
-
-    public static final NullExpression NULL = new NullExpression();
-
-    private NullExpression() {
-    }
-
-    @Nonnull
-    @Override
-    public String getTag() {
-        return "null";
-    }
-
-    @Override
-    public void saveTo(@Nonnull Element element) {
-    }
-
-    @Override
-    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
-        return null;
-    }
-
-    @Override
-    public String toString() {
-        return "null";
-    }
+public interface NullExpression extends Expression {
 }

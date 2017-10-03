@@ -21,46 +21,10 @@
 
 package org.marid.runtime.expression;
 
-import org.jetbrains.annotations.NotNull;
-import org.marid.io.Xmls;
-import org.marid.runtime.context2.BeanContext;
-import org.w3c.dom.Element;
-
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public abstract class ValueExpression extends Expression {
-
-    @Nonnull
-    private final String value;
-
-    public ValueExpression(@Nonnull String value) {
-        this.value = value;
-    }
-
-    public ValueExpression(@Nonnull Element element) {
-        value = Xmls.attribute(element, "value").orElseThrow(() -> new NullPointerException("value"));
-    }
-
-    @Override
-    public void saveTo(@NotNull Element element) {
-        element.setAttribute("value", value);
-    }
+public interface ValueExpression extends Expression {
 
     @Nonnull
-    public String getValue() {
-        return value;
-    }
-
-    @Override
-    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
-        return parseSubstituted(context.resolvePlaceholders(value));
-    }
-
-    protected abstract Object parseSubstituted(@Nonnull String substituted);
-
-    @Override
-    public String toString() {
-        return value;
-    }
+    String getValue();
 }

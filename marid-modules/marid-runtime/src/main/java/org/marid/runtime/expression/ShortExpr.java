@@ -21,5 +21,20 @@
 
 package org.marid.runtime.expression;
 
-public interface FloatExpression extends ValueExpression {
+import javax.annotation.Nonnull;
+
+public class ShortExpr extends ValueExpr implements ShortExpression {
+
+    public ShortExpr(@Nonnull String value) {
+        super(value);
+    }
+
+    public ShortExpr() {
+        super("0");
+    }
+
+    @Override
+    protected Object parseSubstituted(@Nonnull String substituted) {
+        return Short.decode(substituted);
+    }
 }

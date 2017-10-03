@@ -36,7 +36,7 @@ import java.util.NoSuchElementException;
 import static java.util.stream.Collectors.toList;
 import static org.marid.io.Xmls.*;
 import static org.marid.misc.Builder.build;
-import static org.marid.runtime.expression.NullExpression.NULL;
+import static org.marid.runtime.expression.NullExpr.NULL;
 
 public class MaridRuntimeBean implements MaridBean {
 
@@ -57,7 +57,7 @@ public class MaridRuntimeBean implements MaridBean {
         this.name = attribute(element, "name").orElseThrow(() -> new NullPointerException("name"));
         this.factory = elements(element)
                 .filter(e -> "factory".equals(e.getTagName()))
-                .flatMap(e -> elements(e).map(Expression::from))
+                .flatMap(e -> elements(e).map(NULL::from))
                 .findFirst()
                 .orElseThrow(() -> new NoSuchElementException("factory"));
         this.children = elements(element)
@@ -108,7 +108,7 @@ public class MaridRuntimeBean implements MaridBean {
         final Document document = element.getOwnerDocument();
 
         final Element factoryElement = build(document.createElement("factory"), element::appendChild);
-        factory.saveTo(build(document.createElement(factory.getTag()), factoryElement::appendChild));
+        factory.saveTo(build(factory.newElement(element), factoryElement::appendChild));
 
         children.forEach(b -> b.writeTo(build(document.createElement("bean"), element::appendChild)));
     }

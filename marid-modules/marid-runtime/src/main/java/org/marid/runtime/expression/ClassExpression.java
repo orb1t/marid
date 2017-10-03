@@ -21,55 +21,10 @@
 
 package org.marid.runtime.expression;
 
-import org.marid.io.Xmls;
-import org.marid.runtime.context2.BeanContext;
-import org.w3c.dom.Element;
-
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.NoSuchElementException;
 
-public class ClassExpression extends Expression {
+public interface ClassExpression extends Expression {
 
     @Nonnull
-    private final String className;
-
-    public ClassExpression(@Nonnull String className) {
-        this.className = className;
-    }
-
-    public ClassExpression(@Nonnull Element element) {
-        className = Xmls.attribute(element, "class").orElseThrow(() -> new NullPointerException("class"));
-    }
-
-    @Nonnull
-    public String getClassName() {
-        return className;
-    }
-
-    @Nonnull
-    @Override
-    public String getTag() {
-        return "class";
-    }
-
-    @Override
-    public void saveTo(@Nonnull Element element) {
-        element.setAttribute("class", className);
-    }
-
-    @Override
-    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
-        final String className = context.resolvePlaceholders(this.className);
-        try {
-            return context.getClassLoader().loadClass(className);
-        } catch (ClassNotFoundException x) {
-            throw new NoSuchElementException(className);
-        }
-    }
-
-    @Override
-    public String toString() {
-        return "&" + className;
-    }
+    String getClassName();
 }

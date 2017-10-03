@@ -21,5 +21,20 @@
 
 package org.marid.runtime.expression;
 
-public interface FloatExpression extends ValueExpression {
+import javax.annotation.Nonnull;
+
+public class CharExpr extends ValueExpr implements CharExpression {
+
+    public CharExpr(@Nonnull String value) {
+        super(value);
+    }
+
+    public CharExpr() {
+        super("0");
+    }
+
+    @Override
+    protected Object parseSubstituted(@Nonnull String substituted) {
+        return (char) Integer.parseInt(substituted, 16);
+    }
 }

@@ -21,28 +21,5 @@
 
 package org.marid.runtime.expression;
 
-import org.w3c.dom.Element;
-
-import javax.annotation.Nonnull;
-
-public class ShortExpression extends ValueExpression {
-
-    public ShortExpression(@Nonnull String value) {
-        super(value);
-    }
-
-    public ShortExpression(@Nonnull Element element) {
-        super(element);
-    }
-
-    @Override
-    protected Object parseSubstituted(@Nonnull String substituted) {
-        return Short.decode(substituted);
-    }
-
-    @Nonnull
-    @Override
-    public String getTag() {
-        return "short";
-    }
+public interface ShortExpression extends ValueExpression {
 }
