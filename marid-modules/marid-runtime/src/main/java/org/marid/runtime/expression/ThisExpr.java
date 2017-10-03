@@ -21,5 +21,30 @@
 
 package org.marid.runtime.expression;
 
-public interface BooleanExpression extends ValueExpression {
+import org.marid.runtime.context2.BeanContext;
+import org.w3c.dom.Element;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+public class ThisExpr extends AbstractExpression implements ThisExpression {
+
+    public static final ThisExpr THIS = new ThisExpr();
+
+    public ThisExpr() {
+    }
+
+    @Nullable
+    @Override
+    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
+        return self;
+    }
+
+    @Override
+    public void saveTo(@Nonnull Element element) {
+    }
+
+    @Override
+    public void loadFrom(@Nonnull Element element) {
+    }
 }
