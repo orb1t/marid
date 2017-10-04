@@ -88,4 +88,22 @@ public class FieldSetStaticExpr extends AbstractExpression implements FieldSetSt
             throw new IllegalStateException(x);
         }
     }
+
+    @Nonnull
+    @Override
+    public Expression getTarget() {
+        return target;
+    }
+
+    @Nonnull
+    @Override
+    public String getField() {
+        return field;
+    }
+
+    @Nonnull
+    @Override
+    public Expression getValue() {
+        return value;
+    }
 }

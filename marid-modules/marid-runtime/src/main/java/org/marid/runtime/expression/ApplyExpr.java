@@ -31,7 +31,10 @@ import javax.annotation.Nullable;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandleProxies;
 import java.lang.invoke.MethodHandles;
-import java.lang.reflect.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -42,6 +45,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Stream.of;
 import static org.marid.io.Xmls.*;
+import static org.marid.misc.Calls.call;
 
 public class ApplyExpr extends AbstractExpression implements ApplyExpression {
 
@@ -142,14 +146,8 @@ public class ApplyExpr extends AbstractExpression implements ApplyExpression {
     @Override
     protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
         final Object t = requireNonNull(target.evaluate(self, context), "target");
-        final Class<?> c = target instanceof ClassExpr ? (Class<?>) t : target.getClass();
         final String typeName = context.resolvePlaceholders(this.type);
-        final Class<?> type;
-        try {
-            type = context.getClassLoader().loadClass(typeName);
-        } catch (ClassNotFoundException x) {
-            throw new IllegalArgumentException(typeName);
-        }
+        final Class<?> type = call(() -> context.getClassLoader().loadClass(typeName), IllegalArgumentException::new);
         if (!type.isInterface()) {
             throw new IllegalArgumentException("Wrong interface " + type);
         }
@@ -163,7 +161,7 @@ public class ApplyExpr extends AbstractExpression implements ApplyExpression {
 
         final MethodHandles.Lookup lookup = MethodHandles.lookup();
         if ("new".equals(mName) && target instanceof ClassExpr) {
-            for (final Constructor<?> ct : c.getConstructors()) {
+            for (final Constructor<?> ct : ((Class<?>) t).getConstructors()) {
                 if (ct.getParameterCount() != args.size() + fMethod.getParameterCount()) {
                     continue;
                 }
@@ -190,7 +188,7 @@ public class ApplyExpr extends AbstractExpression implements ApplyExpression {
             }
             throw new NoSuchElementException();
         } else {
-            for (final Method m : c.getMethods()) {
+            for (final Method m : t.getClass().getMethods()) {
                 if (m.getParameterCount() != args.size() + fMethod.getParameterCount()) {
                     continue;
                 }
@@ -219,23 +217,6 @@ public class ApplyExpr extends AbstractExpression implements ApplyExpression {
                     return MethodHandleProxies.asInterfaceInstance(type, h);
                 } catch (IllegalAccessException x) {
                     throw new IllegalStateException(x);
-                }
-            }
-            if (ps.isEmpty() && fMethod.getParameterCount() == 0) {
-                for (final Field f : c.getFields()) {
-                    if (!f.getName().equals(mName)) {
-                        continue;
-                    }
-                    try {
-                        f.setAccessible(true);
-                        MethodHandle h = lookup.unreflectGetter(f);
-                        if (!Modifier.isStatic(f.getModifiers())) {
-                            h = h.bindTo(t);
-                        }
-                        return MethodHandleProxies.asInterfaceInstance(type, h);
-                    } catch (IllegalAccessException x) {
-                        throw new IllegalStateException(x);
-                    }
                 }
             }
             throw new NoSuchElementException();

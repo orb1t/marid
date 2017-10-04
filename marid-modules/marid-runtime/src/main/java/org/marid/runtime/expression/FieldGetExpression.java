@@ -24,6 +24,7 @@ package org.marid.runtime.expression;
 import javax.annotation.Nonnull;
 
 public interface FieldGetExpression extends Expression {
+
     @Nonnull
     Expression getTarget();
 

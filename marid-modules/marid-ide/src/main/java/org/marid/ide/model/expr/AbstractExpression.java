@@ -20,7 +20,28 @@
 
 package org.marid.ide.model.expr;
 
+import javafx.beans.Observable;
+import javafx.collections.ObservableList;
+import org.marid.function.Suppliers;
 import org.marid.runtime.expression.Expression;
 
+import javax.annotation.Nonnull;
+import java.util.function.Supplier;
+
+import static javafx.collections.FXCollections.observableArrayList;
+
 public abstract class AbstractExpression implements Expression {
+
+    private final Supplier<Observable[]> observables = Suppliers.memoized(this::observables);
+    private final ObservableList<AbstractExpression> initializers = observableArrayList(e -> e.observables.get());
+
+    protected Observable[] observables() {
+        return new Observable[] {initializers};
+    }
+
+    @Nonnull
+    @Override
+    public ObservableList<AbstractExpression> getInitializers() {
+        return initializers;
+    }
 }

@@ -32,5 +32,5 @@ public interface MethodCallStaticExpression extends Expression {
     String getMethod();
 
     @Nonnull
-    List<Expression> getArgs();
+    List<? extends Expression> getArgs();
 }

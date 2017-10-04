@@ -22,7 +22,6 @@
 package org.marid.runtime.expression;
 
 import org.marid.runtime.context2.BeanContext;
-import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -46,25 +45,5 @@ public abstract class AbstractExpression implements Expression {
     @Nonnull
     public List<Expression> getInitializers() {
         return initializers;
-    }
-
-    @Nonnull
-    @Override
-    public Element newElement(@Nonnull Element element) {
-        final String tag = getClass().getSimpleName().replace("Expr", "");
-        return element.getOwnerDocument().createElement(tag);
-    }
-
-    @Nonnull
-    @Override
-    public Expression newInstanceFrom(@Nonnull Element element) {
-        final Package p = getClass().getPackage();
-        final ClassLoader classLoader = getClass().getClassLoader();
-        final String className = p.getName() + "." + element.getTagName() + "Expr";
-        try {
-            return (Expression) classLoader.loadClass(className).getConstructor().newInstance();
-        } catch (ReflectiveOperationException x) {
-            throw new IllegalStateException(x);
-        }
     }
 }

@@ -25,6 +25,7 @@ import javax.annotation.Nonnull;
 import java.util.Map;
 
 public interface ApplyExpression extends Expression {
+
     @Nonnull
     Expression getTarget();
 

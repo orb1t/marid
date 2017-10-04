@@ -21,8 +21,7 @@
 
 package org.marid.function;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicMarkableReference;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -33,15 +32,20 @@ import java.util.function.Supplier;
 public interface Suppliers {
 
     static <T> Supplier<T> memoized(Supplier<T> supplier) {
-        final AtomicReference<T> ref = new AtomicReference<>();
-        final AtomicBoolean initialized = new AtomicBoolean();
+        final AtomicMarkableReference<T> ref = new AtomicMarkableReference<>(null, false);
         return () -> {
-            if (initialized.compareAndSet(false, true)) {
-                final T value = supplier.get();
-                ref.set(value);
-                return value;
+            if (ref.isMarked()) {
+                return ref.getReference();
             } else {
-                return ref.get();
+                synchronized (ref) {
+                    if (ref.isMarked()) {
+                        return ref.getReference();
+                    } else {
+                        final T v = supplier.get();
+                        ref.set(v, true);
+                        return v;
+                    }
+                }
             }
         };
     }

@@ -38,13 +38,25 @@ public interface Expression {
     Object evaluate(@Nullable Object self, @Nonnull BeanContext context);
 
     @Nonnull
-    List<Expression> getInitializers();
+    List<? extends Expression> getInitializers();
 
     @Nonnull
-    Expression newInstanceFrom(@Nonnull Element element);
+    default Element newElement(@Nonnull Element element) {
+        final String tag = getClass().getSimpleName().replace("Expr", "");
+        return element.getOwnerDocument().createElement(tag);
+    }
 
     @Nonnull
-    Element newElement(@Nonnull Element element);
+    default Expression newInstanceFrom(@Nonnull Element element) {
+        final Package p = getClass().getPackage();
+        final ClassLoader classLoader = getClass().getClassLoader();
+        final String className = p.getName() + "." + element.getTagName() + "Expr";
+        try {
+            return (Expression) classLoader.loadClass(className).getConstructor().newInstance();
+        } catch (ReflectiveOperationException x) {
+            throw new IllegalStateException(x);
+        }
+    }
 
     @Nonnull
     default Expression from(@Nonnull Element element) {

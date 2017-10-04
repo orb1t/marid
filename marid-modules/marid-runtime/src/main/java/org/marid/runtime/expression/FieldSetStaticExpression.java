@@ -21,5 +21,16 @@
 
 package org.marid.runtime.expression;
 
+import javax.annotation.Nonnull;
+
 public interface FieldSetStaticExpression extends Expression {
+
+    @Nonnull
+    Expression getTarget();
+
+    @Nonnull
+    String getField();
+
+    @Nonnull
+    Expression getValue();
 }
