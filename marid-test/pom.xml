@@ -24,7 +24,13 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
-            <version>5.0.0</version>
+            <version>5.0.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apiguardian</groupId>
+            <artifactId>apiguardian-api</artifactId>
+            <version>1.0.0</version>
         </dependency>
 
         <dependency>

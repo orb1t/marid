@@ -21,7 +21,6 @@
 
 package org.marid.runtime.context;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.marid.runtime.exception.MaridCircularPlaceholderException;
 
@@ -33,7 +32,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Tag("normal")
 public class MaridPlaceholderResolverTest {
 
     @Test
