@@ -21,29 +21,21 @@
 
 package org.marid.runtime.expression;
 
-import org.marid.runtime.context2.BeanContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Function;
 
-import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Stream.of;
 import static org.marid.io.Xmls.attribute;
 import static org.marid.io.Xmls.elements;
 import static org.marid.misc.Builder.build;
-import static org.marid.runtime.context.MaridRuntimeUtils.compatible;
-import static org.marid.runtime.context.MaridRuntimeUtils.value;
 import static org.marid.runtime.expression.NullExpr.NULL;
 
 public class MethodCallExpr extends AbstractExpression implements MethodCallExpression {
@@ -99,33 +91,6 @@ public class MethodCallExpr extends AbstractExpression implements MethodCallExpr
         target = target(element, NULL::from);
         method = attribute(element, "method").orElseThrow(() -> new NullPointerException("method"));
         args.addAll(args(element, NULL::from));
-    }
-
-    @Override
-    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
-        final Object t = requireNonNull(target.evaluate(self, context), "target");
-        final String mName = context.resolvePlaceholders(method);
-        final Object[] ps = args.stream().map(p -> p.evaluate(t, context)).toArray();
-        final Method mt = of(t.getClass().getMethods())
-                .filter(m -> mName.equals(m.getName()))
-                .filter(m -> compatible(m, ps))
-                .findFirst()
-                .orElseThrow(() -> new NoSuchElementException(mName));
-        final Class<?>[] types = mt.getParameterTypes();
-        for (int i = 0; i < types.length; i++) {
-            ps[i] = value(types[i], ps[i]);
-        }
-        try {
-            mt.setAccessible(true);
-            if (mt.getReturnType() == void.class) {
-                mt.invoke(t, ps);
-                return t;
-            } else {
-                return mt.invoke(t, ps);
-            }
-        } catch (IllegalAccessException | InvocationTargetException x) {
-            throw new IllegalStateException(x);
-        }
     }
 
     @Override

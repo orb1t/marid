@@ -32,9 +32,4 @@ public class BooleanExpr extends ValueExpr implements BooleanExpression {
     public BooleanExpr() {
         super("0");
     }
-
-    @Override
-    protected Object parseSubstituted(@Nonnull String substituted) {
-        return Boolean.valueOf(substituted);
-    }
 }

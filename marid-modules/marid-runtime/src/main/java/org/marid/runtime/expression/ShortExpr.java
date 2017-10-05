@@ -32,9 +32,4 @@ public class ShortExpr extends ValueExpr implements ShortExpression {
     public ShortExpr() {
         super("0");
     }
-
-    @Override
-    protected Object parseSubstituted(@Nonnull String substituted) {
-        return Short.decode(substituted);
-    }
 }

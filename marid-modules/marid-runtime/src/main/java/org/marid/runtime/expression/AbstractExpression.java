@@ -21,26 +21,13 @@
 
 package org.marid.runtime.expression;
 
-import org.marid.runtime.context2.BeanContext;
-
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AbstractExpression implements Expression {
 
     private final List<Expression> initializers = new ArrayList<>();
-
-    @Nullable
-    protected abstract Object execute(@Nullable Object self, @Nonnull BeanContext context);
-
-    @Nullable
-    public Object evaluate(@Nullable Object self, @Nonnull BeanContext context) {
-        final Object v = execute(self, context);
-        initializers.forEach(i -> i.evaluate(v, context));
-        return v;
-    }
 
     @Nonnull
     public List<Expression> getInitializers() {

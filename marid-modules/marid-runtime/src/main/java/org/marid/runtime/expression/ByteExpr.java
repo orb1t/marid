@@ -32,9 +32,4 @@ public class ByteExpr extends ValueExpr implements ByteExpression {
     public ByteExpr() {
         super("0");
     }
-
-    @Override
-    protected Object parseSubstituted(@Nonnull String substituted) {
-        return Byte.decode(substituted);
-    }
 }

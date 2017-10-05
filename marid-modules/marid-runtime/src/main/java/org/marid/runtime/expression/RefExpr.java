@@ -21,11 +21,9 @@
 
 package org.marid.runtime.expression;
 
-import org.marid.runtime.context2.BeanContext;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static org.marid.io.Xmls.attribute;
 
@@ -56,11 +54,6 @@ public class RefExpr extends AbstractExpression implements RefExpression {
     @Override
     public void loadFrom(@Nonnull Element element) {
         reference = attribute(element, "ref").orElseThrow(IllegalStateException::new);
-    }
-
-    @Override
-    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
-        return context.getBean(context.resolvePlaceholders(reference));
     }
 
     @Override

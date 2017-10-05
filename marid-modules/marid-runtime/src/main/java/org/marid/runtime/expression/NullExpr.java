@@ -21,11 +21,9 @@
 
 package org.marid.runtime.expression;
 
-import org.marid.runtime.context2.BeanContext;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public class NullExpr extends AbstractExpression implements NullExpression {
 
@@ -40,11 +38,6 @@ public class NullExpr extends AbstractExpression implements NullExpression {
 
     @Override
     public void loadFrom(@Nonnull Element element) {
-    }
-
-    @Override
-    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
-        return null;
     }
 
     @Override

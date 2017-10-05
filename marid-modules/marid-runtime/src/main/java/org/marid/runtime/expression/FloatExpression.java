@@ -21,7 +21,9 @@
 
 package org.marid.runtime.expression;
 
+import org.marid.runtime.context2.BeanContext;
 import org.marid.runtime.types.TypeContext;
+import org.marid.runtime.util.ReflectUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -33,5 +35,15 @@ public interface FloatExpression extends ValueExpression {
     @Override
     default Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {
         return Float.class;
+    }
+
+    @Nullable
+    @Override
+    default Object evaluate(@Nullable Object self, @Nonnull BeanContext context) {
+        return ReflectUtils.evaluate(this::execute, this).apply(self, context);
+    }
+
+    private Object execute(@Nullable Object self, @Nonnull BeanContext context) {
+        return Float.valueOf(context.resolvePlaceholders(getValue()));
     }
 }

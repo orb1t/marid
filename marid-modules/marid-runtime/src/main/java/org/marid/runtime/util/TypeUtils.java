@@ -19,7 +19,7 @@
  * #L%
  */
 
-package org.marid.runtime.types;
+package org.marid.runtime.util;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;

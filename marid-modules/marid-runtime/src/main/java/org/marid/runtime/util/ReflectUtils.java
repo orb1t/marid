@@ -19,17 +19,20 @@
  * #L%
  */
 
-package org.marid.runtime.expression;
+package org.marid.runtime.util;
 
-import javax.annotation.Nonnull;
+import org.marid.runtime.context2.BeanContext;
+import org.marid.runtime.expression.Expression;
 
-public class CharExpr extends ValueExpr implements CharExpression {
+import java.util.function.BiFunction;
 
-    public CharExpr(@Nonnull String value) {
-        super(value);
-    }
+public interface ReflectUtils {
 
-    public CharExpr() {
-        super("0");
+    static BiFunction<Object, BeanContext, Object> evaluate(BiFunction<Object, BeanContext, Object> f, Expression e) {
+        return (self, context) -> {
+            final Object o = f.apply(self, context);
+            e.getInitializers().forEach(i -> i.evaluate(o, context));
+            return o;
+        };
     }
 }

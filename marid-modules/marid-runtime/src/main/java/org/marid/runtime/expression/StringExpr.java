@@ -21,11 +21,9 @@
 
 package org.marid.runtime.expression;
 
-import org.marid.runtime.context2.BeanContext;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public class StringExpr extends AbstractExpression implements StringExpression {
 
@@ -54,11 +52,6 @@ public class StringExpr extends AbstractExpression implements StringExpression {
     @Override
     public void loadFrom(@Nonnull Element element) {
         value = element.getTextContent();
-    }
-
-    @Override
-    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
-        return context.resolvePlaceholders(value);
     }
 
     @Override

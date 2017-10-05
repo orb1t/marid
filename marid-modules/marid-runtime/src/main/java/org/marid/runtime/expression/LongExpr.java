@@ -32,9 +32,4 @@ public class LongExpr extends ValueExpr implements LongExpression {
     public LongExpr() {
         super("0");
     }
-
-    @Override
-    protected Object parseSubstituted(@Nonnull String substituted) {
-        return Long.decode(substituted);
-    }
 }

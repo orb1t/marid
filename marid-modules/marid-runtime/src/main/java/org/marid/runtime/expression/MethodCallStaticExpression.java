@@ -21,17 +21,26 @@
 
 package org.marid.runtime.expression;
 
+import org.marid.runtime.context2.BeanContext;
 import org.marid.runtime.types.TypeContext;
-import org.marid.runtime.types.TypeUtils;
+import org.marid.runtime.util.ReflectUtils;
+import org.marid.runtime.util.TypeUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 
-import static org.marid.runtime.types.TypeUtils.map;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Stream.of;
+import static org.marid.runtime.context.MaridRuntimeUtils.compatible;
+import static org.marid.runtime.context.MaridRuntimeUtils.value;
+import static org.marid.runtime.util.TypeUtils.map;
 
 public interface MethodCallStaticExpression extends Expression {
 
@@ -74,5 +83,32 @@ public interface MethodCallStaticExpression extends Expression {
                             );
                 })
                 .orElseGet(typeContext::getWildcard);
+    }
+
+    @Nullable
+    @Override
+    default Object evaluate(@Nullable Object self, @Nonnull BeanContext context) {
+        return ReflectUtils.evaluate(this::execute, this).apply(self, context);
+    }
+
+    private Object execute(@Nullable Object self, @Nonnull BeanContext context) {
+        final Class<?> t = (Class<?>) requireNonNull(getTarget().evaluate(self, context), "target");
+        final String mName = context.resolvePlaceholders(getMethod());
+        final Object[] ps = getArgs().stream().map(p -> p.evaluate(null, context)).toArray();
+        final Method mt = of(t.getMethods())
+                .filter(m -> mName.equals(m.getName()))
+                .filter(m -> compatible(m, ps))
+                .findFirst()
+                .orElseThrow(() -> new NoSuchElementException(mName));
+        final Class<?>[] types = mt.getParameterTypes();
+        for (int i = 0; i < types.length; i++) {
+            ps[i] = value(types[i], ps[i]);
+        }
+        try {
+            mt.setAccessible(true);
+            return mt.invoke(null, ps);
+        } catch (IllegalAccessException | InvocationTargetException x) {
+            throw new IllegalStateException(x);
+        }
     }
 }

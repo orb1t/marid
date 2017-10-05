@@ -21,15 +21,10 @@
 
 package org.marid.runtime.expression;
 
-import org.marid.runtime.context2.BeanContext;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.lang.reflect.Field;
-import java.util.NoSuchElementException;
 
-import static java.util.Objects.requireNonNull;
 import static org.marid.io.Xmls.attribute;
 import static org.marid.runtime.expression.FieldSetExpr.value;
 import static org.marid.runtime.expression.MethodCallExpr.target;
@@ -70,23 +65,6 @@ public class FieldSetStaticExpr extends AbstractExpression implements FieldSetSt
         field = attribute(element, "field").orElseThrow(() -> new NullPointerException("field"));
         target = target(element, NULL::from);
         value = value(element, NULL::from);
-    }
-
-    @Override
-    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
-        final String field = context.resolvePlaceholders(this.field);
-        final Class<?> t = (Class<?>) requireNonNull(target.evaluate(self, context), "target");
-        final Object v = value.evaluate(self, context);
-        try {
-            final Field f = t.getField(field);
-            f.setAccessible(true);
-            f.set(null, v);
-            return null;
-        } catch (NoSuchFieldException x) {
-            throw new NoSuchElementException(field);
-        } catch (IllegalAccessException x) {
-            throw new IllegalStateException(x);
-        }
     }
 
     @Nonnull

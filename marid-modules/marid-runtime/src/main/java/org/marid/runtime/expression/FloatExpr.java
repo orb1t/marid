@@ -32,9 +32,4 @@ public class FloatExpr extends ValueExpr implements FloatExpression {
     public FloatExpr() {
         super("0.0");
     }
-
-    @Override
-    protected Object parseSubstituted(@Nonnull String substituted) {
-        return Float.valueOf(substituted);
-    }
 }

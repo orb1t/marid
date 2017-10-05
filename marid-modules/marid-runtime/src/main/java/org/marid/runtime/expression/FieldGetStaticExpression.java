@@ -21,14 +21,19 @@
 
 package org.marid.runtime.expression;
 
+import org.marid.runtime.context2.BeanContext;
 import org.marid.runtime.types.TypeContext;
-import org.marid.runtime.types.TypeUtils;
+import org.marid.runtime.util.ReflectUtils;
+import org.marid.runtime.util.TypeUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.reflect.Field;
 import java.lang.reflect.Type;
+import java.util.NoSuchElementException;
 
 import static java.util.Collections.emptyMap;
+import static java.util.Objects.requireNonNull;
 
 public interface FieldGetStaticExpression extends Expression {
 
@@ -46,5 +51,25 @@ public interface FieldGetStaticExpression extends Expression {
         return TypeUtils.getField(targetClass, typeContext.resolvePlaceholders(getField()))
                 .map(f -> owner != null ? typeContext.resolve(owner, f.getGenericType(), emptyMap()) : f.getGenericType())
                 .orElseGet(typeContext::getWildcard);
+    }
+
+    @Nullable
+    @Override
+    default Object evaluate(@Nullable Object self, @Nonnull BeanContext context) {
+        return ReflectUtils.evaluate(this::execute, this).apply(self, context);
+    }
+
+    private Object execute(@Nullable Object self, @Nonnull BeanContext context) {
+        final String field = context.resolvePlaceholders(getField());
+        final Class<?> t = (Class<?>) requireNonNull(getTarget().evaluate(self, context), "target");
+        try {
+            final Field f = t.getField(field);
+            f.setAccessible(true);
+            return f.get(null);
+        } catch (NoSuchFieldException x) {
+            throw new NoSuchElementException(field);
+        } catch (IllegalAccessException x) {
+            throw new IllegalStateException(x);
+        }
     }
 }

@@ -21,15 +21,10 @@
 
 package org.marid.runtime.expression;
 
-import org.marid.runtime.context2.BeanContext;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.lang.reflect.Field;
-import java.util.NoSuchElementException;
 
-import static java.util.Objects.requireNonNull;
 import static org.marid.io.Xmls.attribute;
 import static org.marid.runtime.expression.MethodCallExpr.target;
 import static org.marid.runtime.expression.NullExpr.NULL;
@@ -74,21 +69,6 @@ public class FieldGetStaticExpr extends AbstractExpression implements FieldGetSt
     public void loadFrom(@Nonnull Element element) {
         target = target(element, NULL::from);
         field = attribute(element, "field").orElseThrow(() -> new NullPointerException("field"));
-    }
-
-    @Override
-    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
-        final String field = context.resolvePlaceholders(this.field);
-        final Class<?> t = (Class<?>) requireNonNull(target.evaluate(self, context), "target");
-        try {
-            final Field f = t.getField(field);
-            f.setAccessible(true);
-            return f.get(null);
-        } catch (NoSuchFieldException x) {
-            throw new NoSuchElementException(field);
-        } catch (IllegalAccessException x) {
-            throw new IllegalStateException(x);
-        }
     }
 
     @Override

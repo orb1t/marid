@@ -32,9 +32,4 @@ public class IntegerExpr extends ValueExpr implements IntegerExpression {
     public IntegerExpr() {
         super("0");
     }
-
-    @Override
-    protected Object parseSubstituted(@Nonnull String substituted) {
-        return Integer.decode(substituted);
-    }
 }

@@ -21,16 +21,25 @@
 
 package org.marid.runtime.expression;
 
+import org.marid.runtime.context2.BeanContext;
 import org.marid.runtime.types.TypeContext;
+import org.marid.runtime.util.ReflectUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 
-import static org.marid.runtime.types.TypeUtils.map;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Stream.of;
+import static org.marid.runtime.context.MaridRuntimeUtils.compatible;
+import static org.marid.runtime.context.MaridRuntimeUtils.value;
+import static org.marid.runtime.util.TypeUtils.map;
 
 public interface ConstructorCallExpression extends Expression {
 
@@ -39,6 +48,12 @@ public interface ConstructorCallExpression extends Expression {
 
     @Nonnull
     List<? extends Expression> getArgs();
+
+    @Nullable
+    @Override
+    default Object evaluate(@Nullable Object self, @Nonnull BeanContext context) {
+        return ReflectUtils.evaluate(this::execute, this).apply(self, context);
+    }
 
     @Nonnull
     @Override
@@ -65,5 +80,24 @@ public interface ConstructorCallExpression extends Expression {
                         map(m.getGenericParameterTypes(), i -> getArgs().get(i).getType(owner, typeContext)))
                 )
                 .orElseGet(typeContext::getWildcard);
+    }
+
+    private Object execute(@Nullable Object self, @Nonnull BeanContext context) {
+        final Class<?> t = (Class<?>) requireNonNull(getTarget().evaluate(self, context), "target");
+        final Object[] ps = getArgs().stream().map(p -> p.evaluate(self, context)).toArray();
+        final Constructor ct = of(t.getConstructors())
+                .filter(co -> compatible(co, ps))
+                .findFirst()
+                .orElseThrow(() -> new NoSuchElementException("No constructor found for " + t));
+        final Class<?>[] types = ct.getParameterTypes();
+        for (int i = 0; i < types.length; i++) {
+            ps[i] = value(types[i], ps[i]);
+        }
+        try {
+            ct.setAccessible(true);
+            return ct.newInstance(ps);
+        } catch (IllegalAccessException | InstantiationException | InvocationTargetException x) {
+            throw new IllegalStateException(x);
+        }
     }
 }

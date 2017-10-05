@@ -21,7 +21,9 @@
 
 package org.marid.runtime.expression;
 
+import org.marid.runtime.context2.BeanContext;
 import org.marid.runtime.types.TypeContext;
+import org.marid.runtime.util.ReflectUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -33,5 +35,11 @@ public interface NullExpression extends Expression {
     @Override
     default Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {
         return typeContext.getWildcard();
+    }
+
+    @Nullable
+    @Override
+    default Object evaluate(@Nullable Object self, @Nonnull BeanContext context) {
+        return ReflectUtils.evaluate((s, c) -> null, this).apply(self, context);
     }
 }

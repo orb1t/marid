@@ -21,11 +21,17 @@
 
 package org.marid.runtime.expression;
 
+import org.marid.runtime.context2.BeanContext;
 import org.marid.runtime.types.TypeContext;
+import org.marid.runtime.util.ReflectUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.reflect.Field;
 import java.lang.reflect.Type;
+import java.util.NoSuchElementException;
+
+import static java.util.Objects.requireNonNull;
 
 public interface FieldSetExpression extends Expression {
 
@@ -42,5 +48,27 @@ public interface FieldSetExpression extends Expression {
     @Override
     default Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {
         return getTarget().getType(owner, typeContext);
+    }
+
+    @Nullable
+    @Override
+    default Object evaluate(@Nullable Object self, @Nonnull BeanContext context) {
+        return ReflectUtils.evaluate(this::execute, this).apply(self, context);
+    }
+
+    private Object execute(@Nullable Object self, @Nonnull BeanContext context) {
+        final String field = context.resolvePlaceholders(getField());
+        final Object t = requireNonNull(getTarget().evaluate(self, context), "target");
+        final Object v = getValue().evaluate(self, context);
+        try {
+            final Field f = t.getClass().getField(field);
+            f.setAccessible(true);
+            f.set(t, v);
+            return t;
+        } catch (NoSuchFieldException x) {
+            throw new NoSuchElementException(field);
+        } catch (IllegalAccessException x) {
+            throw new IllegalStateException(x);
+        }
     }
 }

@@ -21,12 +21,15 @@
 
 package org.marid.runtime.expression;
 
+import org.marid.runtime.context2.BeanContext;
 import org.marid.runtime.types.TypeContext;
-import org.marid.runtime.types.TypeUtils;
+import org.marid.runtime.util.ReflectUtils;
+import org.marid.runtime.util.TypeUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
+import java.util.NoSuchElementException;
 
 public interface ClassExpression extends Expression {
 
@@ -39,5 +42,20 @@ public interface ClassExpression extends Expression {
         return TypeUtils.getClass(typeContext.getClassLoader(), typeContext.resolvePlaceholders(getClassName()))
                 .map(typeContext::getClassType)
                 .orElseGet(typeContext::getWildcard);
+    }
+
+    @Nullable
+    @Override
+    default Object evaluate(@Nullable Object self, @Nonnull BeanContext context) {
+        return ReflectUtils.evaluate(this::execute, this).apply(self, context);
+    }
+
+    private Object execute(@Nullable Object self, @Nonnull BeanContext context) {
+        final String className = context.resolvePlaceholders(context.resolvePlaceholders(getClassName()));
+        try {
+            return context.getClassLoader().loadClass(className);
+        } catch (ClassNotFoundException x) {
+            throw new NoSuchElementException(className);
+        }
     }
 }

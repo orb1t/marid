@@ -22,12 +22,9 @@
 package org.marid.runtime.expression;
 
 import org.marid.io.Xmls;
-import org.marid.runtime.context2.BeanContext;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.NoSuchElementException;
 
 public class ClassExpr extends AbstractExpression implements ClassExpression {
 
@@ -56,16 +53,6 @@ public class ClassExpr extends AbstractExpression implements ClassExpression {
     @Override
     public void loadFrom(@Nonnull Element element) {
         className = Xmls.attribute(element, "class").orElseThrow(() -> new NullPointerException("class"));
-    }
-
-    @Override
-    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
-        final String className = context.resolvePlaceholders(this.className);
-        try {
-            return context.getClassLoader().loadClass(className);
-        } catch (ClassNotFoundException x) {
-            throw new NoSuchElementException(className);
-        }
     }
 
     @Override
