@@ -19,22 +19,38 @@
  * #L%
  */
 
-package org.marid.runtime.expression;
+package org.marid.runtime.types;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.lang.reflect.Type;
 import java.util.Map;
 
-public interface ApplyExpression extends Expression {
+public interface TypeContext {
 
     @Nonnull
-    Expression getTarget();
+    Type getWildcard();
 
     @Nonnull
-    String getMethod();
+    Type getBeanType(String name);
 
     @Nonnull
-    String getType();
+    Type resolve(@Nullable Type owner, @Nonnull Type type, @Nonnull Map<Type, Type> mapping);
 
     @Nonnull
-    Map<String, Expression> getArgs();
+    String resolvePlaceholders(@Nonnull String value);
+
+    @Nonnull
+    Class<?> getRaw(@Nonnull Type type);
+
+    boolean isAssignable(@Nonnull Type from, @Nonnull Type to);
+
+    @Nonnull
+    ClassLoader getClassLoader();
+
+    @Nonnull
+    Type getClassType(@Nonnull Class<?> type);
+
+    @Nonnull
+    Type getType(Class<?> type);
 }

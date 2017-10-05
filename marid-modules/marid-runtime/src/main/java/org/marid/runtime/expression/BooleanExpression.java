@@ -21,5 +21,17 @@
 
 package org.marid.runtime.expression;
 
+import org.marid.runtime.types.TypeContext;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.lang.reflect.Type;
+
 public interface BooleanExpression extends ValueExpression {
+
+    @Nonnull
+    @Override
+    default Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {
+        return Boolean.class;
+    }
 }

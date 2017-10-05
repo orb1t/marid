@@ -21,8 +21,16 @@
 
 package org.marid.runtime.expression;
 
+import org.marid.runtime.types.TypeContext;
+
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.util.List;
+import java.util.stream.Stream;
+
+import static org.marid.runtime.types.TypeUtils.map;
 
 public interface ConstructorCallExpression extends Expression {
 
@@ -31,4 +39,31 @@ public interface ConstructorCallExpression extends Expression {
 
     @Nonnull
     List<? extends Expression> getArgs();
+
+    @Nonnull
+    @Override
+    default Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {
+        final Type t = getTarget().getType(owner, typeContext);
+        final Class<?> targetClass = typeContext.getRaw(t);
+        return Stream.of(targetClass.getConstructors())
+                .filter(m -> m.getParameterCount() == getArgs().size())
+                .filter(m -> !Modifier.isStatic(m.getModifiers()))
+                .filter(m -> {
+                    final Type[] pt = m.getGenericParameterTypes();
+                    for (int i = 0; i < pt.length; i++) {
+                        final Type at = getArgs().get(i).getType(owner, typeContext);
+                        if (!typeContext.isAssignable(pt[i], at)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                })
+                .findFirst()
+                .map(m -> typeContext.resolve(
+                        null,
+                        typeContext.getType(m.getDeclaringClass()),
+                        map(m.getGenericParameterTypes(), i -> getArgs().get(i).getType(owner, typeContext)))
+                )
+                .orElseGet(typeContext::getWildcard);
+    }
 }

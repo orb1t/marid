@@ -22,10 +22,12 @@
 package org.marid.runtime.expression;
 
 import org.marid.runtime.context2.BeanContext;
+import org.marid.runtime.types.TypeContext;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.reflect.Type;
 import java.util.List;
 
 public interface Expression {
@@ -36,6 +38,9 @@ public interface Expression {
 
     @Nullable
     Object evaluate(@Nullable Object self, @Nonnull BeanContext context);
+
+    @Nonnull
+    Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext);
 
     @Nonnull
     List<? extends Expression> getInitializers();

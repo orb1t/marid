@@ -29,6 +29,7 @@ import javax.annotation.Nullable;
 
 public class StringExpr extends AbstractExpression implements StringExpression {
 
+    @Nonnull
     private String value;
 
     public StringExpr(String value) {
@@ -39,6 +40,7 @@ public class StringExpr extends AbstractExpression implements StringExpression {
         value = "";
     }
 
+    @Nonnull
     @Override
     public String getValue() {
         return value;

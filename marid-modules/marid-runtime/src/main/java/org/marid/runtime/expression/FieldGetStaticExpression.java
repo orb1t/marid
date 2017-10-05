@@ -21,7 +21,14 @@
 
 package org.marid.runtime.expression;
 
+import org.marid.runtime.types.TypeContext;
+import org.marid.runtime.types.TypeUtils;
+
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.lang.reflect.Type;
+
+import static java.util.Collections.emptyMap;
 
 public interface FieldGetStaticExpression extends Expression {
 
@@ -30,4 +37,14 @@ public interface FieldGetStaticExpression extends Expression {
 
     @Nonnull
     String getField();
+
+    @Nonnull
+    @Override
+    default Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {
+        final Type targetType = getTarget().getType(owner, typeContext);
+        final Class<?> targetClass = typeContext.getRaw(targetType);
+        return TypeUtils.getField(targetClass, typeContext.resolvePlaceholders(getField()))
+                .map(f -> owner != null ? typeContext.resolve(owner, f.getGenericType(), emptyMap()) : f.getGenericType())
+                .orElseGet(typeContext::getWildcard);
+    }
 }

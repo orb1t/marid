@@ -21,10 +21,23 @@
 
 package org.marid.runtime.expression;
 
+import org.marid.runtime.types.TypeContext;
+import org.marid.runtime.types.TypeUtils;
+
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.lang.reflect.Type;
 
 public interface ClassExpression extends Expression {
 
     @Nonnull
     String getClassName();
+
+    @Nonnull
+    @Override
+    default Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {
+        return TypeUtils.getClass(typeContext.getClassLoader(), typeContext.resolvePlaceholders(getClassName()))
+                .map(typeContext::getClassType)
+                .orElseGet(typeContext::getWildcard);
+    }
 }

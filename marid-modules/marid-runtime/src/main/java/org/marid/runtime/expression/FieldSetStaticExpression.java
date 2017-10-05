@@ -21,7 +21,11 @@
 
 package org.marid.runtime.expression;
 
+import org.marid.runtime.types.TypeContext;
+
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.lang.reflect.Type;
 
 public interface FieldSetStaticExpression extends Expression {
 
@@ -33,4 +37,10 @@ public interface FieldSetStaticExpression extends Expression {
 
     @Nonnull
     Expression getValue();
+
+    @Nonnull
+    @Override
+    default Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {
+        return void.class;
+    }
 }

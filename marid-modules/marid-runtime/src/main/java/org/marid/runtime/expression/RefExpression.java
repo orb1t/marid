@@ -21,9 +21,20 @@
 
 package org.marid.runtime.expression;
 
+import org.marid.runtime.types.TypeContext;
+
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.lang.reflect.Type;
 
 public interface RefExpression extends Expression {
+
     @Nonnull
     String getReference();
+
+    @Nonnull
+    @Override
+    default Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {
+        return typeContext.getBeanType(typeContext.resolvePlaceholders(getReference()));
+    }
 }
