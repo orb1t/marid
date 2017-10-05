@@ -46,32 +46,22 @@ public interface Expression {
     List<? extends Expression> getInitializers();
 
     @Nonnull
-    default Element newElement(@Nonnull Element element) {
-        final String tag = getClass().getSimpleName().replace("Expr", "");
-        return element.getOwnerDocument().createElement(tag);
-    }
-
-    @Nonnull
-    default Expression newInstanceFrom(@Nonnull Element element) {
+    default Expression from(@Nonnull Element element) {
         final Package p = getClass().getPackage();
         final ClassLoader classLoader = getClass().getClassLoader();
         final String className = p.getName() + "." + element.getTagName() + "Expr";
         try {
-            return (Expression) classLoader.loadClass(className).getConstructor().newInstance();
+            final Expression expression = (Expression) classLoader.loadClass(className).getConstructor().newInstance();
+            expression.loadFrom(element);
+            return expression;
         } catch (ReflectiveOperationException x) {
             throw new IllegalStateException(x);
         }
     }
 
-    @Nonnull
-    default Expression from(@Nonnull Element element) {
-        final Expression expression = newInstanceFrom(element);
-        expression.loadFrom(element);
-        return expression;
-    }
-
     default void to(@Nonnull Element element) {
-        final Element e = newElement(element);
+        final String tag = getClass().getSimpleName().replace("Expr", "");
+        final Element e = element.getOwnerDocument().createElement(tag);
         saveTo(e);
         element.appendChild(e);
     }

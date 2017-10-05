@@ -108,7 +108,7 @@ public class MaridRuntimeBean implements MaridBean {
         final Document document = element.getOwnerDocument();
 
         final Element factoryElement = build(document.createElement("factory"), element::appendChild);
-        factory.saveTo(build(factory.newElement(element), factoryElement::appendChild));
+        factory.to(factoryElement);
 
         children.forEach(b -> b.writeTo(build(document.createElement("bean"), element::appendChild)));
     }
