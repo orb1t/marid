@@ -21,13 +21,8 @@
 
 package org.marid.runtime.expression;
 
-import org.w3c.dom.Element;
-
 import javax.annotation.Nonnull;
 
-import static org.marid.io.Xmls.attribute;
-import static org.marid.runtime.expression.FieldSetExpr.value;
-import static org.marid.runtime.expression.MethodCallExpr.target;
 import static org.marid.runtime.expression.NullExpr.NULL;
 
 public class FieldSetStaticExpr extends AbstractExpression implements FieldSetStaticExpression {
@@ -51,20 +46,6 @@ public class FieldSetStaticExpr extends AbstractExpression implements FieldSetSt
         target = NULL;
         field = "";
         value = NULL;
-    }
-
-    @Override
-    public void saveTo(@Nonnull Element element) {
-        element.setAttribute("field", field);
-        target(element, target);
-        value(element, value);
-    }
-
-    @Override
-    public void loadFrom(@Nonnull Element element) {
-        field = attribute(element, "field").orElseThrow(() -> new NullPointerException("field"));
-        target = target(element, NULL::from);
-        value = value(element, NULL::from);
     }
 
     @Nonnull

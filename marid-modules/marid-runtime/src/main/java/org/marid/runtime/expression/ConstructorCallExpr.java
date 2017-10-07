@@ -21,8 +21,6 @@
 
 package org.marid.runtime.expression;
 
-import org.w3c.dom.Element;
-
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,8 +28,6 @@ import java.util.Collection;
 import java.util.List;
 
 import static java.util.stream.Collectors.joining;
-import static org.marid.runtime.expression.MethodCallExpr.args;
-import static org.marid.runtime.expression.MethodCallExpr.target;
 import static org.marid.runtime.expression.NullExpr.NULL;
 
 public class ConstructorCallExpr extends AbstractExpression implements ConstructorCallExpression {
@@ -73,18 +69,6 @@ public class ConstructorCallExpr extends AbstractExpression implements Construct
     public void setArgs(@Nonnull Collection<? extends Expression> args) {
         this.args.clear();
         this.args.addAll(args);
-    }
-
-    @Override
-    public void saveTo(@Nonnull Element element) {
-        target(element, target);
-        args(element, args);
-    }
-
-    @Override
-    public void loadFrom(@Nonnull Element element) {
-        target = target(element, NULL::from);
-        args.addAll(args(element, NULL::from));
     }
 
     @Override

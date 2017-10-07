@@ -25,6 +25,7 @@ import org.marid.runtime.context2.BeanContext;
 import org.marid.runtime.types.TypeContext;
 import org.marid.runtime.util.ReflectUtils;
 import org.marid.runtime.util.TypeUtils;
+import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -34,6 +35,9 @@ import java.util.NoSuchElementException;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Objects.requireNonNull;
+import static org.marid.io.Xmls.attribute;
+import static org.marid.runtime.expression.MethodCallExpr.target;
+import static org.marid.runtime.expression.NullExpr.NULL;
 
 public interface FieldGetExpression extends Expression {
 
@@ -46,6 +50,18 @@ public interface FieldGetExpression extends Expression {
     String getField();
 
     void setField(@Nonnull String field);
+
+    @Override
+    default void saveTo(@Nonnull Element element) {
+        element.setAttribute("field", getField());
+        target(element, getTarget());
+    }
+
+    @Override
+    default void loadFrom(@Nonnull Element element) {
+        setTarget(target(element, NULL::from));
+        setField(attribute(element, "field").orElseThrow(() -> new NullPointerException("field")));
+    }
 
     @Nonnull
     @Override

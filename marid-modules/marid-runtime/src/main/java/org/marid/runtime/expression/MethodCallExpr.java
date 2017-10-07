@@ -30,7 +30,6 @@ import java.util.function.Function;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
-import static org.marid.io.Xmls.attribute;
 import static org.marid.io.Xmls.elements;
 import static org.marid.misc.Builder.build;
 import static org.marid.runtime.expression.NullExpr.NULL;
@@ -90,20 +89,6 @@ public class MethodCallExpr extends AbstractExpression implements MethodCallExpr
     public void setArgs(@Nonnull Collection<? extends Expression> args) {
         this.args.clear();
         this.args.addAll(args);
-    }
-
-    @Override
-    public void saveTo(@Nonnull Element element) {
-        element.setAttribute("method", method);
-        target(element, target);
-        args(element, args);
-    }
-
-    @Override
-    public void loadFrom(@Nonnull Element element) {
-        target = target(element, NULL::from);
-        method = attribute(element, "method").orElseThrow(() -> new NullPointerException("method"));
-        args.addAll(args(element, NULL::from));
     }
 
     @Override

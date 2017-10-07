@@ -28,10 +28,8 @@ import javax.annotation.Nonnull;
 import java.util.NoSuchElementException;
 import java.util.function.Function;
 
-import static org.marid.io.Xmls.attribute;
 import static org.marid.io.Xmls.elements;
 import static org.marid.misc.Builder.build;
-import static org.marid.runtime.expression.MethodCallExpr.target;
 import static org.marid.runtime.expression.NullExpr.NULL;
 
 public class FieldSetExpr extends AbstractExpression implements FieldSetExpression {
@@ -88,20 +86,6 @@ public class FieldSetExpr extends AbstractExpression implements FieldSetExpressi
     @Override
     public void setValue(@Nonnull Expression value) {
         this.value = value;
-    }
-
-    @Override
-    public void saveTo(@Nonnull Element element) {
-        element.setAttribute("field", field);
-        target(element, target);
-        value(element, value);
-    }
-
-    @Override
-    public void loadFrom(@Nonnull Element element) {
-        field = attribute(element, "field").orElseThrow(() -> new NullPointerException("field"));
-        target = target(element, NULL::from);
-        value = value(element, NULL::from);
     }
 
     public static Expression value(Element element, Function<Element, Expression> expressionFactory) {

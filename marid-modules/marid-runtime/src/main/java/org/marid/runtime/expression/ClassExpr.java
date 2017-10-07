@@ -21,9 +21,6 @@
 
 package org.marid.runtime.expression;
 
-import org.marid.io.Xmls;
-import org.w3c.dom.Element;
-
 import javax.annotation.Nonnull;
 
 public class ClassExpr extends AbstractExpression implements ClassExpression {
@@ -48,16 +45,6 @@ public class ClassExpr extends AbstractExpression implements ClassExpression {
     @Override
     public void setClassName(@Nonnull String className) {
         this.className = className;
-    }
-
-    @Override
-    public void saveTo(@Nonnull Element element) {
-        element.setAttribute("class", className);
-    }
-
-    @Override
-    public void loadFrom(@Nonnull Element element) {
-        className = Xmls.attribute(element, "class").orElseThrow(() -> new NullPointerException("class"));
     }
 
     @Override
