@@ -21,10 +21,6 @@
 
 package org.marid.runtime.expression;
 
-import org.jetbrains.annotations.NotNull;
-import org.marid.io.Xmls;
-import org.w3c.dom.Element;
-
 import javax.annotation.Nonnull;
 
 public abstract class ValueExpr extends AbstractExpression implements ValueExpression {
@@ -37,19 +33,14 @@ public abstract class ValueExpr extends AbstractExpression implements ValueExpre
     }
 
     @Override
-    public void saveTo(@NotNull Element element) {
-        element.setAttribute("value", value);
-    }
-
-    @Override
-    public void loadFrom(@Nonnull Element element) {
-        value = Xmls.attribute(element, "value").orElseThrow(() -> new NullPointerException("value"));
-    }
-
-    @Override
     @Nonnull
     public String getValue() {
         return value;
+    }
+
+    @Override
+    public void setValue(@Nonnull String value) {
+        this.value = value;
     }
 
     @Override

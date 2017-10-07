@@ -21,10 +21,26 @@
 
 package org.marid.runtime.expression;
 
+import org.jetbrains.annotations.NotNull;
+import org.marid.io.Xmls;
+import org.w3c.dom.Element;
+
 import javax.annotation.Nonnull;
 
 public interface ValueExpression extends Expression {
 
     @Nonnull
     String getValue();
+
+    void setValue(@Nonnull String value);
+
+    @Override
+    default void saveTo(@NotNull Element element) {
+        element.setAttribute("value", getValue());
+    }
+
+    @Override
+    default void loadFrom(@Nonnull Element element) {
+        setValue(Xmls.attribute(element, "value").orElseThrow(() -> new NullPointerException("value")));
+    }
 }

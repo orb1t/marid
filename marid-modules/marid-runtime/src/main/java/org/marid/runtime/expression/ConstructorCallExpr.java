@@ -26,6 +26,7 @@ import org.w3c.dom.Element;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import static java.util.stream.Collectors.joining;
@@ -58,9 +59,20 @@ public class ConstructorCallExpr extends AbstractExpression implements Construct
     }
 
     @Override
+    public void setTarget(@Nonnull Expression target) {
+        this.target = target;
+    }
+
+    @Override
     @Nonnull
     public List<Expression> getArgs() {
         return args;
+    }
+
+    @Override
+    public void setArgs(@Nonnull Collection<? extends Expression> args) {
+        this.args.clear();
+        this.args.addAll(args);
     }
 
     @Override

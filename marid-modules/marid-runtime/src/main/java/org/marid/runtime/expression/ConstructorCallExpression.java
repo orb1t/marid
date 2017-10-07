@@ -31,6 +31,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
@@ -46,8 +47,12 @@ public interface ConstructorCallExpression extends Expression {
     @Nonnull
     Expression getTarget();
 
+    void setTarget(@Nonnull Expression target);
+
     @Nonnull
     List<? extends Expression> getArgs();
+
+    void setArgs(@Nonnull Collection<? extends Expression> args);
 
     @Nullable
     @Override

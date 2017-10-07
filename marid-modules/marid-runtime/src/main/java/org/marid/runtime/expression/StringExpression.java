@@ -34,6 +34,8 @@ public interface StringExpression extends Expression {
     @Nonnull
     String getValue();
 
+    void setValue(@Nonnull String value);
+
     @Nonnull
     @Override
     default Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {

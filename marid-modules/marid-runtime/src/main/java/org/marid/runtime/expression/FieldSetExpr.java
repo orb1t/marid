@@ -64,15 +64,30 @@ public class FieldSetExpr extends AbstractExpression implements FieldSetExpressi
     }
 
     @Override
+    public void setTarget(@Nonnull Expression target) {
+        this.target = target;
+    }
+
+    @Override
     @Nonnull
     public String getField() {
         return field;
     }
 
     @Override
+    public void setField(@Nonnull String field) {
+        this.field = field;
+    }
+
+    @Override
     @Nonnull
     public Expression getValue() {
         return value;
+    }
+
+    @Override
+    public void setValue(@Nonnull Expression value) {
+        this.value = value;
     }
 
     @Override

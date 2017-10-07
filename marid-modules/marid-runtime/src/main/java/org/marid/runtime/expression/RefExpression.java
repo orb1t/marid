@@ -24,15 +24,30 @@ package org.marid.runtime.expression;
 import org.marid.runtime.context2.BeanContext;
 import org.marid.runtime.types.TypeContext;
 import org.marid.runtime.util.ReflectUtils;
+import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
 
+import static org.marid.io.Xmls.attribute;
+
 public interface RefExpression extends Expression {
 
     @Nonnull
     String getReference();
+
+    void setReference(@Nonnull String reference);
+
+    @Override
+    default void saveTo(@Nonnull Element element) {
+        element.setAttribute("ref", getReference());
+    }
+
+    @Override
+    default void loadFrom(@Nonnull Element element) {
+        setReference(attribute(element, "ref").orElseThrow(IllegalStateException::new));
+    }
 
     @Nonnull
     @Override

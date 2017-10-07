@@ -38,11 +38,17 @@ public interface FieldSetStaticExpression extends Expression {
     @Nonnull
     Expression getTarget();
 
+    void setTarget(@Nonnull Expression target);
+
     @Nonnull
     String getField();
 
+    void setField(@Nonnull String field);
+
     @Nonnull
     Expression getValue();
+
+    void setValue(@Nonnull Expression value);
 
     @Nonnull
     @Override

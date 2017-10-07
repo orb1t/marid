@@ -45,6 +45,11 @@ public class StringExpr extends AbstractExpression implements StringExpression {
     }
 
     @Override
+    public void setValue(@Nonnull String value) {
+        this.value = value;
+    }
+
+    @Override
     public void saveTo(@Nonnull Element element) {
         element.setTextContent(value);
     }

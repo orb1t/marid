@@ -36,6 +36,8 @@ public interface ClassExpression extends Expression {
     @Nonnull
     String getClassName();
 
+    void setClassName(@Nonnull String className);
+
     @Nonnull
     @Override
     default Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {

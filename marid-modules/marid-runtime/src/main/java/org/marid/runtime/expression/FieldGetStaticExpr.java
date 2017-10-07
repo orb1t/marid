@@ -54,9 +54,19 @@ public class FieldGetStaticExpr extends AbstractExpression implements FieldGetSt
     }
 
     @Override
+    public void setTarget(@Nonnull Expression target) {
+        this.target = target;
+    }
+
+    @Override
     @Nonnull
     public String getField() {
         return field;
+    }
+
+    @Override
+    public void setField(@Nonnull String field) {
+        this.field = field;
     }
 
     @Override

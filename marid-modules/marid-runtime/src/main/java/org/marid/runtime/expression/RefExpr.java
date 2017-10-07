@@ -21,11 +21,7 @@
 
 package org.marid.runtime.expression;
 
-import org.w3c.dom.Element;
-
 import javax.annotation.Nonnull;
-
-import static org.marid.io.Xmls.attribute;
 
 public class RefExpr extends AbstractExpression implements RefExpression {
 
@@ -47,13 +43,8 @@ public class RefExpr extends AbstractExpression implements RefExpression {
     }
 
     @Override
-    public void saveTo(@Nonnull Element element) {
-        element.setAttribute("ref", reference);
-    }
-
-    @Override
-    public void loadFrom(@Nonnull Element element) {
-        reference = attribute(element, "ref").orElseThrow(IllegalStateException::new);
+    public void setReference(@Nonnull String reference) {
+        this.reference = reference;
     }
 
     @Override

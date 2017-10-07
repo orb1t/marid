@@ -40,8 +40,12 @@ public interface FieldGetExpression extends Expression {
     @Nonnull
     Expression getTarget();
 
+    void setTarget(@Nonnull Expression target);
+
     @Nonnull
     String getField();
+
+    void setField(@Nonnull String field);
 
     @Nonnull
     @Override

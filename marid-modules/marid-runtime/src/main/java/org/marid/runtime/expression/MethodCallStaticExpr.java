@@ -21,17 +21,13 @@
 
 package org.marid.runtime.expression;
 
-import org.w3c.dom.Element;
-
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import static java.util.stream.Collectors.joining;
-import static org.marid.io.Xmls.attribute;
-import static org.marid.runtime.expression.MethodCallExpr.args;
-import static org.marid.runtime.expression.MethodCallExpr.target;
 import static org.marid.runtime.expression.NullExpr.NULL;
 
 public class MethodCallStaticExpr extends AbstractExpression implements MethodCallStaticExpression {
@@ -64,9 +60,19 @@ public class MethodCallStaticExpr extends AbstractExpression implements MethodCa
     }
 
     @Override
+    public void setTarget(@Nonnull Expression target) {
+        this.target = target;
+    }
+
+    @Override
     @Nonnull
     public String getMethod() {
         return method;
+    }
+
+    @Override
+    public void setMethod(@Nonnull String method) {
+        this.method = method;
     }
 
     @Override
@@ -76,17 +82,9 @@ public class MethodCallStaticExpr extends AbstractExpression implements MethodCa
     }
 
     @Override
-    public void saveTo(@Nonnull Element element) {
-        element.setAttribute("method", method);
-        target(element, target);
-        args(element, args);
-    }
-
-    @Override
-    public void loadFrom(@Nonnull Element element) {
-        target = target(element, NULL::from);
-        method = attribute(element, "method").orElseThrow(() -> new NullPointerException("method"));
-        args.addAll(args(element, NULL::from));
+    public void setArgs(@Nonnull Collection<? extends Expression> args) {
+        this.args.clear();
+        this.args.addAll(args);
     }
 
     @Override

@@ -46,6 +46,11 @@ public class ClassExpr extends AbstractExpression implements ClassExpression {
     }
 
     @Override
+    public void setClassName(@Nonnull String className) {
+        this.className = className;
+    }
+
+    @Override
     public void saveTo(@Nonnull Element element) {
         element.setAttribute("class", className);
     }

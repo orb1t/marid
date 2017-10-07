@@ -73,15 +73,30 @@ public class FieldSetStaticExpr extends AbstractExpression implements FieldSetSt
         return target;
     }
 
+    @Override
+    public void setTarget(@Nonnull Expression target) {
+        this.target = target;
+    }
+
     @Nonnull
     @Override
     public String getField() {
         return field;
     }
 
+    @Override
+    public void setField(@Nonnull String field) {
+        this.field = field;
+    }
+
     @Nonnull
     @Override
     public Expression getValue() {
         return value;
+    }
+
+    @Override
+    public void setValue(@Nonnull Expression value) {
+        this.value = value;
     }
 }

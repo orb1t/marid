@@ -25,10 +25,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.function.Function;
 
 import static java.util.stream.Collectors.joining;
@@ -68,15 +65,31 @@ public class MethodCallExpr extends AbstractExpression implements MethodCallExpr
     }
 
     @Override
+    public void setTarget(@Nonnull Expression target) {
+        this.target = target;
+    }
+
+    @Override
     @Nonnull
     public String getMethod() {
         return method;
     }
 
     @Override
+    public void setMethod(@Nonnull String method) {
+        this.method = method;
+    }
+
+    @Override
     @Nonnull
     public List<Expression> getArgs() {
         return args;
+    }
+
+    @Override
+    public void setArgs(@Nonnull Collection<? extends Expression> args) {
+        this.args.clear();
+        this.args.addAll(args);
     }
 
     @Override
@@ -119,7 +132,7 @@ public class MethodCallExpr extends AbstractExpression implements MethodCallExpr
                 .collect(toList());
     }
 
-    public static void args(Element element, List<Expression> args) {
+    public static void args(Element element, List<? extends Expression> args) {
         final Document document = element.getOwnerDocument();
         final Element argsElement = build(document.createElement("args"), element::appendChild);
         args.forEach(arg -> arg.to(argsElement));
