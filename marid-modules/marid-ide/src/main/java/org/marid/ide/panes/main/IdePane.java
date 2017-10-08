@@ -21,7 +21,6 @@
 package org.marid.ide.panes.main;
 
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
 import org.marid.ide.status.IdeStatusBar;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -40,10 +39,8 @@ public class IdePane extends BorderPane {
     }
 
     @Autowired
-    private void top(IdeMenu ideMenu, IdeToolbar toolbar) {
-        final BorderPane menuPane = new BorderPane();
-        menuPane.setCenter(ideMenu);
-        setTop(new VBox(menuPane, toolbar));
+    private void top(IdeMenu ideMenu) {
+        setTop(ideMenu);
     }
 
     @Autowired

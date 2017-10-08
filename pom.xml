@@ -296,7 +296,6 @@
                     <configuration>
                         <showWarnings>true</showWarnings>
                         <showDeprecation>true</showDeprecation>
-                        <optimize>true</optimize>
                         <parameters>true</parameters>
                         <release>9</release>
                         <testRelease>9</testRelease>

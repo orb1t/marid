@@ -43,6 +43,7 @@ public class IdeMenu extends MenuBar {
     @Autowired
     public IdeMenu(@IdeAction Supplier<List<FxAction>> actionFactory) {
         this.actionFactory = actionFactory;
+        setUseSystemMenuBar(true);
     }
 
     @EventListener

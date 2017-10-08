@@ -20,6 +20,8 @@
 
 package org.marid.ide.panes.main;
 
+import javafx.geometry.Side;
+import javafx.scene.layout.BorderPane;
 import org.controlsfx.control.HiddenSidesPane;
 import org.marid.ide.logging.IdeLogPane;
 import org.marid.ide.tabs.IdeTabPane;
@@ -33,19 +35,26 @@ import java.util.prefs.Preferences;
  * @since 0.9
  */
 @Component
-public class IdeMainPane extends HiddenSidesPane {
+public class IdeMainPane extends BorderPane {
 
+    private final HiddenSidesPane pane;
     private final IdeTabPane tabPane;
     private final IdeLogPane ideLogPane;
     private final Preferences preferences;
 
     @Autowired
-    public IdeMainPane(IdeTabPane tabPane, IdeLogPane ideLogPane, Preferences preferences) {
-        super(tabPane, null, null, ideLogPane, null);
+    public IdeMainPane(IdeTabPane tabPane, IdeLogPane ideLogPane, IdeToolbar toolbar, Preferences preferences) {
+        this.pane = new HiddenSidesPane(tabPane, null, null, ideLogPane, null);
         this.tabPane = tabPane;
         this.ideLogPane = ideLogPane;
         this.preferences = preferences;
         this.ideLogPane.maxHeightProperty().bind(heightProperty().subtract(100.0));
+        setTop(toolbar);
+        setCenter(pane);
         setFocusTraversable(false);
+    }
+
+    public void setPinnedSide(Side side) {
+        pane.setPinnedSide(side);
     }
 }
