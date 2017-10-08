@@ -23,7 +23,9 @@ package org.marid.runtime.expression;
 
 import org.marid.runtime.context2.BeanContext;
 import org.marid.runtime.types.TypeContext;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -59,9 +61,14 @@ public interface Expression {
         }
     }
 
-    default void to(@Nonnull Element element) {
+    default void to(@Nonnull Node element) {
         final String tag = getClass().getSimpleName().replace("Expr", "");
-        final Element e = element.getOwnerDocument().createElement(tag);
+        final Element e;
+        if (element instanceof Document) {
+            e = ((Document) element).createElement(tag);
+        } else {
+            e = element.getOwnerDocument().createElement(tag);
+        }
         saveTo(e);
         element.appendChild(e);
     }

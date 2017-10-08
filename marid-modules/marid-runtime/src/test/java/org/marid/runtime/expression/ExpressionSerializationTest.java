@@ -25,8 +25,14 @@ import org.junit.jupiter.api.Test;
 import org.marid.io.Xmls;
 
 import javax.xml.transform.stream.StreamResult;
+import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.io.UncheckedIOException;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ExpressionSerializationTest {
 
@@ -37,13 +43,41 @@ class ExpressionSerializationTest {
         final StringWriter writer = new StringWriter();
 
         try (writer) {
-            Xmls.writeFormatted("expr", expr::to, new StreamResult(writer));
+            Xmls.writeFormatted(expr::to, new StreamResult(writer));
         }
 
         final StringReader reader = new StringReader(writer.toString());
 
         try (reader) {
+            final Expression expression = Xmls.read(reader, NullExpr.NULL::from);
 
+            assertTrue(expression instanceof NullExpression);
+        }
+    }
+
+    private <T extends Expression> void check(Class<T> type, Consumer<T> configurator, BiConsumer<T, T> checker){
+        final T expected;
+        try {
+            expected = type.getConstructor().newInstance();
+        } catch (ReflectiveOperationException x) {
+            throw new IllegalStateException(x);
+        }
+        configurator.accept(expected);
+
+        final StringWriter writer = new StringWriter();
+
+        try (writer) {
+            Xmls.writeFormatted(expected::to, new StreamResult(writer));
+        } catch (IOException x) {
+            throw new UncheckedIOException(x);
+        }
+
+        final StringReader reader = new StringReader(writer.toString());
+
+        try (reader) {
+            final Expression expression = Xmls.read(reader, NullExpr.NULL::from);
+
+            assertTrue(expression instanceof NullExpression);
         }
     }
 }
