@@ -23,6 +23,7 @@ package org.marid.type;
 import com.google.common.reflect.TypeResolver;
 import com.google.common.reflect.TypeToken;
 import org.marid.misc.Casts;
+import org.marid.runtime.types.TypeEvaluator;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -32,13 +33,15 @@ import java.util.*;
 
 import static com.google.common.reflect.TypeToken.of;
 
-public class TypeEvaluator {
+public class GuavaTypeEvaluator implements TypeEvaluator {
 
     private final Set<TypeToken<?>> passed = new HashSet<>();
     private final Map<TypeToken<?>, List<TypeToken<?>>> typeMappings = new LinkedHashMap<>();
 
-    public void where(Type formal, Type actual) {
+    @Override
+    public GuavaTypeEvaluator where(Type formal, Type actual) {
         where(TypeToken.of(formal), TypeToken.of(actual));
+        return this;
     }
 
     public void where(TypeToken<?> formal, TypeToken<?> actual) {
@@ -74,6 +77,7 @@ public class TypeEvaluator {
         }
     }
 
+    @Override
     public Type resolve(Type type) {
         try {
             return typeMappings.entrySet().stream()
