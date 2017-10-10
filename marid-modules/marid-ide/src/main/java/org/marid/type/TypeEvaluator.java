@@ -75,9 +75,14 @@ public class TypeEvaluator {
     }
 
     public Type resolve(Type type) {
-        return typeMappings.entrySet().stream()
-                .reduce(new TypeResolver(), this::where, (r1, r2) -> r2)
-                .resolveType(type);
+        try {
+            return typeMappings.entrySet().stream()
+                    .reduce(new TypeResolver(), this::where, (r1, r2) -> r2)
+                    .resolveType(type);
+        } finally {
+            typeMappings.clear();
+            passed.clear();
+        }
     }
 
     private TypeToken<?> commonAncestor(Map.Entry<TypeToken<?>, List<TypeToken<?>>> entry) {
