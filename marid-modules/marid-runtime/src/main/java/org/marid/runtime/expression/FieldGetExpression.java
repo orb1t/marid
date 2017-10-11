@@ -69,8 +69,7 @@ public interface FieldGetExpression extends Expression {
         final Type targetType = getTarget().getType(owner, typeContext);
         final Class<?> targetClass = typeContext.getRaw(targetType);
         return TypeUtils.getField(targetClass, typeContext.resolvePlaceholders(getField()))
-                .map(f -> typeContext.resolve(targetType, f.getGenericType(), emptyMap()))
-                .map(t -> owner != null ? typeContext.resolve(owner, t, emptyMap()) : t)
+                .map(f -> typeContext.resolve(targetType, f.getGenericType()))
                 .orElseGet(typeContext::getWildcard);
     }
 

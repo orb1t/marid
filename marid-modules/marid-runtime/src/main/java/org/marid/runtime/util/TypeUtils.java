@@ -21,14 +21,14 @@
 
 package org.marid.runtime.util;
 
+import org.marid.runtime.expression.Expression;
+import org.marid.runtime.types.TypeContext;
+
 import javax.annotation.Nonnull;
-import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import javax.annotation.Nullable;
+import java.lang.reflect.*;
+import java.util.List;
 import java.util.Optional;
-import java.util.function.IntFunction;
 
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
@@ -47,12 +47,33 @@ public interface TypeUtils {
     }
 
     @Nonnull
-    static Map<Type, Type> map(@Nonnull Type[] formalTypes, @Nonnull IntFunction<Type> actualTypeFunc) {
-        final LinkedHashMap<Type, Type> map = new LinkedHashMap<>(formalTypes.length);
-        for (int i = 0; i < formalTypes.length; i++) {
-            map.put(formalTypes[i], actualTypeFunc.apply(i));
-        }
-        return map;
+    static Type type(@Nonnull Type returnType,
+                     @Nonnull Type[] argTypes,
+                     @Nonnull List<? extends Expression> args,
+                     @Nullable Type owner,
+                     @Nonnull TypeContext context) {
+        return context.evaluate(e -> {
+            for (int i = 0; i < argTypes.length; i++) {
+                e.where(argTypes[i], args.get(i).getType(owner, context));
+            }
+            return e.resolve(returnType);
+        });
+    }
+
+    @Nonnull
+    static Type type(@Nonnull Method method,
+                     @Nonnull List<? extends Expression> args,
+                     @Nullable Type owner,
+                     @Nonnull TypeContext context) {
+        return type(method.getGenericReturnType(), method.getGenericParameterTypes(), args, owner, context);
+    }
+
+    @Nonnull
+    static Type type(@Nonnull Constructor<?> constructor,
+                     @Nonnull List<? extends Expression> args,
+                     @Nullable Type owner,
+                     @Nonnull TypeContext context) {
+        return type(context.getType(constructor.getDeclaringClass()), constructor.getGenericParameterTypes(), args, owner, context);
     }
 
     @Nonnull

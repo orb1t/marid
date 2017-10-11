@@ -25,6 +25,7 @@ import com.google.common.reflect.TypeToken;
 import org.marid.misc.Casts;
 import org.marid.runtime.types.TypeEvaluator;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -38,6 +39,7 @@ public class GuavaTypeEvaluator implements TypeEvaluator {
     private final Set<TypeToken<?>> passed = new HashSet<>();
     private final Map<TypeToken<?>, List<TypeToken<?>>> typeMappings = new LinkedHashMap<>();
 
+    @Nonnull
     @Override
     public GuavaTypeEvaluator where(Type formal, Type actual) {
         where(TypeToken.of(formal), TypeToken.of(actual));
@@ -77,6 +79,7 @@ public class GuavaTypeEvaluator implements TypeEvaluator {
         }
     }
 
+    @Nonnull
     @Override
     public Type resolve(Type type) {
         try {

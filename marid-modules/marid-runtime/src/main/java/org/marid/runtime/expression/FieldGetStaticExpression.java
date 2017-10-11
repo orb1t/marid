@@ -33,7 +33,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.NoSuchElementException;
 
-import static java.util.Collections.emptyMap;
 import static java.util.Objects.requireNonNull;
 import static org.marid.io.Xmls.attribute;
 import static org.marid.runtime.expression.MethodCallExpr.target;
@@ -69,7 +68,7 @@ public interface FieldGetStaticExpression extends Expression {
         final Type targetType = getTarget().getType(owner, typeContext);
         final Class<?> targetClass = typeContext.getRaw(targetType);
         return TypeUtils.getField(targetClass, typeContext.resolvePlaceholders(getField()))
-                .map(f -> owner != null ? typeContext.resolve(owner, f.getGenericType(), emptyMap()) : f.getGenericType())
+                .map(f -> typeContext.resolve(owner, f.getGenericType()))
                 .orElseGet(typeContext::getWildcard);
     }
 

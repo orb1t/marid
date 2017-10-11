@@ -21,11 +21,14 @@
 
 package org.marid.runtime.types;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.Type;
 
 public interface TypeEvaluator {
 
+    @Nonnull
     TypeEvaluator where(Type formal, Type actual);
 
+    @Nonnull
     Type resolve(Type type);
 }

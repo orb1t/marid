@@ -24,7 +24,6 @@ package org.marid.runtime.types;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
-import java.util.Map;
 import java.util.function.Function;
 
 public interface TypeContext {
@@ -36,7 +35,7 @@ public interface TypeContext {
     Type getBeanType(@Nonnull String name);
 
     @Nonnull
-    Type resolve(@Nullable Type owner, @Nonnull Type type, @Nonnull Map<Type, Type> mapping);
+    Type resolve(@Nullable Type owner, @Nonnull Type type);
 
     @Nonnull
     String resolvePlaceholders(@Nonnull String value);
@@ -55,6 +54,5 @@ public interface TypeContext {
     @Nonnull
     Type getType(@Nonnull Class<?> type);
 
-    @Nullable
     <T> T evaluate(@Nonnull Function<TypeEvaluator, T> callback);
 }

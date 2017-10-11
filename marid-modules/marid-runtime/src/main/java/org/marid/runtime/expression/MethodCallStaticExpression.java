@@ -46,7 +46,6 @@ import static org.marid.runtime.context.MaridRuntimeUtils.value;
 import static org.marid.runtime.expression.MethodCallExpr.args;
 import static org.marid.runtime.expression.MethodCallExpr.target;
 import static org.marid.runtime.expression.NullExpr.NULL;
-import static org.marid.runtime.util.TypeUtils.map;
 
 public interface MethodCallStaticExpression extends Expression {
 
@@ -102,11 +101,7 @@ public interface MethodCallStaticExpression extends Expression {
                                 return true;
                             })
                             .findFirst()
-                            .map(m -> typeContext.resolve(
-                                    null,
-                                    m.getGenericReturnType(),
-                                    map(m.getGenericParameterTypes(), i -> getArgs().get(i).getType(owner, typeContext)))
-                            );
+                            .map(m -> TypeUtils.type(m, getArgs(), owner, typeContext));
                 })
                 .orElseGet(typeContext::getWildcard);
     }

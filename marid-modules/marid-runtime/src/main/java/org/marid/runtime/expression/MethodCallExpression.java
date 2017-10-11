@@ -24,6 +24,7 @@ package org.marid.runtime.expression;
 import org.marid.runtime.context2.BeanContext;
 import org.marid.runtime.types.TypeContext;
 import org.marid.runtime.util.ReflectUtils;
+import org.marid.runtime.util.TypeUtils;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
@@ -45,7 +46,6 @@ import static org.marid.runtime.context.MaridRuntimeUtils.value;
 import static org.marid.runtime.expression.MethodCallExpr.args;
 import static org.marid.runtime.expression.MethodCallExpr.target;
 import static org.marid.runtime.expression.NullExpr.NULL;
-import static org.marid.runtime.util.TypeUtils.map;
 
 public interface MethodCallExpression extends Expression {
 
@@ -99,11 +99,8 @@ public interface MethodCallExpression extends Expression {
                     return true;
                 })
                 .findFirst()
-                .map(m -> typeContext.resolve(
-                        null,
-                        m.getGenericReturnType(),
-                        map(m.getGenericParameterTypes(), i -> getArgs().get(i).getType(owner, typeContext)))
-                )
+                .map(m -> TypeUtils.type(m, getArgs(), t, typeContext))
+                .map(type -> typeContext.resolve(t, type))
                 .orElseGet(typeContext::getWildcard);
     }
 
