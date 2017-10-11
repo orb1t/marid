@@ -37,6 +37,10 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.marid.runtime.expression.ConstantExpr.*;
+import static org.marid.runtime.expression.ConstantExpression.ConstantType.BOOL;
+import static org.marid.runtime.expression.ConstantExpression.ConstantType.INT;
+import static org.marid.runtime.expression.ConstantExpression.ConstantType.LONG;
 
 class ExpressionSerializationTest {
 
@@ -47,14 +51,14 @@ class ExpressionSerializationTest {
 
     private static Stream<? extends ValueExpression> valueClasses() {
         return Stream.of(
-                new BooleanExpr("x"),
-                new IntegerExpr("x"),
-                new LongExpr("x"),
-                new ShortExpr("x"),
-                new ByteExpr("x"),
-                new CharExpr("x"),
-                new DoubleExpr("x"),
-                new FloatExpr("x")
+                boolExpr("x"),
+                intExpr("x"),
+                longExpr("x"),
+                shortExpr("x"),
+                byteExpr("x"),
+                charExpr("x"),
+                doubleExpr("x"),
+                floatExpr("x")
         );
     }
 
@@ -77,19 +81,20 @@ class ExpressionSerializationTest {
     @Test
     void testMethodCall() {
         check(new MethodCallExpr(
-                        new BooleanExpr("x"),
+                        boolExpr("x"),
                         "x",
                         new MethodCallStaticExpr(
                                 new ConstructorCallExpr(NullExpr.NULL, ThisExpr.THIS),
                                 "v",
-                                new IntegerExpr("0"),
-                                new LongExpr("1")
+                                intExpr("0"),
+                                longExpr("1")
                         ),
                         new RefExpr("u")),
                 (e, a) -> {
-                    final BooleanExpr expectedTarget = (BooleanExpr) e.getTarget();
-                    final BooleanExpr actualTarget = (BooleanExpr) a.getTarget();
+                    final ConstantExpr expectedTarget = (ConstantExpr) e.getTarget();
+                    final ConstantExpr actualTarget = (ConstantExpr) a.getTarget();
                     assertEquals(expectedTarget.getValue(), actualTarget.getValue());
+                    assertEquals(BOOL, actualTarget.getType());
 
                     assertEquals(e.getMethod(), a.getMethod());
 
@@ -103,11 +108,14 @@ class ExpressionSerializationTest {
                     assertTrue(actualArg0Target.getTarget() instanceof NullExpression);
                     assertTrue(actualArg0Target.getArgs().get(0) instanceof ThisExpression);
 
-                    final IntegerExpr arg0 = (IntegerExpr) actualArg0.getArgs().get(0);
-                    final LongExpr arg1 = (LongExpr) actualArg0.getArgs().get(1);
+                    final ConstantExpr arg0 = (ConstantExpr) actualArg0.getArgs().get(0);
+                    final ConstantExpr arg1 = (ConstantExpr) actualArg0.getArgs().get(1);
 
                     assertEquals("0", arg0.getValue());
+                    assertEquals(INT, arg0.getType());
+
                     assertEquals("1", arg1.getValue());
+                    assertEquals(LONG, arg1.getType());
                 });
     }
 
