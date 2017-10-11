@@ -82,10 +82,10 @@ public interface MethodCallStaticExpression extends Expression {
     @Override
     default Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {
         final Type targetType = getTarget().getType(owner, typeContext);
+        final String methodName = typeContext.resolvePlaceholders(getMethod());
         return TypeUtils.classType(targetType)
                 .flatMap(t -> {
                     final Class<?> targetClass = typeContext.getRaw(t);
-                    final String methodName = typeContext.resolvePlaceholders(getMethod());
                     return Stream.of(targetClass.getMethods())
                             .filter(m -> m.getName().equals(methodName))
                             .filter(m -> m.getParameterCount() == getArgs().size())

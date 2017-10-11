@@ -66,9 +66,10 @@ public interface FieldGetStaticExpression extends Expression {
     @Override
     default Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {
         final Type targetType = getTarget().getType(owner, typeContext);
-        final Class<?> targetClass = typeContext.getRaw(targetType);
-        return TypeUtils.getField(targetClass, typeContext.resolvePlaceholders(getField()))
-                .map(f -> typeContext.resolve(owner, f.getGenericType()))
+        final String field = typeContext.resolvePlaceholders(getField());
+        return TypeUtils.classType(targetType)
+                .flatMap(tc -> TypeUtils.getField(typeContext.getRaw(tc), field)
+                        .map(f -> typeContext.resolve(owner, f.getGenericType())))
                 .orElseGet(typeContext::getWildcard);
     }
 

@@ -80,22 +80,22 @@ public interface ConstructorCallExpression extends Expression {
     @Override
     default Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {
         final Type t = getTarget().getType(owner, typeContext);
-        final Class<?> targetClass = typeContext.getRaw(t);
-        return Stream.of(targetClass.getConstructors())
-                .filter(m -> m.getParameterCount() == getArgs().size())
-                .filter(m -> !Modifier.isStatic(m.getModifiers()))
-                .filter(m -> {
-                    final Type[] pt = m.getGenericParameterTypes();
-                    for (int i = 0; i < pt.length; i++) {
-                        final Type at = getArgs().get(i).getType(owner, typeContext);
-                        if (!typeContext.isAssignable(pt[i], at)) {
-                            return false;
-                        }
-                    }
-                    return true;
-                })
-                .findFirst()
-                .map(m -> TypeUtils.type(m, getArgs(), owner, typeContext))
+        return TypeUtils.classType(t)
+                .flatMap(tc -> Stream.of(typeContext.getRaw(tc).getConstructors())
+                        .filter(m -> m.getParameterCount() == getArgs().size())
+                        .filter(m -> !Modifier.isStatic(m.getModifiers()))
+                        .filter(m -> {
+                            final Type[] pt = m.getGenericParameterTypes();
+                            for (int i = 0; i < pt.length; i++) {
+                                final Type at = getArgs().get(i).getType(owner, typeContext);
+                                if (!typeContext.isAssignable(pt[i], at)) {
+                                    return false;
+                                }
+                            }
+                            return true;
+                        })
+                        .findFirst()
+                        .map(m -> TypeUtils.type(m, getArgs(), owner, typeContext)))
                 .orElseGet(typeContext::getWildcard);
     }
 
