@@ -21,22 +21,7 @@
 
 package org.marid.runtime.expression;
 
-import org.w3c.dom.Element;
-
-import javax.annotation.Nonnull;
-
 public class ThisExpr extends AbstractExpression implements ThisExpression {
 
     public static final ThisExpr THIS = new ThisExpr();
-
-    public ThisExpr() {
-    }
-
-    @Override
-    public void saveTo(@Nonnull Element element) {
-    }
-
-    @Override
-    public void loadFrom(@Nonnull Element element) {
-    }
 }

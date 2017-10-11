@@ -23,10 +23,14 @@ package org.marid.runtime.expression;
 
 import org.jetbrains.annotations.NotNull;
 import org.marid.misc.Calls;
+import org.marid.runtime.context2.BeanContext;
+import org.marid.runtime.types.TypeContext;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.File;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.InetAddress;
@@ -57,6 +61,18 @@ public interface ConstantExpression extends ValueExpression {
     default void loadFrom(@Nonnull Element element) {
         ValueExpression.super.loadFrom(element);
         setType(ConstantType.valueOf(element.getAttribute("type")));
+    }
+
+    @Nullable
+    @Override
+    default Object evaluate(@Nullable Object self, @Nonnull BeanContext context) {
+        return getType().converter.apply(context.resolvePlaceholders(getValue()));
+    }
+
+    @Nonnull
+    @Override
+    default Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {
+        return getType().type;
     }
 
     enum ConstantType {

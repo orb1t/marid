@@ -29,8 +29,12 @@ import org.w3c.dom.Node;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 public interface Expression {
 
@@ -53,9 +57,19 @@ public interface Expression {
         final ClassLoader classLoader = getClass().getClassLoader();
         final String className = p.getName() + "." + element.getTagName() + "Expr";
         try {
-            final Expression expression = (Expression) classLoader.loadClass(className).getConstructor().newInstance();
-            expression.loadFrom(element);
-            return expression;
+            final Class<?> clazz = classLoader.loadClass(className);
+            final Optional<Field> field = Stream.of(clazz.getFields())
+                    .filter(f -> Modifier.isStatic(f.getModifiers()))
+                    .filter(f -> Modifier.isFinal(f.getModifiers()))
+                    .filter(f -> Expression.class.isAssignableFrom(f.getType()))
+                    .findFirst();
+            if (field.isPresent()) {
+                return (Expression) field.get().get(null);
+            } else {
+                final Expression expression = (Expression) clazz.getConstructor().newInstance();
+                expression.loadFrom(element);
+                return expression;
+            }
         } catch (ReflectiveOperationException x) {
             throw new IllegalStateException(x);
         }

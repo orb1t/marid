@@ -24,12 +24,21 @@ package org.marid.runtime.expression;
 import org.marid.runtime.context2.BeanContext;
 import org.marid.runtime.types.TypeContext;
 import org.marid.runtime.util.ReflectUtils;
+import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
 
 public interface ThisExpression extends Expression {
+
+    @Override
+    default void saveTo(@Nonnull Element element) {
+    }
+
+    @Override
+    default void loadFrom(@Nonnull Element element) {
+    }
 
     @Nonnull
     @Override

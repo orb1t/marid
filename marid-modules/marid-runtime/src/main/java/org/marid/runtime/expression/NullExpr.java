@@ -21,24 +21,9 @@
 
 package org.marid.runtime.expression;
 
-import org.w3c.dom.Element;
-
-import javax.annotation.Nonnull;
-
 public class NullExpr extends AbstractExpression implements NullExpression {
 
     public static final NullExpression NULL = new NullExpr();
-
-    public NullExpr() {
-    }
-
-    @Override
-    public void saveTo(@Nonnull Element element) {
-    }
-
-    @Override
-    public void loadFrom(@Nonnull Element element) {
-    }
 
     @Override
     public String toString() {

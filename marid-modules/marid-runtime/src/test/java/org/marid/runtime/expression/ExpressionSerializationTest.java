@@ -35,12 +35,11 @@ import java.io.UncheckedIOException;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.marid.runtime.expression.ConstantExpr.*;
-import static org.marid.runtime.expression.ConstantExpression.ConstantType.BOOL;
-import static org.marid.runtime.expression.ConstantExpression.ConstantType.INT;
-import static org.marid.runtime.expression.ConstantExpression.ConstantType.LONG;
+import static org.marid.runtime.expression.ConstantExpression.ConstantType.*;
+import static org.marid.runtime.expression.NullExpr.NULL;
+import static org.marid.runtime.expression.ThisExpr.THIS;
 
 class ExpressionSerializationTest {
 
@@ -84,7 +83,7 @@ class ExpressionSerializationTest {
                         boolExpr("x"),
                         "x",
                         new MethodCallStaticExpr(
-                                new ConstructorCallExpr(NullExpr.NULL, ThisExpr.THIS),
+                                new ConstructorCallExpr(NULL, THIS),
                                 "v",
                                 intExpr("0"),
                                 longExpr("1")
@@ -105,8 +104,8 @@ class ExpressionSerializationTest {
 
                     final ConstructorCallExpr actualArg0Target = (ConstructorCallExpr) actualArg0.getTarget();
 
-                    assertTrue(actualArg0Target.getTarget() instanceof NullExpression);
-                    assertTrue(actualArg0Target.getArgs().get(0) instanceof ThisExpression);
+                    assertSame(NULL, actualArg0Target.getTarget());
+                    assertSame(THIS, actualArg0Target.getArgs().get(0));
 
                     final ConstantExpr arg0 = (ConstantExpr) actualArg0.getArgs().get(0);
                     final ConstantExpr arg1 = (ConstantExpr) actualArg0.getArgs().get(1);
@@ -129,7 +128,7 @@ class ExpressionSerializationTest {
 
         final StringReader reader = new StringReader(writer.toString());
         try (reader) {
-            final Expression expression = Xmls.read(reader, NullExpr.NULL::from);
+            final Expression expression = Xmls.read(reader, NULL::from);
 
             final Class<T> type = Casts.cast(expected.getClass());
             assertTrue(type.isInstance(expression));

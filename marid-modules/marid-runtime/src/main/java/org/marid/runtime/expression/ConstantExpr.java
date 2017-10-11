@@ -21,12 +21,7 @@
 
 package org.marid.runtime.expression;
 
-import org.marid.runtime.context2.BeanContext;
-import org.marid.runtime.types.TypeContext;
-
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.lang.reflect.Type;
 
 import static org.marid.runtime.expression.ConstantExpression.ConstantType.*;
 
@@ -52,18 +47,6 @@ public class ConstantExpr extends ValueExpr implements ConstantExpression {
     @Override
     public void setType(@Nonnull ConstantType type) {
         this.type = type;
-    }
-
-    @Nullable
-    @Override
-    public Object evaluate(@Nullable Object self, @Nonnull BeanContext context) {
-        return type.converter.apply(context.resolvePlaceholders(getValue()));
-    }
-
-    @Nonnull
-    @Override
-    public Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {
-        return type.type;
     }
 
     public static ConstantExpr byteExpr(String value) {
