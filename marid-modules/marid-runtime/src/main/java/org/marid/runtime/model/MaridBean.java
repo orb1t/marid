@@ -42,9 +42,6 @@ public interface MaridBean {
     @Nonnull
     List<? extends MaridBean> getChildren();
 
-    @Nonnull
-    MaridBean add(@Nonnull String name, @Nonnull Expression factory);
-
     default Stream<MaridBean> ancestors() {
         return ofNullable(getParent()).flatMap(p -> concat(of(p), p.ancestors()));
     }

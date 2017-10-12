@@ -18,7 +18,7 @@
  * #L%
  */
 
-package org.marid.type;
+package org.marid.meta;
 
 import com.google.common.reflect.TypeResolver;
 import com.google.common.reflect.TypeToken;

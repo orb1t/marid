@@ -95,7 +95,6 @@ public class MaridRuntimeBean implements MaridBean {
     }
 
     @Nonnull
-    @Override
     public MaridRuntimeBean add(@Nonnull String name, @Nonnull Expression factory) {
         final MaridRuntimeBean bean = new MaridRuntimeBean(this, name, factory);
         children.add(bean);
