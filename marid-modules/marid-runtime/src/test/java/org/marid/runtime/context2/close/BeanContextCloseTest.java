@@ -51,16 +51,14 @@ class BeanContextCloseTest {
                 new MaridDefaultContextListener()
         );
         final MaridRuntimeBean root = new MaridRuntimeBean()
-                .add("bean1", new ConstructorCallExpr(new ClassExpr(C1.class.getName())))
-                .add("bean11", new ConstructorCallExpr(new ClassExpr(C2.class.getName())))
-                .getParent()
-                .getParent()
-                .add("bean2", new ConstructorCallExpr(new ClassExpr(C2.class.getName())))
-                .add("bean21", new ConstructorCallExpr(new ClassExpr(C3.class.getName())))
-                .add("bean211", new ConstructorCallExpr(new ClassExpr(C4.class.getName())))
-                .getParent()
-                .getParent()
-                .getParent();
+                .add("bean1", new ConstructorCallExpr(new ClassExpr(C1.class.getName())), b -> {
+                    b.add("bean11", new ConstructorCallExpr(new ClassExpr(C2.class.getName())));
+                })
+                .add("bean2", new ConstructorCallExpr(new ClassExpr(C2.class.getName())), b -> {
+                    b.add("bean21", new ConstructorCallExpr(new ClassExpr(C3.class.getName())), bb -> {
+                        bb.add("bean211", new ConstructorCallExpr(new ClassExpr(C4.class.getName())));
+                    });
+                });
         try (final BeanContext context = new BeanContext(configuration, root)) {
             throw new AssertionError("Unreachable");
         } catch (Throwable x) {

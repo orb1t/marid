@@ -41,8 +41,7 @@ class BeanContextTest {
     void testOneBean() {
         final BeanConfiguration configuration = new BeanConfiguration(CLASS_LOADER, PROPERTIES);
         final MaridRuntimeBean root = new MaridRuntimeBean()
-                .add("bean1", new FieldGetStaticExpr(new ClassExpr(TimeUnit.class.getName()), "SECONDS"))
-                .getParent();
+                .add("bean1", new FieldGetStaticExpr(new ClassExpr(TimeUnit.class.getName()), "SECONDS"));
         try (final BeanContext context = new BeanContext(configuration, root)) {
             final Object seconds = context.findBean("bean1");
             assertEquals(TimeUnit.SECONDS, seconds);
@@ -54,9 +53,7 @@ class BeanContextTest {
         final BeanConfiguration configuration = new BeanConfiguration(CLASS_LOADER, PROPERTIES);
         final MaridRuntimeBean root = new MaridRuntimeBean()
                 .add("bean1", new MethodCallStaticExpr(new ClassExpr(TimeUnit.class.getName()), "valueOf", new RefExpr("bean2")))
-                .getParent()
-                .add("bean2", new StringExpr("SECONDS"))
-                .getParent();
+                .add("bean2", new StringExpr("SECONDS"));
         try (final BeanContext context = new BeanContext(configuration, root)) {
             final Object seconds = context.findBean("bean1");
             assertEquals(TimeUnit.SECONDS, seconds);

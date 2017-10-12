@@ -32,6 +32,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.function.Consumer;
 
 import static java.util.stream.Collectors.toList;
 import static org.marid.io.Xmls.*;
@@ -94,11 +95,17 @@ public class MaridRuntimeBean implements MaridBean {
         return children;
     }
 
+    @SafeVarargs
     @Nonnull
-    public MaridRuntimeBean add(@Nonnull String name, @Nonnull Expression factory) {
+    public final MaridRuntimeBean add(@Nonnull String name,
+                                      @Nonnull Expression factory,
+                                      @Nonnull Consumer<MaridRuntimeBean>... consumers) {
         final MaridRuntimeBean bean = new MaridRuntimeBean(this, name, factory);
         children.add(bean);
-        return bean;
+        for (final Consumer<MaridRuntimeBean> consumer : consumers) {
+            consumer.accept(bean);
+        }
+        return this;
     }
 
     public void writeTo(Element element) {
