@@ -25,13 +25,15 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
 import org.marid.expression.AbstractExpression;
+import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.props.FxObject;
 import org.marid.runtime.model.MaridBean;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.rmi.server.UID;
+import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Properties;
 import java.util.function.Consumer;
 
 import static javafx.collections.FXCollections.observableArrayList;
@@ -39,7 +41,6 @@ import static org.marid.expression.NullExpr.NULL;
 
 public class MetaBean implements MaridBean {
 
-    public final UID uid = new UID();
     public final MetaBean parent;
     public final StringProperty name = new SimpleStringProperty();
     public final FxObject<AbstractExpression> factory = new FxObject<>(AbstractExpression::getObservables);
@@ -88,6 +89,15 @@ public class MetaBean implements MaridBean {
             consumer.accept(child);
         }
         return this;
+    }
+
+    public Type getType(ClassLoader classLoader, Properties properties) {
+        final GuavaTypeContext context = new GuavaTypeContext(this, classLoader, properties);
+        return getFactory().getType(null, context);
+    }
+
+    public Type getType(ProjectProfile profile) {
+        return getType(profile.getClassLoader(), new Properties());
     }
 
     private Observable[] observables() {

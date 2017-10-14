@@ -23,13 +23,24 @@ package org.marid.runtime.context2;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.marid.runtime.expression.*;
+import org.marid.runtime.model.MaridBean;
 import org.marid.runtime.model.MaridRuntimeBean;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
+import static java.util.List.of;
+import static java.util.Map.entry;
+import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.marid.runtime.expression.NullExpr.NULL;
 
 @Tag("normal")
 class BeanContextTest {
@@ -60,8 +71,47 @@ class BeanContextTest {
         }
     }
 
-    @Test
-    void testCloseNestedContextsOnException() {
+    private static Stream<Arguments> matchingCandidatesArguments() {
+        final MaridRuntimeBean root = new MaridRuntimeBean()
+                .add("b1", NULL, b1 -> {
+                    b1.add("b11", NULL, b11 -> {b11.add("b111", NULL); b11.add("b112", NULL);});
+                    b1.add("b12", NULL);
+                })
+                .add("b2", NULL, b2 -> {
+                    b2.add("b21", NULL, b21 -> {
+                        b21.add("b211", NULL);
+                        b21.add("b212", NULL);
+                        b21.add("b213", NULL, b213 -> {b213.add("b2131", NULL); b213.add("b2132", NULL);});
+                    });
+                    b2.add("b22", NULL);
+                    b2.add("b23", NULL);
+                });
 
+        final Map<String, List<String>> map = Map.ofEntries(
+                entry("b1", of("b2")),
+                entry("b11", of("b12", "b1", "b2")),
+                entry("b111", of("b112", "b11", "b12", "b1", "b2")),
+                entry("b112", of("b111", "b11", "b12", "b1", "b2")),
+                entry("b12", of("b11", "b1", "b2")),
+                entry("b2", of("b1")),
+                entry("b21", of("b22", "b23", "b2", "b1")),
+                entry("b211", of("b212", "b213", "b21", "b22", "b23", "b2", "b1")),
+                entry("b212", of("b211", "b213", "b21", "b22", "b23", "b2", "b1")),
+                entry("b213", of("b211", "b212", "b21", "b22", "b23", "b2", "b1")),
+                entry("b2131", of("b2132", "b213", "b211", "b212", "b21", "b22", "b23", "b2", "b1")),
+                entry("b2132", of("b2131", "b213", "b211", "b212", "b21", "b22", "b23", "b2", "b1")),
+                entry("b22", of("b21", "b23", "b2", "b1")),
+                entry("b23", of("b21", "b22", "b2", "b1"))
+        );
+
+        return root.descendants().map(b -> () -> new Object[]{b, map.get(b.getName())});
+    }
+
+    @ParameterizedTest
+    @MethodSource("matchingCandidatesArguments")
+    void testMatchingCandidates(MaridBean bean, List<String> expected) {
+        final List<String> actual = bean.matchingCandidates().map(MaridBean::getName).collect(toList());
+
+        assertEquals(expected, actual);
     }
 }

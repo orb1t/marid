@@ -46,11 +46,17 @@ public interface MaridBean {
         return ofNullable(getParent()).flatMap(p -> concat(of(p), p.ancestors()));
     }
 
+    default Stream<MaridBean> descendants() {
+        return getChildren().stream().flatMap(b -> concat(of(b), b.descendants()));
+    }
+
     default Stream<MaridBean> siblings() {
         return ofNullable(getParent()).flatMap(p -> p.getChildren().stream().filter(c -> c != this));
     }
 
     default Stream<MaridBean> matchingCandidates() {
-        return ancestors().flatMap(p -> concat(of(p), p.siblings()));
+        return concat(siblings(), ancestors()
+                .filter(p -> p.getParent() != null)
+                .flatMap(p -> concat(of(p), p.siblings())));
     }
 }

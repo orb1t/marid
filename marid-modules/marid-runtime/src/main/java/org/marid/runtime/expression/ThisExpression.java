@@ -43,7 +43,7 @@ public interface ThisExpression extends Expression {
     @Nonnull
     @Override
     default Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {
-        return owner == null ? Object.class : owner;
+        return owner == null ? void.class : owner;
     }
 
     @Nullable

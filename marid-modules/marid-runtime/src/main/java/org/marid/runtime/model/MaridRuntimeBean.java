@@ -129,6 +129,10 @@ public class MaridRuntimeBean implements MaridBean {
 
     @Override
     public String toString() {
-        return name + "(" + factory + children + ")";
+        if (children.isEmpty()) {
+            return name + "(" + factory + ")";
+        } else {
+            return name + "(" + factory + ")" + children;
+        }
     }
 }

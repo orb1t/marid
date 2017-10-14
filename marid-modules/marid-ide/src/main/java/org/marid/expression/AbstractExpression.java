@@ -21,6 +21,7 @@
 package org.marid.expression;
 
 import javafx.beans.Observable;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import org.marid.misc.Calls;
 import org.marid.runtime.expression.Expression;
@@ -39,10 +40,7 @@ public abstract class AbstractExpression implements Expression {
     public final ObservableList<AbstractExpression> initializers = observableArrayList(AbstractExpression::getObservables);
 
     public Observable[] getObservables() {
-        return Stream.of(getClass().getFields())
-                .filter(f -> Observable.class.isAssignableFrom(f.getType()))
-                .map(f -> Calls.call(() -> f.get(this)))
-                .toArray(Observable[]::new);
+        return ostream().toArray(Observable[]::new);
     }
 
     @Nonnull
@@ -51,11 +49,15 @@ public abstract class AbstractExpression implements Expression {
         return initializers;
     }
 
-    private Stream<Object> stream() {
+    private Stream<Observable> ostream() {
         return Stream.of(getClass().getFields())
                 .filter(f -> Observable.class.isAssignableFrom(f.getType()))
                 .sorted(Comparator.comparing(Field::getName))
-                .map(f -> Calls.call(() -> f.get(this)));
+                .map(f -> Calls.call(() -> (Observable) f.get(this)));
+    }
+
+    private Stream<Object> stream() {
+        return ostream().map(v -> v instanceof ObservableValue ? ((ObservableValue) v).getValue() : v);
     }
 
     @Override
