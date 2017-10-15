@@ -28,6 +28,7 @@ import org.marid.runtime.expression.Expression;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -37,16 +38,23 @@ import static javafx.collections.FXCollections.observableArrayList;
 
 public abstract class AbstractExpression implements Expression {
 
-    public final ObservableList<AbstractExpression> initializers = observableArrayList(AbstractExpression::getObservables);
+    public final ObservableList<Expression> initializers = observableArrayList(AbstractExpression::getObservables);
 
-    public Observable[] getObservables() {
-        return ostream().toArray(Observable[]::new);
+    public static Observable[] getObservables(Expression expression) {
+        return expression instanceof AbstractExpression
+                ? ((AbstractExpression) expression).ostream().toArray(Observable[]::new)
+                : new Observable[0];
     }
 
     @Nonnull
     @Override
-    public ObservableList<AbstractExpression> getInitializers() {
+    public ObservableList<Expression> getInitializers() {
         return initializers;
+    }
+
+    @Override
+    public void setInitializers(@Nonnull Collection<? extends Expression> initializers) {
+        this.initializers.setAll(initializers);
     }
 
     private Stream<Observable> ostream() {

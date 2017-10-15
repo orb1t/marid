@@ -23,6 +23,7 @@ package org.marid.runtime.expression;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public abstract class AbstractExpression implements Expression {
@@ -32,5 +33,11 @@ public abstract class AbstractExpression implements Expression {
     @Nonnull
     public List<Expression> getInitializers() {
         return initializers;
+    }
+
+    @Override
+    public void setInitializers(@Nonnull Collection<? extends Expression> initializers) {
+        this.initializers.clear();
+        this.initializers.addAll(initializers);
     }
 }

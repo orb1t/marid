@@ -33,11 +33,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.NoSuchElementException;
 
-import static java.util.Collections.emptyMap;
 import static java.util.Objects.requireNonNull;
 import static org.marid.io.Xmls.attribute;
 import static org.marid.runtime.expression.MethodCallExpr.target;
-import static org.marid.runtime.expression.NullExpr.NULL;
 
 public interface FieldGetExpression extends Expression {
 
@@ -59,7 +57,7 @@ public interface FieldGetExpression extends Expression {
 
     @Override
     default void loadFrom(@Nonnull Element element) {
-        setTarget(target(element, NULL::from));
+        setTarget(target(element, this::from));
         setField(attribute(element, "field").orElseThrow(() -> new NullPointerException("field")));
     }
 

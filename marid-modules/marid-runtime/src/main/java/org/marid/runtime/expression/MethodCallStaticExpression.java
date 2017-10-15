@@ -73,9 +73,9 @@ public interface MethodCallStaticExpression extends Expression {
 
     @Override
     default void loadFrom(@Nonnull Element element) {
-        setTarget(target(element, NULL::from));
+        setTarget(target(element, this::from));
         setMethod(attribute(element, "method").orElseThrow(() -> new NullPointerException("method")));
-        setArgs(args(element, NULL::from));
+        setArgs(args(element, this::from));
     }
 
     @Nonnull

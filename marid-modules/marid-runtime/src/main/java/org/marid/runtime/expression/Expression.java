@@ -21,6 +21,7 @@
 
 package org.marid.runtime.expression;
 
+import org.marid.io.Xmls;
 import org.marid.runtime.context2.BeanContext;
 import org.marid.runtime.types.TypeContext;
 import org.w3c.dom.Document;
@@ -32,8 +33,10 @@ import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public interface Expression {
@@ -50,6 +53,8 @@ public interface Expression {
 
     @Nonnull
     List<? extends Expression> getInitializers();
+
+    void setInitializers(@Nonnull Collection<? extends Expression> initializers);
 
     @Nonnull
     default Expression from(@Nonnull Element element) {
@@ -68,6 +73,12 @@ public interface Expression {
             } else {
                 final Expression expression = (Expression) clazz.getConstructor().newInstance();
                 expression.loadFrom(element);
+                setInitializers(Xmls.elements(element)
+                        .filter(e -> "initializers".equals(e.getTagName()))
+                        .flatMap(Xmls::elements)
+                        .map(this::from)
+                        .collect(Collectors.toList())
+                );
                 return expression;
             }
         } catch (ReflectiveOperationException x) {
@@ -77,13 +88,14 @@ public interface Expression {
 
     default void to(@Nonnull Node element) {
         final String tag = getClass().getSimpleName().replace("Expr", "");
-        final Element e;
-        if (element instanceof Document) {
-            e = ((Document) element).createElement(tag);
-        } else {
-            e = element.getOwnerDocument().createElement(tag);
-        }
+        final Document document = element instanceof Document ? (Document) element : element.getOwnerDocument();
+        final Element e = document.createElement(tag);
         saveTo(e);
         element.appendChild(e);
+        if (!getInitializers().isEmpty()) {
+            final Element ie = document.createElement("initializers");
+            e.appendChild(ie);
+            getInitializers().forEach(i -> i.to(ie));
+        }
     }
 }

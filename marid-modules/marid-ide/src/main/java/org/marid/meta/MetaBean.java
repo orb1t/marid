@@ -27,6 +27,7 @@ import javafx.collections.ObservableList;
 import org.marid.expression.AbstractExpression;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.props.FxObject;
+import org.marid.runtime.expression.Expression;
 import org.marid.runtime.model.MaridBean;
 
 import javax.annotation.Nonnull;
@@ -43,7 +44,7 @@ public class MetaBean implements MaridBean {
 
     public final MetaBean parent;
     public final StringProperty name = new SimpleStringProperty();
-    public final FxObject<AbstractExpression> factory = new FxObject<>(AbstractExpression::getObservables);
+    public final FxObject<Expression> factory = new FxObject<>(AbstractExpression::getObservables);
     public final ObservableList<MetaBean> children = observableArrayList(MetaBean::observables);
 
     public MetaBean(@Nullable MetaBean parent, @Nonnull String name, @Nonnull AbstractExpression factory) {
@@ -69,7 +70,7 @@ public class MetaBean implements MaridBean {
 
     @Nonnull
     @Override
-    public AbstractExpression getFactory() {
+    public Expression getFactory() {
         return factory.get();
     }
 

@@ -58,7 +58,7 @@ public interface FieldGetStaticExpression extends Expression {
 
     @Override
     default void loadFrom(@Nonnull Element element) {
-        setTarget(target(element, NULL::from));
+        setTarget(target(element, this::from));
         setField(attribute(element, "field").orElseThrow(() -> new NullPointerException("field")));
     }
 

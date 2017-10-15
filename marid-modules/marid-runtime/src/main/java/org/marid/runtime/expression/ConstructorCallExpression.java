@@ -44,7 +44,6 @@ import static org.marid.runtime.context.MaridRuntimeUtils.compatible;
 import static org.marid.runtime.context.MaridRuntimeUtils.value;
 import static org.marid.runtime.expression.MethodCallExpr.args;
 import static org.marid.runtime.expression.MethodCallExpr.target;
-import static org.marid.runtime.expression.NullExpr.NULL;
 
 public interface ConstructorCallExpression extends Expression {
 
@@ -66,8 +65,8 @@ public interface ConstructorCallExpression extends Expression {
 
     @Override
     default void loadFrom(@Nonnull Element element) {
-        setTarget(target(element, NULL::from));
-        setArgs(args(element, NULL::from));
+        setTarget(target(element, this::from));
+        setArgs(args(element, this::from));
     }
 
     @Nullable

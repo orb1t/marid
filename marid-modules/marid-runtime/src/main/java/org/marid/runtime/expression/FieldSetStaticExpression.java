@@ -36,7 +36,6 @@ import static java.util.Objects.requireNonNull;
 import static org.marid.io.Xmls.attribute;
 import static org.marid.runtime.expression.FieldSetExpr.value;
 import static org.marid.runtime.expression.MethodCallExpr.target;
-import static org.marid.runtime.expression.NullExpr.NULL;
 
 public interface FieldSetStaticExpression extends Expression {
 
@@ -65,8 +64,8 @@ public interface FieldSetStaticExpression extends Expression {
     @Override
     default void loadFrom(@Nonnull Element element) {
         setField(attribute(element, "field").orElseThrow(() -> new NullPointerException("field")));
-        setTarget(target(element, NULL::from));
-        setValue(value(element, NULL::from));
+        setTarget(target(element, this::from));
+        setValue(value(element, this::from));
     }
 
     @Nonnull

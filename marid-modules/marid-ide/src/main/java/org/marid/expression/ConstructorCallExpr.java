@@ -22,7 +22,6 @@ package org.marid.expression;
 
 import javafx.collections.ObservableList;
 import org.marid.jfx.props.FxObject;
-import org.marid.misc.Casts;
 import org.marid.runtime.expression.ConstructorCallExpression;
 import org.marid.runtime.expression.Expression;
 
@@ -34,8 +33,8 @@ import static javafx.collections.FXCollections.observableArrayList;
 
 public class ConstructorCallExpr extends AbstractExpression implements ConstructorCallExpression {
 
-    public final FxObject<AbstractExpression> target = new FxObject<>(AbstractExpression::getObservables);
-    public final ObservableList<AbstractExpression> args = observableArrayList(AbstractExpression::getObservables);
+    public final FxObject<Expression> target = new FxObject<>(AbstractExpression::getObservables);
+    public final ObservableList<Expression> args = observableArrayList(AbstractExpression::getObservables);
 
     public ConstructorCallExpr(@Nonnull AbstractExpression target, @Nonnull AbstractExpression... args) {
         this.target.set(target);
@@ -54,7 +53,7 @@ public class ConstructorCallExpr extends AbstractExpression implements Construct
 
     @Override
     public void setTarget(@Nonnull Expression target) {
-        this.target.set((AbstractExpression) target);
+        this.target.set(target);
     }
 
     @Nonnull
@@ -65,6 +64,6 @@ public class ConstructorCallExpr extends AbstractExpression implements Construct
 
     @Override
     public void setArgs(@Nonnull Collection<? extends Expression> args) {
-        this.args.setAll(Casts.<Collection<AbstractExpression>>cast(args));
+        this.args.setAll(args);
     }
 }
