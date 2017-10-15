@@ -45,7 +45,6 @@ import static org.marid.runtime.context.MaridRuntimeUtils.compatible;
 import static org.marid.runtime.context.MaridRuntimeUtils.value;
 import static org.marid.runtime.expression.MethodCallExpr.args;
 import static org.marid.runtime.expression.MethodCallExpr.target;
-import static org.marid.runtime.expression.NullExpr.NULL;
 
 public interface MethodCallStaticExpression extends Expression {
 

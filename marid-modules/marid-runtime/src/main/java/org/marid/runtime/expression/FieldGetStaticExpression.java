@@ -36,7 +36,6 @@ import java.util.NoSuchElementException;
 import static java.util.Objects.requireNonNull;
 import static org.marid.io.Xmls.attribute;
 import static org.marid.runtime.expression.MethodCallExpr.target;
-import static org.marid.runtime.expression.NullExpr.NULL;
 
 public interface FieldGetStaticExpression extends Expression {
 
