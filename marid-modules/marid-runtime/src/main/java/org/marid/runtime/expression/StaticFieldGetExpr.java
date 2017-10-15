@@ -25,7 +25,7 @@ import javax.annotation.Nonnull;
 
 import static org.marid.runtime.expression.NullExpr.NULL;
 
-public class FieldGetStaticExpr extends AbstractExpression implements FieldGetStaticExpression {
+public class StaticFieldGetExpr extends AbstractExpression implements StaticFieldGetExpression {
 
     @Nonnull
     private Expression target;
@@ -33,12 +33,12 @@ public class FieldGetStaticExpr extends AbstractExpression implements FieldGetSt
     @Nonnull
     private String field;
 
-    public FieldGetStaticExpr(@Nonnull Expression target, @Nonnull String field) {
+    public StaticFieldGetExpr(@Nonnull Expression target, @Nonnull String field) {
         this.target = target;
         this.field = field;
     }
 
-    public FieldGetStaticExpr() {
+    public StaticFieldGetExpr() {
         target = NULL;
         field = "";
     }

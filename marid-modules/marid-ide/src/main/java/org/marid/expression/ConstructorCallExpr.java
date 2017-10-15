@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.List;
 
 import static javafx.collections.FXCollections.observableArrayList;
+import static org.marid.expression.NullExpr.NULL;
 
 public class ConstructorCallExpr extends AbstractExpression implements ConstructorCallExpression {
 
@@ -42,7 +43,7 @@ public class ConstructorCallExpr extends AbstractExpression implements Construct
     }
 
     public ConstructorCallExpr() {
-        this(new NullExpr());
+        this(NULL);
     }
 
     @Nonnull

@@ -82,7 +82,7 @@ class ExpressionSerializationTest {
         check(new MethodCallExpr(
                         boolExpr("x"),
                         "x",
-                        new MethodCallStaticExpr(
+                        new StaticMethodCallExpr(
                                 new ConstructorCallExpr(NULL, THIS),
                                 "v",
                                 intExpr("0"),
@@ -97,8 +97,8 @@ class ExpressionSerializationTest {
 
                     assertEquals(e.getMethod(), a.getMethod());
 
-                    final MethodCallStaticExpr expectedArg0 = (MethodCallStaticExpr) e.getArgs().get(0);
-                    final MethodCallStaticExpr actualArg0 = (MethodCallStaticExpr) a.getArgs().get(0);
+                    final StaticMethodCallExpr expectedArg0 = (StaticMethodCallExpr) e.getArgs().get(0);
+                    final StaticMethodCallExpr actualArg0 = (StaticMethodCallExpr) a.getArgs().get(0);
 
                     assertEquals(expectedArg0.getMethod(), actualArg0.getMethod());
 

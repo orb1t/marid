@@ -22,34 +22,39 @@
 package org.marid.runtime.expression;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
+import static java.util.stream.Collectors.joining;
 import static org.marid.runtime.expression.NullExpr.NULL;
 
-public class FieldSetStaticExpr extends AbstractExpression implements FieldSetStaticExpression {
+public class StaticMethodCallExpr extends AbstractExpression implements StaticMethodCallExpression {
 
     @Nonnull
     private Expression target;
 
     @Nonnull
-    private String field;
+    private String method;
 
     @Nonnull
-    private Expression value;
+    private final List<Expression> args;
 
-    public FieldSetStaticExpr(@Nonnull Expression target, @Nonnull String field, @Nonnull Expression value) {
+    public StaticMethodCallExpr(@Nonnull Expression target, @Nonnull String method, @Nonnull Expression... args) {
         this.target = target;
-        this.field = field;
-        this.value = value;
+        this.method = method;
+        this.args = new ArrayList<>(Arrays.asList(args));
     }
 
-    public FieldSetStaticExpr() {
+    public StaticMethodCallExpr() {
         target = NULL;
-        field = "";
-        value = NULL;
+        method = "";
+        args = new ArrayList<>();
     }
 
-    @Nonnull
     @Override
+    @Nonnull
     public Expression getTarget() {
         return target;
     }
@@ -59,25 +64,31 @@ public class FieldSetStaticExpr extends AbstractExpression implements FieldSetSt
         this.target = target;
     }
 
+    @Override
     @Nonnull
-    @Override
-    public String getField() {
-        return field;
+    public String getMethod() {
+        return method;
     }
 
     @Override
-    public void setField(@Nonnull String field) {
-        this.field = field;
+    public void setMethod(@Nonnull String method) {
+        this.method = method;
     }
 
+    @Override
     @Nonnull
-    @Override
-    public Expression getValue() {
-        return value;
+    public List<Expression> getArgs() {
+        return args;
     }
 
     @Override
-    public void setValue(@Nonnull Expression value) {
-        this.value = value;
+    public void setArgs(@Nonnull Collection<? extends Expression> args) {
+        this.args.clear();
+        this.args.addAll(args);
+    }
+
+    @Override
+    public String toString() {
+        return args.stream().map(Object::toString).collect(joining(",", target + "!" + method + "(", ")"));
     }
 }

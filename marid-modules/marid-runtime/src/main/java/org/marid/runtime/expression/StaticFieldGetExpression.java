@@ -24,6 +24,7 @@ package org.marid.runtime.expression;
 import org.marid.runtime.context2.BeanContext;
 import org.marid.runtime.types.TypeContext;
 import org.marid.runtime.util.ReflectUtils;
+import org.marid.runtime.util.TypeUtils;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
@@ -34,10 +35,9 @@ import java.util.NoSuchElementException;
 
 import static java.util.Objects.requireNonNull;
 import static org.marid.io.Xmls.attribute;
-import static org.marid.runtime.expression.FieldSetExpr.value;
 import static org.marid.runtime.expression.MethodCallExpr.target;
 
-public interface FieldSetStaticExpression extends Expression {
+public interface StaticFieldGetExpression extends Expression {
 
     @Nonnull
     Expression getTarget();
@@ -49,29 +49,27 @@ public interface FieldSetStaticExpression extends Expression {
 
     void setField(@Nonnull String field);
 
-    @Nonnull
-    Expression getValue();
-
-    void setValue(@Nonnull Expression value);
-
     @Override
     default void saveTo(@Nonnull Element element) {
         element.setAttribute("field", getField());
         target(element, getTarget());
-        value(element, getValue());
     }
 
     @Override
     default void loadFrom(@Nonnull Element element) {
-        setField(attribute(element, "field").orElseThrow(() -> new NullPointerException("field")));
         setTarget(target(element, this::from));
-        setValue(value(element, this::from));
+        setField(attribute(element, "field").orElseThrow(() -> new NullPointerException("field")));
     }
 
     @Nonnull
     @Override
     default Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {
-        return void.class;
+        final Type targetType = getTarget().getType(owner, typeContext);
+        final String field = typeContext.resolvePlaceholders(getField());
+        return TypeUtils.classType(targetType)
+                .flatMap(tc -> TypeUtils.getField(typeContext.getRaw(tc), field)
+                        .map(f -> typeContext.resolve(owner, f.getGenericType())))
+                .orElseGet(typeContext::getWildcard);
     }
 
     @Nullable
@@ -83,12 +81,10 @@ public interface FieldSetStaticExpression extends Expression {
     private Object execute(@Nullable Object self, @Nonnull BeanContext context) {
         final String field = context.resolvePlaceholders(getField());
         final Class<?> t = (Class<?>) requireNonNull(getTarget().evaluate(self, context), "target");
-        final Object v = getValue().evaluate(self, context);
         try {
             final Field f = t.getField(field);
             f.setAccessible(true);
-            f.set(null, v);
-            return null;
+            return f.get(null);
         } catch (NoSuchFieldException x) {
             throw new NoSuchElementException(field);
         } catch (IllegalAccessException x) {

@@ -46,7 +46,7 @@ import static org.marid.runtime.context.MaridRuntimeUtils.value;
 import static org.marid.runtime.expression.MethodCallExpr.args;
 import static org.marid.runtime.expression.MethodCallExpr.target;
 
-public interface MethodCallStaticExpression extends Expression {
+public interface StaticMethodCallExpression extends Expression {
 
     @Nonnull
     Expression getTarget();
