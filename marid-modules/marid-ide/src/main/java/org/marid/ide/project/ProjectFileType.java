@@ -21,7 +21,6 @@
 package org.marid.ide.project;
 
 import org.marid.runtime.context.MaridContextListener;
-import org.marid.runtime.converter.ValueConvertersFactory;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -48,8 +47,7 @@ public enum ProjectFileType {
     BEANS_XML(META_DIR, "beans.xml"),
     TARGET_LIB(TARGET, "lib"),
     TARGET_CLASSES(TARGET, "classes"),
-    CONTEXT_LISTENERS(SERVICES, MaridContextListener.class.getName()),
-    VALUE_CONVERTER_FACTORIES(SERVICES, ValueConvertersFactory.class.getName());
+    CONTEXT_LISTENERS(SERVICES, MaridContextListener.class.getName());
 
     public final Path relative;
 

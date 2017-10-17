@@ -19,9 +19,8 @@
  * #L%
  */
 
-package org.marid.runtime.context2;
+package org.marid.runtime.context;
 
-import org.marid.runtime.context.MaridRuntime;
 import org.marid.runtime.event.BeanPostConstructEvent;
 import org.marid.runtime.event.BeanPreDestroyEvent;
 import org.marid.runtime.event.ContextBootstrapEvent;

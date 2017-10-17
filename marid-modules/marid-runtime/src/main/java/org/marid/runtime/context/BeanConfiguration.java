@@ -19,7 +19,7 @@
  * #L%
  */
 
-package org.marid.runtime.context2;
+package org.marid.runtime.context;
 
 import org.marid.runtime.context.MaridContextListener;
 import org.marid.runtime.context.MaridPlaceholderResolver;

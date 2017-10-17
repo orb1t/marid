@@ -65,7 +65,7 @@ public interface MaridRuntimeUtils {
         return methods;
     }
 
-    static Thread daemonThread(AtomicReference<MaridContext> contextRef) {
+    static Thread daemonThread(AtomicReference<BeanContext> contextRef) {
         final Thread daemon = new Thread(null, () -> {
             final Scanner scanner = new Scanner(System.in);
             try {
@@ -78,7 +78,7 @@ public interface MaridRuntimeUtils {
                     switch (line) {
                         case "close":
                             try {
-                                final MaridContext context = contextRef.get();
+                                final BeanContext context = contextRef.get();
                                 if (context != null) {
                                     context.close();
                                     contextRef.set(null);

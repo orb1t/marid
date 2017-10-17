@@ -19,13 +19,13 @@
  * #L%
  */
 
-package org.marid.runtime.context2.close;
+package org.marid.runtime.context.close;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.marid.runtime.context.MaridDefaultContextListener;
-import org.marid.runtime.context2.BeanConfiguration;
-import org.marid.runtime.context2.BeanContext;
+import org.marid.runtime.context.BeanConfiguration;
+import org.marid.runtime.context.BeanContext;
 import org.marid.runtime.exception.MaridBeanInitializationException;
 import org.marid.runtime.expression.ClassExpr;
 import org.marid.runtime.expression.ConstructorCallExpr;

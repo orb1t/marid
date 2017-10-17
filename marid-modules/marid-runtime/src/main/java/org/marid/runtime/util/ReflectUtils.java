@@ -21,7 +21,7 @@
 
 package org.marid.runtime.util;
 
-import org.marid.runtime.context2.BeanContext;
+import org.marid.runtime.context.BeanContext;
 import org.marid.runtime.expression.Expression;
 
 import java.util.function.BiFunction;

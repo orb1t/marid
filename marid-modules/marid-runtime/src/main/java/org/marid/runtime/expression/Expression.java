@@ -22,7 +22,7 @@
 package org.marid.runtime.expression;
 
 import org.marid.io.Xmls;
-import org.marid.runtime.context2.BeanContext;
+import org.marid.runtime.context.BeanContext;
 import org.marid.runtime.types.TypeContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

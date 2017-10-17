@@ -29,11 +29,9 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.marid.ide.model.BeanFile;
-import org.marid.ide.types.BeanContext;
 import org.marid.misc.Urls;
 import org.marid.runtime.context.MaridDefaultContextListener;
 import org.marid.runtime.context.MaridLogContextListener;
-import org.marid.runtime.converter.DefaultValueConvertersFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -53,7 +51,6 @@ import java.util.logging.Logger;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.write;
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static java.util.EnumSet.allOf;
 import static java.util.logging.Level.WARNING;
 import static java.util.stream.Collectors.toMap;
@@ -76,7 +73,6 @@ public class ProjectProfile {
     private final Queue<WeakReference<Consumer<ProjectProfile>>> onUpdate = new ConcurrentLinkedQueue<>();
 
     private URLClassLoader classLoader;
-    private BeanContext beanContext;
 
     ProjectProfile(Path profilesDir, String name) {
         path = profilesDir.resolve(name);
@@ -124,9 +120,6 @@ public class ProjectProfile {
                 write(get(CONTEXT_LISTENERS), asList(
                         MaridLogContextListener.class.getName(),
                         MaridDefaultContextListener.class.getName()
-                ), UTF_8);
-                write(get(VALUE_CONVERTER_FACTORIES), singletonList(
-                        DefaultValueConvertersFactory.class.getName()
                 ), UTF_8);
             } catch (IOException ix) {
                 log(logger, WARNING, "Unable to write default services", ix);
@@ -196,11 +189,10 @@ public class ProjectProfile {
     }
 
     private void updateClassLoader() {
-        try (final URLClassLoader old = classLoader; final BeanContext oldCache = beanContext) {
+        try (final URLClassLoader old = classLoader) {
             final URL[] urls = Urls.classpath(get(TARGET_LIB), get(TARGET_CLASSES));
             final ClassLoader parent = Thread.currentThread().getContextClassLoader();
             classLoader = new URLClassLoader(urls, parent);
-            beanContext = new BeanContext(beanFile, classLoader);
             onUpdate.removeIf(ref -> {
                 final Consumer<ProjectProfile> c = ref.get();
                 if (c == null) {
@@ -217,10 +209,6 @@ public class ProjectProfile {
         } catch (Exception x) {
             log(logger, WARNING, "Unable to close class loader", x);
         }
-    }
-
-    public BeanContext getBeanContext() {
-        return beanContext;
     }
 
     public URLClassLoader getClassLoader() {

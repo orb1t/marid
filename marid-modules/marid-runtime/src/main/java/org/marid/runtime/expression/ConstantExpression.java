@@ -23,7 +23,7 @@ package org.marid.runtime.expression;
 
 import org.jetbrains.annotations.NotNull;
 import org.marid.misc.Calls;
-import org.marid.runtime.context2.BeanContext;
+import org.marid.runtime.context.BeanContext;
 import org.marid.runtime.types.TypeContext;
 import org.w3c.dom.Element;
 

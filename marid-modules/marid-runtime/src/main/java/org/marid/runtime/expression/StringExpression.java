@@ -21,7 +21,7 @@
 
 package org.marid.runtime.expression;
 
-import org.marid.runtime.context2.BeanContext;
+import org.marid.runtime.context.BeanContext;
 import org.marid.runtime.types.TypeContext;
 import org.marid.runtime.util.ReflectUtils;
 
