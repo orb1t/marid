@@ -24,7 +24,6 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
 import org.marid.expression.generic.CallExpression;
-import org.marid.expression.generic.Expression;
 import org.marid.jfx.props.FxObject;
 
 import javax.annotation.Nonnull;
@@ -34,13 +33,13 @@ import static javafx.collections.FXCollections.observableArrayList;
 
 public class CallExpr extends Expr implements CallExpression {
 
-    public final FxObject<Expression> target = new FxObject<>(Expr::getObservables);
+    public final FxObject<Expr> target = new FxObject<>(Expr::getObservables);
     public final StringProperty method = new SimpleStringProperty();
-    public final ObservableList<Expression> args = observableArrayList(Expr::getObservables);
+    public final ObservableList<Expr> args = observableArrayList(Expr::getObservables);
 
     @Nonnull
     @Override
-    public Expression getTarget() {
+    public Expr getTarget() {
         return target.get();
     }
 
@@ -52,7 +51,7 @@ public class CallExpr extends Expr implements CallExpression {
 
     @Nonnull
     @Override
-    public List<? extends Expression> getArgs() {
+    public List<Expr> getArgs() {
         return args;
     }
 }

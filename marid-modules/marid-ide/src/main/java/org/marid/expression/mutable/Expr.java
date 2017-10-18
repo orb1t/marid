@@ -37,18 +37,16 @@ import static javafx.collections.FXCollections.observableArrayList;
 
 public abstract class Expr implements Expression {
 
-    public final ObservableList<Expression> initializers = observableArrayList(Expr::getObservables);
-
-    public static Observable[] getObservables(Expression expression) {
-        return expression instanceof Expr
-                ? ((Expr) expression).ostream().toArray(Observable[]::new)
-                : new Observable[0];
-    }
+    public final ObservableList<Expr> initializers = observableArrayList(Expr::getObservables);
 
     @Nonnull
     @Override
-    public ObservableList<Expression> getInitializers() {
+    public ObservableList<Expr> getInitializers() {
         return initializers;
+    }
+
+    public Observable[] getObservables() {
+        return ostream().toArray(Observable[]::new);
     }
 
     private Stream<Observable> ostream() {

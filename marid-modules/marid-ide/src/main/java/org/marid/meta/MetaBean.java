@@ -25,7 +25,6 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
 import org.marid.beans.MaridBean;
-import org.marid.expression.generic.Expression;
 import org.marid.expression.mutable.Expr;
 import org.marid.expression.mutable.NullExpr;
 import org.marid.ide.project.ProjectProfile;
@@ -44,7 +43,7 @@ public class MetaBean implements MaridBean {
 
     public final MetaBean parent;
     public final StringProperty name = new SimpleStringProperty();
-    public final FxObject<Expression> factory = new FxObject<>(Expr::getObservables);
+    public final FxObject<Expr> factory = new FxObject<>(Expr::getObservables);
     public final ObservableList<MetaBean> children = observableArrayList(MetaBean::observables);
 
     public MetaBean(@Nullable MetaBean parent, @Nonnull String name, @Nonnull Expr factory) {
@@ -70,7 +69,7 @@ public class MetaBean implements MaridBean {
 
     @Nonnull
     @Override
-    public Expression getFactory() {
+    public Expr getFactory() {
         return factory.get();
     }
 
@@ -81,9 +80,7 @@ public class MetaBean implements MaridBean {
     }
 
     @SafeVarargs
-    public final MetaBean add(@Nonnull String name,
-                              @Nonnull Expr factory,
-                              @Nonnull Consumer<MetaBean>... consumers) {
+    public final MetaBean add(@Nonnull String name, @Nonnull Expr factory, @Nonnull Consumer<MetaBean>... consumers) {
         final MetaBean child = new MetaBean(this, name, factory);
         children.add(child);
         for (final Consumer<MetaBean> consumer : consumers) {
