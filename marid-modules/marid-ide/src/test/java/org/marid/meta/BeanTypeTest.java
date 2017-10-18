@@ -21,9 +21,9 @@
 package org.marid.meta;
 
 import org.junit.jupiter.api.Test;
-import org.marid.expression.ClassExpr;
-import org.marid.expression.NullExpr;
-import org.marid.expression.RefExpr;
+import org.marid.expression.mutable.ClassExpr;
+import org.marid.expression.mutable.NullExpr;
+import org.marid.expression.mutable.RefExpr;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;

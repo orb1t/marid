@@ -19,20 +19,12 @@
  * #L%
  */
 
-package org.marid.runtime.util;
+package org.marid.expression.generic;
 
-import org.marid.runtime.context.BeanContext;
-import org.marid.expression.generic.Expression;
+import javax.annotation.Nonnull;
 
-import java.util.function.BiFunction;
+public interface ValueExpression extends Expression {
 
-public interface ReflectUtils {
-
-    static BiFunction<Object, BeanContext, Object> evaluate(BiFunction<Object, BeanContext, Object> f, Expression e) {
-        return (self, context) -> {
-            final Object o = f.apply(self, context);
-            e.getInitializers().forEach(i -> i.evaluate(o, context));
-            return o;
-        };
-    }
+    @Nonnull
+    String getValue();
 }

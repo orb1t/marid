@@ -166,6 +166,18 @@ public interface Xmls {
         return nodes(node, Element.class);
     }
 
+    static Stream<Element> elements(Node node, String tag) {
+        return elements(node).filter(e -> tag.equals(e.getTagName()));
+    }
+
+    static Stream<Element> elements(String tag, Node node) {
+        return nodes(node, Element.class).filter(e -> tag.equals(e.getTagName())).flatMap(Xmls::elements);
+    }
+
+    static Optional<Element> element(String tag, Node node) {
+        return elements(tag, node).findFirst();
+    }
+
     static Optional<String> attribute(Element element, String name) {
         return element.hasAttribute(name)
                 ? Optional.of(element.getAttribute(name))
@@ -176,5 +188,19 @@ public interface Xmls {
         return element.hasChildNodes()
                 ? Optional.of(element.getTextContent())
                 : Optional.empty();
+    }
+
+    @SafeVarargs
+    static Element create(Node parent, String tag, Consumer<Element>... consumers) {
+        final Document document = parent instanceof Document ? ((Document) parent) : parent.getOwnerDocument();
+        final Element element = document.createElement(tag);
+
+        parent.appendChild(element);
+
+        for (final Consumer<Element> consumer : consumers) {
+            consumer.accept(element);
+        }
+
+        return element;
     }
 }

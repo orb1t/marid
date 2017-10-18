@@ -25,7 +25,7 @@ package org.marid.runtime;
 import org.marid.runtime.context.BeanConfiguration;
 import org.marid.runtime.context.BeanContext;
 import org.marid.runtime.context.MaridRuntimeUtils;
-import org.marid.runtime.model.MaridRuntimeBean;
+import org.marid.beans.RuntimeBean;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -52,7 +52,7 @@ public class MaridLauncher {
 
         try (final Reader reader = new InputStreamReader(beansXmlUrl.openStream(), UTF_8)) {
             final BeanConfiguration configuration = new BeanConfiguration(classLoader, System.getProperties());
-            final MaridRuntimeBean bean = read(reader, e -> new MaridRuntimeBean(null, e));
+            final RuntimeBean bean = read(reader, e -> new RuntimeBean(null, e));
             final BeanContext context = new BeanContext(configuration, bean);
             contextRef.set(context);
         } catch (Throwable x) {

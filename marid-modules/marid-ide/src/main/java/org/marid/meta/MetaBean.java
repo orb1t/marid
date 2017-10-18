@@ -24,11 +24,12 @@ import javafx.beans.Observable;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
-import org.marid.expression.AbstractExpression;
+import org.marid.beans.MaridBean;
+import org.marid.expression.generic.Expression;
+import org.marid.expression.mutable.Expr;
+import org.marid.expression.mutable.NullExpr;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.props.FxObject;
-import org.marid.runtime.expression.Expression;
-import org.marid.runtime.model.MaridBean;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -38,23 +39,22 @@ import java.util.Properties;
 import java.util.function.Consumer;
 
 import static javafx.collections.FXCollections.observableArrayList;
-import static org.marid.expression.NullExpr.NULL;
 
 public class MetaBean implements MaridBean {
 
     public final MetaBean parent;
     public final StringProperty name = new SimpleStringProperty();
-    public final FxObject<Expression> factory = new FxObject<>(AbstractExpression::getObservables);
+    public final FxObject<Expression> factory = new FxObject<>(Expr::getObservables);
     public final ObservableList<MetaBean> children = observableArrayList(MetaBean::observables);
 
-    public MetaBean(@Nullable MetaBean parent, @Nonnull String name, @Nonnull AbstractExpression factory) {
+    public MetaBean(@Nullable MetaBean parent, @Nonnull String name, @Nonnull Expr factory) {
         this.parent = parent;
         this.name.set(name);
         this.factory.set(factory);
     }
 
     public MetaBean() {
-        this(null, "beans", NULL);
+        this(null, "beans", new NullExpr());
     }
 
     @Override
@@ -82,7 +82,7 @@ public class MetaBean implements MaridBean {
 
     @SafeVarargs
     public final MetaBean add(@Nonnull String name,
-                              @Nonnull AbstractExpression factory,
+                              @Nonnull Expr factory,
                               @Nonnull Consumer<MetaBean>... consumers) {
         final MetaBean child = new MetaBean(this, name, factory);
         children.add(child);

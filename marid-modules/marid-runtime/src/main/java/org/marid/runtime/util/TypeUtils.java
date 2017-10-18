@@ -21,7 +21,7 @@
 
 package org.marid.runtime.util;
 
-import org.marid.runtime.expression.Expression;
+import org.marid.expression.generic.Expression;
 import org.marid.runtime.types.TypeContext;
 
 import javax.annotation.Nonnull;

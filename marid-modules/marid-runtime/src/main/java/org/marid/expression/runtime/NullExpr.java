@@ -19,20 +19,22 @@
  * #L%
  */
 
-package org.marid.runtime.util;
+package org.marid.expression.runtime;
 
-import org.marid.runtime.context.BeanContext;
-import org.marid.expression.generic.Expression;
+import org.marid.expression.generic.NullExpression;
+import org.w3c.dom.Element;
 
-import java.util.function.BiFunction;
+public final class NullExpr extends Expr implements NullExpression {
 
-public interface ReflectUtils {
+    public NullExpr() {
+    }
 
-    static BiFunction<Object, BeanContext, Object> evaluate(BiFunction<Object, BeanContext, Object> f, Expression e) {
-        return (self, context) -> {
-            final Object o = f.apply(self, context);
-            e.getInitializers().forEach(i -> i.evaluate(o, context));
-            return o;
-        };
+    public NullExpr(Element element) {
+        super(element);
+    }
+
+    @Override
+    public String toString() {
+        return "null";
     }
 }

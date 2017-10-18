@@ -28,7 +28,6 @@ import org.apache.maven.model.Organization;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-import org.marid.ide.model.BeanFile;
 import org.marid.misc.Urls;
 import org.marid.runtime.context.MaridDefaultContextListener;
 import org.marid.runtime.context.MaridLogContextListener;
@@ -69,7 +68,6 @@ public class ProjectProfile {
     private final EnumMap<ProjectFileType, Path> paths;
     private final Logger logger;
     private final BooleanProperty enabled;
-    private final BeanFile beanFile;
     private final Queue<WeakReference<Consumer<ProjectProfile>>> onUpdate = new ConcurrentLinkedQueue<>();
 
     private URLClassLoader classLoader;
@@ -93,7 +91,6 @@ public class ProjectProfile {
         logger = Logger.getLogger(getName());
         model = loadModel();
         model.setModelVersion("4.0.0");
-        beanFile = new BeanFile(this);
         init();
         enabled = new SimpleBooleanProperty(true);
         enabled.addListener((o, oV, nV) -> {
@@ -173,11 +170,6 @@ public class ProjectProfile {
 
     public void save() {
         savePomFile();
-        beanFile.save(this);
-    }
-
-    public BeanFile getBeanFile() {
-        return beanFile;
     }
 
     void delete() {

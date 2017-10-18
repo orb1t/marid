@@ -19,20 +19,17 @@
  * #L%
  */
 
-package org.marid.runtime.util;
+package org.marid.expression.runtime;
 
-import org.marid.runtime.context.BeanContext;
-import org.marid.expression.generic.Expression;
+import org.marid.expression.generic.ThisExpression;
+import org.w3c.dom.Element;
 
-import java.util.function.BiFunction;
+public final class ThisExpr extends Expr implements ThisExpression {
 
-public interface ReflectUtils {
+    public ThisExpr() {
+    }
 
-    static BiFunction<Object, BeanContext, Object> evaluate(BiFunction<Object, BeanContext, Object> f, Expression e) {
-        return (self, context) -> {
-            final Object o = f.apply(self, context);
-            e.getInitializers().forEach(i -> i.evaluate(o, context));
-            return o;
-        };
+    public ThisExpr(Element element) {
+        super(element);
     }
 }

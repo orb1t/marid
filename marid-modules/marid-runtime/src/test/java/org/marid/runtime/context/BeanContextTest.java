@@ -26,11 +26,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.marid.runtime.context.BeanConfiguration;
-import org.marid.runtime.context.BeanContext;
-import org.marid.runtime.expression.*;
-import org.marid.runtime.model.MaridBean;
-import org.marid.runtime.model.MaridRuntimeBean;
+import org.marid.expression.runtime.*;
+import org.marid.beans.MaridBean;
+import org.marid.beans.RuntimeBean;
 
 import java.util.List;
 import java.util.Map;
@@ -42,7 +40,6 @@ import static java.util.List.of;
 import static java.util.Map.entry;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.marid.runtime.expression.NullExpr.NULL;
 
 @Tag("normal")
 class BeanContextTest {
@@ -53,8 +50,8 @@ class BeanContextTest {
     @Test
     void testOneBean() {
         final BeanConfiguration configuration = new BeanConfiguration(CLASS_LOADER, PROPERTIES);
-        final MaridRuntimeBean root = new MaridRuntimeBean()
-                .add("bean1", new StaticFieldGetExpr(new ClassExpr(TimeUnit.class.getName()), "SECONDS"));
+        final RuntimeBean root = new RuntimeBean()
+                .add("bean1", new GetExpr(new ClassExpr(TimeUnit.class.getName()), "SECONDS"));
         try (final BeanContext context = new BeanContext(configuration, root)) {
             final Object seconds = context.findBean("bean1");
             assertEquals(TimeUnit.SECONDS, seconds);
@@ -64,8 +61,8 @@ class BeanContextTest {
     @Test
     void testTwoBeans() {
         final BeanConfiguration configuration = new BeanConfiguration(CLASS_LOADER, PROPERTIES);
-        final MaridRuntimeBean root = new MaridRuntimeBean()
-                .add("bean1", new StaticMethodCallExpr(new ClassExpr(TimeUnit.class.getName()), "valueOf", new RefExpr("bean2")))
+        final RuntimeBean root = new RuntimeBean()
+                .add("bean1", new CallExpr(new ClassExpr(TimeUnit.class.getName()), "valueOf", new RefExpr("bean2")))
                 .add("bean2", new StringExpr("SECONDS"));
         try (final BeanContext context = new BeanContext(configuration, root)) {
             final Object seconds = context.findBean("bean1");
@@ -74,19 +71,19 @@ class BeanContextTest {
     }
 
     private static Stream<Arguments> matchingCandidatesArguments() {
-        final MaridRuntimeBean root = new MaridRuntimeBean()
-                .add("b1", NULL, b1 -> {
-                    b1.add("b11", NULL, b11 -> {b11.add("b111", NULL); b11.add("b112", NULL);});
-                    b1.add("b12", NULL);
+        final RuntimeBean root = new RuntimeBean()
+                .add("b1", new NullExpr(), b1 -> {
+                    b1.add("b11", b11 -> {b11.add("b111"); b11.add("b112");});
+                    b1.add("b12", new NullExpr());
                 })
-                .add("b2", NULL, b2 -> {
-                    b2.add("b21", NULL, b21 -> {
-                        b21.add("b211", NULL);
-                        b21.add("b212", NULL);
-                        b21.add("b213", NULL, b213 -> {b213.add("b2131", NULL); b213.add("b2132", NULL);});
+                .add("b2", b2 -> {
+                    b2.add("b21", b21 -> {
+                        b21.add("b211");
+                        b21.add("b212");
+                        b21.add("b213", b213 -> {b213.add("b2131"); b213.add("b2132");});
                     });
-                    b2.add("b22", NULL);
-                    b2.add("b23", NULL);
+                    b2.add("b22");
+                    b2.add("b23");
                 });
 
         final Map<String, List<String>> map = Map.ofEntries(

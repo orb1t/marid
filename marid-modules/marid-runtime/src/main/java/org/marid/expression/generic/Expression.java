@@ -19,20 +19,24 @@
  * #L%
  */
 
-package org.marid.runtime.util;
+package org.marid.expression.generic;
 
 import org.marid.runtime.context.BeanContext;
-import org.marid.expression.generic.Expression;
+import org.marid.runtime.types.TypeContext;
 
-import java.util.function.BiFunction;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.lang.reflect.Type;
+import java.util.List;
 
-public interface ReflectUtils {
+public interface Expression {
 
-    static BiFunction<Object, BeanContext, Object> evaluate(BiFunction<Object, BeanContext, Object> f, Expression e) {
-        return (self, context) -> {
-            final Object o = f.apply(self, context);
-            e.getInitializers().forEach(i -> i.evaluate(o, context));
-            return o;
-        };
-    }
+    @Nullable
+    Object evaluate(@Nullable Object self, @Nonnull BeanContext context);
+
+    @Nonnull
+    Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext);
+
+    @Nonnull
+    List<? extends Expression> getInitializers();
 }

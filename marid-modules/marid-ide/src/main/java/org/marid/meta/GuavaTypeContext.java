@@ -24,7 +24,7 @@ import com.google.common.reflect.TypeResolver;
 import com.google.common.reflect.TypeToken;
 import org.marid.misc.Casts;
 import org.marid.runtime.context.MaridPlaceholderResolver;
-import org.marid.runtime.model.MaridBean;
+import org.marid.beans.MaridBean;
 import org.marid.runtime.types.TypeContext;
 import org.marid.runtime.types.TypeEvaluator;
 
