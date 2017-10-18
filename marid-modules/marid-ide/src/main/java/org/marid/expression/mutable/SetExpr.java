@@ -22,26 +22,41 @@ package org.marid.expression.mutable;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.marid.expression.generic.RefExpression;
+import org.marid.expression.generic.SetExpression;
+import org.marid.jfx.props.FxObject;
 
 import javax.annotation.Nonnull;
 
-public class RefExpr extends Expr implements RefExpression {
+public class SetExpr extends Expr implements SetExpression {
 
-    public final StringProperty ref = new SimpleStringProperty();
+    public final FxObject<Expr> target = new FxObject<>(Expr::getObservables);
+    public final StringProperty field = new SimpleStringProperty();
+    public final FxObject<Expr> value = new FxObject<>(Expr::getObservables);
 
-    public RefExpr(@Nonnull String ref) {
-        this.ref.set(ref);
+    @Nonnull
+    @Override
+    public Expr getTarget() {
+        return target.get();
     }
 
     @Nonnull
     @Override
-    public String getReference() {
-        return ref.get();
+    public String getField() {
+        return field.get();
+    }
+
+    @Nonnull
+    @Override
+    public Expr getValue() {
+        return value.get();
     }
 
     @Override
     public org.marid.expression.runtime.Expr toRuntimeExpr() {
-        return new org.marid.expression.runtime.RefExpr(getReference());
+        return new org.marid.expression.runtime.SetExpr(
+                getTarget().toRuntimeExpr(),
+                getField(),
+                getValue().toRuntimeExpr()
+        );
     }
 }

@@ -24,4 +24,8 @@ import org.marid.expression.generic.NullExpression;
 
 public class NullExpr extends Expr implements NullExpression {
 
+    @Override
+    public org.marid.expression.runtime.Expr toRuntimeExpr() {
+        return new org.marid.expression.runtime.NullExpr();
+    }
 }

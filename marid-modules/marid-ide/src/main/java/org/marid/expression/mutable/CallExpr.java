@@ -54,4 +54,13 @@ public class CallExpr extends Expr implements CallExpression {
     public List<Expr> getArgs() {
         return args;
     }
+
+    @Override
+    public org.marid.expression.runtime.Expr toRuntimeExpr() {
+        return new org.marid.expression.runtime.CallExpr(
+                getTarget().toRuntimeExpr(),
+                getMethod(),
+                getArgs().stream().map(Expr::toRuntimeExpr).toArray(org.marid.expression.runtime.Expr[]::new)
+        );
+    }
 }

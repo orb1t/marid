@@ -49,6 +49,8 @@ public abstract class Expr implements Expression {
         return ostream().toArray(Observable[]::new);
     }
 
+    public abstract org.marid.expression.runtime.Expr toRuntimeExpr();
+
     private Stream<Observable> ostream() {
         return Stream.of(getClass().getFields())
                 .filter(f -> Observable.class.isAssignableFrom(f.getType()))

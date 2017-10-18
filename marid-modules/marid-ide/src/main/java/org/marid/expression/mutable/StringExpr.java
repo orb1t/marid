@@ -20,24 +20,28 @@
 
 package org.marid.expression.mutable;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import org.marid.expression.generic.ConstExpression;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import org.marid.expression.generic.StringExpression;
 
 import javax.annotation.Nonnull;
 
-public class ConstantExpr extends ValueExpr implements ConstExpression {
+public class StringExpr extends Expr implements StringExpression {
 
-    public final ObjectProperty<ConstantType> type = new SimpleObjectProperty<>();
+    public final StringProperty value = new SimpleStringProperty();
 
-    public ConstantExpr(@Nonnull ConstantType type, @Nonnull String value) {
-        super(value);
-        this.type.set(type);
+    public StringExpr(@Nonnull String value) {
+        this.value.set(value);
     }
 
     @Nonnull
     @Override
-    public ConstantType getType() {
-        return type.get();
+    public String getValue() {
+        return value.get();
+    }
+
+    @Override
+    public org.marid.expression.runtime.Expr toRuntimeExpr() {
+        return new org.marid.expression.runtime.StringExpr(getValue());
     }
 }

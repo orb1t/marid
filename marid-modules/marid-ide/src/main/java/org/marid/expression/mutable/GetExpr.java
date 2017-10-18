@@ -20,23 +20,37 @@
 
 package org.marid.expression.mutable;
 
-import org.marid.expression.generic.Expression;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import org.marid.expression.generic.GetExpression;
+import org.marid.jfx.props.FxObject;
 
 import javax.annotation.Nonnull;
 
 public class GetExpr extends Expr implements GetExpression {
 
+    public final FxObject<Expr> target = new FxObject<>(Expr::getObservables);
+    public final StringProperty field = new SimpleStringProperty();
+
+    public GetExpr(@Nonnull Expr target, @Nonnull String field) {
+        this.target.set(target);
+        this.field.set(field);
+    }
 
     @Nonnull
     @Override
-    public Expression getTarget() {
-        return null;
+    public Expr getTarget() {
+        return target.get();
     }
 
     @Nonnull
     @Override
     public String getField() {
-        return null;
+        return field.get();
+    }
+
+    @Override
+    public org.marid.expression.runtime.Expr toRuntimeExpr() {
+        return new org.marid.expression.runtime.GetExpr(getTarget().toRuntimeExpr(), getField());
     }
 }

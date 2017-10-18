@@ -24,4 +24,8 @@ import org.marid.expression.generic.ThisExpression;
 
 public class ThisExpr extends Expr implements ThisExpression {
 
+    @Override
+    public org.marid.expression.runtime.Expr toRuntimeExpr() {
+        return new org.marid.expression.runtime.ThisExpr();
+    }
 }

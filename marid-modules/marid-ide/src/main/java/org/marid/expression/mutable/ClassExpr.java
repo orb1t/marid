@@ -39,4 +39,9 @@ public class ClassExpr extends Expr implements ClassExpression {
     public String getClassName() {
         return className.get();
     }
+
+    @Override
+    public org.marid.expression.runtime.Expr toRuntimeExpr() {
+        return new org.marid.expression.runtime.ClassExpr(getClassName());
+    }
 }
