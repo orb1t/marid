@@ -22,33 +22,27 @@ package org.marid.meta;
 
 import com.google.common.reflect.TypeResolver;
 import com.google.common.reflect.TypeToken;
+import org.marid.beans.MaridBean;
 import org.marid.misc.Casts;
 import org.marid.runtime.context.MaridPlaceholderResolver;
-import org.marid.beans.MaridBean;
 import org.marid.runtime.types.TypeContext;
 import org.marid.runtime.types.TypeEvaluator;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Properties;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 public class GuavaTypeContext implements TypeContext {
 
-    public static final Type WILDCARD;
-
-    static {
-        try {
-            final Method method = TypeToken.class.getMethod("of", Type.class);
-            final ParameterizedType parameterizedType = (ParameterizedType) method.getGenericReturnType();
-            WILDCARD = parameterizedType.getActualTypeArguments()[0];
-        } catch (ReflectiveOperationException x) {
-            throw new IllegalStateException(x);
-        }
-    }
+    public static final Type WILDCARD = Stream.of(TypeToken.class.getMethods())
+            .filter(m -> "of".equals(m.getName()) && m.getParameterTypes()[0] == Type.class)
+            .map(m -> ((ParameterizedType) m.getGenericReturnType()).getActualTypeArguments()[0])
+            .findFirst()
+            .orElseThrow(IllegalStateException::new);
 
     private final MaridBean bean;
     private final MaridPlaceholderResolver placeholderResolver;
