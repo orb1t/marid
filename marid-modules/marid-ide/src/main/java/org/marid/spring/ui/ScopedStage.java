@@ -24,8 +24,6 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 
-import java.util.UUID;
-
 import static org.marid.Ide.FX_SCOPE;
 
 public abstract class ScopedStage extends Stage {
@@ -34,7 +32,7 @@ public abstract class ScopedStage extends Stage {
 
     public ScopedStage(StageStyle style) {
         super(style);
-        conversationId = UUID.randomUUID().toString();
+        conversationId = FX_SCOPE.nextConversationId();
         FX_SCOPE.setConversationId(conversationId);
         focusedProperty().addListener((o, oV, nV) -> {
             if (nV) {

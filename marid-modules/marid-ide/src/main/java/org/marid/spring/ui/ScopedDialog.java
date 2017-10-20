@@ -24,8 +24,6 @@ import javafx.event.EventHandler;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogEvent;
 
-import java.util.UUID;
-
 import static org.marid.Ide.FX_SCOPE;
 
 public abstract class ScopedDialog<R> extends Dialog<R> {
@@ -33,7 +31,7 @@ public abstract class ScopedDialog<R> extends Dialog<R> {
     private final String conversationId;
 
     public ScopedDialog() {
-        this.conversationId = UUID.randomUUID().toString();
+        this.conversationId = FX_SCOPE.nextConversationId();
         FX_SCOPE.setConversationId(conversationId);
         setOnShowing(event -> FX_SCOPE.setConversationId(conversationId));
         setOnHidden(event -> FX_SCOPE.destroy(conversationId));

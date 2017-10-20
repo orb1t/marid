@@ -25,8 +25,11 @@ import org.springframework.beans.factory.config.Scope;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.lang.Integer.toUnsignedString;
@@ -38,11 +41,22 @@ import static org.marid.logging.Log.log;
 
 public class FxScope implements Scope {
 
-    private volatile String conversationId;
+    private final Set<String> conversationIds = new ConcurrentSkipListSet<>();
     private final ConcurrentMap<String, ConcurrentMap<String, Object>> map = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, ConcurrentMap<String, Runnable>> destroyers = new ConcurrentHashMap<>();
 
+    private volatile String conversationId;
+
+    String nextConversationId() {
+        return IntStream.range(0, Integer.MAX_VALUE)
+                .mapToObj(Integer::toString)
+                .filter(v -> !conversationIds.contains(v))
+                .findFirst()
+                .orElse("-");
+    }
+
     void setConversationId(String conversationId) {
+        conversationIds.add(conversationId);
         if (!conversationId.equals(this.conversationId)) {
             this.conversationId = conversationId;
             log(INFO, "Activated {0}", conversationId);
@@ -50,6 +64,7 @@ public class FxScope implements Scope {
     }
 
     void destroy(String conversationId) {
+        conversationIds.remove(conversationId);
         map.remove(conversationId);
         ofNullable(destroyers.remove(conversationId)).ifPresent(d -> d.forEach((k, v) -> {
             try {
