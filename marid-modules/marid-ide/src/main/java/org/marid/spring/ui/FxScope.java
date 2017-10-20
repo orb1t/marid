@@ -42,14 +42,14 @@ public class FxScope implements Scope {
     private final ConcurrentMap<String, ConcurrentMap<String, Object>> map = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, ConcurrentMap<String, Runnable>> destroyers = new ConcurrentHashMap<>();
 
-    public void setConversationId(String conversationId) {
+    void setConversationId(String conversationId) {
         if (!conversationId.equals(this.conversationId)) {
             this.conversationId = conversationId;
             log(INFO, "Activated {0}", conversationId);
         }
     }
 
-    public void destroy(String conversationId) {
+    void destroy(String conversationId) {
         map.remove(conversationId);
         ofNullable(destroyers.remove(conversationId)).ifPresent(d -> d.forEach((k, v) -> {
             try {

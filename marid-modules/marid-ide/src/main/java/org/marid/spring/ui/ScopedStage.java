@@ -30,7 +30,7 @@ import static org.marid.Ide.FX_SCOPE;
 
 public abstract class ScopedStage extends Stage {
 
-    protected final String conversationId;
+    private final String conversationId;
 
     public ScopedStage(StageStyle style) {
         super(style);
