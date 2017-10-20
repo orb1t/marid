@@ -21,11 +21,12 @@
 package org.marid.ide.configurations;
 
 import org.marid.IdeDependants;
-import org.marid.dependant.iconviewer.IconViewerConfiguration;
 import org.marid.dependant.log.LogConfiguration;
 import org.marid.dependant.monitor.MonitorConfiguration;
+import org.marid.ide.tools.iconviewer.IconViewer;
 import org.marid.jfx.action.FxAction;
 import org.marid.spring.annotation.IdeAction;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.stereotype.Component;
 
 import static org.marid.jfx.LocalizedStrings.ls;
@@ -37,14 +38,11 @@ import static org.marid.jfx.LocalizedStrings.ls;
 public class ToolsConfiguration {
 
     @IdeAction
-    public FxAction iconViewerAction(IdeDependants dependants) {
+    public FxAction iconViewerAction(ObjectFactory<IconViewer> iconViewerFactory) {
         return new FxAction("icons", "Tools")
                 .setIcon("M_OPEN_IN_BROWSER")
                 .bindText(ls("Icon viewer"))
-                .setEventHandler(event -> dependants.start(IconViewerConfiguration.class, context -> {
-                    context.setId("iconViewer");
-                    context.setDisplayName("Icon Viewer");
-                }));
+                .setEventHandler(event -> iconViewerFactory.getObject().show());
     }
 
     @IdeAction

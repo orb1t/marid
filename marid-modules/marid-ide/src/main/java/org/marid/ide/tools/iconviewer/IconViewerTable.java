@@ -18,7 +18,7 @@
  * #L%
  */
 
-package org.marid.dependant.iconviewer;
+package org.marid.ide.tools.iconviewer;
 
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -27,7 +27,7 @@ import javafx.scene.Node;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import org.marid.l10n.L10n;
-import org.springframework.stereotype.Component;
+import org.marid.spring.ui.FxComponent;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,7 +41,7 @@ import static org.marid.jfx.icons.FontIcons.glyphIcon;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
+@FxComponent
 public class IconViewerTable extends TableView<String> {
 
     public IconViewerTable() {

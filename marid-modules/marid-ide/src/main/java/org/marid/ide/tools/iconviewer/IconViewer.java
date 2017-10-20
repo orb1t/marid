@@ -18,30 +18,31 @@
  * #L%
  */
 
-package org.marid.dependant.iconviewer;
+package org.marid.ide.tools.iconviewer;
 
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
-import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.l10n.L10n;
+import org.marid.spring.annotation.PrototypeComponent;
+import org.marid.spring.ui.ScopedStage;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ContextStartedEvent;
-import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Component;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
-public class IconViewer extends Stage {
+@PrototypeComponent
+public class IconViewer extends ScopedStage {
+
+    public IconViewer() {
+        super(StageStyle.UNIFIED);
+    }
 
     @Autowired
-    public IconViewer(IconViewerTable table, IdePane idePane) {
-        super(StageStyle.UNIFIED);
+    private void configure(IdePane idePane, IconViewerTable table) {
         initOwner(idePane.getScene().getWindow());
         setTitle(L10n.s("Icon viewer"));
         final BorderPane pane = new BorderPane(table);
@@ -51,10 +52,5 @@ public class IconViewer extends Stage {
         BorderPane.setMargin(table, new Insets(10, 10, 5, 10));
         BorderPane.setMargin(countLabel, new Insets(5, 10, 10, 10));
         setScene(new Scene(pane));
-    }
-
-    @EventListener
-    private void onStart(ContextStartedEvent event) {
-        show();
     }
 }

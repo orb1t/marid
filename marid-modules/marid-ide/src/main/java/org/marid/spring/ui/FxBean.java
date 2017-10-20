@@ -18,14 +18,19 @@
  * #L%
  */
 
-package org.marid.ide.structure.editor;
+package org.marid.spring.ui;
 
-import org.springframework.stereotype.Repository;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Scope;
 
-/**
- * @author Dmitry Ovchinnikov
- */
-@Repository
-public class FileEditors {
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
+@Target({ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+@Bean
+@Scope("fx")
+public @interface FxBean {
 }

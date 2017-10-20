@@ -31,9 +31,9 @@ import org.marid.ide.panes.main.IdePane;
 import org.marid.image.MaridIconFx;
 import org.marid.splash.MaridSplash;
 import org.marid.spring.postprocessors.MaridCommonPostProcessor;
+import org.marid.spring.ui.FxScope;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import java.awt.*;
 import java.util.Locale;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -47,6 +47,8 @@ import static org.marid.logging.Log.log;
  */
 public class Ide extends Application {
 
+    public static final FxScope FX_SCOPE = new FxScope();
+
     public static volatile Stage primaryStage;
 
     private final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
@@ -54,6 +56,7 @@ public class Ide extends Application {
     @Override
     public void init() throws Exception {
         context.getBeanFactory().addBeanPostProcessor(new MaridCommonPostProcessor());
+        context.getBeanFactory().registerScope("fx", FX_SCOPE);
         context.register(IdeContext.class);
         context.setAllowBeanDefinitionOverriding(true);
         context.setAllowCircularReferences(false);
@@ -98,9 +101,6 @@ public class Ide extends Application {
     }
 
     public static void main(String... args) throws Exception {
-        // Desktop initialization
-        Desktop.isDesktopSupported();
-
         // locale
         final String locale = PREFERENCES.get("locale", null);
         if (locale != null) {

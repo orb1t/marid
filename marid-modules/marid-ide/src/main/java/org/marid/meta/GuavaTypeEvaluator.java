@@ -46,7 +46,7 @@ public class GuavaTypeEvaluator implements TypeEvaluator {
         return this;
     }
 
-    public void where(TypeToken<?> formal, TypeToken<?> actual) {
+    private void where(TypeToken<?> formal, TypeToken<?> actual) {
         if (!passed.add(formal)) {
             return;
         }
