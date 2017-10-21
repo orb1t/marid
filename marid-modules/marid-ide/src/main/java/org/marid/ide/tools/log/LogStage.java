@@ -39,10 +39,10 @@ import static org.marid.jfx.icons.FontIcons.glyphIcon;
 import static org.marid.l10n.L10n.s;
 
 @PrototypeComponent
-public class FxStage extends FxStage {
+public class LogStage extends FxStage {
 
     @Autowired
-    public FxStage() {
+    public LogStage() {
         super(StageStyle.DECORATED);
         final Preferences preferences = IdePrefs.PREFERENCES.node("logs");
         initOwner(Ide.primaryStage);
