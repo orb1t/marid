@@ -26,11 +26,11 @@ import javafx.stage.WindowEvent;
 
 import static org.marid.Ide.FX_SCOPE;
 
-public abstract class ScopedStage extends Stage {
+public abstract class FxStage extends Stage {
 
     private final String conversationId;
 
-    public ScopedStage(StageStyle style) {
+    public FxStage(StageStyle style) {
         super(style);
         conversationId = FX_SCOPE.nextConversationId();
         FX_SCOPE.setConversationId(conversationId);

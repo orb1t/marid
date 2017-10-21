@@ -28,14 +28,14 @@ import javafx.stage.StageStyle;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.l10n.L10n;
 import org.marid.spring.annotation.PrototypeComponent;
-import org.marid.spring.ui.ScopedStage;
+import org.marid.spring.ui.FxStage;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @PrototypeComponent
-public class IconViewer extends ScopedStage {
+public class IconViewer extends FxStage {
 
     public IconViewer() {
         super(StageStyle.DECORATED);

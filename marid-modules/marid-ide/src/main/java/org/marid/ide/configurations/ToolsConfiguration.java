@@ -23,7 +23,7 @@ package org.marid.ide.configurations;
 import org.marid.IdeDependants;
 import org.marid.dependant.monitor.MonitorConfiguration;
 import org.marid.ide.tools.iconviewer.IconViewer;
-import org.marid.ide.tools.log.LogStage;
+import org.marid.ide.tools.log.FxStage;
 import org.marid.jfx.action.FxAction;
 import org.marid.spring.annotation.IdeAction;
 import org.springframework.beans.factory.ObjectFactory;
@@ -68,7 +68,7 @@ public class ToolsConfiguration {
     }
 
     @IdeAction
-    public FxAction showLogsAction(ObjectFactory<LogStage> logStageFactory) {
+    public FxAction showLogsAction(ObjectFactory<FxStage> logStageFactory) {
         return new FxAction("log", "log", "Tools")
                 .setIcon("M_VIEW_LIST")
                 .bindText(ls("Show logs"))

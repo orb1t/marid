@@ -29,7 +29,7 @@ import javafx.stage.StageStyle;
 import org.marid.Ide;
 import org.marid.IdePrefs;
 import org.marid.spring.annotation.PrototypeComponent;
-import org.marid.spring.ui.ScopedStage;
+import org.marid.spring.ui.FxStage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -39,10 +39,10 @@ import static org.marid.jfx.icons.FontIcons.glyphIcon;
 import static org.marid.l10n.L10n.s;
 
 @PrototypeComponent
-public class LogStage extends ScopedStage {
+public class FxStage extends FxStage {
 
     @Autowired
-    public LogStage() {
+    public FxStage() {
         super(StageStyle.DECORATED);
         final Preferences preferences = IdePrefs.PREFERENCES.node("logs");
         initOwner(Ide.primaryStage);

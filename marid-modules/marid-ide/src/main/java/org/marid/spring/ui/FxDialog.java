@@ -26,11 +26,11 @@ import javafx.scene.control.DialogEvent;
 
 import static org.marid.Ide.FX_SCOPE;
 
-public abstract class ScopedDialog<R> extends Dialog<R> {
+public abstract class FxDialog<R> extends Dialog<R> {
 
     private final String conversationId;
 
-    public ScopedDialog() {
+    public FxDialog() {
         this.conversationId = FX_SCOPE.nextConversationId();
         FX_SCOPE.setConversationId(conversationId);
         setOnShowing(event -> FX_SCOPE.setConversationId(conversationId));
