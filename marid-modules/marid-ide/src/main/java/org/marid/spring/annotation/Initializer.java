@@ -20,27 +20,28 @@
 
 package org.marid.spring.annotation;
 
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.annotation.AliasFor;
+import org.springframework.core.annotation.Order;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * @author Dmitry Ovchinnikov
- */
+import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
+
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Bean
-public @interface PrototypeBean {
+@Scope(SCOPE_PROTOTYPE)
+@Order
+public @interface Initializer {
 
-    String[] value() default {};
+    @AliasFor(annotation = Order.class, attribute = "value")
+    int order();
 
     @AliasFor(annotation = Bean.class, attribute = "initMethod")
-    String initMethod() default "";
+    String initMethod() default "run";
 }

@@ -18,7 +18,7 @@
  * #L%
  */
 
-package org.marid.dependant.log;
+package org.marid.ide.tools.log;
 
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -32,8 +32,8 @@ import org.marid.ide.logging.IdeLogHandler;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.jfx.track.Tracks;
 import org.marid.l10n.L10n;
+import org.marid.spring.ui.FxComponent;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
 import java.text.MessageFormat;
@@ -45,7 +45,7 @@ import java.util.logging.LogRecord;
 /**
  * @author Dmitry Ovchinnikov
  */
-@Component
+@FxComponent
 public class LoggingTable extends TableView<LogRecord> {
 
     @Autowired

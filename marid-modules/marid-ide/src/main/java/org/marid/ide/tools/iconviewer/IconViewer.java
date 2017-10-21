@@ -38,7 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class IconViewer extends ScopedStage {
 
     public IconViewer() {
-        super(StageStyle.UNIFIED);
+        super(StageStyle.DECORATED);
     }
 
     @Autowired

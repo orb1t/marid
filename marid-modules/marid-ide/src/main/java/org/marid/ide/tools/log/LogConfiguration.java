@@ -18,39 +18,35 @@
  * #L%
  */
 
-package org.marid.dependant.log;
+package org.marid.ide.tools.log;
 
-import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
 import javafx.scene.layout.BorderPane;
-import javafx.stage.Stage;
-import org.marid.Ide;
-import org.marid.IdePrefs;
+import org.marid.spring.ui.FxBean;
+import org.marid.spring.ui.FxComponent;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.prefs.Preferences;
 import java.util.stream.Stream;
 
-import static org.marid.dependant.log.LoggingTable.icon;
+import static org.marid.ide.tools.log.LoggingTable.icon;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 import static org.marid.l10n.L10n.s;
 
 /**
  * @author Dmitry Ovchinnikov.
  */
-@Configuration
-@Import({LoggingFilter.class, LoggingTable.class})
+@FxComponent
 public class LogConfiguration {
 
     @Qualifier("log")
-    @Bean
+    @FxBean
     @Order(1)
     public Menu filterMenu(LoggingFilter loggingFilter) {
         final Menu menu = new Menu(s("Filter"));
@@ -74,7 +70,7 @@ public class LogConfiguration {
     }
 
     @Qualifier("log")
-    @Bean
+    @FxBean
     @Order(2)
     public Menu actionsMenu(LoggingFilter loggingFilter) {
         final Menu menu = new Menu(s("Actions"));
@@ -87,38 +83,14 @@ public class LogConfiguration {
     }
 
     @Qualifier("log")
-    @Bean
+    @FxBean
     public MenuBar logMenuBar(@Qualifier("log") List<Menu> menus) {
         return new MenuBar(menus.toArray(new Menu[menus.size()]));
     }
 
     @Qualifier("log")
-    @Bean
+    @FxBean
     public BorderPane logPane(@Qualifier("log") MenuBar menuBar, LoggingTable table) {
         return new BorderPane(table, menuBar, null, null, null);
-    }
-
-    @Qualifier("log")
-    @Bean(initMethod = "show")
-    public Stage logStage(@Qualifier("log") BorderPane logPane, @Qualifier("log") Menu actionsMenu) {
-        final Preferences preferences = IdePrefs.PREFERENCES.node("logs");
-        final Stage stage = new Stage();
-        stage.initOwner(Ide.primaryStage);
-        stage.setScene(new Scene(logPane, preferences.getDouble("width", 800), preferences.getDouble("height", 600)));
-        stage.setOnCloseRequest(event -> {
-            preferences.putDouble("x", stage.getX());
-            preferences.putDouble("y", stage.getY());
-            preferences.putDouble("width", stage.getWidth());
-            preferences.putDouble("height", stage.getHeight());
-        });
-        stage.setX(preferences.getDouble("x", stage.getX()));
-        stage.setY(preferences.getDouble("y", stage.getY()));
-        {
-            actionsMenu.getItems().add(new SeparatorMenuItem());
-            final CheckMenuItem menuItem = new CheckMenuItem(s("Always on top"), glyphIcon("M_BORDER_TOP", 16));
-            menuItem.setOnAction(event -> stage.setAlwaysOnTop(!stage.isAlwaysOnTop()));
-            actionsMenu.getItems().add(menuItem);
-        }
-        return stage;
     }
 }

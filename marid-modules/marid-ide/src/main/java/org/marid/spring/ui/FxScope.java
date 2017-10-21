@@ -59,7 +59,7 @@ public class FxScope implements Scope {
         conversationIds.add(conversationId);
         if (!conversationId.equals(this.conversationId)) {
             this.conversationId = conversationId;
-            log(INFO, "Activated {0}", conversationId);
+            log(INFO, "Activated FxScope[{0}]", conversationId);
         }
     }
 
@@ -69,23 +69,19 @@ public class FxScope implements Scope {
         ofNullable(destroyers.remove(conversationId)).ifPresent(d -> d.forEach((k, v) -> {
             try {
                 v.run();
-                log(INFO, "Destroyed {0}.{1}", conversationId, k);
             } catch (Throwable x) {
-                log(WARNING, "Unable to destroy {0}.{1}", x, conversationId, k);
+                log(WARNING, "Unable to destroy FxScope[{0}].{1}", x, conversationId, k);
             }
         }));
-        log(INFO, "Destroyed {0}", conversationId);
+        log(INFO, "Destroyed FxScope[{0}]", conversationId);
     }
 
     @Nonnull
     @Override
     public Object get(@Nonnull String name, @Nonnull ObjectFactory<?> objectFactory) {
-        log(INFO, "Get {0}.{1}", conversationId, name);
-        final Object result = map
+        return map
                 .computeIfAbsent(conversationId, k -> new ConcurrentHashMap<>())
                 .computeIfAbsent(name, k -> objectFactory.getObject());
-        log(INFO, "Got {0}.{1} {2}", conversationId, name, pp(result));
-        return result;
     }
 
     @Nullable
@@ -93,7 +89,6 @@ public class FxScope implements Scope {
     public Object remove(@Nonnull String name) {
         return Stream.ofNullable(map.remove(conversationId))
                 .map(m -> m.get(name))
-                .peek(v -> log(INFO, "Removed {0}.{1} {2}", conversationId, name, pp(v)))
                 .findFirst()
                 .orElse(null);
     }
