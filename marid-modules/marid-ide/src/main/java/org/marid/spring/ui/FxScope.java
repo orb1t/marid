@@ -32,8 +32,6 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static java.lang.Integer.toUnsignedString;
-import static java.lang.System.identityHashCode;
 import static java.util.Optional.ofNullable;
 import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.WARNING;
@@ -110,9 +108,5 @@ public class FxScope implements Scope {
     @Override
     public String getConversationId() {
         return conversationId;
-    }
-
-    private String pp(Object v) {
-        return toUnsignedString(identityHashCode(v), 16);
     }
 }

@@ -97,7 +97,7 @@ public class LoggingTable extends TableView<LogRecord> {
         col.setText("☼");
         col.setCellValueFactory(param -> new SimpleObjectProperty<>(icon(param.getValue().getLevel())));
         col.setStyle("-fx-alignment: center;");
-        col.setCellFactory(c -> new TableCell<LogRecord, IconDescriptor>() {
+        col.setCellFactory(c -> new TableCell<>() {
             @Override
             protected void updateItem(IconDescriptor item, boolean empty) {
                 super.updateItem(item, empty);

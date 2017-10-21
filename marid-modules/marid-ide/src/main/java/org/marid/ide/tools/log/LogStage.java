@@ -28,9 +28,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.StageStyle;
 import org.marid.Ide;
 import org.marid.IdePrefs;
-import org.marid.spring.annotation.Initializer;
 import org.marid.spring.annotation.PrototypeComponent;
-import org.marid.spring.ui.FxInit;
 import org.marid.spring.ui.ScopedStage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -64,13 +62,11 @@ public class LogStage extends ScopedStage {
         setScene(new Scene(logPane, preferences.getDouble("width", 800), preferences.getDouble("height", 600)));
     }
 
-    @Initializer(order = 1)
-    public FxInit alwaysOnTopItem(@Qualifier("log") Menu actionsMenu) {
-        return () -> {
-            actionsMenu.getItems().add(new SeparatorMenuItem());
-            final CheckMenuItem menuItem = new CheckMenuItem(s("Always on top"), glyphIcon("M_BORDER_TOP", 16));
-            menuItem.setOnAction(event -> setAlwaysOnTop(!isAlwaysOnTop()));
-            actionsMenu.getItems().add(menuItem);
-        };
+    @Autowired
+    private void initItems(@Qualifier("log") Menu actionsMenu) {
+        actionsMenu.getItems().add(new SeparatorMenuItem());
+        final CheckMenuItem menuItem = new CheckMenuItem(s("Always on top"), glyphIcon("M_BORDER_TOP", 16));
+        menuItem.setOnAction(event -> setAlwaysOnTop(!isAlwaysOnTop()));
+        actionsMenu.getItems().add(menuItem);
     }
 }
