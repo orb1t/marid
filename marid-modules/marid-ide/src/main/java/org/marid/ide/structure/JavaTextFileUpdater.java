@@ -26,7 +26,6 @@ import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.printer.PrettyPrinter;
-import org.apache.commons.io.FilenameUtils;
 import org.marid.ide.event.TextFileAddedEvent;
 import org.marid.ide.event.TextFileMovedEvent;
 import org.marid.ide.project.ProjectManager;
@@ -35,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -108,7 +108,8 @@ public class JavaTextFileUpdater {
                     .filter(TypeDeclaration::isTopLevelType)
                     .findFirst()
                     .ifPresent(t -> {
-                        final String name = FilenameUtils.getBaseName(path.getFileName().toString());
+                        final String fileName = StringUtils.getFilename(path.getFileName().toString());
+                        final String name = fileName.replace(".java", "");
                         if (!t.getNameAsString().equals(name)) {
                             t.setName(name);
                             updated.set(true);

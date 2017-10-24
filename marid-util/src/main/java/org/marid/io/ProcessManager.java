@@ -58,6 +58,10 @@ public class ProcessManager implements Closeable {
         errConsumer.start();
     }
 
+    public ProcessManager(String name, Process process, Consumer<String> out, Consumer<String> err) {
+        this(name, process, out, err, 65536, 1L, TimeUnit.SECONDS);
+    }
+
     private void awaitThreads(IOException iox) throws IOException {
         final IOException ex = iox != null ? iox : new IOException();
         try (final InputStream e = err; final InputStream i = out) {
@@ -75,6 +79,10 @@ public class ProcessManager implements Closeable {
         if (ex.getMessage() != null || ex.getSuppressed().length > 0) {
             throw ex;
         }
+    }
+
+    public int waitFor() throws InterruptedException {
+        return process.waitFor();
     }
 
     @Override

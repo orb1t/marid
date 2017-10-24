@@ -23,6 +23,8 @@ package org.marid.ide.settings;
 import javafx.beans.value.WritableObjectValue;
 import org.springframework.stereotype.Component;
 
+import java.nio.file.Paths;
+
 import static org.marid.jfx.props.Props.string;
 
 /**
@@ -31,6 +33,7 @@ import static org.marid.jfx.props.Props.string;
 @Component
 public class MavenSettings extends AbstractSettings {
 
+    public final WritableObjectValue<String> mavenHome = string(preferences, "mavenHome", defaultMavenHome());
     public final WritableObjectValue<String> snapshotUpdatePolicy = string(preferences, "snapshotUpdatePolicy", null);
     public final WritableObjectValue<String> releaseUpdatePolicy = string(preferences, "releaseUpdatePolicy", null);
     public final WritableObjectValue<String> dependencyPluginVersion = string(preferences, "dependencyPluginVersion", "3.0.2");
@@ -42,5 +45,9 @@ public class MavenSettings extends AbstractSettings {
     @Override
     public String getName() {
         return "Maven";
+    }
+
+    private static String defaultMavenHome() {
+        return Paths.get(System.getProperty("user.home"), "maven").toAbsolutePath().toString();
     }
 }

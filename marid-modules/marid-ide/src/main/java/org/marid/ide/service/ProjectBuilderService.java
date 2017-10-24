@@ -20,38 +20,26 @@
 
 package org.marid.ide.service;
 
-import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.concurrent.WorkerStateEvent;
-import javafx.geometry.Insets;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.HBox;
-import org.apache.maven.cli.MaridTransferEvent;
-import org.controlsfx.control.PopOver;
-import org.controlsfx.control.PopOver.ArrowLocation;
-import org.eclipse.aether.transfer.TransferEvent;
+import javafx.scene.text.Font;
 import org.marid.ide.common.IdeShapes;
-import org.marid.ide.logging.IdeLogHandler;
-import org.marid.ide.logging.IdeMavenLogHandler;
 import org.marid.ide.project.ProjectMavenBuilder;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.status.IdeService;
-import org.marid.jfx.icons.FontIcons;
-import org.marid.jfx.logging.LogComponent;
+import org.marid.io.ProcessManager;
 import org.marid.spring.annotation.PrototypeComponent;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ApplicationEventMulticaster;
 
 import javax.annotation.Nonnull;
-import java.util.ListIterator;
-import java.util.logging.Logger;
+import java.util.function.Consumer;
 
+import static java.lang.System.lineSeparator;
+import static javafx.application.Platform.runLater;
 import static org.marid.l10n.L10n.s;
 
 /**
@@ -60,19 +48,18 @@ import static org.marid.l10n.L10n.s;
 @PrototypeComponent
 public class ProjectBuilderService extends IdeService<HBox> {
 
-    private final IdeLogHandler logHandler;
     private final ObjectFactory<ProjectMavenBuilder> builder;
-    private final ApplicationEventMulticaster multicaster;
+    private final TextArea out = new TextArea();
+    private final TextArea err = new TextArea();
 
     private ProjectProfile profile;
 
     @Autowired
-    public ProjectBuilderService(IdeLogHandler logHandler,
-                                 ObjectFactory<ProjectMavenBuilder> builder,
-                                 ApplicationEventMulticaster multicaster) {
-        this.logHandler = logHandler;
+    public ProjectBuilderService(ObjectFactory<ProjectMavenBuilder> builder) {
         this.builder = builder;
-        this.multicaster = multicaster;
+
+        out.setFont(Font.font("Monospaced"));
+        err.setFont(Font.font("Monospaced"));
     }
 
     public ProjectBuilderService setProfile(ProjectProfile profile) {
@@ -90,10 +77,6 @@ public class ProjectBuilderService extends IdeService<HBox> {
 
     private class BuilderTask extends IdeTask {
 
-        private ApplicationListener<MaridTransferEvent> transferEventListener;
-        private ObservableList<TransferEvent> events;
-        ListView<TransferEvent> view;
-
         private BuilderTask() {
             updateTitle(profile.getName() + ": " + s("Maven Build"));
         }
@@ -103,33 +86,18 @@ public class ProjectBuilderService extends IdeService<HBox> {
             final ProjectMavenBuilder projectBuilder = builder.getObject()
                     .profile(profile)
                     .goals("clean", "install");
-            final int threadId = logHandler.registerBlockedThreadId();
-            final IdeMavenLogHandler mavenLogHandler = new IdeMavenLogHandler(threadId);
-            final Logger root = Logger.getLogger("");
-            root.addHandler(mavenLogHandler);
             updateGraphic(box -> {
-                final LogComponent logComponent = new LogComponent(mavenLogHandler.records);
-                final BorderPane pane = new BorderPane(logComponent);
-                BorderPane.setMargin(logComponent, new Insets(5));
-                logComponent.setPrefSize(800, 600);
-                details.set(pane);
-                multicaster.addApplicationListener(transferEventListener = new TransferListener());
+                final Tab outTab = new Tab("Out", out);
+                final Tab errTab = new Tab("Err", err);
+                final TabPane tabPane = new TabPane(outTab, errTab);
+                tabPane.setPrefSize(800, 800);
+                details.set(tabPane);
             });
-            try {
-                projectBuilder.build(result -> {
-                    if (!result.exceptions.isEmpty()) {
-                        final IllegalStateException thrown = new IllegalStateException("Maven build error");
-                        result.exceptions.forEach(thrown::addSuppressed);
-                        throw thrown;
-                    }
-                });
-            } finally {
-                logHandler.unregisterBlockedThreadId(threadId);
-                root.removeHandler(mavenLogHandler);
-                if (transferEventListener != null) {
-                    multicaster.removeApplicationListener(transferEventListener);
-                }
-            }
+            final Consumer<String> o = l -> runLater(() -> out.appendText(l + lineSeparator()));
+            final Consumer<String> e = l -> runLater(() -> err.appendText(l + lineSeparator()));
+            final ProcessManager manager = projectBuilder.build(o, e);
+
+            manager.waitFor();
         }
 
         @Nonnull
@@ -141,81 +109,6 @@ public class ProjectBuilderService extends IdeService<HBox> {
         @Override
         protected ContextMenu contextMenu() {
             return new ContextMenu();
-        }
-
-        private class TransferListener implements ApplicationListener<MaridTransferEvent> {
-
-            @Override
-            public void onApplicationEvent(MaridTransferEvent event) {
-                if (event.getSource() != profile) {
-                    return;
-                }
-                Platform.runLater(() -> {
-                    if (events == null) {
-                        events = FXCollections.observableArrayList();
-
-                        view = new ListView<>(events);
-                        view.setPrefSize(400, 800);
-                        view.setCellFactory(param -> new ListCell<TransferEvent>() {
-                            @Override
-                            protected void updateItem(TransferEvent item, boolean empty) {
-                                super.updateItem(item, empty);
-                                if (empty || item == null) {
-                                    setText(null);
-                                    setGraphic(null);
-                                } else {
-                                    setText(item.getResource().getFile().getName());
-                                    switch (item.getType()) {
-                                        case STARTED:
-                                            setGraphic(FontIcons.glyphIcon("D_PLAY"));
-                                            break;
-                                        case CORRUPTED:
-                                            setGraphic(FontIcons.glyphIcon("M_BUG_REPORT"));
-                                            break;
-                                        case FAILED:
-                                            setGraphic(FontIcons.glyphIcon("M_SMS_FAILED"));
-                                            break;
-                                        case INITIATED:
-                                            setGraphic(FontIcons.glyphIcon("M_INSERT_INVITATION"));
-                                            break;
-                                        case PROGRESSED:
-                                            setGraphic(FontIcons.glyphIcon("D_MESSAGE_PROCESSING"));
-                                            break;
-                                        case SUCCEEDED:
-                                            setGraphic(FontIcons.glyphIcon("F_STOP"));
-                                            break;
-                                        default:
-                                            setGraphic(null);
-                                            break;
-                                    }
-                                }
-                            }
-                        });
-
-                        final PopOver popOver = new PopOver(view);
-                        popOver.setArrowLocation(ArrowLocation.BOTTOM_LEFT);
-
-                        addEventHandler(WorkerStateEvent.ANY, e -> {
-                            if (DONE_EVENT_TYPES.contains(e.getEventType())) {
-                                events.clear();
-                                popOver.hide();
-                            }
-                        });
-
-                        popOver.show(button);
-                    }
-
-                    for (final ListIterator<TransferEvent> i = events.listIterator(); i.hasNext(); ) {
-                        final TransferEvent e = i.next();
-                        if (e.getResource() == event.getEvent().getResource()) {
-                            i.set(e);
-                            return;
-                        }
-                    }
-                    events.add(event.getEvent());
-                    view.scrollTo(events.size() - 1);
-                });
-            }
         }
     }
 }

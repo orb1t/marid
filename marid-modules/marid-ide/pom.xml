@@ -34,34 +34,23 @@
         </dependency>
 
         <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
         </dependency>
 
         <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.apache.maven</groupId>
-            <artifactId>maven-embedder</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.maven.wagon</groupId>
-            <artifactId>wagon-file</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.maven.resolver</groupId>
-            <artifactId>maven-resolver-connector-basic</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.maven.resolver</groupId>
-            <artifactId>maven-resolver-transport-wagon</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.maven.wagon</groupId>
-            <artifactId>wagon-http</artifactId>
-            <classifier>shaded</classifier>
+            <artifactId>maven-model-builder</artifactId>
         </dependency>
 
         <dependency>
@@ -79,12 +68,6 @@
             <groupId>com.digitalpetri.modbus</groupId>
             <artifactId>modbus-slave-tcp</artifactId>
             <version>1.1.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jboss.windup.org.apache.maven.indexer</groupId>
-            <artifactId>indexer-core</artifactId>
-            <version>7.0.WINDUP</version>
         </dependency>
     </dependencies>
 

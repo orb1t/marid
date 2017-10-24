@@ -29,9 +29,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
 import org.apache.maven.model.Dependency;
 import org.marid.Ide;
-import org.marid.ide.maven.MavenArtifactFinder;
 import org.marid.jfx.toolbar.ToolbarBuilder;
-import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
@@ -64,7 +62,7 @@ public class DependenciesPane extends BorderPane {
     }
 
     @Autowired
-    private void initToolbar(ObjectFactory<MavenArtifactFinder> artifactFinder) {
+    private void initToolbar() {
         final ObservableList<Dependency> selected = dependencyTable.getSelectionModel().getSelectedItems();
         setBottom(new ToolbarBuilder()
                 .add("Add item", "M_ADD", event -> addDependency(new Dependency(), d -> {}))
@@ -73,8 +71,7 @@ public class DependenciesPane extends BorderPane {
                 .add("Clear all items", "M_CLEAR_ALL", event -> clear(), isEmpty(dependencyTable.getItems()))
                 .addSeparator()
                 .add("Find an artifact", "M_FIND_IN_PAGE", event -> {
-                    final MavenArtifactFinder finder = artifactFinder.getObject();
-                    finder.showAndWait().ifPresent(a -> addDependency(a.toDependency(), d -> {}));
+                    // TODO: add a dialog
                 })
                 .addSeparator()
                 .add("Add standard artifact", "M_ADD_CIRCLE", this::onStandard)

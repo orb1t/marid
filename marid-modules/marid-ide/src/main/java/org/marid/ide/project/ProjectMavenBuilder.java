@@ -20,17 +20,22 @@
 
 package org.marid.ide.project;
 
-import org.apache.maven.cli.MaridMavenCli;
-import org.apache.maven.cli.MaridMavenCliRequest;
-import org.marid.maven.MavenBuildResult;
+import org.marid.ide.settings.JavaSettings;
+import org.marid.ide.settings.MavenSettings;
+import org.marid.io.ProcessManager;
 import org.marid.spring.annotation.PrototypeComponent;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
+
+import static java.util.logging.Level.INFO;
+import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -40,13 +45,15 @@ public class ProjectMavenBuilder {
 
     private final List<String> goals = new ArrayList<>();
     private final List<String> profiles = new ArrayList<>();
-    private final ApplicationEventPublisher eventPublisher;
+    private final JavaSettings javaSettings;
+    private final MavenSettings mavenSettings;
 
     private ProjectProfile profile;
 
     @Autowired
-    public ProjectMavenBuilder(ApplicationEventPublisher eventPublisher) {
-        this.eventPublisher = eventPublisher;
+    public ProjectMavenBuilder(JavaSettings javaSettings, MavenSettings mavenSettings) {
+        this.javaSettings = javaSettings;
+        this.mavenSettings = mavenSettings;
     }
 
     public ProjectMavenBuilder goals(String... goals) {
@@ -64,22 +71,23 @@ public class ProjectMavenBuilder {
         return this;
     }
 
-    public void build(Consumer<MavenBuildResult> consumer) {
-        final long start = System.currentTimeMillis();
-        final List<String> argList = new ArrayList<>();
+    public ProcessManager build(Consumer<String> out, Consumer<String> err) throws IOException {
+        final List<String> args = new LinkedList<>();
+        args.add(javaSettings.getJavaExecutable());
+        args.add("-Dmaven.multiModuleProjectDirectory=" + profile.getPath());
+        args.add("-Dmaven.home=" + mavenSettings.mavenHome.get());
+        args.add("-Dclassworlds.conf=" + Paths.get(mavenSettings.mavenHome.get(), "bin", "m2.conf"));
+        args.add("-Dfile.encoding=UTF-8");
+        args.add("-cp");
+        args.add(Paths.get(mavenSettings.mavenHome.get(), "boot", "plexus-classworlds-2.5.2.jar").toString());
+        args.add("org.codehaus.classworlds.Launcher");
         if (!profiles.isEmpty()) {
-            argList.add("-P" + String.join(",", profiles));
+            args.add("-P" + String.join(",", profiles));
         }
-        argList.addAll(goals);
-        final String[] args = argList.toArray(new String[argList.size()]);
-        final List<Throwable> exceptions = new ArrayList<>();
-        final MaridMavenCliRequest request = new MaridMavenCliRequest(args, null).directory(profile.getPath());
-        final MaridMavenCli cli = new MaridMavenCli(null, eventPublisher, profile);
-        try {
-            cli.doMain(request);
-        } catch (Exception x) {
-            exceptions.add(x);
-        }
-        consumer.accept(new MavenBuildResult(System.currentTimeMillis() - start, exceptions));
+        args.addAll(goals);
+
+        log(INFO, "Executing {0}", String.join(" ", args));
+        final Process process = new ProcessBuilder(args).directory(profile.getPath().toFile()).start();
+        return new ProcessManager(profile.getName(), process, out, err);
     }
 }
