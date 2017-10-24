@@ -21,9 +21,6 @@
 
 package org.marid.runtime.context;
 
-import org.marid.runtime.context.MaridContextListener;
-import org.marid.runtime.context.MaridPlaceholderResolver;
-
 import java.io.*;
 import java.util.Properties;
 import java.util.ServiceLoader;

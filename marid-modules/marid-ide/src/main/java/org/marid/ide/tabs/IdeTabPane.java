@@ -20,8 +20,12 @@
 
 package org.marid.ide.tabs;
 
+import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Nonnull;
+import java.util.function.Supplier;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -29,8 +33,24 @@ import org.springframework.stereotype.Component;
 @Component
 public class IdeTabPane extends TabPane {
 
+    private static final Object TAB_KEY = new Object();
+
     public IdeTabPane() {
         setTabClosingPolicy(TabClosingPolicy.ALL_TABS);
         setFocusTraversable(false);
+    }
+
+    public void addTab(@Nonnull Object key, @Nonnull Supplier<? extends Tab> tabSupplier) {
+        for (int i = getTabs().size() - 1; i >= 0; i--) {
+            final Object v = getTabs().get(i).getProperties().get(TAB_KEY);
+            if (v != null && v.equals(key)) {
+                getSelectionModel().select(i);
+                return;
+            }
+        }
+
+        final Tab tab = tabSupplier.get();
+        tab.getProperties().put(TAB_KEY, key);
+        getTabs().add(tab);
     }
 }

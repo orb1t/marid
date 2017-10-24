@@ -21,12 +21,16 @@
 
 package org.marid.runtime.context;
 
+import org.marid.beans.MaridBean;
+
 import java.util.Properties;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public interface MaridRuntime {
+
+    String getName();
 
     MaridRuntime getParent();
 
@@ -37,4 +41,6 @@ public interface MaridRuntime {
     String resolvePlaceholders(String value);
 
     Properties getApplicationProperties();
+
+    MaridBean getBean();
 }

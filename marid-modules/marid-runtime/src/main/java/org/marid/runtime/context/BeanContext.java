@@ -88,6 +88,11 @@ public final class BeanContext implements MaridRuntime, AutoCloseable {
     }
 
     @Override
+    public String getName() {
+        return bean.getName();
+    }
+
+    @Override
     public BeanContext getParent() {
         return parent;
     }
@@ -135,6 +140,11 @@ public final class BeanContext implements MaridRuntime, AutoCloseable {
     @Override
     public Properties getApplicationProperties() {
         return configuration.getPlaceholderResolver().getProperties();
+    }
+
+    @Override
+    public MaridBean getBean() {
+        return bean;
     }
 
     private Object create(MaridBean bean, BeanContext context) {
