@@ -47,4 +47,10 @@ public class RefExpr extends Expr implements RefExpression {
     public String getReference() {
         return ref.get();
     }
+
+    @Override
+    public void writeTo(@Nonnull Element element) {
+        super.writeTo(element);
+        element.setAttribute("ref", getReference());
+    }
 }

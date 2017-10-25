@@ -49,12 +49,6 @@ public final class ClassExpr extends Expr implements ClassExpression {
     }
 
     @Override
-    public void writeTo(@Nonnull Element element) {
-        super.writeTo(element);
-        element.setAttribute("class", className);
-    }
-
-    @Override
     public String toString() {
         return "&" + className;
     }

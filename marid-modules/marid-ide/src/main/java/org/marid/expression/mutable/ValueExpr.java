@@ -49,4 +49,10 @@ public abstract class ValueExpr extends Expr implements ValueExpression {
     public String getValue() {
         return value.get();
     }
+
+    @Override
+    public void writeTo(@Nonnull Element element) {
+        super.writeTo(element);
+        element.setAttribute("value", getValue());
+    }
 }

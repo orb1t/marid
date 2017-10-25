@@ -75,14 +75,6 @@ public final class CallExpr extends Expr implements CallExpression {
     }
 
     @Override
-    public void writeTo(@Nonnull Element element) {
-        super.writeTo(element);
-        create(element, "target", t -> create(t, target.getTag(), target::writeTo));
-        element.setAttribute("method", method);
-        create(element, "args", as -> args.forEach(a -> create(as, a.getTag(), a::writeTo)));
-    }
-
-    @Override
     public String toString() {
         return args.stream().map(Object::toString).collect(joining(",", target + "." + method + "(", ")"));
     }

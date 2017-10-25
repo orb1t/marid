@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
-import static org.marid.io.Xmls.create;
 import static org.marid.io.Xmls.elements;
 
 public abstract class Expr implements Expression {
@@ -52,10 +51,6 @@ public abstract class Expr implements Expression {
 
     public String getTag() {
         return getClass().getSimpleName().replace("Expr", "").toLowerCase();
-    }
-
-    public void writeTo(@Nonnull Element element) {
-        create(element, "initializers", is -> initializers.forEach(i -> create(is, i.getTag(), i::writeTo)));
     }
 
     public static Expr of(@Nonnull Element element) {

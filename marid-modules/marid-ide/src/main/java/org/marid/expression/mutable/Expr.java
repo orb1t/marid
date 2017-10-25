@@ -36,6 +36,7 @@ import java.util.stream.Stream;
 
 import static java.util.Arrays.deepEquals;
 import static javafx.collections.FXCollections.observableArrayList;
+import static org.marid.io.Xmls.create;
 import static org.marid.io.Xmls.elements;
 
 public abstract class Expr implements Expression {
@@ -60,6 +61,14 @@ public abstract class Expr implements Expression {
 
     public Observable[] getObservables() {
         return ostream().toArray(Observable[]::new);
+    }
+
+    public String getTag() {
+        return getClass().getSimpleName().replace("Expr", "").toLowerCase();
+    }
+
+    public void writeTo(@Nonnull Element element) {
+        create(element, "initializers", is -> getInitializers().forEach(i -> create(is, i.getTag(), i::writeTo)));
     }
 
     private Stream<Observable> ostream() {

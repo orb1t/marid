@@ -48,12 +48,6 @@ public final class RefExpr extends Expr implements RefExpression {
     }
 
     @Override
-    public void writeTo(@Nonnull Element element) {
-        super.writeTo(element);
-        element.setAttribute("ref", reference);
-    }
-
-    @Override
     public String toString() {
         return "@" + reference;
     }

@@ -29,6 +29,7 @@ import org.w3c.dom.Element;
 import javax.annotation.Nonnull;
 
 import static org.marid.io.Xmls.attribute;
+import static org.marid.io.Xmls.create;
 import static org.marid.io.Xmls.element;
 
 public class GetExpr extends Expr implements GetExpression {
@@ -61,5 +62,12 @@ public class GetExpr extends Expr implements GetExpression {
     @Override
     public String getField() {
         return field.get();
+    }
+
+    @Override
+    public void writeTo(@Nonnull Element element) {
+        super.writeTo(element);
+        create(element, "target", t -> create(t, getTarget().getTag(), getTarget()::writeTo));
+        element.setAttribute("field", getField());
     }
 }

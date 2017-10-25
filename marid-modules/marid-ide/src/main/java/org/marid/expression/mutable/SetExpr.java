@@ -28,8 +28,7 @@ import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 
-import static org.marid.io.Xmls.attribute;
-import static org.marid.io.Xmls.element;
+import static org.marid.io.Xmls.*;
 
 public class SetExpr extends Expr implements SetExpression {
 
@@ -74,5 +73,13 @@ public class SetExpr extends Expr implements SetExpression {
     @Override
     public Expr getValue() {
         return value.get();
+    }
+
+    @Override
+    public void writeTo(@Nonnull Element element) {
+        super.writeTo(element);
+        create(element, "target", t -> create(t, getTarget().getTag(), getTarget()::writeTo));
+        element.setAttribute("field", getField());
+        create(element, "value", v -> create(v, getValue().getTag(), getValue()::writeTo));
     }
 }

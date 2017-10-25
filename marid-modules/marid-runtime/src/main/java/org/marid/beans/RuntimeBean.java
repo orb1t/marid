@@ -27,8 +27,6 @@ import org.marid.expression.runtime.NullExpr;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
-import javax.xml.transform.stream.StreamResult;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -100,16 +98,6 @@ public class RuntimeBean implements MaridBean {
     @Nonnull
     public final RuntimeBean add(@Nonnull String name, @Nonnull Consumer<RuntimeBean>... consumers) {
         return add(name, new NullExpr(), consumers);
-    }
-
-    public void writeTo(@Nonnull Element element) {
-        element.setAttribute("name", name);
-        create(element, "factory", f -> create(f, factory.getTag(), factory::writeTo));
-        children.forEach(c -> create(element, "bean", c::writeTo));
-    }
-
-    public void save(Writer writer) {
-        writeFormatted("bean", this::writeTo, new StreamResult(writer));
     }
 
     @Override

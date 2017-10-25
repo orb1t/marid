@@ -26,7 +26,6 @@ import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 
-import static org.marid.expression.generic.ConstExpression.ConstantType.*;
 import static org.marid.io.Xmls.attribute;
 
 public final class ConstExpr extends ValueExpr implements ConstExpression {
@@ -47,43 +46,5 @@ public final class ConstExpr extends ValueExpr implements ConstExpression {
     @Override
     public ConstantType getType() {
         return type;
-    }
-
-    @Override
-    public void writeTo(@Nonnull Element element) {
-        super.writeTo(element);
-        element.setAttribute("type", type.name());
-    }
-
-    public static ConstExpr byteExpr(String value) {
-        return new ConstExpr(BYTE, value);
-    }
-
-    public static ConstExpr intExpr(String value) {
-        return new ConstExpr(INT, value);
-    }
-
-    public static ConstExpr longExpr(String value) {
-        return new ConstExpr(LONG, value);
-    }
-
-    public static ConstExpr floatExpr(String value) {
-        return new ConstExpr(FLOAT, value);
-    }
-
-    public static ConstExpr doubleExpr(String value) {
-        return new ConstExpr(DOUBLE, value);
-    }
-
-    public static ConstExpr charExpr(String value) {
-        return new ConstExpr(CHAR, value);
-    }
-
-    public static ConstExpr shortExpr(String value) {
-        return new ConstExpr(SHORT, value);
-    }
-
-    public static ConstExpr boolExpr(String value) {
-        return new ConstExpr(BOOL, value);
     }
 }

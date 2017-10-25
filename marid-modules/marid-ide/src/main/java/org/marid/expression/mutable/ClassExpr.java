@@ -49,4 +49,10 @@ public class ClassExpr extends Expr implements ClassExpression {
     public String getClassName() {
         return className.get();
     }
+
+    @Override
+    public void writeTo(@Nonnull Element element) {
+        super.writeTo(element);
+        element.setAttribute("class", getClassName());
+    }
 }

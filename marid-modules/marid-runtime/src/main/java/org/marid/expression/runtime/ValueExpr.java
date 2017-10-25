@@ -49,12 +49,6 @@ public abstract class ValueExpr extends Expr implements ValueExpression {
     }
 
     @Override
-    public void writeTo(@Nonnull Element element) {
-        super.writeTo(element);
-        element.setAttribute("value", value);
-    }
-
-    @Override
     public String toString() {
         return value;
     }

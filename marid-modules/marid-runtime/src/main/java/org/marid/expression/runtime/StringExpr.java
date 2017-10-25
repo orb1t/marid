@@ -49,12 +49,6 @@ public final class StringExpr extends Expr implements StringExpression {
     }
 
     @Override
-    public void writeTo(@Nonnull Element element) {
-        super.writeTo(element);
-        element.setTextContent(value);
-    }
-
-    @Override
     public String toString() {
         return "\"" + value.replace("\"", "\\\"") + "\"";
     }

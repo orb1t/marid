@@ -47,4 +47,10 @@ public class StringExpr extends Expr implements StringExpression {
     public String getValue() {
         return value.get();
     }
+
+    @Override
+    public void writeTo(@Nonnull Element element) {
+        super.writeTo(element);
+        element.setTextContent(getValue());
+    }
 }

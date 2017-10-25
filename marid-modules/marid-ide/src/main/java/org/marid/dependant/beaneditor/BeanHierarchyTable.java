@@ -22,11 +22,11 @@ package org.marid.dependant.beaneditor;
 
 import javafx.scene.control.TreeItem;
 import org.marid.jfx.control.MaridTreeTableView;
-import org.marid.meta.MetaBean;
+import org.marid.beans.IdeBean;
 
-public class BeanHierarchyTable extends MaridTreeTableView<MetaBean> {
+public class BeanHierarchyTable extends MaridTreeTableView<IdeBean> {
 
     public BeanHierarchyTable() {
-        super(new TreeItem<>(new MetaBean()));
+        super(new TreeItem<>(new IdeBean()));
     }
 }

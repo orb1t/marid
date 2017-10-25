@@ -50,4 +50,10 @@ public class ConstExpr extends ValueExpr implements ConstExpression {
     public ConstantType getType() {
         return type.get();
     }
+
+    @Override
+    public void writeTo(@Nonnull Element element) {
+        super.writeTo(element);
+        element.setAttribute("type", getType().name());
+    }
 }

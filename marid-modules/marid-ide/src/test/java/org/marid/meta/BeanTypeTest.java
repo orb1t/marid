@@ -21,6 +21,7 @@
 package org.marid.meta;
 
 import org.junit.jupiter.api.Test;
+import org.marid.beans.IdeBean;
 import org.marid.expression.mutable.ClassExpr;
 import org.marid.expression.mutable.NullExpr;
 import org.marid.expression.mutable.RefExpr;
@@ -40,7 +41,7 @@ class BeanTypeTest {
 
     @Test
     void simple() {
-        final MetaBean root = new MetaBean()
+        final IdeBean root = new IdeBean()
                 .add("b1", new ClassExpr("java.lang.Integer"))
                 .add("b2", new NullExpr())
                 .add("b3", new RefExpr("b1"));
