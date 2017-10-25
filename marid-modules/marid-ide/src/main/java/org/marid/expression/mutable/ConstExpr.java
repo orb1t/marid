@@ -23,27 +23,31 @@ package org.marid.expression.mutable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import org.marid.expression.generic.ConstExpression;
-import org.marid.expression.runtime.Expr;
+import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 
+import static org.marid.io.Xmls.attribute;
+
 public class ConstExpr extends ValueExpr implements ConstExpression {
 
-    public final ObjectProperty<ConstantType> type = new SimpleObjectProperty<>();
+    public final ObjectProperty<ConstantType> type;
 
     public ConstExpr(@Nonnull ConstantType type, @Nonnull String value) {
         super(value);
-        this.type.set(type);
+        this.type = new SimpleObjectProperty<>(type);
+    }
+
+    ConstExpr(@Nonnull Element element) {
+        super(element);
+        this.type = new SimpleObjectProperty<>(
+                attribute(element, "type").map(ConstantType::valueOf).orElseThrow(() -> new NullPointerException("type"))
+        );
     }
 
     @Nonnull
     @Override
     public ConstantType getType() {
         return type.get();
-    }
-
-    @Override
-    public Expr toRuntimeExpr() {
-        return new org.marid.expression.runtime.ConstExpr(getType(), getValue());
     }
 }

@@ -18,19 +18,15 @@
  * #L%
  */
 
-package org.marid.expression.mutable;
+package org.marid.dependant.beaneditor;
 
-import org.marid.expression.generic.ThisExpression;
-import org.w3c.dom.Element;
+import javafx.scene.control.TreeItem;
+import org.marid.jfx.control.MaridTreeTableView;
+import org.marid.meta.MetaBean;
 
-import javax.annotation.Nonnull;
+public class BeanHierarchyTable extends MaridTreeTableView<MetaBean> {
 
-public class ThisExpr extends Expr implements ThisExpression {
-
-    public ThisExpr() {
-    }
-
-    ThisExpr(@Nonnull Element element) {
-        super(element);
+    public BeanHierarchyTable() {
+        super(new TreeItem<>(new MetaBean()));
     }
 }

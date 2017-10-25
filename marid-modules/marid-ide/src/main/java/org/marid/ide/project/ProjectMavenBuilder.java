@@ -20,14 +20,13 @@
 
 package org.marid.ide.project;
 
+import org.marid.ide.common.Directories;
 import org.marid.ide.settings.JavaSettings;
-import org.marid.ide.settings.MavenSettings;
 import org.marid.io.ProcessManager;
 import org.marid.spring.annotation.PrototypeComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -46,14 +45,14 @@ public class ProjectMavenBuilder {
     private final List<String> goals = new ArrayList<>();
     private final List<String> profiles = new ArrayList<>();
     private final JavaSettings javaSettings;
-    private final MavenSettings mavenSettings;
+    private final Directories directories;
 
     private ProjectProfile profile;
 
     @Autowired
-    public ProjectMavenBuilder(JavaSettings javaSettings, MavenSettings mavenSettings) {
+    public ProjectMavenBuilder(JavaSettings javaSettings, Directories directories) {
         this.javaSettings = javaSettings;
-        this.mavenSettings = mavenSettings;
+        this.directories = directories;
     }
 
     public ProjectMavenBuilder goals(String... goals) {
@@ -75,11 +74,11 @@ public class ProjectMavenBuilder {
         final List<String> args = new LinkedList<>();
         args.add(javaSettings.getJavaExecutable());
         args.add("-Dmaven.multiModuleProjectDirectory=" + profile.getPath());
-        args.add("-Dmaven.home=" + mavenSettings.mavenHome.get());
-        args.add("-Dclassworlds.conf=" + Paths.get(mavenSettings.mavenHome.get(), "bin", "m2.conf"));
+        args.add("-Dmaven.home=" + directories.getMaven());
+        args.add("-Dclassworlds.conf=" + directories.getMaven().resolve("bin").resolve("m2.conf"));
         args.add("-Dfile.encoding=UTF-8");
         args.add("-cp");
-        args.add(Paths.get(mavenSettings.mavenHome.get(), "boot", "plexus-classworlds-2.5.2.jar").toString());
+        args.add(directories.getMaven().resolve("boot").resolve("plexus-classworlds-2.5.2.jar").toString());
         args.add("org.codehaus.classworlds.Launcher");
         if (!profiles.isEmpty()) {
             args.add("-P" + String.join(",", profiles));

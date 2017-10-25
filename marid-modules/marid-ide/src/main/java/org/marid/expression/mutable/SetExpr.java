@@ -24,14 +24,39 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.marid.expression.generic.SetExpression;
 import org.marid.jfx.props.FxObject;
+import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 
+import static org.marid.io.Xmls.attribute;
+import static org.marid.io.Xmls.element;
+
 public class SetExpr extends Expr implements SetExpression {
 
-    public final FxObject<Expr> target = new FxObject<>(Expr::getObservables);
-    public final StringProperty field = new SimpleStringProperty();
-    public final FxObject<Expr> value = new FxObject<>(Expr::getObservables);
+    public final FxObject<Expr> target;
+    public final StringProperty field;
+    public final FxObject<Expr> value;
+
+    public SetExpr(@Nonnull Expr target, @Nonnull String field, @Nonnull Expr value) {
+        this.target = new FxObject<>(Expr::getObservables, target);
+        this.field = new SimpleStringProperty(field);
+        this.value = new FxObject<>(Expr::getObservables, value);
+    }
+
+    SetExpr(@Nonnull Element element) {
+        super(element);
+        this.target = new FxObject<>(
+                Expr::getObservables,
+                element("target", element).map(Expr::of).orElseThrow(() -> new NullPointerException("target"))
+        );
+        this.field = new SimpleStringProperty(
+                attribute(element, "field").orElseThrow(() -> new NullPointerException("field"))
+        );
+        this.value = new FxObject<>(
+                Expr::getObservables,
+                element("value", element).map(Expr::of).orElseThrow(() -> new NullPointerException("value"))
+        );
+    }
 
     @Nonnull
     @Override
@@ -49,14 +74,5 @@ public class SetExpr extends Expr implements SetExpression {
     @Override
     public Expr getValue() {
         return value.get();
-    }
-
-    @Override
-    public org.marid.expression.runtime.Expr toRuntimeExpr() {
-        return new org.marid.expression.runtime.SetExpr(
-                getTarget().toRuntimeExpr(),
-                getField(),
-                getValue().toRuntimeExpr()
-        );
     }
 }

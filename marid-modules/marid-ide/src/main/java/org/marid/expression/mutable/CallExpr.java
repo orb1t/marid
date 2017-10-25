@@ -25,17 +25,41 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
 import org.marid.expression.generic.CallExpression;
 import org.marid.jfx.props.FxObject;
+import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 import java.util.List;
 
+import static java.util.stream.Collectors.toCollection;
 import static javafx.collections.FXCollections.observableArrayList;
+import static org.marid.io.Xmls.*;
 
 public class CallExpr extends Expr implements CallExpression {
 
-    public final FxObject<Expr> target = new FxObject<>(Expr::getObservables);
-    public final StringProperty method = new SimpleStringProperty();
-    public final ObservableList<Expr> args = observableArrayList(Expr::getObservables);
+    public final FxObject<Expr> target;
+    public final StringProperty method;
+    public final ObservableList<Expr> args;
+
+    public CallExpr(@Nonnull Expr target, @Nonnull String method, @Nonnull Expr... args) {
+        this.target = new FxObject<>(Expr::getObservables, target);
+        this.method = new SimpleStringProperty(method);
+        this.args = observableArrayList(Expr::getObservables);
+        this.args.setAll(args);
+    }
+
+    CallExpr(@Nonnull Element element) {
+        super(element);
+        target = new FxObject<>(
+                Expr::getObservables,
+                element("target", element).map(Expr::of).orElseThrow(() -> new NullPointerException("target"))
+        );
+        method = new SimpleStringProperty(
+                attribute(element, "method").orElseThrow(() -> new NullPointerException("method"))
+        );
+        args = elements("args", element)
+                .map(Expr::of)
+                .collect(toCollection(() -> observableArrayList(Expr::getObservables)));
+    }
 
     @Nonnull
     @Override
@@ -53,14 +77,5 @@ public class CallExpr extends Expr implements CallExpression {
     @Override
     public List<Expr> getArgs() {
         return args;
-    }
-
-    @Override
-    public org.marid.expression.runtime.Expr toRuntimeExpr() {
-        return new org.marid.expression.runtime.CallExpr(
-                getTarget().toRuntimeExpr(),
-                getMethod(),
-                getArgs().stream().map(Expr::toRuntimeExpr).toArray(org.marid.expression.runtime.Expr[]::new)
-        );
     }
 }

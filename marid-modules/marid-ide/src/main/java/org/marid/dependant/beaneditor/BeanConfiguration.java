@@ -18,19 +18,12 @@
  * #L%
  */
 
-package org.marid.expression.mutable;
+package org.marid.dependant.beaneditor;
 
-import org.marid.expression.generic.ThisExpression;
-import org.w3c.dom.Element;
+import org.springframework.context.annotation.Configuration;
 
-import javax.annotation.Nonnull;
+@Configuration
+public class BeanConfiguration {
 
-public class ThisExpr extends Expr implements ThisExpression {
 
-    public ThisExpr() {
-    }
-
-    ThisExpr(@Nonnull Element element) {
-        super(element);
-    }
 }

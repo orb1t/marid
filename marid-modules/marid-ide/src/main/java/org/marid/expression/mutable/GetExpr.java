@@ -24,17 +24,31 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.marid.expression.generic.GetExpression;
 import org.marid.jfx.props.FxObject;
+import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 
+import static org.marid.io.Xmls.attribute;
+import static org.marid.io.Xmls.element;
+
 public class GetExpr extends Expr implements GetExpression {
 
-    public final FxObject<Expr> target = new FxObject<>(Expr::getObservables);
-    public final StringProperty field = new SimpleStringProperty();
+    public final FxObject<Expr> target;
+    public final StringProperty field;
 
     public GetExpr(@Nonnull Expr target, @Nonnull String field) {
-        this.target.set(target);
-        this.field.set(field);
+        this.target = new FxObject<>(Expr::getObservables, target);
+        this.field = new SimpleStringProperty(field);
+    }
+
+    GetExpr(@Nonnull Element element) {
+        this.target = new FxObject<>(
+                Expr::getObservables,
+                element("target", element).map(Expr::of).orElseThrow(() -> new NullPointerException("target"))
+        );
+        this.field = new SimpleStringProperty(
+                attribute(element, "field").orElseThrow(() -> new NullPointerException("field"))
+        );
     }
 
     @Nonnull
@@ -47,10 +61,5 @@ public class GetExpr extends Expr implements GetExpression {
     @Override
     public String getField() {
         return field.get();
-    }
-
-    @Override
-    public org.marid.expression.runtime.Expr toRuntimeExpr() {
-        return new org.marid.expression.runtime.GetExpr(getTarget().toRuntimeExpr(), getField());
     }
 }

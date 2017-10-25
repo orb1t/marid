@@ -21,11 +21,16 @@
 package org.marid.expression.mutable;
 
 import org.marid.expression.generic.NullExpression;
+import org.w3c.dom.Element;
+
+import javax.annotation.Nonnull;
 
 public class NullExpr extends Expr implements NullExpression {
 
-    @Override
-    public org.marid.expression.runtime.Expr toRuntimeExpr() {
-        return new org.marid.expression.runtime.NullExpr();
+    public NullExpr() {
+    }
+
+    NullExpr(@Nonnull Element element) {
+        super(element);
     }
 }

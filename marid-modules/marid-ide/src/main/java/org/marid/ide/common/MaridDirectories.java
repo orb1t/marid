@@ -35,18 +35,21 @@ public class MaridDirectories implements Directories {
     private final Path marid;
     private final Path profiles;
     private final Path repo;
+    private final Path maven;
 
     public MaridDirectories() {
         userHome = Paths.get(System.getProperty("user.home"));
         marid = userHome.resolve("marid");
         profiles = marid.resolve("profiles");
         repo = marid.resolve("repo");
+        maven = marid.resolve("maven");
     }
 
     @PostConstruct
     private void init() throws IOException {
         Files.createDirectories(profiles);
         Files.createDirectories(repo);
+        Files.createDirectories(maven);
 
         System.setProperty("maven.repo.local", repo.toAbsolutePath().toString());
     }
@@ -69,5 +72,10 @@ public class MaridDirectories implements Directories {
     @Override
     public Path getRepo() {
         return repo;
+    }
+
+    @Override
+    public Path getMaven() {
+        return maven;
     }
 }

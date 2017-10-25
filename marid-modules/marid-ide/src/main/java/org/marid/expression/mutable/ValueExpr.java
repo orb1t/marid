@@ -23,15 +23,25 @@ package org.marid.expression.mutable;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.marid.expression.generic.ValueExpression;
+import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 
+import static org.marid.io.Xmls.attribute;
+
 public abstract class ValueExpr extends Expr implements ValueExpression {
 
-    public final StringProperty value = new SimpleStringProperty();
+    public final StringProperty value;
 
     public ValueExpr(@Nonnull String value) {
-        this.value.set(value);
+        this.value = new SimpleStringProperty(value);
+    }
+
+    ValueExpr(@Nonnull Element element) {
+        super(element);
+        this.value = new SimpleStringProperty(
+                attribute(element, "value").orElseThrow(() -> new NullPointerException("value"))
+        );
     }
 
     @Nonnull

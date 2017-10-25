@@ -25,19 +25,32 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import org.marid.expression.generic.Expression;
 import org.marid.misc.Calls;
+import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.deepEquals;
 import static javafx.collections.FXCollections.observableArrayList;
+import static org.marid.io.Xmls.elements;
 
 public abstract class Expr implements Expression {
 
-    public final ObservableList<Expr> initializers = observableArrayList(Expr::getObservables);
+    public final ObservableList<Expr> initializers;
+
+    public Expr() {
+        initializers = observableArrayList(Expr::getObservables);
+    }
+
+    Expr(@Nonnull Element element) {
+        initializers = elements("initializers", element)
+                .map(Expr::of)
+                .collect(Collectors.toCollection(() -> observableArrayList(Expr::getObservables)));
+    }
 
     @Nonnull
     @Override
@@ -48,8 +61,6 @@ public abstract class Expr implements Expression {
     public Observable[] getObservables() {
         return ostream().toArray(Observable[]::new);
     }
-
-    public abstract org.marid.expression.runtime.Expr toRuntimeExpr();
 
     private Stream<Observable> ostream() {
         return Stream.of(getClass().getFields())
@@ -72,5 +83,20 @@ public abstract class Expr implements Expression {
         return obj != null
                 && obj.getClass() == getClass()
                 && deepEquals(stream().toArray(), ((Expr) obj).stream().toArray());
+    }
+
+    public static Expr of(@Nonnull Element element) {
+        switch (element.getTagName()) {
+            case "class": return new ClassExpr(element);
+            case "this": return new ThisExpr(element);
+            case "string": return new StringExpr(element);
+            case "ref": return new RefExpr(element);
+            case "const": return new ConstExpr(element);
+            case "get": return new GetExpr(element);
+            case "set": return new SetExpr(element);
+            case "null": return new NullExpr(element);
+            case "call": return new CallExpr(element);
+            default: throw new IllegalArgumentException(element.getTagName());
+        }
     }
 }

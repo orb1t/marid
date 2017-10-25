@@ -34,4 +34,6 @@ public interface Directories {
     Path getProfiles();
 
     Path getRepo();
+
+    Path getMaven();
 }
