@@ -83,9 +83,9 @@
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib</classpathPrefix>
                         </manifest>
+                        <manifestFile>build/MANIFEST.MF</manifestFile>
                         <manifestEntries>
                             <JavaFX-Version>9.0</JavaFX-Version>
-                            <Add-Opens>java.base/java.lang java.base/sun.nio.fs javafx.graphics/com.sun.javafx.scene</Add-Opens>
                         </manifestEntries>
                     </archive>
                 </configuration>
