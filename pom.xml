@@ -49,14 +49,6 @@
 
     <profiles>
         <profile>
-            <id>slow-tests</id>
-
-            <properties>
-                <test.groups>org.marid.test.SlowTests</test.groups>
-            </properties>
-        </profile>
-
-        <profile>
             <id>release</id>
 
             <properties>
