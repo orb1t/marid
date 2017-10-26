@@ -97,12 +97,12 @@ public class IdeDependants {
 
     private static class DependantContext extends AnnotationConfigApplicationContext {
 
-        private final L parentListener;
+        private final Listener parentListener;
 
         private DependantContext(GenericApplicationContext parent) {
             final String id = UUID.randomUUID().toString();
             setId(id);
-            parent.addApplicationListener(parentListener = new L(this, parent));
+            parent.addApplicationListener(parentListener = new Listener(this, parent));
             setAllowBeanDefinitionOverriding(false);
             setAllowCircularReferences(false);
             getBeanFactory().addBeanPostProcessor(new WindowAndDialogPostProcessor(this));
@@ -126,32 +126,32 @@ public class IdeDependants {
                     .ifPresent(AbstractApplicationContext::close);
         }
     }
+}
 
-    private static class L extends WeakReference<GenericApplicationContext> implements ApplicationListener<ApplicationEvent> {
+class Listener extends WeakReference<GenericApplicationContext> implements ApplicationListener<ApplicationEvent> {
 
-        private final GenericApplicationContext parent;
+    private final GenericApplicationContext parent;
 
-        private L(GenericApplicationContext referent, GenericApplicationContext parent) {
-            super(referent);
-            this.parent = parent;
-        }
+    Listener(GenericApplicationContext referent, GenericApplicationContext parent) {
+        super(referent);
+        this.parent = parent;
+    }
 
-        @Override
-        public void onApplicationEvent(@Nonnull ApplicationEvent event) {
-            final GenericApplicationContext context = get();
-            if (context == null || !context.isActive()) {
-                close();
-            } else {
-                if (event instanceof ContextClosedEvent) {
-                    context.close();
-                } else if (event instanceof PropagatedEvent) {
-                    context.publishEvent(event);
-                }
+    @Override
+    public void onApplicationEvent(@Nonnull ApplicationEvent event) {
+        final GenericApplicationContext context = get();
+        if (context == null || !context.isActive()) {
+            close();
+        } else {
+            if (event instanceof ContextClosedEvent) {
+                context.close();
+            } else if (event instanceof PropagatedEvent) {
+                context.publishEvent(event);
             }
         }
+    }
 
-        private void close() {
-            parent.getApplicationListeners().remove(this);
-        }
+    void close() {
+        parent.getApplicationListeners().remove(this);
     }
 }
