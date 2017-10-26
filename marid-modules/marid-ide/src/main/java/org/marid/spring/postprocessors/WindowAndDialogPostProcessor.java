@@ -27,6 +27,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,19 +41,19 @@ public class WindowAndDialogPostProcessor implements BeanPostProcessor {
     private final List<Window> windows = new ArrayList<>();
     private final AnnotationConfigApplicationContext context;
 
-    public WindowAndDialogPostProcessor(AnnotationConfigApplicationContext context) {
+    public WindowAndDialogPostProcessor(@Nonnull AnnotationConfigApplicationContext context) {
         this.context = context;
     }
 
     @Override
-    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+    public Object postProcessBeforeInitialization(@Nullable Object bean, String beanName) throws BeansException {
         return bean;
     }
 
     @Override
-    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        if (beanName != null && matches(bean) && context.isSingleton(beanName)) {
-            if (bean instanceof Dialog<?>) {
+    public Object postProcessAfterInitialization(@Nullable Object bean, String beanName) throws BeansException {
+        if (beanName != null) {
+            if (bean instanceof Dialog<?> && context.isSingleton(beanName)) {
                 final Dialog<?> dialog = (Dialog<?>) bean;
                 dialog.showingProperty().addListener((observable, oldValue, newValue) -> {
                     if (!newValue) {
@@ -60,7 +62,7 @@ public class WindowAndDialogPostProcessor implements BeanPostProcessor {
                     }
                 });
                 dialogs.add(dialog);
-            } else if (bean instanceof Window) {
+            } else if (bean instanceof Window && context.isSingleton(beanName)) {
                 final Window window = (Window) bean;
                 window.addEventHandler(WindowEvent.WINDOW_HIDDEN, event -> {
                     windows.remove(window);
@@ -70,10 +72,6 @@ public class WindowAndDialogPostProcessor implements BeanPostProcessor {
             }
         }
         return bean;
-    }
-
-    private static boolean matches(Object bean) {
-        return bean instanceof Dialog || bean instanceof Window;
     }
 
     private void closeIfNecessary() {

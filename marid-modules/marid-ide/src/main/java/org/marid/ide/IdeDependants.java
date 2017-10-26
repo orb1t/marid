@@ -26,6 +26,7 @@ import javafx.scene.control.Tab;
 import javafx.stage.Window;
 import org.marid.ide.event.PropagatedEvent;
 import org.marid.ide.tabs.IdeTab;
+import org.marid.misc.Casts;
 import org.marid.spring.postprocessors.MaridCommonPostProcessor;
 import org.marid.spring.postprocessors.WindowAndDialogPostProcessor;
 import org.springframework.beans.BeansException;
@@ -61,7 +62,7 @@ public class IdeDependants {
         this.parent = parent;
     }
 
-    public GenericApplicationContext start(Consumer<AnnotationConfigApplicationContext> consumer) {
+    public GenericApplicationContext run(Consumer<AnnotationConfigApplicationContext> consumer) {
         final AnnotationConfigApplicationContext context = new DependantContext(parent);
         consumer.accept(context);
         context.refresh();
@@ -69,15 +70,24 @@ public class IdeDependants {
         return context;
     }
 
-    public GenericApplicationContext start(Consumer<AnnotationConfigApplicationContext> consumer, Object conf) {
+    @SafeVarargs
+    public final GenericApplicationContext start(Object conf, Consumer<AnnotationConfigApplicationContext>... consumers) {
         return CONTEXTS.stream()
                 .filter(c -> c.containsBean("$conf") && c.getBean("$conf").equals(conf))
                 .findAny()
                 .map(IdeDependants::activate)
-                .orElseGet(() -> start(context -> {
-                    context.registerBean("$conf", conf.getClass(), (Supplier<?>) () -> conf);
-                    consumer.accept(context);
+                .orElseGet(() -> run(context -> {
+                    final Supplier<Object> supplier = () -> conf;
+                    final Class<Object> type = Casts.cast(conf.getClass());
+                    context.registerBean("$conf", type, supplier);
+                    for (final Consumer<AnnotationConfigApplicationContext> c : consumers) {
+                        c.accept(context);
+                    }
                 }));
+    }
+
+    public GenericApplicationContext start(Object conf, String displayName) {
+        return start(conf, c -> c.setDisplayName(displayName));
     }
 
     private static GenericApplicationContext activate(GenericApplicationContext context) {

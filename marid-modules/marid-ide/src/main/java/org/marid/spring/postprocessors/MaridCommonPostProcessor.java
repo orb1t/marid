@@ -24,6 +24,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.core.Ordered;
 
+import javax.annotation.Nullable;
+
 import static java.util.logging.Level.INFO;
 import static org.marid.logging.Log.log;
 
@@ -33,7 +35,7 @@ import static org.marid.logging.Log.log;
 public class MaridCommonPostProcessor implements DestructionAwareBeanPostProcessor, Ordered {
 
     @Override
-    public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
+    public void postProcessBeforeDestruction(@Nullable Object bean, @Nullable String beanName) throws BeansException {
         if (beanName == null) {
             if (bean != null) {
                 try {
@@ -53,12 +55,12 @@ public class MaridCommonPostProcessor implements DestructionAwareBeanPostProcess
     }
 
     @Override
-    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+    public Object postProcessBeforeInitialization(@Nullable Object bean, String beanName) throws BeansException {
         return bean;
     }
 
     @Override
-    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+    public Object postProcessAfterInitialization(@Nullable Object bean, String beanName) throws BeansException {
         if (beanName != null) {
             log(INFO, "Initialized {0}", beanName);
         } else {

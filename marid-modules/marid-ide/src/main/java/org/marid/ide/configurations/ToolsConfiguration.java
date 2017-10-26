@@ -50,7 +50,7 @@ public class ToolsConfiguration {
         return new FxAction("monitor", "Tools")
                 .setIcon("M_GRAPHIC_EQ")
                 .bindText(ls("System monitor"))
-                .setEventHandler(event -> dependants.start(c -> {
+                .setEventHandler(event -> dependants.run(c -> {
                     c.register(MonitorConfiguration.class);
                     c.setDisplayName("Monitor");
                 }));

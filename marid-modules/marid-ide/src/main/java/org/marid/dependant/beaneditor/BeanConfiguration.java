@@ -31,6 +31,9 @@ import org.springframework.context.annotation.Configuration;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static java.util.logging.Level.WARNING;
+import static org.marid.logging.Log.log;
+
 @Configuration
 @ComponentScan
 public class BeanConfiguration {
@@ -50,9 +53,12 @@ public class BeanConfiguration {
     public IdeBean root() {
         final Path beansFile = profile.get(ProjectFileType.BEANS_XML);
         if (Files.isRegularFile(beansFile)) {
-            return Xmls.read(beansFile, IdeBean::new);
-        } else {
-            return new IdeBean();
+            try {
+                return Xmls.read(beansFile, IdeBean::new);
+            } catch (Exception x) {
+                log(WARNING, "Unable to read {0}", x, beansFile);
+            }
         }
+        return new IdeBean();
     }
 }

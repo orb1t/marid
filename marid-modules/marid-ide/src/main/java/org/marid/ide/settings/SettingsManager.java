@@ -39,7 +39,7 @@ public class SettingsManager {
         return new FxAction("settings", "settings", "Tools")
                 .setIcon("O_SETTINGS")
                 .bindText(ls("Settings..."))
-                .setEventHandler(event -> dependants.start(c -> {
+                .setEventHandler(event -> dependants.run(c -> {
                     c.register(SettingsConfiguration.class);
                     c.setDisplayName("Settings Editor");
                 }));
