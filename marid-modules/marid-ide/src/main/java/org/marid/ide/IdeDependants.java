@@ -20,14 +20,12 @@
 
 package org.marid.ide;
 
-import javafx.application.Platform;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.SelectionModel;
 import javafx.scene.control.Tab;
 import javafx.stage.Window;
 import org.marid.ide.event.PropagatedEvent;
 import org.marid.ide.tabs.IdeTab;
-import org.marid.jfx.track.Tracks;
 import org.marid.spring.postprocessors.MaridCommonPostProcessor;
 import org.marid.spring.postprocessors.WindowAndDialogPostProcessor;
 import org.springframework.beans.BeansException;
@@ -36,14 +34,13 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
-import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.Collection;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
@@ -55,7 +52,7 @@ import java.util.function.Supplier;
 @Component("dependants")
 public class IdeDependants {
 
-    private static final Collection<WeakReference<DependantContext>> CONTEXTS = new ConcurrentLinkedQueue<>();
+    private static final Collection<DependantContext> CONTEXTS = new ConcurrentLinkedQueue<>();
 
     private final GenericApplicationContext parent;
 
@@ -74,8 +71,6 @@ public class IdeDependants {
 
     public GenericApplicationContext start(Consumer<AnnotationConfigApplicationContext> consumer, Object conf) {
         return CONTEXTS.stream()
-                .map(Reference::get)
-                .filter(Objects::nonNull)
                 .filter(c -> c.containsBean("$conf") && c.getBean("$conf").equals(conf))
                 .findAny()
                 .map(IdeDependants::activate)
@@ -102,76 +97,61 @@ public class IdeDependants {
 
     private static class DependantContext extends AnnotationConfigApplicationContext {
 
-        private final ParentListener parentListener;
+        private final L parentListener;
 
         private DependantContext(GenericApplicationContext parent) {
             final String id = UUID.randomUUID().toString();
             setId(id);
-            parent.addApplicationListener(parentListener = new ParentListener(this, parent));
+            parent.addApplicationListener(parentListener = new L(this, parent));
             setAllowBeanDefinitionOverriding(false);
             setAllowCircularReferences(false);
             getBeanFactory().addBeanPostProcessor(new WindowAndDialogPostProcessor(this));
             getBeanFactory().addBeanPostProcessor(new MaridCommonPostProcessor());
             getBeanFactory().setParentBeanFactory(parent.getDefaultListableBeanFactory());
             register(IdeDependants.class);
-            Tracks.CLEANER.register(this, () -> CONTEXTS.removeIf(ref -> {
-                final GenericApplicationContext c = ref.get();
-                if (c != null && id.equals(c.getId())) {
-                    Platform.runLater(c::close);
-                    return true;
-                } else {
-                    return false;
-                }
-            }));
         }
 
         @Override
         protected void onRefresh() throws BeansException {
             parentListener.close();
-            CONTEXTS.removeIf(c -> c.get() == null);
-            CONTEXTS.add(new WeakReference<>(this));
+            CONTEXTS.add(this);
         }
 
         @Override
         protected void onClose() {
-            CONTEXTS.removeIf(c -> c.get() == null || c.get() == this);
-            for (final WeakReference<DependantContext> ref : CONTEXTS) {
-                final GenericApplicationContext c = ref.get();
-                if (c != null && c.getBeanFactory().getParentBeanFactory() == getBeanFactory()) {
-                    c.close();
-                    return;
+            CONTEXTS.removeIf(c -> c == this);
+            CONTEXTS.stream()
+                    .filter(c -> c.getBeanFactory().getParentBeanFactory() == getBeanFactory())
+                    .findFirst()
+                    .ifPresent(AbstractApplicationContext::close);
+        }
+    }
+
+    private static class L extends WeakReference<GenericApplicationContext> implements ApplicationListener<ApplicationEvent> {
+
+        private final GenericApplicationContext parent;
+
+        private L(GenericApplicationContext referent, GenericApplicationContext parent) {
+            super(referent);
+            this.parent = parent;
+        }
+
+        @Override
+        public void onApplicationEvent(@Nonnull ApplicationEvent event) {
+            final GenericApplicationContext context = get();
+            if (context == null || !context.isActive()) {
+                close();
+            } else {
+                if (event instanceof ContextClosedEvent) {
+                    context.close();
+                } else if (event instanceof PropagatedEvent) {
+                    context.publishEvent(event);
                 }
             }
         }
 
-        private static class ParentListener extends WeakReference<GenericApplicationContext>
-                implements ApplicationListener<ApplicationEvent>, AutoCloseable {
-
-            private final GenericApplicationContext parent;
-
-            private ParentListener(GenericApplicationContext referent, GenericApplicationContext parent) {
-                super(referent);
-                this.parent = parent;
-            }
-
-            @Override
-            public void onApplicationEvent(@Nonnull ApplicationEvent event) {
-                final GenericApplicationContext context = get();
-                if (context == null || !context.isActive()) {
-                    close();
-                } else {
-                    if (event instanceof ContextClosedEvent) {
-                        context.close();
-                    } else if (event instanceof PropagatedEvent) {
-                        context.publishEvent(event);
-                    }
-                }
-            }
-
-            @Override
-            public void close() {
-                parent.getApplicationListeners().remove(this);
-            }
+        private void close() {
+            parent.getApplicationListeners().remove(this);
         }
     }
 }
