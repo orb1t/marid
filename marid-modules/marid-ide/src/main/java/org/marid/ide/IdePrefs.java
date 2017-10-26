@@ -18,7 +18,7 @@
  * #L%
  */
 
-package org.marid;
+package org.marid.ide;
 
 import java.util.prefs.Preferences;
 

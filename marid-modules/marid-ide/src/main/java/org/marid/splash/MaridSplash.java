@@ -41,7 +41,7 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import org.marid.IdePrefs;
+import org.marid.ide.IdePrefs;
 import org.marid.image.MaridIconFx;
 
 import java.util.List;

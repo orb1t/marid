@@ -20,8 +20,8 @@
 
 package org.marid.ide.configurations;
 
-import org.marid.IdeDependants;
 import org.marid.dependant.monitor.MonitorConfiguration;
+import org.marid.ide.IdeDependants;
 import org.marid.ide.tools.iconviewer.IconViewer;
 import org.marid.ide.tools.log.LogStage;
 import org.marid.jfx.action.FxAction;
@@ -50,9 +50,9 @@ public class ToolsConfiguration {
         return new FxAction("monitor", "Tools")
                 .setIcon("M_GRAPHIC_EQ")
                 .bindText(ls("System monitor"))
-                .setEventHandler(event -> dependants.start(MonitorConfiguration.class, context -> {
-                    context.setId("monitor");
-                    context.setDisplayName("Monitor");
+                .setEventHandler(event -> dependants.start(c -> {
+                    c.register(MonitorConfiguration.class);
+                    c.setDisplayName("Monitor");
                 }));
     }
 

@@ -27,7 +27,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.marid.IdePrefs;
+import org.marid.ide.IdePrefs;
 import org.marid.ide.common.Directories;
 import org.marid.ide.event.FileAddedEvent;
 import org.marid.ide.event.FileRemovedEvent;

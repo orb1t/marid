@@ -20,11 +20,14 @@
 
 package org.marid.ide.configurations;
 
-import org.marid.IdeDependants;
 import org.marid.dependant.modbus.ModbusSourceConfiguration;
+import org.marid.ide.IdeDependants;
 import org.marid.jfx.action.FxAction;
 import org.marid.spring.annotation.IdeAction;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.stereotype.Component;
+
+import java.util.function.Consumer;
 
 import static org.marid.jfx.LocalizedStrings.ls;
 
@@ -40,9 +43,12 @@ public class IOConfiguration {
         return new FxAction("modbus", "I/O")
                 .setIcon("M_DEVICES")
                 .bindText(ls("MODBUS devices"))
-                .setEventHandler(event -> dependants.start(ModbusSourceConfiguration.class, context -> {
-                    context.setId("modbus");
-                    context.setDisplayName("MODBUS devices");
-                }));
+                .setEventHandler(event -> {
+                    Consumer<AnnotationConfigApplicationContext> consumer = c -> c.setDisplayName("MODBUS devices");
+                    dependants.start(context1 -> {
+                        context1.register((Class<?>) ModbusSourceConfiguration.class);
+                        consumer.accept(context1);
+                    });
+                });
     }
 }

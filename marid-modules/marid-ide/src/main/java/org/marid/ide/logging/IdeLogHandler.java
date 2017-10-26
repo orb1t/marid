@@ -30,7 +30,7 @@ import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 
 import static java.util.logging.Level.INFO;
-import static org.marid.IdePrefs.PREFERENCES;
+import static org.marid.ide.IdePrefs.PREFERENCES;
 
 /**
  * @author Dmitry Ovchinnikov

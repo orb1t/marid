@@ -20,10 +20,39 @@
 
 package org.marid.dependant.beaneditor;
 
+import org.marid.beans.IdeBean;
+import org.marid.ide.project.ProjectFileType;
+import org.marid.ide.project.ProjectProfile;
+import org.marid.io.Xmls;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 @Configuration
+@ComponentScan
 public class BeanConfiguration {
 
+    private final ProjectProfile profile;
 
+    public BeanConfiguration(ProjectProfile profile) {
+        this.profile = profile;
+    }
+
+    @Bean
+    public ProjectProfile profile() {
+        return profile;
+    }
+
+    @Bean
+    public IdeBean root() {
+        final Path beansFile = profile.get(ProjectFileType.BEANS_XML);
+        if (Files.isRegularFile(beansFile)) {
+            return Xmls.read(beansFile, IdeBean::new);
+        } else {
+            return new IdeBean();
+        }
+    }
 }

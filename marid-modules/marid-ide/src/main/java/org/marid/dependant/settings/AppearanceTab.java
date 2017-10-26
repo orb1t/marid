@@ -22,7 +22,7 @@ package org.marid.dependant.settings;
 
 import javafx.application.Application;
 import javafx.scene.control.ComboBox;
-import org.marid.IdePrefs;
+import org.marid.ide.IdePrefs;
 import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.settings.AppearanceSettings;
 import org.marid.jfx.LocalizedStrings;

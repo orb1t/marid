@@ -48,7 +48,7 @@ import static org.marid.l10n.L10n.s;
  * @author Dmitry Ovchinnikov
  */
 @Configuration
-@ComponentScan(basePackageClasses = {ProjectConfigConfiguration.class})
+@ComponentScan
 public class ProjectConfigConfiguration {
 
     private final ProjectProfile profile;

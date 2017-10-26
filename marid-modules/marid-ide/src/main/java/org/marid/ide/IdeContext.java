@@ -18,9 +18,8 @@
  * #L%
  */
 
-package org.marid;
+package org.marid.ide;
 
-import org.marid.ide.IdeNotifications;
 import org.marid.ide.common.IdeValues;
 import org.marid.ide.common.MaridDirectories;
 import org.marid.ide.logging.IdeLogConsoleHandler;
@@ -44,7 +43,7 @@ import static org.springframework.beans.factory.config.ConfigurableBeanFactory.S
  * @author Dmitry Ovchinnikov
  */
 @Import({IdeDependants.class})
-@ComponentScan(basePackageClasses = IdeNotifications.class)
+@ComponentScan
 @EnableScheduling
 @PropertySource({"meta.properties", "ide.properties"})
 @Configuration

@@ -20,8 +20,8 @@
 
 package org.marid.ide.settings;
 
-import org.marid.IdeDependants;
 import org.marid.dependant.settings.SettingsConfiguration;
+import org.marid.ide.IdeDependants;
 import org.marid.jfx.action.FxAction;
 import org.marid.spring.annotation.IdeAction;
 import org.springframework.stereotype.Component;
@@ -39,9 +39,9 @@ public class SettingsManager {
         return new FxAction("settings", "settings", "Tools")
                 .setIcon("O_SETTINGS")
                 .bindText(ls("Settings..."))
-                .setEventHandler(event -> dependants.start(SettingsConfiguration.class, context -> {
-                    context.setId("settingsEditor");
-                    context.setDisplayName("Settings Editor");
+                .setEventHandler(event -> dependants.start(c -> {
+                    c.register(SettingsConfiguration.class);
+                    c.setDisplayName("Settings Editor");
                 }));
     }
 }

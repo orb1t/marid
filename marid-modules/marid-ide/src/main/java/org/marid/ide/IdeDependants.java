@@ -18,7 +18,7 @@
  * #L%
  */
 
-package org.marid;
+package org.marid.ide;
 
 import javafx.application.Platform;
 import javafx.scene.control.Dialog;
@@ -28,7 +28,6 @@ import javafx.stage.Window;
 import org.marid.ide.event.PropagatedEvent;
 import org.marid.ide.tabs.IdeTab;
 import org.marid.jfx.track.Tracks;
-import org.marid.misc.Casts;
 import org.marid.spring.postprocessors.MaridCommonPostProcessor;
 import org.marid.spring.postprocessors.WindowAndDialogPostProcessor;
 import org.springframework.beans.BeansException;
@@ -40,12 +39,15 @@ import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Nonnull;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -53,7 +55,7 @@ import java.util.function.Consumer;
 @Component("dependants")
 public class IdeDependants {
 
-    private static final Collection<WeakReference<GenericApplicationContext>> CONTEXTS = new ConcurrentLinkedQueue<>();
+    private static final Collection<WeakReference<DependantContext>> CONTEXTS = new ConcurrentLinkedQueue<>();
 
     private final GenericApplicationContext parent;
 
@@ -70,13 +72,6 @@ public class IdeDependants {
         return context;
     }
 
-    public GenericApplicationContext start(Class<?> conf, Consumer<AnnotationConfigApplicationContext> consumer) {
-        return start(context -> {
-            context.register(conf);
-            consumer.accept(context);
-        });
-    }
-
     public GenericApplicationContext start(Consumer<AnnotationConfigApplicationContext> consumer, Object conf) {
         return CONTEXTS.stream()
                 .map(Reference::get)
@@ -85,8 +80,7 @@ public class IdeDependants {
                 .findAny()
                 .map(IdeDependants::activate)
                 .orElseGet(() -> start(context -> {
-                    final Class<Object> type = Casts.cast(conf.getClass());
-                    context.registerBean("$conf", type, () -> conf);
+                    context.registerBean("$conf", conf.getClass(), (Supplier<?>) () -> conf);
                     consumer.accept(context);
                 }));
     }
@@ -109,9 +103,10 @@ public class IdeDependants {
     private static class DependantContext extends AnnotationConfigApplicationContext {
 
         private final ParentListener parentListener;
-        private final int hash;
 
         private DependantContext(GenericApplicationContext parent) {
+            final String id = UUID.randomUUID().toString();
+            setId(id);
             parent.addApplicationListener(parentListener = new ParentListener(this, parent));
             setAllowBeanDefinitionOverriding(false);
             setAllowCircularReferences(false);
@@ -119,10 +114,9 @@ public class IdeDependants {
             getBeanFactory().addBeanPostProcessor(new MaridCommonPostProcessor());
             getBeanFactory().setParentBeanFactory(parent.getDefaultListableBeanFactory());
             register(IdeDependants.class);
-            hash = hashCode();
             Tracks.CLEANER.register(this, () -> CONTEXTS.removeIf(ref -> {
                 final GenericApplicationContext c = ref.get();
-                if (c != null && c.hashCode() == hash) {
+                if (c != null && id.equals(c.getId())) {
                     Platform.runLater(c::close);
                     return true;
                 } else {
@@ -141,7 +135,7 @@ public class IdeDependants {
         @Override
         protected void onClose() {
             CONTEXTS.removeIf(c -> c.get() == null || c.get() == this);
-            for (final WeakReference<GenericApplicationContext> ref : CONTEXTS) {
+            for (final WeakReference<DependantContext> ref : CONTEXTS) {
                 final GenericApplicationContext c = ref.get();
                 if (c != null && c.getBeanFactory().getParentBeanFactory() == getBeanFactory()) {
                     c.close();
@@ -161,7 +155,7 @@ public class IdeDependants {
             }
 
             @Override
-            public void onApplicationEvent(ApplicationEvent event) {
+            public void onApplicationEvent(@Nonnull ApplicationEvent event) {
                 final GenericApplicationContext context = get();
                 if (context == null || !context.isActive()) {
                     close();

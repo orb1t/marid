@@ -25,6 +25,7 @@ import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.marid.ide.IdeContext;
 import org.marid.ide.logging.IdeLogConsoleHandler;
 import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.panes.main.IdePane;
@@ -39,7 +40,7 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 import static java.util.logging.Level.WARNING;
-import static org.marid.IdePrefs.PREFERENCES;
+import static org.marid.ide.IdePrefs.PREFERENCES;
 import static org.marid.logging.Log.log;
 
 /**

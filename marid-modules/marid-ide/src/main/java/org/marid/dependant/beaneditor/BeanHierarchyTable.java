@@ -21,12 +21,16 @@
 package org.marid.dependant.beaneditor;
 
 import javafx.scene.control.TreeItem;
-import org.marid.jfx.control.MaridTreeTableView;
 import org.marid.beans.IdeBean;
+import org.marid.jfx.control.MaridTreeTableView;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class BeanHierarchyTable extends MaridTreeTableView<IdeBean> {
 
-    public BeanHierarchyTable() {
-        super(new TreeItem<>(new IdeBean()));
+    @Autowired
+    public BeanHierarchyTable(IdeBean root) {
+        super(new TreeItem<>(root));
     }
 }

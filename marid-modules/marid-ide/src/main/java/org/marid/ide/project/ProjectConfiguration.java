@@ -23,7 +23,7 @@ package org.marid.ide.project;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.scene.input.KeyCombination;
-import org.marid.IdeDependants;
+import org.marid.ide.IdeDependants;
 import org.marid.dependant.project.config.ProjectConfigConfiguration;
 import org.marid.ide.service.ProjectBuilderService;
 import org.marid.ide.service.ProjectRunService;

@@ -1,3 +1,4 @@
 Add-Opens: java.base/java.lang
   java.base/sun.nio.fs
   javafx.graphics/com.sun.javafx.scene
+  javafx.base/com.sun.javafx.beans
