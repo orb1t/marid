@@ -32,7 +32,6 @@ import org.marid.Ide;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -56,7 +55,7 @@ public class DependenciesPane extends BorderPane {
         dependencyTable = new DependencyTable(dependencies.filtered(d -> !eq(d, runtimeDependency())));
     }
 
-    @PostConstruct
+    @Autowired
     private void initTable() {
         setCenter(dependencyTable);
     }

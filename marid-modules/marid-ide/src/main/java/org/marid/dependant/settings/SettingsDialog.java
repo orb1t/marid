@@ -20,14 +20,13 @@
 
 package org.marid.dependant.settings;
 
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import org.marid.Ide;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ContextStartedEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.util.Comparator;
@@ -59,11 +58,7 @@ public class SettingsDialog extends Dialog<ButtonType> {
                     return param;
             }
         });
-    }
-
-    @EventListener
-    private void onStart(ContextStartedEvent event) {
-        showAndWait();
+        Platform.runLater(this::showAndWait);
     }
 
     private TabPane tabPane(List<SettingsEditor> settingsEditors) {

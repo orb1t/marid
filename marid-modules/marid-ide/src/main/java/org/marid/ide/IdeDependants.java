@@ -42,7 +42,6 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Nonnull;
 import java.lang.ref.WeakReference;
 import java.util.Collection;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -74,7 +73,7 @@ public class IdeDependants {
     public final GenericApplicationContext start(Object conf, Consumer<AnnotationConfigApplicationContext>... consumers) {
         return CONTEXTS.stream()
                 .filter(c -> c.containsBean("$conf") && c.getBean("$conf").equals(conf))
-                .findAny()
+                .findFirst()
                 .map(IdeDependants::activate)
                 .orElseGet(() -> run(context -> {
                     final Supplier<Object> supplier = () -> conf;
@@ -110,8 +109,6 @@ public class IdeDependants {
         private final Listener parentListener;
 
         private DependantContext(GenericApplicationContext parent) {
-            final String id = UUID.randomUUID().toString();
-            setId(id);
             parent.addApplicationListener(parentListener = new Listener(this, parent));
             setAllowBeanDefinitionOverriding(false);
             setAllowCircularReferences(false);

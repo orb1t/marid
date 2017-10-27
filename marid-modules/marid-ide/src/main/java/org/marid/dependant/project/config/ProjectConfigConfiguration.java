@@ -20,6 +20,7 @@
 
 package org.marid.dependant.project.config;
 
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonType;
@@ -28,16 +29,15 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.Region;
 import javafx.stage.Modality;
+import javafx.stage.StageStyle;
 import org.apache.maven.model.Model;
-import org.marid.ide.panes.main.IdePane;
+import org.marid.Ide;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.control.MaridControls;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.core.annotation.Order;
 
 import java.util.List;
@@ -88,21 +88,19 @@ public class ProjectConfigConfiguration {
     }
 
     @Bean
-    public Dialog<Boolean> dialog(IdePane idePane, TabPane tabPane, ProjectProfile profile) {
+    public Dialog<Boolean> dialog(TabPane tabPane, ProjectProfile profile) {
         final Dialog<Boolean> dialog = new Dialog<>();
-        dialog.getDialogPane().setPrefSize(800, 600);
         dialog.getDialogPane().setContent(tabPane);
+        dialog.getDialogPane().setPrefSize(800, 600);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CLOSE);
         dialog.setTitle(s("Project preferences: %s", profile));
+        dialog.initOwner(Ide.primaryStage);
+        dialog.initStyle(StageStyle.DECORATED);
         dialog.initModality(Modality.WINDOW_MODAL);
-        dialog.initOwner(idePane.getScene().getWindow());
+        dialog.setResizable(true);
         dialog.setResultConverter(type -> true);
+        Platform.runLater(dialog::showAndWait);
         return dialog;
-    }
-
-    @Bean
-    public ApplicationListener<ContextStartedEvent> onStartListener(Dialog<Boolean> dialog) {
-        return event -> dialog.showAndWait();
     }
 
     @Override
