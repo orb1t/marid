@@ -37,7 +37,9 @@ public class ProjectStructureTab extends IdeTab {
 
     @Autowired
     public ProjectStructureTab(ProjectStructurePane projectStructurePane) {
-        super(projectStructurePane, ls("Profiles"), () -> glyphIcon("O_BOOK", 16));
+        setContent(projectStructurePane);
+        textProperty().bind(ls("Profiles"));
+        setGraphic(glyphIcon("O_BOOK", 16));
         setClosable(false);
     }
 }

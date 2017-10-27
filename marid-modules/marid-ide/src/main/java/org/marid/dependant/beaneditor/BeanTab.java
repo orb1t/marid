@@ -20,14 +20,10 @@
 
 package org.marid.dependant.beaneditor;
 
-import javafx.beans.binding.Bindings;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.tabs.IdeTab;
-import org.marid.ide.tabs.IdeTabPane;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.PreDestroy;
 
 import static org.marid.ide.common.IdeShapes.circle;
 
@@ -36,16 +32,8 @@ public class BeanTab extends IdeTab {
 
     @Autowired
     public BeanTab(BeanHierarchyTable table, ProjectProfile profile) {
-        super(table, Bindings.createStringBinding(profile::getName), () -> circle(profile.hashCode(), 16));
-    }
-
-    @Autowired
-    private void init(IdeTabPane ideTabPane) {
-        ideTabPane.getTabs().add(this);
-    }
-
-    @PreDestroy
-    private void destroy() {
-        ideTabPane.getTabs().remove(this);
+        setContent(table);
+        setText(profile.getName());
+        setGraphic(circle(profile.hashCode(), 16));
     }
 }

@@ -69,6 +69,12 @@ public class MonitorConfiguration {
 
     @Bean
     public IdeTab tab(GridPane monitorGridPane) {
-        return new IdeTab(monitorGridPane, ls("Monitor"), () -> glyphIcon("O_GRAPH", 16));
+        final IdeTab tab = new IdeTab();
+
+        tab.setContent(monitorGridPane);
+        tab.textProperty().bind(ls("Monitor"));
+        tab.setGraphic(glyphIcon("O_GRAPH", 16));
+
+        return tab;
     }
 }
