@@ -44,6 +44,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Optional.ofNullable;
 import static javafx.scene.input.TransferMode.COPY_OR_MOVE;
 import static javafx.scene.input.TransferMode.MOVE;
 import static org.marid.jfx.action.SpecialActionType.COPY;
@@ -81,14 +82,17 @@ public class MaridTreeTableView<T> extends TreeTableView<T> implements MaridActi
             setRowFactory(param -> {
                 final TreeTableRow<T> row = rowSupplier.get();
                 row.addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> {
-                    final Collection<FxAction> fxActions = actions(row.getTreeItem());
+                    final TreeItem<T> item = Optional.ofNullable(row.getTreeItem()).orElseGet(this::getRoot);
+                    final Collection<FxAction> fxActions = actions(item);
                     row.setContextMenu(fxActions.isEmpty() ? null : FxAction.grouped(fxActions));
                 });
                 initDnd(row, specialActions, dndManager);
                 return row;
             });
             addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> {
-                final Collection<FxAction> fxActions = actions(new TreeItem<>());
+                final TreeItem<T> item = ofNullable(getSelectionModel().getSelectedItem()).orElseGet(this::getRoot);
+                final Collection<FxAction> fxActions = actions(item);
+                System.out.println(item);
                 setContextMenu(fxActions.isEmpty() ? null : FxAction.grouped(fxActions));
             });
             getSelectionModel().selectedItemProperty().addListener(invalidationListener);

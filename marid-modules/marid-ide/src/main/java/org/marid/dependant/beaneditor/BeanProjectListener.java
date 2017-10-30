@@ -18,30 +18,37 @@
  * #L%
  */
 
-package org.marid.ide.project;
+package org.marid.dependant.beaneditor;
 
+import org.marid.beans.IdeBean;
+import org.marid.ide.project.ProjectFileType;
+import org.marid.ide.project.ProjectProfile;
+import org.marid.ide.project.ProjectSaveEvent;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-/**
- * @author Dmitry Ovchinnikov
- */
-@Component
-public class ProjectSaver {
+import java.nio.file.Path;
 
-    private final ProjectPrerequisites projectPrerequisites;
-    private final ApplicationEventPublisher publisher;
+import static java.util.logging.Level.INFO;
+import static org.marid.logging.Log.log;
+
+@Component
+public class BeanProjectListener {
+
+    private final ProjectProfile profile;
+    private final IdeBean root;
 
     @Autowired
-    public ProjectSaver(ProjectPrerequisites projectPrerequisites, ApplicationEventPublisher publisher) {
-        this.projectPrerequisites = projectPrerequisites;
-        this.publisher = publisher;
+    public BeanProjectListener(ProjectProfile profile, IdeBean root) {
+        this.profile = profile;
+        this.root = root;
     }
 
-    public void save(ProjectProfile profile) {
-        publisher.publishEvent(new ProjectSaveEvent(this));
-        projectPrerequisites.apply(profile);
-        profile.save();
+    @EventListener
+    public void onProjectSave(ProjectSaveEvent event) {
+        final Path path = profile.get(ProjectFileType.BEANS_XML);
+        root.save(path);
+        log(INFO, "Saved {0}", path);
     }
 }

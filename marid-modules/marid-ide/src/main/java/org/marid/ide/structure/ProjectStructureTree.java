@@ -79,7 +79,7 @@ public class ProjectStructureTree extends MaridTreeTableView<Path> {
         nameColumn = Builder.build(new TreeTableColumn<>(), column -> {
             column.textProperty().bind(ls("Name"));
             column.setCellValueFactory(e -> e.getValue().valueProperty());
-            column.setCellFactory(e -> new TreeTableCell<Path, Path>() {
+            column.setCellFactory(e -> new TreeTableCell<>() {
                 @Override
                 protected void updateItem(Path item, boolean empty) {
                     super.updateItem(item, empty);
@@ -130,29 +130,26 @@ public class ProjectStructureTree extends MaridTreeTableView<Path> {
 
     @Autowired
     private void init(Map<String, FileEditor> fileEditors) {
-        fileEditors.forEach((name, editor) -> {
-            actions().add((item -> {
-                if (item == null || item.getValue() == null) {
-                    return null;
+        fileEditors.forEach((name, editor) -> actions().add((item -> {
+            if (item == null || item.getValue() == null) {
+                return null;
+            } else {
+                final Path file = item.getValue();
+                final Runnable task = editor.getEditAction(file);
+                if (task != null) {
+                    final FxAction action = editor.getSpecialAction() != null
+                            ? new FxAction(editor.getSpecialAction())
+                            : new FxAction(name, editor.getGroup(), "Actions");
+                    return action
+                            .bindText(LocalizedStrings.ls(editor.getName()))
+                            .bindIcon(new SimpleStringProperty(editor.getIcon()))
+                            .setDisabled(false)
+                            .setEventHandler(e -> task.run());
                 } else {
-                    final Path file = item.getValue();
-                    final Runnable task = editor.getEditAction(file);
-                    if (task != null) {
-                        final FxAction action = editor.getSpecialAction() != null
-                                ? new FxAction(editor.getSpecialAction())
-                                : new FxAction(name, editor.getGroup(), "Actions");
-                        return action
-                                .bindText(LocalizedStrings.ls(editor.getName()))
-                                .bindIcon(new SimpleStringProperty(editor.getIcon()))
-                                .setDisabled(false)
-                                .setEventHandler(e -> task.run());
-                    } else {
-                        return null;
-                    }
+                    return null;
                 }
-            }));
-
-        });
+            }
+        })));
     }
 
     @Autowired

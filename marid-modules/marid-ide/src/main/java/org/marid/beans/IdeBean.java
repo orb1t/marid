@@ -24,6 +24,8 @@ import javafx.beans.Observable;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.marid.expression.mutable.Expr;
 import org.marid.expression.mutable.NullExpr;
 import org.marid.ide.project.ProjectProfile;
@@ -34,12 +36,8 @@ import org.w3c.dom.Element;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.xml.transform.stream.StreamResult;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.io.Writer;
 import java.lang.reflect.Type;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Properties;
@@ -138,14 +136,15 @@ public class IdeBean implements MaridBean {
     }
 
     public void save(@Nonnull Path file) {
-        try (final Writer writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8)) {
-            save(writer);
-        } catch (IOException x) {
-            throw new UncheckedIOException(x);
-        }
+        writeFormatted("bean", this::writeTo, file);
     }
 
     private Observable[] observables() {
         return new Observable[]{name, factory, children};
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 }

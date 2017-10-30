@@ -61,4 +61,14 @@ public class BeanConfiguration {
         }
         return new IdeBean();
     }
+
+    @Override
+    public int hashCode() {
+        return profile.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj == this || (obj instanceof BeanConfiguration && ((BeanConfiguration) obj).profile.equals(profile));
+    }
 }

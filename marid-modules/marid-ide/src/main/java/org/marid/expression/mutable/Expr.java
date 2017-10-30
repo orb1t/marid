@@ -68,7 +68,9 @@ public abstract class Expr implements Expression {
     }
 
     public void writeTo(@Nonnull Element element) {
-        create(element, "initializers", is -> getInitializers().forEach(i -> create(is, i.getTag(), i::writeTo)));
+        if (!initializers.isEmpty()) {
+            create(element, "initializers", is -> getInitializers().forEach(i -> create(is, i.getTag(), i::writeTo)));
+        }
     }
 
     private Stream<Observable> ostream() {

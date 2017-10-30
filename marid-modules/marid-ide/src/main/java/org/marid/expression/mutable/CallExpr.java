@@ -84,6 +84,8 @@ public class CallExpr extends Expr implements CallExpression {
         super.writeTo(element);
         create(element, "target", t -> create(t, getTarget().getTag(), getTarget()::writeTo));
         element.setAttribute("method", getMethod());
-        create(element, "args", as -> getArgs().forEach(a -> create(as, a.getTag(), a::writeTo)));
+        if (!args.isEmpty()) {
+            create(element, "args", as -> getArgs().forEach(a -> create(as, a.getTag(), a::writeTo)));
+        }
     }
 }
