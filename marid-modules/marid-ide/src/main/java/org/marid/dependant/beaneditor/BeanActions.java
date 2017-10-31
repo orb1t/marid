@@ -30,7 +30,7 @@ import org.springframework.stereotype.Component;
 public class BeanActions {
 
     @Bean
-    public BeanActionProvider addAction(SpecialActions specialActions) {
+    public BeanActionProvider addAction(SpecialActions specialActions, BeanDao beanDao) {
         return bean -> new FxAction(specialActions.get(SpecialActionType.ADD))
                 .setEventHandler(event -> {
 

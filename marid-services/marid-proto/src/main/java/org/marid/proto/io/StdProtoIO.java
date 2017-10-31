@@ -22,7 +22,7 @@
 package org.marid.proto.io;
 
 import org.marid.runtime.annotation.MaridBean;
-import org.marid.runtime.annotation.MaridBeanProducer;
+import org.marid.runtime.annotation.MaridBeanFactory;
 
 import java.io.*;
 import java.util.logging.Level;
@@ -38,7 +38,7 @@ public class StdProtoIO implements ProtoIO, Closeable {
     private final InputStream inputStream;
     private final OutputStream outputStream;
 
-    @MaridBeanProducer(name = "Standard Proto I/O")
+    @MaridBeanFactory(name = "Standard Proto I/O")
     public StdProtoIO(InputStream inputStream, OutputStream outputStream) throws IOException {
         this.inputStream = inputStream;
         this.outputStream = outputStream;

@@ -26,7 +26,7 @@ import org.marid.io.IOBiFunction;
 import org.marid.io.IOConsumer;
 import org.marid.proto.io.ProtoIO;
 import org.marid.runtime.annotation.MaridBean;
-import org.marid.runtime.annotation.MaridBeanProducer;
+import org.marid.runtime.annotation.MaridBeanFactory;
 
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
@@ -45,7 +45,7 @@ public class StdProtoBusTaskRunner implements ProtoBusTaskRunner<StdProtoBus> {
 
     private final StdProtoBus bus;
 
-    @MaridBeanProducer(name = "Proto Task Runner")
+    @MaridBeanFactory(name = "Proto Task Runner")
     public StdProtoBusTaskRunner(StdProtoBus bus) {
         this.bus = bus;
     }

@@ -22,7 +22,7 @@
 package org.marid.proto.io;
 
 import org.marid.runtime.annotation.MaridBean;
-import org.marid.runtime.annotation.MaridBeanProducer;
+import org.marid.runtime.annotation.MaridBeanFactory;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -35,7 +35,7 @@ public class StdProtoSocketIO extends StdProtoIO {
 
     private final Socket socket;
 
-    @MaridBeanProducer(name = "Standard Network Socket I/O", icon = "D_NEEDLE")
+    @MaridBeanFactory(name = "Standard Network Socket I/O", icon = "D_NEEDLE")
     public StdProtoSocketIO(Socket socket) throws IOException {
         super(socket.getInputStream(), socket.getOutputStream());
         this.socket = socket;

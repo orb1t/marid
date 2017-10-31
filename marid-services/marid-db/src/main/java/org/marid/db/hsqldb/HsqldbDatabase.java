@@ -27,7 +27,7 @@ import org.hsqldb.jdbc.JDBCSessionDataSource;
 import org.hsqldb.server.Server;
 import org.hsqldb.server.ServerConstants;
 import org.marid.runtime.annotation.MaridBean;
-import org.marid.runtime.annotation.MaridBeanProducer;
+import org.marid.runtime.annotation.MaridBeanFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -70,7 +70,7 @@ public final class HsqldbDatabase implements Closeable {
     private PrintWriter outWriter;
     private PrintWriter errWriter;
 
-    @MaridBeanProducer
+    @MaridBeanFactory
     public HsqldbDatabase(HsqldbProperties properties) throws MalformedURLException {
         log(INFO, "{0}", properties);
         directory = properties.getDirectory();
@@ -164,7 +164,7 @@ public final class HsqldbDatabase implements Closeable {
         }
     }
 
-    @MaridBeanProducer(name = "Data Source", icon = "D_DATABASE_OUTLINE")
+    @MaridBeanFactory(name = "Data Source", icon = "D_DATABASE_OUTLINE")
     public DataSource dataSource(String name) {
         final int dbIndex = new ArrayList<>(databaseNameToIndex.keySet()).indexOf(name);
         final Database database = DatabaseManager.getDatabase(dbIndex);

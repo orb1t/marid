@@ -92,7 +92,6 @@ public class MaridTreeTableView<T> extends TreeTableView<T> implements MaridActi
             addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> {
                 final TreeItem<T> item = ofNullable(getSelectionModel().getSelectedItem()).orElseGet(this::getRoot);
                 final Collection<FxAction> fxActions = actions(item);
-                System.out.println(item);
                 setContextMenu(fxActions.isEmpty() ? null : FxAction.grouped(fxActions));
             });
             getSelectionModel().selectedItemProperty().addListener(invalidationListener);

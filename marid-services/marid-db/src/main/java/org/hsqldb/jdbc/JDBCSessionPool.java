@@ -25,7 +25,7 @@ import org.hsqldb.Database;
 import org.hsqldb.jdbc.pool.JDBCPooledConnection;
 import org.hsqldb.jdbc.pool.JDBCPooledDataSource;
 import org.marid.runtime.annotation.MaridBean;
-import org.marid.runtime.annotation.MaridBeanProducer;
+import org.marid.runtime.annotation.MaridBeanFactory;
 
 import javax.sql.PooledConnection;
 import java.sql.SQLException;
@@ -39,7 +39,7 @@ public class JDBCSessionPool extends JDBCPool {
     private final Database database;
     private final String schema;
 
-    @MaridBeanProducer
+    @MaridBeanFactory
     public JDBCSessionPool(int size, Database database, String schema) {
         super(size);
         this.database = database;

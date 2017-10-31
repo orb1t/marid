@@ -22,7 +22,7 @@
 package org.marid.proto;
 
 import org.marid.runtime.annotation.MaridBean;
-import org.marid.runtime.annotation.MaridBeanProducer;
+import org.marid.runtime.annotation.MaridBeanFactory;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -36,7 +36,7 @@ public class StdProtoRoot extends StdProto implements ProtoRoot {
     private final Map<String, StdProtoBus> children = new LinkedHashMap<>();
     private final ThreadGroup threadGroup;
 
-    @MaridBeanProducer(name = "Proto Root")
+    @MaridBeanFactory(name = "Proto Root")
     public StdProtoRoot(String id, String name) {
         super(id, name);
         this.threadGroup = new ThreadGroup(id);

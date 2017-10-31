@@ -35,14 +35,12 @@ import org.marid.runtime.context.MaridLogContextListener;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.EnumMap;
-import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
@@ -68,9 +66,9 @@ public class ProjectProfile {
     private final EnumMap<ProjectFileType, Path> paths;
     private final Logger logger;
     private final BooleanProperty enabled;
-    private final Queue<WeakReference<Consumer<ProjectProfile>>> onUpdate = new ConcurrentLinkedQueue<>();
+    private final ConcurrentLinkedQueue<Consumer<ProjectProfile>> onUpdate = new ConcurrentLinkedQueue<>();
 
-    private URLClassLoader classLoader;
+    private volatile URLClassLoader classLoader;
 
     ProjectProfile(Path profilesDir, String name) {
         path = profilesDir.resolve(name);
@@ -181,21 +179,16 @@ public class ProjectProfile {
     }
 
     private void updateClassLoader() {
-        try (final URLClassLoader old = classLoader) {
+        final URLClassLoader old = classLoader;
+        try (old) {
             final URL[] urls = Urls.classpath(get(TARGET_LIB), get(TARGET_CLASSES));
             final ClassLoader parent = Thread.currentThread().getContextClassLoader();
             classLoader = new URLClassLoader(urls, parent);
-            onUpdate.removeIf(ref -> {
-                final Consumer<ProjectProfile> c = ref.get();
-                if (c == null) {
-                    return true;
-                } else {
-                    try {
-                        c.accept(this);
-                    } catch (Exception x) {
-                        // just ignore
-                    }
-                    return false;
+            onUpdate.forEach(c -> {
+                try {
+                    c.accept(this);
+                } catch (Exception x) {
+                    log(WARNING, "Unable to call update trigger {0}", x, c);
                 }
             });
         } catch (Exception x) {
@@ -208,16 +201,11 @@ public class ProjectProfile {
     }
 
     public void addOnUpdate(Consumer<ProjectProfile> listener) {
-        onUpdate.removeIf(ref -> ref.get() == null);
-        onUpdate.add(new WeakReference<>(listener));
+        onUpdate.add(listener);
     }
 
     public void removeOnUpdate(Consumer<ProjectProfile> listener) {
-        onUpdate.removeIf(ref -> {
-            final Consumer<ProjectProfile> c = ref.get();
-            return c == null || c.equals(listener);
-        });
-        onUpdate.remove(new WeakReference<>(listener));
+        onUpdate.remove(listener);
     }
 
     @Override

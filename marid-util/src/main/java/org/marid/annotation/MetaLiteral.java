@@ -64,20 +64,6 @@ public class MetaLiteral {
         }
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        } else  if (o == null || getClass() != o.getClass()) {
-            return false;
-        } else {
-            final MetaLiteral that = (MetaLiteral) o;
-            return Objects.equals(name, that.name) &&
-                    Objects.equals(icon, that.icon) &&
-                    Objects.equals(description, that.description);
-        }
-    }
-
     public static MetaLiteral l(String group, String name, String icon, String description) {
         return new MetaLiteral(group, name, icon, description);
     }
@@ -111,6 +97,20 @@ public class MetaLiteral {
                                                                       @Nonnull String icon,
                                                                       @Nonnull E... elements) {
         return l(metaType, group, type.getSimpleName(), icon, elements);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        } else  if (o == null || getClass() != o.getClass()) {
+            return false;
+        } else {
+            final MetaLiteral that = (MetaLiteral) o;
+            return Objects.equals(name, that.name) &&
+                    Objects.equals(icon, that.icon) &&
+                    Objects.equals(description, that.description);
+        }
     }
 
     @Override

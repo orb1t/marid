@@ -23,7 +23,7 @@ package org.marid.proto.health;
 
 import org.marid.proto.ProtoBus;
 import org.marid.runtime.annotation.MaridBean;
-import org.marid.runtime.annotation.MaridBeanProducer;
+import org.marid.runtime.annotation.MaridBeanFactory;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -40,7 +40,7 @@ public class StdProtoBusHealthMonitor implements AutoCloseable {
     private final ScheduledFuture<?> task;
     private final ScheduledExecutorService scheduler;
 
-    @MaridBeanProducer(name = "Bus Health Monitor", icon = "F_HEART")
+    @MaridBeanFactory(name = "Bus Health Monitor", icon = "F_HEART")
     public StdProtoBusHealthMonitor(ProtoBus bus, StdProtoBusHealthMonitorProps props) {
         final long timeout = props.getMaxRecencySeconds() * 1000L;
         final Runnable resetStrategy = () -> {

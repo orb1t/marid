@@ -34,7 +34,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.CONSTRUCTOR, ElementType.METHOD, ElementType.FIELD})
 @MetaInfoType("Bean")
-public @interface MaridBeanProducer {
+public @interface MaridBeanFactory {
 
     String group() default "";
 

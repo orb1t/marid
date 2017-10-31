@@ -1,6 +1,6 @@
 /*-
  * #%L
- * marid-proto
+ * marid-util
  * %%
  * Copyright (C) 2012 - 2017 MARID software development group
  * %%
@@ -19,38 +19,18 @@
  * #L%
  */
 
-package org.marid.proto;
+package org.marid.io;
 
-import org.marid.runtime.annotation.MaridBean;
-import org.marid.runtime.annotation.MaridBeanFactory;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 
-/**
- * @author Dmitry Ovchinnikov
- */
-@MaridBean
-public abstract class StdProto implements Proto {
+public interface PathMatchers {
 
-    private final String id;
-    private final String name;
-
-    @MaridBeanFactory(name = "Proto Object")
-    public StdProto(String id, String name) {
-        this.id = id;
-        this.name = name;
+    static boolean isClassFile(Path path, BasicFileAttributes a) {
+        return path.getFileName() != null && path.getFileName().toString().endsWith(".class");
     }
 
-    @Override
-    public String getId() {
-        return id;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public String toString() {
-        return Proto.label(this);
+    static boolean isJarFile(Path path, BasicFileAttributes a) {
+        return path.getFileName() != null && path.getFileName().toString().endsWith(".jar");
     }
 }

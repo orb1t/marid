@@ -23,7 +23,7 @@ package org.hsqldb.jdbc;
 
 import org.hsqldb.Database;
 import org.marid.runtime.annotation.MaridBean;
-import org.marid.runtime.annotation.MaridBeanProducer;
+import org.marid.runtime.annotation.MaridBeanFactory;
 
 import javax.annotation.Nonnull;
 import java.sql.SQLException;
@@ -37,7 +37,7 @@ import static org.marid.logging.Log.log;
 @MaridBean
 public class JDBCSessionConnection extends JDBCConnection {
 
-    @MaridBeanProducer
+    @MaridBeanFactory
     public JDBCSessionConnection(@Nonnull Database database, @Nonnull String schema) throws SQLException {
         super(database.getSessionManager().newSysSession());
         setSchema(schema);

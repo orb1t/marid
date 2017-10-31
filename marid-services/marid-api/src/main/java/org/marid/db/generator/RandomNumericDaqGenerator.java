@@ -26,7 +26,7 @@ import org.marid.db.dao.NumericWriter;
 import org.marid.db.data.DataRecord;
 import org.marid.db.data.DataRecordKey;
 import org.marid.runtime.annotation.MaridBean;
-import org.marid.runtime.annotation.MaridBeanProducer;
+import org.marid.runtime.annotation.MaridBeanFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -52,7 +52,7 @@ public class RandomNumericDaqGenerator {
     private final long periodMillis;
     private final Timer timer = new Timer();
 
-    @MaridBeanProducer(description = "Generates random sequences of numbers")
+    @MaridBeanFactory(description = "Generates random sequences of numbers")
     public RandomNumericDaqGenerator(
             NumericWriter numericWriter,
             long tag,

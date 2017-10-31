@@ -26,7 +26,7 @@ import org.marid.proto.ProtoBus;
 import org.marid.proto.ProtoDriver;
 import org.marid.proto.StdProto;
 import org.marid.runtime.annotation.MaridBean;
-import org.marid.runtime.annotation.MaridBeanProducer;
+import org.marid.runtime.annotation.MaridBeanFactory;
 
 import javax.annotation.PostConstruct;
 import java.io.DataInputStream;
@@ -60,7 +60,7 @@ public class ModbusTcpDriver extends StdProto implements ProtoDriver {
 
     private ScheduledFuture<?> task;
 
-    @MaridBeanProducer(name = "Modbus TCP Driver")
+    @MaridBeanFactory(name = "Modbus TCP Driver")
     public ModbusTcpDriver(ProtoBus bus, String id, String name, ModbusTcpDriverProps props) {
         super(id, name);
         this.bus = bus;
