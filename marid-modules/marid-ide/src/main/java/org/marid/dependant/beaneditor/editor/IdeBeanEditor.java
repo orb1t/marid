@@ -18,21 +18,9 @@
  * #L%
  */
 
-package org.marid.beans.view;
+package org.marid.dependant.beaneditor.editor;
 
-import javafx.scene.layout.HBox;
-import javafx.scene.text.Text;
-import org.marid.expression.mutable.Expr;
+import javafx.scene.layout.BorderPane;
 
-import javax.annotation.Nonnull;
-
-public abstract class IdeBeanView extends HBox {
-
-    public static IdeBeanView view(@Nonnull Expr expr) {
-        return null;
-    }
-
-    public static Text glyph(@Nonnull Expr expr) {
-        return null;
-    }
+public abstract class IdeBeanEditor extends BorderPane {
 }

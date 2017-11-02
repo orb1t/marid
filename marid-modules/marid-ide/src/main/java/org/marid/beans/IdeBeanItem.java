@@ -29,7 +29,7 @@ import javax.annotation.Nonnull;
 
 import static java.util.stream.Collectors.toList;
 import static javafx.beans.binding.Bindings.createObjectBinding;
-import static org.marid.beans.view.IdeBeanView.glyph;
+import static org.marid.dependant.beaneditor.view.IdeBeanView.glyph;
 
 public class IdeBeanItem extends TreeItem<IdeBean> {
 

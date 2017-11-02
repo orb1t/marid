@@ -28,9 +28,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.marid.expression.mutable.Expr;
 import org.marid.expression.mutable.NullExpr;
-import org.marid.ide.project.ProjectProfile;
+import org.marid.expression.types.GuavaTypeContext;
 import org.marid.jfx.props.FxObject;
-import org.marid.meta.GuavaTypeContext;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
@@ -119,10 +118,6 @@ public class IdeBean implements MaridBean {
     public Type getType(ClassLoader classLoader, Properties properties) {
         final GuavaTypeContext context = new GuavaTypeContext(this, classLoader, properties);
         return getFactory().getType(null, context);
-    }
-
-    public Type getType(ProjectProfile profile) {
-        return getType(profile.getClassLoader(), new Properties());
     }
 
     public void writeTo(@Nonnull Element element) {

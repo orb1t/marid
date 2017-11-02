@@ -31,6 +31,7 @@ import javax.annotation.Nullable;
 import java.lang.reflect.*;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
@@ -54,22 +55,25 @@ public interface CallExpression extends Expression {
     default Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {
         final String methodName = typeContext.resolvePlaceholders(getMethod());
         final Type targetType = getTarget().getType(owner, typeContext);
+        final Predicate<Executable> executableMatcher = e -> {
+            if (e.getParameterCount() == getArgs().size()) {
+                final Type[] pt = e.getGenericParameterTypes();
+                for (int i = 0; i < pt.length; i++) {
+                    final Type at = getArgs().get(i).getType(owner, typeContext);
+                    if (!typeContext.isAssignable(pt[i], at)) {
+                        return false;
+                    }
+                }
+                return true;
+            } else {
+                return false;
+            }
+        };
         if (getTarget() instanceof ClassExpression) { // static call
             if ("new".equals(methodName)) { // constructor
                 return TypeUtils.classType(targetType)
                         .flatMap(tc -> Stream.of(typeContext.getRaw(tc).getConstructors())
-                                .filter(m -> m.getParameterCount() == getArgs().size())
-                                .filter(m -> !Modifier.isStatic(m.getModifiers()))
-                                .filter(m -> {
-                                    final Type[] pt = m.getGenericParameterTypes();
-                                    for (int i = 0; i < pt.length; i++) {
-                                        final Type at = getArgs().get(i).getType(owner, typeContext);
-                                        if (!typeContext.isAssignable(pt[i], at)) {
-                                            return false;
-                                        }
-                                    }
-                                    return true;
-                                })
+                                .filter(executableMatcher)
                                 .findFirst()
                                 .map(m -> TypeUtils.type(m, getArgs(), owner, typeContext)))
                         .orElseGet(typeContext::getWildcard);
@@ -79,18 +83,8 @@ public interface CallExpression extends Expression {
                             final Class<?> targetClass = typeContext.getRaw(t);
                             return Stream.of(targetClass.getMethods())
                                     .filter(m -> m.getName().equals(methodName))
-                                    .filter(m -> m.getParameterCount() == getArgs().size())
                                     .filter(m -> Modifier.isStatic(m.getModifiers()))
-                                    .filter(m -> {
-                                        final Type[] pt = m.getGenericParameterTypes();
-                                        for (int i = 0; i < pt.length; i++) {
-                                            final Type at = getArgs().get(i).getType(owner, typeContext);
-                                            if (!typeContext.isAssignable(pt[i], at)) {
-                                                return false;
-                                            }
-                                        }
-                                        return true;
-                                    })
+                                    .filter(executableMatcher)
                                     .findFirst()
                                     .map(m -> TypeUtils.type(m, getArgs(), owner, typeContext));
                         })
@@ -99,18 +93,8 @@ public interface CallExpression extends Expression {
         } else { // virtual method
             return Stream.of(typeContext.getRaw(targetType).getMethods())
                     .filter(m -> m.getName().equals(methodName))
-                    .filter(m -> m.getParameterCount() == getArgs().size())
                     .filter(m -> !Modifier.isStatic(m.getModifiers()))
-                    .filter(m -> {
-                        final Type[] pt = m.getGenericParameterTypes();
-                        for (int i = 0; i < pt.length; i++) {
-                            final Type at = getArgs().get(i).getType(owner, typeContext);
-                            if (!typeContext.isAssignable(pt[i], at)) {
-                                return false;
-                            }
-                        }
-                        return true;
-                    })
+                    .filter(executableMatcher)
                     .findFirst()
                     .map(m -> TypeUtils.type(m, getArgs(), targetType, typeContext))
                     .map(type -> typeContext.resolve(targetType, type))
@@ -121,7 +105,7 @@ public interface CallExpression extends Expression {
     @Nullable
     @Override
     default Object evaluate(@Nullable Object self, @Nonnull BeanContext context) {
-        return ReflectUtils.evaluate(this::execute, this).apply(self, context);
+        return ReflectUtils.eval(execute(self, context), this, context);
     }
 
     private Object execute(@Nullable Object self, @Nonnull BeanContext context) {

@@ -40,6 +40,6 @@ public interface NullExpression extends Expression {
     @Nullable
     @Override
     default Object evaluate(@Nullable Object self, @Nonnull BeanContext context) {
-        return ReflectUtils.evaluate((s, c) -> null, this).apply(self, context);
+        return ReflectUtils.eval(null, this, context);
     }
 }

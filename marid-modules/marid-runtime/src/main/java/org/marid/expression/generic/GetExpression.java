@@ -63,7 +63,8 @@ public interface GetExpression extends Expression {
     @Nullable
     @Override
     default Object evaluate(@Nullable Object self, @Nonnull BeanContext context) {
-        return ReflectUtils.evaluate(this::execute, this).apply(self, context);
+        final Object result = execute(self, context);
+        return ReflectUtils.eval(result, this, context);
     }
 
     private Object execute(@Nullable Object self, @Nonnull BeanContext context) {

@@ -24,10 +24,10 @@ import org.marid.ide.project.ProjectProfile;
 import org.marid.io.PathMatchers;
 import org.springframework.asm.ClassReader;
 import org.springframework.asm.ClassVisitor;
-import org.springframework.asm.Opcodes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import javax.annotation.PreDestroy;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -46,10 +46,11 @@ import static org.marid.ide.project.ProjectFileType.TARGET_CLASSES;
 import static org.marid.ide.project.ProjectFileType.TARGET_LIB;
 import static org.marid.logging.Log.log;
 import static org.springframework.asm.ClassReader.*;
+import static org.springframework.asm.Opcodes.ACC_PUBLIC;
 import static org.springframework.asm.Opcodes.ASM6;
 
 @Repository
-public class BeanDao implements AutoCloseable {
+public class BeanDao {
 
     private final ProjectProfile profile;
     private final ConcurrentLinkedQueue<Class<?>> publicClasses = new ConcurrentLinkedQueue<>();
@@ -86,8 +87,8 @@ public class BeanDao implements AutoCloseable {
         final ConcurrentLinkedQueue<String> classNames = new ConcurrentLinkedQueue<>();
         classReaders.parallelStream().forEach(r -> r.accept(new ClassVisitor(ASM6) {
             @Override
-            public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-                if (!name.contains("$") && (access & Opcodes.ACC_PUBLIC) != 0) {
+            public void visit(int v, int access, String name, String signature, String superName, String[] interfaces) {
+                if (!name.contains("$") && (access & ACC_PUBLIC) != 0) {
                     classNames.add(name.replace('/', '.'));
                 }
             }
@@ -130,8 +131,8 @@ public class BeanDao implements AutoCloseable {
         }
     }
 
-    @Override
-    public void close() {
+    @PreDestroy
+    private void close() {
         profile.removeOnUpdate(this::onUpdate);
     }
 }

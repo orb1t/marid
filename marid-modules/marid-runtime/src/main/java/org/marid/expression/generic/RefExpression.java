@@ -43,10 +43,10 @@ public interface RefExpression extends Expression {
     @Nullable
     @Override
     default Object evaluate(@Nullable Object self, @Nonnull BeanContext context) {
-        return ReflectUtils.evaluate(this::execute, this).apply(self, context);
+        return ReflectUtils.eval(execute(context), this, context);
     }
 
-    private Object execute(@Nullable Object self, @Nonnull BeanContext context) {
+    private Object execute(@Nonnull BeanContext context) {
         return context.getBean(context.resolvePlaceholders(getReference()));
     }
 }

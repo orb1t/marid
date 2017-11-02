@@ -30,7 +30,7 @@
 
         <dependency>
             <groupId>org.marid</groupId>
-            <artifactId>marid-runtime</artifactId>
+            <artifactId>marid-types</artifactId>
             <version>${project.version}</version>
         </dependency>
 

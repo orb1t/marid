@@ -43,10 +43,6 @@ public interface StringExpression extends Expression {
     @Nullable
     @Override
     default Object evaluate(@Nullable Object self, @Nonnull BeanContext context) {
-        return ReflectUtils.evaluate(this::execute, this).apply(self, context);
-    }
-
-    private Object execute(@Nullable Object self, @Nonnull BeanContext context) {
-        return context.resolvePlaceholders(getValue());
+        return ReflectUtils.eval(context.resolvePlaceholders(getValue()), this, context);
     }
 }

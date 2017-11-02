@@ -40,10 +40,6 @@ public interface ThisExpression extends Expression {
     @Nullable
     @Override
     default Object evaluate(@Nullable Object self, @Nonnull BeanContext context) {
-        return ReflectUtils.evaluate(this::execute, this).apply(self, context);
-    }
-
-    private Object execute(@Nullable Object self, @Nonnull BeanContext context) {
-        return self;
+        return ReflectUtils.eval(self, this, context);
     }
 }

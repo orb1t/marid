@@ -21,13 +21,10 @@
 
 package org.marid.runtime.context;
 
-import org.marid.misc.StringUtils;
-import org.marid.runtime.exception.MaridUnknownSignatureException;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.lang.invoke.MethodHandle;
-import java.lang.reflect.*;
+import java.lang.reflect.Executable;
+import java.lang.reflect.Method;
 import java.util.Comparator;
 import java.util.Scanner;
 import java.util.TreeSet;
@@ -35,12 +32,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import static java.lang.invoke.MethodHandles.publicLookup;
 import static java.util.logging.Level.WARNING;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Stream.of;
 import static org.marid.logging.Log.log;
-import static org.marid.misc.Calls.call;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -100,126 +94,8 @@ public interface MaridRuntimeUtils {
         return daemon;
     }
 
-    @Nonnull
-    static String signature(@Nonnull Field field) {
-        return String.format("F %04X %s %s",
-                field.getModifiers(),
-                field.getDeclaringClass().getCanonicalName(),
-                field.getName()
-        );
-    }
-
-    @Nonnull
-    static String signature(@Nonnull Method method) {
-        return String.format("M %04X %s %s %s",
-                method.getModifiers(),
-                method.getDeclaringClass().getCanonicalName(),
-                method.getName(),
-                args(method)
-        );
-    }
-
-    @Nonnull
-    static String signature(@Nonnull Constructor<?> constructor) {
-        return String.format("C %04X %s %s",
-                constructor.getModifiers(),
-                constructor.getDeclaringClass().getCanonicalName(),
-                args(constructor)
-        );
-    }
-
-    @Nonnull
-    static String args(@Nonnull Executable executable) {
-        return of(executable.getParameterTypes()).map(Class::getCanonicalName).collect(joining(","));
-    }
-
-    @Nonnull
-    static String toCanonical(@Nonnull String signature) {
-        final int limit = StringUtils.count(signature, ' ') + 1;
-        final String[] parts = signature.split(" ", limit);
-        final String mods = Modifier.toString(Integer.parseUnsignedInt(parts[1], 16));
-        switch (parts[0]) {
-            case "F": return String.format("%s %s.%s", mods, parts[2], parts[3]);
-            case "C": return String.format("%s %s(%s)", mods, parts[2], parts[3]);
-            case "M": return String.format("%s %s.%s(%s)", mods, parts[2], parts[3], parts[4]);
-            default: throw new IllegalArgumentException(signature);
-        }
-    }
-
-    @Nonnull
-    static String toCanonicalWithArgs(@Nonnull String signature, Type... types) {
-        final int limit = StringUtils.count(signature, ' ') + 1;
-        final String[] parts = signature.split(" ", limit);
-        final String args = of(types).map(Type::getTypeName).collect(joining(","));
-        switch (parts[0]) {
-            case "F": return String.format("%s.%s", parts[2], parts[3]);
-            case "C": return String.format("%s(%s)", parts[2], args);
-            case "M": return String.format("%s.%s(%s)", parts[2], parts[3], args);
-            default: throw new IllegalArgumentException(signature);
-        }
-    }
-
-    static int modifiers(@Nonnull String signature) {
-        final int limit = StringUtils.count(signature, ' ') + 1;
-        final String[] parts = signature.split(" ", limit);
-        return Integer.parseUnsignedInt(parts[1], 16);
-    }
-
-    static Member fromSignature(@Nonnull String signature, @Nonnull ClassLoader classLoader) {
-        try {
-            final int limit = StringUtils.count(signature, ' ') + 1;
-            final String[] parts = signature.split(" ", limit);
-            final Class<?> declaringClass = Class.forName(parts[2], false, classLoader);
-            switch (parts[0]) {
-                case "F":
-                    return of(declaringClass.getFields())
-                            .filter(f -> f.getName().equals(parts[3]))
-                            .findFirst()
-                            .orElseThrow(() -> new NoSuchFieldException(parts[3]));
-                case "C":
-                    return of(declaringClass.getConstructors())
-                            .filter(c -> args(c).equals(parts[3]))
-                            .findFirst()
-                            .orElseThrow(() -> new NoSuchMethodException(signature));
-                case "M":
-                    return of(declaringClass.getMethods())
-                            .filter(m -> m.getName().equals(parts[3]))
-                            .filter(m -> args(m).equals(parts[4]))
-                            .findFirst()
-                            .orElseThrow(() -> new NoSuchMethodException(parts[3]));
-                default:
-                    throw new IllegalArgumentException(parts[0]);
-            }
-        } catch (Throwable x) {
-            throw new MaridUnknownSignatureException(signature, x);
-        }
-    }
-
-    static boolean isRoot(Member member) {
-        return member instanceof Constructor<?> || Modifier.isStatic(member.getModifiers());
-    }
-
-    static MethodHandle producer(Member member) {
-        if (member instanceof Constructor<?>) {
-            return call(() -> publicLookup().unreflectConstructor((Constructor<?>) member));
-        } else if (member instanceof Method) {
-            return call(() -> publicLookup().unreflect((Method) member));
-        } else {
-            return call(() -> publicLookup().unreflectGetter((Field) member));
-        }
-    }
-
-    static MethodHandle initializer(Member member) {
-        if (member instanceof Constructor<?>) {
-            return call(() -> publicLookup().unreflectConstructor((Constructor<?>) member));
-        } else if (member instanceof Method) {
-            return call(() -> publicLookup().unreflect((Method) member));
-        } else {
-            return call(() -> publicLookup().unreflectSetter((Field) member));
-        }
-    }
-
-    static @Nullable Object value(@Nonnull Class<?> target, @Nullable Object v) {
+    @Nullable
+    static Object value(@Nonnull Class<?> target, @Nullable Object v) {
         if (target.isPrimitive()) {
             if (v == null) {
                 switch (target.getName()) {

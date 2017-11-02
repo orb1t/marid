@@ -21,18 +21,13 @@
 
 package org.marid.runtime.util;
 
-import org.marid.runtime.context.BeanContext;
 import org.marid.expression.generic.Expression;
-
-import java.util.function.BiFunction;
+import org.marid.runtime.context.BeanContext;
 
 public interface ReflectUtils {
 
-    static BiFunction<Object, BeanContext, Object> evaluate(BiFunction<Object, BeanContext, Object> f, Expression e) {
-        return (self, context) -> {
-            final Object o = f.apply(self, context);
-            e.getInitializers().forEach(i -> i.evaluate(o, context));
-            return o;
-        };
+    static Object eval(Object result, Expression expression, BeanContext beanContext) {
+        expression.getInitializers().forEach(i -> i.evaluate(result, beanContext));
+        return result;
     }
 }

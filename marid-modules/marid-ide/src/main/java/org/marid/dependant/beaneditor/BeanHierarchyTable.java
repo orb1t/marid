@@ -36,7 +36,7 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 import static javafx.beans.binding.Bindings.createObjectBinding;
-import static org.marid.beans.view.IdeBeanView.view;
+import static org.marid.dependant.beaneditor.view.IdeBeanView.view;
 import static org.marid.jfx.LocalizedStrings.ls;
 
 @Component

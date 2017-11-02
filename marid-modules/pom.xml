@@ -15,6 +15,7 @@
         <module>marid-ide</module>
         <module>marid-fx</module>
         <module>marid-runtime</module>
+        <module>marid-types</module>
     </modules>
 
     <dependencies>
