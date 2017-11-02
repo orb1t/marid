@@ -37,7 +37,7 @@ public final class ConstExpr extends ValueExpr implements ConstExpression {
         this.type = type;
     }
 
-    public ConstExpr(@Nonnull Element element) {
+    ConstExpr(@Nonnull Element element) {
         super(element);
         type = attribute(element, "type").map(ConstantType::valueOf).orElseThrow(() -> new NullPointerException("type"));
     }

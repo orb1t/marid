@@ -29,7 +29,7 @@ public final class ThisExpr extends Expr implements ThisExpression {
     public ThisExpr() {
     }
 
-    public ThisExpr(Element element) {
+    ThisExpr(Element element) {
         super(element);
     }
 }

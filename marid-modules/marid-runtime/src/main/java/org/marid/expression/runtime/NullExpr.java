@@ -29,7 +29,7 @@ public final class NullExpr extends Expr implements NullExpression {
     public NullExpr() {
     }
 
-    public NullExpr(Element element) {
+    NullExpr(Element element) {
         super(element);
     }
 

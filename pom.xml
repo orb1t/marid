@@ -426,6 +426,7 @@
                     <reuseForks>false</reuseForks>
                     <forkCount>1</forkCount>
                     <threadCount>1</threadCount>
+                    <argLine>--add-opens java.base/java.lang=ALL-UNNAMED</argLine>
                 </configuration>
                 <dependencies>
                     <dependency>

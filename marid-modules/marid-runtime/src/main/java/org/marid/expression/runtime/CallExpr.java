@@ -49,7 +49,7 @@ public final class CallExpr extends Expr implements CallExpression {
         this.args = Arrays.asList(args);
     }
 
-    public CallExpr(@Nonnull Element element) {
+    CallExpr(@Nonnull Element element) {
         super(element);
         target = element("target", element).map(Expr::of).orElseThrow(() -> new NullPointerException("target"));
         method = attribute(element, "method").orElseThrow(() -> new NullPointerException("method"));

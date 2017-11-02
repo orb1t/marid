@@ -46,7 +46,7 @@ public final class SetExpr extends Expr implements SetExpression {
         this.value = value;
     }
 
-    public SetExpr(@Nonnull Element element) {
+    SetExpr(@Nonnull Element element) {
         super(element);
         target = element("target", element).map(Expr::of).orElseThrow(() -> new NullPointerException("target"));
         field = attribute(element, "field").orElseThrow(() -> new NullPointerException("field"));

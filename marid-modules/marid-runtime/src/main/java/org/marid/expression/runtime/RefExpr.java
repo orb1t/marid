@@ -36,7 +36,7 @@ public final class RefExpr extends Expr implements RefExpression {
         this.reference = reference;
     }
 
-    public RefExpr(@Nonnull Element element) {
+    RefExpr(@Nonnull Element element) {
         super(element);
         reference = Xmls.attribute(element, "ref").orElseThrow(() -> new NullPointerException("ref"));
     }

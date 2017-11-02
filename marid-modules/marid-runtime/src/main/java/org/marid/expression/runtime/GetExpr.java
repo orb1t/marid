@@ -42,7 +42,7 @@ public final class GetExpr extends Expr implements GetExpression {
         this.field = field;
     }
 
-    public GetExpr(@Nonnull Element element) {
+    GetExpr(@Nonnull Element element) {
         super(element);
         this.target = element("target", element).map(Expr::of).orElseThrow(() -> new NullPointerException("target"));
         this.field = attribute(element, "field").orElseThrow(() -> new NullPointerException("field"));
