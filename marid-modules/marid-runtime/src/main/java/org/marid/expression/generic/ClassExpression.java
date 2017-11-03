@@ -22,27 +22,16 @@
 package org.marid.expression.generic;
 
 import org.marid.runtime.context.BeanContext;
-import org.marid.runtime.types.TypeContext;
 import org.marid.runtime.util.ReflectUtils;
-import org.marid.runtime.util.TypeUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.lang.reflect.Type;
 import java.util.NoSuchElementException;
 
 public interface ClassExpression extends Expression {
 
     @Nonnull
     String getClassName();
-
-    @Nonnull
-    @Override
-    default Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {
-        return TypeUtils.getClass(typeContext.getClassLoader(), typeContext.resolvePlaceholders(getClassName()))
-                .map(typeContext::getClassType)
-                .orElseGet(typeContext::getWildcard);
-    }
 
     @Nullable
     @Override

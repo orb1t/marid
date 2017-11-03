@@ -19,15 +19,14 @@
  * #L%
  */
 
-package org.marid.expression.types;
+package org.marid.types;
 
 import com.google.common.reflect.TypeResolver;
 import com.google.common.reflect.TypeToken;
-import org.marid.beans.MaridBean;
+import org.marid.beans.TypedBean;
 import org.marid.misc.Casts;
 import org.marid.runtime.context.MaridPlaceholderResolver;
-import org.marid.runtime.types.TypeContext;
-import org.marid.runtime.types.TypeEvaluator;
+import org.springframework.util.TypeUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -45,12 +44,17 @@ public class GuavaTypeContext implements TypeContext {
             .findFirst()
             .orElseThrow(IllegalStateException::new);
 
-    private final MaridBean bean;
+    private final TypedBean bean;
     private final MaridPlaceholderResolver placeholderResolver;
 
-    public GuavaTypeContext(MaridBean bean, ClassLoader classLoader, Properties properties) {
+    public GuavaTypeContext(TypedBean bean, ClassLoader classLoader, Properties properties) {
         this.bean = bean;
         this.placeholderResolver = new MaridPlaceholderResolver(classLoader, properties);
+    }
+
+    private GuavaTypeContext(TypedBean bean, MaridPlaceholderResolver placeholderResolver) {
+        this.bean = bean;
+        this.placeholderResolver = placeholderResolver;
     }
 
     @Nonnull
@@ -65,7 +69,7 @@ public class GuavaTypeContext implements TypeContext {
         return bean.matchingCandidates()
                 .filter(b -> name.equals(b.getName()))
                 .findFirst()
-                .map(b -> b.getFactory().getType(null, this))
+                .map(b -> b.getFactory().getType(null, new GuavaTypeContext(b, placeholderResolver)))
                 .orElse(WILDCARD);
     }
 
@@ -89,7 +93,7 @@ public class GuavaTypeContext implements TypeContext {
 
     @Override
     public boolean isAssignable(@Nonnull Type from, @Nonnull Type to) {
-        return TypeToken.of(from).isSubtypeOf(to);
+        return TypeUtils.isAssignable(to, from);
     }
 
     @Nonnull

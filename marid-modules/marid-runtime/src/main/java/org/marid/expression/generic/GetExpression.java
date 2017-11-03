@@ -22,14 +22,11 @@
 package org.marid.expression.generic;
 
 import org.marid.runtime.context.BeanContext;
-import org.marid.runtime.types.TypeContext;
 import org.marid.runtime.util.ReflectUtils;
-import org.marid.runtime.util.TypeUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
-import java.lang.reflect.Type;
 import java.util.NoSuchElementException;
 
 import static java.util.Objects.requireNonNull;
@@ -41,24 +38,6 @@ public interface GetExpression extends Expression {
 
     @Nonnull
     String getField();
-
-    @Nonnull
-    @Override
-    default Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {
-        final Type targetType = getTarget().getType(owner, typeContext);
-        if (getTarget() instanceof ClassExpression) {
-            final String field = typeContext.resolvePlaceholders(getField());
-            return TypeUtils.classType(targetType)
-                    .flatMap(tc -> TypeUtils.getField(typeContext.getRaw(tc), field)
-                            .map(f -> typeContext.resolve(owner, f.getGenericType())))
-                    .orElseGet(typeContext::getWildcard);
-        } else {
-            final Class<?> targetClass = typeContext.getRaw(targetType);
-            return TypeUtils.getField(targetClass, typeContext.resolvePlaceholders(getField()))
-                    .map(f -> typeContext.resolve(targetType, f.getGenericType()))
-                    .orElseGet(typeContext::getWildcard);
-        }
-    }
 
     @Nullable
     @Override

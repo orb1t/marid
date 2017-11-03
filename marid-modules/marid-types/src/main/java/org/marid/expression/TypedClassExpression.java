@@ -1,6 +1,6 @@
 /*-
  * #%L
- * marid-runtime
+ * marid-types
  * %%
  * Copyright (C) 2012 - 2017 MARID software development group
  * %%
@@ -19,19 +19,23 @@
  * #L%
  */
 
-package org.marid.expression.generic;
+package org.marid.expression;
 
-import org.marid.runtime.context.BeanContext;
+import org.marid.expression.generic.ClassExpression;
+import org.marid.runtime.util.TypeUtils;
+import org.marid.types.TypeContext;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
+import java.lang.reflect.Type;
 
-public interface Expression {
-
-    @Nullable
-    Object evaluate(@Nullable Object self, @Nonnull BeanContext context);
+public interface TypedClassExpression extends ClassExpression, TypedExpression {
 
     @Nonnull
-    List<? extends Expression> getInitializers();
+    @Override
+    default Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {
+        return TypeUtils.getClass(typeContext.getClassLoader(), typeContext.resolvePlaceholders(getClassName()))
+                .map(typeContext::getClassType)
+                .orElseGet(typeContext::getWildcard);
+    }
 }

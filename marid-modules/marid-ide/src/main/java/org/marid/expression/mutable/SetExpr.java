@@ -22,7 +22,7 @@ package org.marid.expression.mutable;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.marid.expression.generic.SetExpression;
+import org.marid.expression.TypedSetExpression;
 import org.marid.jfx.props.FxObject;
 import org.w3c.dom.Element;
 
@@ -30,7 +30,7 @@ import javax.annotation.Nonnull;
 
 import static org.marid.io.Xmls.*;
 
-public class SetExpr extends Expr implements SetExpression {
+public class SetExpr extends Expr implements TypedSetExpression {
 
     public final FxObject<Expr> target;
     public final StringProperty field;

@@ -23,13 +23,11 @@ package org.marid.expression.generic;
 
 import org.marid.misc.Calls;
 import org.marid.runtime.context.BeanContext;
-import org.marid.runtime.types.TypeContext;
 import org.marid.runtime.util.ReflectUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.File;
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.InetAddress;
@@ -70,12 +68,6 @@ public interface ConstExpression extends ValueExpression {
             final Object result = getType().converter.apply(v);
             return ReflectUtils.eval(result, this, context);
         }
-    }
-
-    @Nonnull
-    @Override
-    default Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {
-        return getType().type;
     }
 
     enum ConstantType {

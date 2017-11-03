@@ -1,6 +1,6 @@
 /*-
  * #%L
- * marid-runtime
+ * marid-types
  * %%
  * Copyright (C) 2012 - 2017 MARID software development group
  * %%
@@ -21,8 +21,8 @@
 
 package org.marid.runtime.util;
 
-import org.marid.expression.generic.Expression;
-import org.marid.runtime.types.TypeContext;
+import org.marid.expression.TypedExpression;
+import org.marid.types.TypeContext;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -49,7 +49,7 @@ public interface TypeUtils {
     @Nonnull
     static Type type(@Nonnull Type returnType,
                      @Nonnull Type[] argTypes,
-                     @Nonnull List<? extends Expression> args,
+                     @Nonnull List<? extends TypedExpression> args,
                      @Nullable Type owner,
                      @Nonnull TypeContext context) {
         return context.evaluate(e -> {
@@ -62,7 +62,7 @@ public interface TypeUtils {
 
     @Nonnull
     static Type type(@Nonnull Method method,
-                     @Nonnull List<? extends Expression> args,
+                     @Nonnull List<? extends TypedExpression> args,
                      @Nullable Type owner,
                      @Nonnull TypeContext context) {
         return type(method.getGenericReturnType(), method.getGenericParameterTypes(), args, owner, context);
@@ -70,7 +70,7 @@ public interface TypeUtils {
 
     @Nonnull
     static Type type(@Nonnull Constructor<?> constructor,
-                     @Nonnull List<? extends Expression> args,
+                     @Nonnull List<? extends TypedExpression> args,
                      @Nullable Type owner,
                      @Nonnull TypeContext context) {
         return type(context.getType(constructor.getDeclaringClass()), constructor.getGenericParameterTypes(), args, owner, context);

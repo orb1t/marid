@@ -19,16 +19,40 @@
  * #L%
  */
 
-package org.marid.runtime.types;
+package org.marid.types;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.Type;
+import java.util.function.Function;
 
-public interface TypeEvaluator {
-
-    @Nonnull
-    TypeEvaluator where(Type formal, Type actual);
+public interface TypeContext {
 
     @Nonnull
-    Type resolve(Type type);
+    Type getWildcard();
+
+    @Nonnull
+    Type getBeanType(@Nonnull String name);
+
+    @Nonnull
+    Type resolve(@Nullable Type owner, @Nonnull Type type);
+
+    @Nonnull
+    String resolvePlaceholders(@Nonnull String value);
+
+    @Nonnull
+    Class<?> getRaw(@Nonnull Type type);
+
+    boolean isAssignable(@Nonnull Type from, @Nonnull Type to);
+
+    @Nonnull
+    ClassLoader getClassLoader();
+
+    @Nonnull
+    Type getClassType(@Nonnull Class<?> type);
+
+    @Nonnull
+    Type getType(@Nonnull Class<?> type);
+
+    <T> T evaluate(@Nonnull Function<TypeEvaluator, T> callback);
 }

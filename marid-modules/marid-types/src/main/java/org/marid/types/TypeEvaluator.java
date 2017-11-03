@@ -19,19 +19,16 @@
  * #L%
  */
 
-package org.marid.expression.generic;
-
-import org.marid.runtime.context.BeanContext;
+package org.marid.types;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.List;
+import java.lang.reflect.Type;
 
-public interface Expression {
-
-    @Nullable
-    Object evaluate(@Nullable Object self, @Nonnull BeanContext context);
+public interface TypeEvaluator {
 
     @Nonnull
-    List<? extends Expression> getInitializers();
+    TypeEvaluator where(Type formal, Type actual);
+
+    @Nonnull
+    Type resolve(Type type);
 }

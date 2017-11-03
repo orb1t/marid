@@ -22,14 +22,14 @@ package org.marid.expression.mutable;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import org.marid.expression.generic.ConstExpression;
+import org.marid.expression.TypedConstExpression;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 
 import static org.marid.io.Xmls.attribute;
 
-public class ConstExpr extends ValueExpr implements ConstExpression {
+public class ConstExpr extends ValueExpr implements TypedConstExpression {
 
     public final ObjectProperty<ConstantType> type;
 

@@ -1,6 +1,6 @@
 /*-
  * #%L
- * marid-runtime
+ * marid-types
  * %%
  * Copyright (C) 2012 - 2017 MARID software development group
  * %%
@@ -19,40 +19,20 @@
  * #L%
  */
 
-package org.marid.runtime.types;
+package org.marid.expression;
+
+import org.marid.expression.generic.ConstExpression;
+import org.marid.types.TypeContext;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
-import java.util.function.Function;
 
-public interface TypeContext {
-
-    @Nonnull
-    Type getWildcard();
+public interface TypedConstExpression extends ConstExpression, TypedValueExpression {
 
     @Nonnull
-    Type getBeanType(@Nonnull String name);
-
-    @Nonnull
-    Type resolve(@Nullable Type owner, @Nonnull Type type);
-
-    @Nonnull
-    String resolvePlaceholders(@Nonnull String value);
-
-    @Nonnull
-    Class<?> getRaw(@Nonnull Type type);
-
-    boolean isAssignable(@Nonnull Type from, @Nonnull Type to);
-
-    @Nonnull
-    ClassLoader getClassLoader();
-
-    @Nonnull
-    Type getClassType(@Nonnull Class<?> type);
-
-    @Nonnull
-    Type getType(@Nonnull Class<?> type);
-
-    <T> T evaluate(@Nonnull Function<TypeEvaluator, T> callback);
+    @Override
+    default Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {
+        return getType().type;
+    }
 }

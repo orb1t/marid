@@ -1,6 +1,6 @@
 /*-
  * #%L
- * marid-runtime
+ * marid-types
  * %%
  * Copyright (C) 2012 - 2017 MARID software development group
  * %%
@@ -19,19 +19,9 @@
  * #L%
  */
 
-package org.marid.expression.generic;
+package org.marid.expression;
 
-import org.marid.runtime.context.BeanContext;
+import org.marid.expression.generic.ValueExpression;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.List;
-
-public interface Expression {
-
-    @Nullable
-    Object evaluate(@Nullable Object self, @Nonnull BeanContext context);
-
-    @Nonnull
-    List<? extends Expression> getInitializers();
+public interface TypedValueExpression extends ValueExpression, TypedExpression {
 }

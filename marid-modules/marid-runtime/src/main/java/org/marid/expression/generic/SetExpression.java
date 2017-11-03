@@ -22,13 +22,11 @@
 package org.marid.expression.generic;
 
 import org.marid.runtime.context.BeanContext;
-import org.marid.runtime.types.TypeContext;
 import org.marid.runtime.util.ReflectUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
-import java.lang.reflect.Type;
 import java.util.NoSuchElementException;
 
 import static java.util.Objects.requireNonNull;
@@ -44,12 +42,6 @@ public interface SetExpression extends Expression {
 
     @Nonnull
     Expression getValue();
-
-    @Nonnull
-    @Override
-    default Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {
-        return getTarget().getType(owner, typeContext);
-    }
 
     @Nullable
     @Override

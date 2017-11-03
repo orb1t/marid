@@ -20,12 +20,12 @@
 
 package org.marid.expression.mutable;
 
-import org.marid.expression.generic.NullExpression;
+import org.marid.expression.TypedNullExpression;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 
-public class NullExpr extends Expr implements NullExpression {
+public class NullExpr extends Expr implements TypedNullExpression {
 
     public NullExpr() {
     }

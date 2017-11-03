@@ -22,14 +22,14 @@ package org.marid.expression.mutable;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.marid.expression.generic.ValueExpression;
+import org.marid.expression.TypedValueExpression;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 
 import static org.marid.io.Xmls.attribute;
 
-public abstract class ValueExpr extends Expr implements ValueExpression {
+public abstract class ValueExpr extends Expr implements TypedValueExpression {
 
     public final StringProperty value;
 

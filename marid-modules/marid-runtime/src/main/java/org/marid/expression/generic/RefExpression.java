@@ -22,31 +22,19 @@
 package org.marid.expression.generic;
 
 import org.marid.runtime.context.BeanContext;
-import org.marid.runtime.types.TypeContext;
 import org.marid.runtime.util.ReflectUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.lang.reflect.Type;
 
 public interface RefExpression extends Expression {
 
     @Nonnull
     String getReference();
 
-    @Nonnull
-    @Override
-    default Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {
-        return typeContext.getBeanType(typeContext.resolvePlaceholders(getReference()));
-    }
-
     @Nullable
     @Override
     default Object evaluate(@Nullable Object self, @Nonnull BeanContext context) {
-        return ReflectUtils.eval(execute(context), this, context);
-    }
-
-    private Object execute(@Nonnull BeanContext context) {
-        return context.getBean(context.resolvePlaceholders(getReference()));
+        return ReflectUtils.eval(context.getBean(context.resolvePlaceholders(getReference())), this, context);
     }
 }

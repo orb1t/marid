@@ -28,8 +28,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.marid.expression.mutable.Expr;
 import org.marid.expression.mutable.NullExpr;
-import org.marid.expression.types.GuavaTypeContext;
 import org.marid.jfx.props.FxObject;
+import org.marid.types.GuavaTypeContext;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 import static javafx.collections.FXCollections.observableArrayList;
 import static org.marid.io.Xmls.*;
 
-public class IdeBean implements MaridBean {
+public class IdeBean implements TypedBean {
 
     public final IdeBean parent;
     public final StringProperty name;

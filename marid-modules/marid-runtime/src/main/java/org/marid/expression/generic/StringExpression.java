@@ -22,23 +22,15 @@
 package org.marid.expression.generic;
 
 import org.marid.runtime.context.BeanContext;
-import org.marid.runtime.types.TypeContext;
 import org.marid.runtime.util.ReflectUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.lang.reflect.Type;
 
 public interface StringExpression extends Expression {
 
     @Nonnull
     String getValue();
-
-    @Nonnull
-    @Override
-    default Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {
-        return String.class;
-    }
 
     @Nullable
     @Override

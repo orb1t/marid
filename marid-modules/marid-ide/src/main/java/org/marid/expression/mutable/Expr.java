@@ -23,7 +23,7 @@ package org.marid.expression.mutable;
 import javafx.beans.Observable;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-import org.marid.expression.generic.Expression;
+import org.marid.expression.TypedExpression;
 import org.marid.misc.Calls;
 import org.w3c.dom.Element;
 
@@ -39,7 +39,7 @@ import static javafx.collections.FXCollections.observableArrayList;
 import static org.marid.io.Xmls.create;
 import static org.marid.io.Xmls.elements;
 
-public abstract class Expr implements Expression {
+public abstract class Expr implements TypedExpression {
 
     public final ObservableList<Expr> initializers;
 

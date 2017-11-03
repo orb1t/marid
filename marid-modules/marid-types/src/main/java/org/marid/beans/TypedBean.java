@@ -1,6 +1,6 @@
 /*-
  * #%L
- * marid-runtime
+ * marid-types
  * %%
  * Copyright (C) 2012 - 2017 MARID software development group
  * %%
@@ -21,7 +21,7 @@
 
 package org.marid.beans;
 
-import org.marid.expression.generic.Expression;
+import org.marid.expression.TypedExpression;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -29,36 +29,36 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Stream.*;
 
-public interface MaridBean {
+public interface TypedBean extends MaridBean {
 
-    MaridBean getParent();
-
-    @Nonnull
-    String getName();
+    @Override
+    TypedBean getParent();
 
     @Nonnull
-    Expression getFactory();
+    @Override
+    TypedExpression getFactory();
 
     @Nonnull
-    List<? extends MaridBean> getChildren();
+    @Override
+    List<? extends TypedBean> getChildren();
 
     @Nonnull
-    default Stream<? extends MaridBean> ancestors() {
+    default Stream<? extends TypedBean> ancestors() {
         return ofNullable(getParent()).flatMap(p -> concat(of(p), p.ancestors()));
     }
 
     @Nonnull
-    default Stream<? extends MaridBean> descendants() {
+    default Stream<? extends TypedBean> descendants() {
         return getChildren().stream().flatMap(b -> concat(of(b), b.descendants()));
     }
 
     @Nonnull
-    default Stream<? extends MaridBean> siblings() {
+    default Stream<? extends TypedBean> siblings() {
         return ofNullable(getParent()).flatMap(p -> p.getChildren().stream().filter(c -> c != this));
     }
 
     @Nonnull
-    default Stream<? extends MaridBean> matchingCandidates() {
+    default Stream<? extends TypedBean> matchingCandidates() {
         return concat(siblings(), ancestors()
                 .filter(p -> p.getParent() != null)
                 .flatMap(p -> concat(of(p), p.siblings())));

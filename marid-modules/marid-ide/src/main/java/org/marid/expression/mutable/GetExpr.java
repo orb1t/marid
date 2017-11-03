@@ -22,17 +22,15 @@ package org.marid.expression.mutable;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.marid.expression.generic.GetExpression;
+import org.marid.expression.TypedGetExpression;
 import org.marid.jfx.props.FxObject;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 
-import static org.marid.io.Xmls.attribute;
-import static org.marid.io.Xmls.create;
-import static org.marid.io.Xmls.element;
+import static org.marid.io.Xmls.*;
 
-public class GetExpr extends Expr implements GetExpression {
+public class GetExpr extends Expr implements TypedGetExpression {
 
     public final FxObject<Expr> target;
     public final StringProperty field;
