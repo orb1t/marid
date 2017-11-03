@@ -22,9 +22,11 @@
 package org.marid.expression.runtime;
 
 import org.marid.expression.generic.StringExpression;
+import org.marid.runtime.context.BeanContext;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import static org.marid.io.Xmls.content;
 
@@ -40,6 +42,11 @@ public final class StringExpr extends Expr implements StringExpression {
     StringExpr(@Nonnull Element element) {
         super(element);
         value = content(element).orElseThrow(() -> new NullPointerException("content"));
+    }
+
+    @Override
+    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
+        return context.resolvePlaceholders(getValue());
     }
 
     @Nonnull

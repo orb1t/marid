@@ -22,9 +22,12 @@
 package org.marid.expression.runtime;
 
 import org.marid.expression.generic.ClassExpression;
+import org.marid.runtime.context.BeanContext;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.NoSuchElementException;
 
 import static org.marid.io.Xmls.attribute;
 
@@ -40,6 +43,16 @@ public final class ClassExpr extends Expr implements ClassExpression {
     ClassExpr(@Nonnull Element element) {
         super(element);
         className = attribute(element, "class").orElseThrow(() -> new NullPointerException("class"));
+    }
+
+    @Override
+    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
+        final String className = context.resolvePlaceholders(context.resolvePlaceholders(getClassName()));
+        try {
+            return context.getClassLoader().loadClass(className);
+        } catch (ClassNotFoundException x) {
+            throw new NoSuchElementException(className);
+        }
     }
 
     @Nonnull

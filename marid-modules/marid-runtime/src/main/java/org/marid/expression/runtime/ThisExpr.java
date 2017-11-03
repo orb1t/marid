@@ -22,7 +22,11 @@
 package org.marid.expression.runtime;
 
 import org.marid.expression.generic.ThisExpression;
+import org.marid.runtime.context.BeanContext;
 import org.w3c.dom.Element;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public final class ThisExpr extends Expr implements ThisExpression {
 
@@ -31,5 +35,10 @@ public final class ThisExpr extends Expr implements ThisExpression {
 
     ThisExpr(Element element) {
         super(element);
+    }
+
+    @Override
+    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
+        return self;
     }
 }

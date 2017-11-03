@@ -21,30 +21,10 @@
 
 package org.marid.expression.generic;
 
-import org.marid.runtime.context.BeanContext;
-import org.marid.runtime.util.ReflectUtils;
-
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.NoSuchElementException;
 
 public interface ClassExpression extends Expression {
 
     @Nonnull
     String getClassName();
-
-    @Nullable
-    @Override
-    default Object evaluate(@Nullable Object self, @Nonnull BeanContext context) {
-        return ReflectUtils.eval(execute(context), this, context);
-    }
-
-    private Object execute(@Nonnull BeanContext context) {
-        final String className = context.resolvePlaceholders(context.resolvePlaceholders(getClassName()));
-        try {
-            return context.getClassLoader().loadClass(className);
-        } catch (ClassNotFoundException x) {
-            throw new NoSuchElementException(className);
-        }
-    }
 }

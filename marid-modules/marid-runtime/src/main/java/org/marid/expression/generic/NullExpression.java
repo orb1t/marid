@@ -21,17 +21,6 @@
 
 package org.marid.expression.generic;
 
-import org.marid.runtime.context.BeanContext;
-import org.marid.runtime.util.ReflectUtils;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 public interface NullExpression extends Expression {
 
-    @Nullable
-    @Override
-    default Object evaluate(@Nullable Object self, @Nonnull BeanContext context) {
-        return ReflectUtils.eval(null, this, context);
-    }
 }

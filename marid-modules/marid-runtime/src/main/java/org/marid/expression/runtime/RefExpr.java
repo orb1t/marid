@@ -23,9 +23,11 @@ package org.marid.expression.runtime;
 
 import org.marid.expression.generic.RefExpression;
 import org.marid.io.Xmls;
+import org.marid.runtime.context.BeanContext;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public final class RefExpr extends Expr implements RefExpression {
 
@@ -39,6 +41,11 @@ public final class RefExpr extends Expr implements RefExpression {
     RefExpr(@Nonnull Element element) {
         super(element);
         reference = Xmls.attribute(element, "ref").orElseThrow(() -> new NullPointerException("ref"));
+    }
+
+    @Override
+    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
+        return context.getBean(context.resolvePlaceholders(getReference()));
     }
 
     @Override

@@ -21,16 +21,10 @@
 
 package org.marid.expression.generic;
 
-import org.marid.runtime.context.BeanContext;
-
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.List;
 
 public interface Expression {
-
-    @Nullable
-    Object evaluate(@Nullable Object self, @Nonnull BeanContext context);
 
     @Nonnull
     List<? extends Expression> getInitializers();

@@ -21,11 +21,17 @@
 
 package org.marid.expression.runtime;
 
+import org.marid.expression.generic.ClassExpression;
 import org.marid.expression.generic.GetExpression;
+import org.marid.runtime.context.BeanContext;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.lang.reflect.Field;
+import java.util.NoSuchElementException;
 
+import static java.util.Objects.requireNonNull;
 import static org.marid.io.Xmls.attribute;
 import static org.marid.io.Xmls.element;
 
@@ -46,6 +52,34 @@ public final class GetExpr extends Expr implements GetExpression {
         super(element);
         this.target = element("target", element).map(Expr::of).orElseThrow(() -> new NullPointerException("target"));
         this.field = attribute(element, "field").orElseThrow(() -> new NullPointerException("field"));
+    }
+
+    @Override
+    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
+        final String field = context.resolvePlaceholders(getField());
+        if (getTarget() instanceof ClassExpression) {
+            final Class<?> t = (Class<?>) requireNonNull(getTarget().evaluate(self, context), "target");
+            try {
+                final Field f = t.getField(field);
+                f.setAccessible(true);
+                return f.get(null);
+            } catch (NoSuchFieldException x) {
+                throw new NoSuchElementException(field);
+            } catch (IllegalAccessException x) {
+                throw new IllegalStateException(x);
+            }
+        } else {
+            final Object t = requireNonNull(getTarget().evaluate(self, context), "target");
+            try {
+                final Field f = t.getClass().getField(field);
+                f.setAccessible(true);
+                return f.get(t);
+            } catch (NoSuchFieldException x) {
+                throw new NoSuchElementException(field);
+            } catch (IllegalAccessException x) {
+                throw new IllegalStateException(x);
+            }
+        }
     }
 
     @Override

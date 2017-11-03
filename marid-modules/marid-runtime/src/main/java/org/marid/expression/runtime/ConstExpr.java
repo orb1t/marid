@@ -22,9 +22,11 @@
 package org.marid.expression.runtime;
 
 import org.marid.expression.generic.ConstExpression;
+import org.marid.runtime.context.BeanContext;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import static org.marid.io.Xmls.attribute;
 
@@ -40,6 +42,16 @@ public final class ConstExpr extends ValueExpr implements ConstExpression {
     ConstExpr(@Nonnull Element element) {
         super(element);
         type = attribute(element, "type").map(ConstantType::valueOf).orElseThrow(() -> new NullPointerException("type"));
+    }
+
+    @Override
+    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
+        final String v = context.resolvePlaceholders(getValue()).trim();
+        if (v.isEmpty()) {
+            return null;
+        } else {
+            return getType().converter.apply(v);
+        }
     }
 
     @Nonnull

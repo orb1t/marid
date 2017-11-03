@@ -22,11 +22,20 @@
 package org.marid.expression.runtime;
 
 import org.marid.expression.generic.NullExpression;
+import org.marid.runtime.context.BeanContext;
 import org.w3c.dom.Element;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public final class NullExpr extends Expr implements NullExpression {
 
     public NullExpr() {
+    }
+
+    @Override
+    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
+        return null;
     }
 
     NullExpr(Element element) {

@@ -21,16 +21,7 @@
 
 package org.marid.expression.generic;
 
-import org.marid.runtime.context.BeanContext;
-import org.marid.runtime.util.ReflectUtils;
-
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.lang.reflect.Field;
-import java.util.NoSuchElementException;
-
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.Stream.of;
 
 public interface SetExpression extends Expression {
 
@@ -42,42 +33,4 @@ public interface SetExpression extends Expression {
 
     @Nonnull
     Expression getValue();
-
-    @Nullable
-    @Override
-    default Object evaluate(@Nullable Object self, @Nonnull BeanContext context) {
-        final Object result = execute(self, context);
-        return ReflectUtils.eval(result, this, context);
-    }
-
-    private Object execute(@Nullable Object self, @Nonnull BeanContext context) {
-        final String field = context.resolvePlaceholders(getField());
-        if (getTarget() instanceof ClassExpression) {
-            final Class<?> t = (Class<?>) requireNonNull(getTarget().evaluate(self, context), "target");
-            final Field f = of(t.getFields())
-                    .filter(m -> field.equals(m.getName()))
-                    .findFirst()
-                    .orElseThrow(() -> new NoSuchElementException(field));
-            try {
-                f.setAccessible(true);
-                f.set(null, getValue().evaluate(self, context));
-                return null;
-            } catch (IllegalAccessException x) {
-                throw new IllegalStateException(x);
-            }
-        } else {
-            final Object t = requireNonNull(getTarget().evaluate(self, context), "target");
-            final Object v = getValue().evaluate(self, context);
-            try {
-                final Field f = t.getClass().getField(field);
-                f.setAccessible(true);
-                f.set(t, v);
-                return t;
-            } catch (NoSuchFieldException x) {
-                throw new NoSuchElementException(field);
-            } catch (IllegalAccessException x) {
-                throw new IllegalStateException(x);
-            }
-        }
-    }
 }

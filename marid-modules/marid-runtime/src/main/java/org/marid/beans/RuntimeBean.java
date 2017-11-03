@@ -21,7 +21,6 @@
 
 package org.marid.beans;
 
-import org.marid.expression.generic.Expression;
 import org.marid.expression.runtime.Expr;
 import org.marid.expression.runtime.NullExpr;
 import org.w3c.dom.Element;
@@ -73,7 +72,7 @@ public class RuntimeBean implements MaridBean {
 
     @Nonnull
     @Override
-    public Expression getFactory() {
+    public Expr getFactory() {
         return factory;
     }
 

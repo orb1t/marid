@@ -21,12 +21,13 @@
 
 package org.marid.runtime.context;
 
+import org.marid.beans.MaridBean;
+import org.marid.beans.RuntimeBean;
 import org.marid.runtime.event.BeanPostConstructEvent;
 import org.marid.runtime.event.BeanPreDestroyEvent;
 import org.marid.runtime.event.ContextBootstrapEvent;
 import org.marid.runtime.event.ContextFailEvent;
 import org.marid.runtime.exception.MaridBeanNotFoundException;
-import org.marid.beans.MaridBean;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -45,12 +46,12 @@ public final class BeanContext implements MaridRuntime, AutoCloseable {
 
     private final BeanContext parent;
     private final BeanConfiguration configuration;
-    private final MaridBean bean;
+    private final RuntimeBean bean;
     private final Object instance;
     private final ConcurrentLinkedDeque<BeanContext> children = new ConcurrentLinkedDeque<>();
     private final HashSet<MaridBean> processing = new HashSet<>();
 
-    public BeanContext(@Nullable BeanContext parent, @Nonnull BeanConfiguration configuration, @Nonnull MaridBean bean) {
+    public BeanContext(@Nullable BeanContext parent, @Nonnull BeanConfiguration configuration, @Nonnull RuntimeBean bean) {
         this.parent = parent;
         this.configuration = configuration;
         this.bean = bean;
@@ -61,7 +62,7 @@ public final class BeanContext implements MaridRuntime, AutoCloseable {
             this.instance = parent == null ? null : parent.create(bean, this);
             configuration.fireEvent(l -> l.onPostConstruct(new BeanPostConstructEvent(this, bean.getName(), instance)), null);
 
-            for (final MaridBean child : bean.getChildren()) {
+            for (final RuntimeBean child : bean.getChildren()) {
                 if (children.stream().noneMatch(b -> b.bean.getName().equals(child.getName()))) {
                     children.add(new BeanContext(this, configuration, child));
                 }
@@ -79,7 +80,7 @@ public final class BeanContext implements MaridRuntime, AutoCloseable {
         }
     }
 
-    public BeanContext(BeanConfiguration configuration, MaridBean root) {
+    public BeanContext(BeanConfiguration configuration, RuntimeBean root) {
         this(null, configuration, root);
     }
 
@@ -106,7 +107,7 @@ public final class BeanContext implements MaridRuntime, AutoCloseable {
         if (parent == null) {
             throw new MaridBeanNotFoundException(name);
         } else {
-            for (final MaridBean brother : parent.bean.getChildren()) {
+            for (final RuntimeBean brother : parent.bean.getChildren()) {
                 if (brother.getName().equals(name)) {
                     try {
                         return parent.children.stream()
@@ -147,7 +148,7 @@ public final class BeanContext implements MaridRuntime, AutoCloseable {
         return bean;
     }
 
-    private Object create(MaridBean bean, BeanContext context) {
+    private Object create(RuntimeBean bean, BeanContext context) {
         if (processing.add(bean)) {
             try {
                 return bean.getFactory().evaluate(context.instance, context);

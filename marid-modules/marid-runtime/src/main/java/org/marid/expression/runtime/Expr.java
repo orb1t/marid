@@ -22,9 +22,11 @@
 package org.marid.expression.runtime;
 
 import org.marid.expression.generic.Expression;
+import org.marid.runtime.context.BeanContext;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +50,17 @@ public abstract class Expr implements Expression {
     public List<Expr> getInitializers() {
         return initializers;
     }
+
+    @Nullable
+    public final Object evaluate(@Nullable Object self, @Nonnull BeanContext context) {
+        final Object v = execute(self, context);
+        for (final Expr initializer : getInitializers()) {
+            initializer.evaluate(v, context);
+        }
+        return v;
+    }
+
+    protected abstract Object execute(@Nullable Object self, @Nonnull BeanContext context);
 
     public String getTag() {
         return getClass().getSimpleName().replace("Expr", "").toLowerCase();
