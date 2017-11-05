@@ -28,11 +28,13 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
 
+import static org.marid.types.TypeUtils.WILDCARD;
+
 public interface TypedNullExpression extends NullExpression, TypedExpression {
 
     @Nonnull
     @Override
     default Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {
-        return typeContext.getWildcard();
+        return WILDCARD;
     }
 }

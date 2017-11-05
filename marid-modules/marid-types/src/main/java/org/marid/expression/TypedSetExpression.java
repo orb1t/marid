@@ -22,7 +22,9 @@
 package org.marid.expression;
 
 import org.marid.expression.generic.SetExpression;
+import org.marid.expression.generic.ThisExpression;
 import org.marid.types.TypeContext;
+import org.marid.types.TypeUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -42,5 +44,20 @@ public interface TypedSetExpression extends SetExpression, TypedExpression {
     @Override
     default Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {
         return getTarget().getType(owner, typeContext);
+    }
+
+    @Nonnull
+    @Override
+    default Type resolve(@Nonnull Type type, @Nonnull TypeContext typeContext) {
+        if (getTarget() instanceof ThisExpression && !(type instanceof Class<?>)) {
+            return TypeUtils.getField(typeContext.getRaw(type), getField())
+                    .map(f -> typeContext.resolve(type, f.getGenericType()))
+                    .map(t -> typeContext.evaluate(e -> e.where(t, getValue()
+                            .resolveType(type, typeContext))
+                            .resolve(type)))
+                    .orElse(type);
+        } else {
+            return type;
+        }
     }
 }

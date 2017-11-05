@@ -69,9 +69,8 @@ public final class CallExpr extends Expr implements CallExpression {
 
     @Override
     protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
-        final String mName = context.resolvePlaceholders(getMethod());
         if (getTarget() instanceof ClassExpression) {
-            if ("new".equals(mName)) {
+            if ("new".equals(getMethod())) {
                 final Class<?> t = (Class<?>) requireNonNull(getTarget().evaluate(self, context), "target");
                 final Object[] ps = getArgs().stream().map(p -> p.evaluate(self, context)).toArray();
                 final Constructor ct = Stream.of(t.getConstructors())
@@ -92,10 +91,10 @@ public final class CallExpr extends Expr implements CallExpression {
                 final Class<?> t = (Class<?>) requireNonNull(getTarget().evaluate(self, context), "target");
                 final Object[] ps = getArgs().stream().map(p -> p.evaluate(null, context)).toArray();
                 final Method mt = Stream.of(t.getMethods())
-                        .filter(m -> mName.equals(m.getName()))
+                        .filter(m -> getMethod().equals(m.getName()))
                         .filter(m -> compatible(m, ps))
                         .findFirst()
-                        .orElseThrow(() -> new NoSuchElementException(mName));
+                        .orElseThrow(() -> new NoSuchElementException(getMethod()));
                 final Class<?>[] types = mt.getParameterTypes();
                 for (int i = 0; i < types.length; i++) {
                     ps[i] = value(types[i], ps[i]);
@@ -111,10 +110,10 @@ public final class CallExpr extends Expr implements CallExpression {
             final Object t = requireNonNull(getTarget().evaluate(self, context), "target");
             final Object[] ps = getArgs().stream().map(p -> p.evaluate(t, context)).toArray();
             final Method mt = Stream.of(t.getClass().getMethods())
-                    .filter(m -> mName.equals(m.getName()))
+                    .filter(m -> getMethod().equals(m.getName()))
                     .filter(m -> compatible(m, ps))
                     .findFirst()
-                    .orElseThrow(() -> new NoSuchElementException(mName));
+                    .orElseThrow(() -> new NoSuchElementException(getMethod()));
             final Class<?>[] types = mt.getParameterTypes();
             for (int i = 0; i < types.length; i++) {
                 ps[i] = value(types[i], ps[i]);

@@ -19,10 +19,11 @@
  * #L%
  */
 
-package org.marid.runtime.util;
+package org.marid.types;
 
+import org.marid.expression.TypedCallExpression;
 import org.marid.expression.TypedExpression;
-import org.marid.types.TypeContext;
+import org.marid.misc.Calls;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -34,6 +35,11 @@ import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
 public interface TypeUtils {
+
+    Type WILDCARD = Calls.call(() -> {
+        final Type pt = Class.class.getMethod("forName", String.class).getGenericReturnType();
+        return ((ParameterizedType) pt).getActualTypeArguments()[0];
+    });
 
     @Nonnull
     static Optional<Type> classType(@Nonnull Type type) {
@@ -91,6 +97,21 @@ public interface TypeUtils {
             return Optional.of(type.getField(name));
         } catch (NoSuchFieldException x) {
             return Optional.empty();
+        }
+    }
+
+    static boolean matches(TypedCallExpression expr, Executable e, Type owner, TypeContext context) {
+        if (e.getParameterCount() == expr.getArgs().size()) {
+            final Type[] pt = e.getGenericParameterTypes();
+            for (int i = 0; i < pt.length; i++) {
+                final Type at = expr.getArgs().get(i).getType(owner, context);
+                if (!context.isAssignable(pt[i], at)) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            return false;
         }
     }
 }

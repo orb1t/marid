@@ -37,4 +37,19 @@ public interface TypedExpression extends Expression {
 
     @Nonnull
     Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext);
+
+    @Nonnull
+    default Type resolve(@Nonnull Type type, @Nonnull TypeContext typeContext) {
+        return type;
+    }
+
+    @Nonnull
+    default Type resolveType(@Nullable Type owner, @Nonnull TypeContext typeContext) {
+        final Type type = getType(owner, typeContext);
+        if (type instanceof Class<?>) {
+            return type;
+        } else {
+            return getInitializers().stream().reduce(type, (t, i) -> i.resolve(t, typeContext), (t1, t2) -> t2);
+        }
+    }
 }

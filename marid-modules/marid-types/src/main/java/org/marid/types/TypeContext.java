@@ -29,16 +29,10 @@ import java.util.function.Function;
 public interface TypeContext {
 
     @Nonnull
-    Type getWildcard();
-
-    @Nonnull
     Type getBeanType(@Nonnull String name);
 
     @Nonnull
     Type resolve(@Nullable Type owner, @Nonnull Type type);
-
-    @Nonnull
-    String resolvePlaceholders(@Nonnull String value);
 
     @Nonnull
     Class<?> getRaw(@Nonnull Type type);

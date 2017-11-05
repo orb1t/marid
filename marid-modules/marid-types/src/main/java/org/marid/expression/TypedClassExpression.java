@@ -22,20 +22,22 @@
 package org.marid.expression;
 
 import org.marid.expression.generic.ClassExpression;
-import org.marid.runtime.util.TypeUtils;
 import org.marid.types.TypeContext;
+import org.marid.types.TypeUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
+
+import static org.marid.types.TypeUtils.WILDCARD;
 
 public interface TypedClassExpression extends ClassExpression, TypedExpression {
 
     @Nonnull
     @Override
     default Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {
-        return TypeUtils.getClass(typeContext.getClassLoader(), typeContext.resolvePlaceholders(getClassName()))
+        return TypeUtils.getClass(typeContext.getClassLoader(), getClassName())
                 .map(typeContext::getClassType)
-                .orElseGet(typeContext::getWildcard);
+                .orElse(WILDCARD);
     }
 }

@@ -29,17 +29,14 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.marid.expression.mutable.Expr;
 import org.marid.expression.mutable.NullExpr;
 import org.marid.jfx.props.FxObject;
-import org.marid.types.GuavaTypeContext;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.xml.transform.stream.StreamResult;
 import java.io.Writer;
-import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -113,11 +110,6 @@ public class IdeBean implements TypedBean {
             consumer.accept(child);
         }
         return this;
-    }
-
-    public Type getType(ClassLoader classLoader, Properties properties) {
-        final GuavaTypeContext context = new GuavaTypeContext(this, classLoader, properties);
-        return getFactory().getType(null, context);
     }
 
     public void writeTo(@Nonnull Element element) {

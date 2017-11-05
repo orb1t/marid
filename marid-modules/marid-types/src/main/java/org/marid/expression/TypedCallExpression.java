@@ -23,24 +23,24 @@ package org.marid.expression;
 
 import org.marid.expression.generic.CallExpression;
 import org.marid.expression.generic.ClassExpression;
-import org.marid.runtime.util.TypeUtils;
+import org.marid.expression.generic.ThisExpression;
 import org.marid.types.TypeContext;
+import org.marid.types.TypeUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.lang.reflect.Executable;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
+
+import static org.marid.types.TypeUtils.WILDCARD;
 
 public interface TypedCallExpression extends CallExpression, TypedExpression {
 
     @Nonnull
     @Override
     TypedExpression getTarget();
-
 
     @Nonnull
     @Override
@@ -49,52 +49,45 @@ public interface TypedCallExpression extends CallExpression, TypedExpression {
     @Nonnull
     @Override
     default Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {
-        final String methodName = typeContext.resolvePlaceholders(getMethod());
-        final Type targetType = getTarget().getType(owner, typeContext);
-        final Predicate<Executable> executableMatcher = e -> {
-            if (e.getParameterCount() == getArgs().size()) {
-                final Type[] pt = e.getGenericParameterTypes();
-                for (int i = 0; i < pt.length; i++) {
-                    final Type at = getArgs().get(i).getType(owner, typeContext);
-                    if (!typeContext.isAssignable(pt[i], at)) {
-                        return false;
-                    }
-                }
-                return true;
-            } else {
-                return false;
-            }
-        };
+        final Type targetType = getTarget().resolveType(owner, typeContext);
         if (getTarget() instanceof ClassExpression) { // static call
-            if ("new".equals(methodName)) { // constructor
+            if ("new".equals(getMethod())) { // constructor
                 return TypeUtils.classType(targetType)
                         .flatMap(tc -> Stream.of(typeContext.getRaw(tc).getConstructors())
-                                .filter(executableMatcher)
+                                .filter(e -> TypeUtils.matches(this, e, owner, typeContext))
                                 .findFirst()
                                 .map(m -> TypeUtils.type(m, getArgs(), owner, typeContext)))
-                        .orElseGet(typeContext::getWildcard);
+                        .orElse(WILDCARD);
             } else { // static method
                 return TypeUtils.classType(targetType)
                         .flatMap(t -> {
                             final Class<?> targetClass = typeContext.getRaw(t);
                             return Stream.of(targetClass.getMethods())
-                                    .filter(m -> m.getName().equals(methodName))
-                                    .filter(m -> Modifier.isStatic(m.getModifiers()))
-                                    .filter(executableMatcher)
+                                    .filter(m -> m.getName().equals(getMethod()) && Modifier.isStatic(m.getModifiers()))
+                                    .filter(e -> TypeUtils.matches(this, e, owner, typeContext))
                                     .findFirst()
                                     .map(m -> TypeUtils.type(m, getArgs(), owner, typeContext));
                         })
-                        .orElseGet(typeContext::getWildcard);
+                        .orElse(WILDCARD);
             }
         } else { // virtual method
             return Stream.of(typeContext.getRaw(targetType).getMethods())
-                    .filter(m -> m.getName().equals(methodName))
-                    .filter(m -> !Modifier.isStatic(m.getModifiers()))
-                    .filter(executableMatcher)
+                    .filter(m -> m.getName().equals(getMethod()) && !Modifier.isStatic(m.getModifiers()))
+                    .filter(e -> TypeUtils.matches(this, e, owner, typeContext))
                     .findFirst()
                     .map(m -> TypeUtils.type(m, getArgs(), targetType, typeContext))
                     .map(type -> typeContext.resolve(targetType, type))
-                    .orElseGet(typeContext::getWildcard);
+                    .orElse(WILDCARD);
+        }
+    }
+
+    @Nonnull
+    @Override
+    default Type resolve(@Nonnull Type type, @Nonnull TypeContext typeContext) {
+        if (getTarget() instanceof ThisExpression && !(type instanceof Class<?>)) {
+            return null;
+        } else {
+            return type;
         }
     }
 }

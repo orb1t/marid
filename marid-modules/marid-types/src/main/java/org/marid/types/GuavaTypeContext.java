@@ -25,42 +25,24 @@ import com.google.common.reflect.TypeResolver;
 import com.google.common.reflect.TypeToken;
 import org.marid.beans.TypedBean;
 import org.marid.misc.Casts;
-import org.marid.runtime.context.MaridPlaceholderResolver;
 import org.springframework.util.TypeUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Properties;
 import java.util.function.Function;
-import java.util.stream.Stream;
+
+import static org.marid.types.TypeUtils.WILDCARD;
 
 public class GuavaTypeContext implements TypeContext {
 
-    public static final Type WILDCARD = Stream.of(TypeToken.class.getMethods())
-            .filter(m -> "of".equals(m.getName()) && m.getParameterTypes()[0] == Type.class)
-            .map(m -> ((ParameterizedType) m.getGenericReturnType()).getActualTypeArguments()[0])
-            .findFirst()
-            .orElseThrow(IllegalStateException::new);
-
     private final TypedBean bean;
-    private final MaridPlaceholderResolver placeholderResolver;
+    private final ClassLoader classLoader;
 
-    public GuavaTypeContext(TypedBean bean, ClassLoader classLoader, Properties properties) {
+    public GuavaTypeContext(TypedBean bean, ClassLoader classLoader) {
         this.bean = bean;
-        this.placeholderResolver = new MaridPlaceholderResolver(classLoader, properties);
-    }
-
-    private GuavaTypeContext(TypedBean bean, MaridPlaceholderResolver placeholderResolver) {
-        this.bean = bean;
-        this.placeholderResolver = placeholderResolver;
-    }
-
-    @Nonnull
-    @Override
-    public Type getWildcard() {
-        return WILDCARD;
+        this.classLoader = classLoader;
     }
 
     @Nonnull
@@ -69,7 +51,7 @@ public class GuavaTypeContext implements TypeContext {
         return bean.matchingCandidates()
                 .filter(b -> name.equals(b.getName()))
                 .findFirst()
-                .map(b -> b.getFactory().getType(null, new GuavaTypeContext(b, placeholderResolver)))
+                .map(b -> b.getFactory().resolveType(null, new GuavaTypeContext(b, classLoader)))
                 .orElse(WILDCARD);
     }
 
@@ -77,12 +59,6 @@ public class GuavaTypeContext implements TypeContext {
     @Override
     public Type resolve(@Nullable Type owner, @Nonnull Type type) {
         return owner == null ? type : TypeToken.of(owner).resolveType(type).getType();
-    }
-
-    @Nonnull
-    @Override
-    public String resolvePlaceholders(@Nonnull String value) {
-        return placeholderResolver.resolvePlaceholders(value);
     }
 
     @Nonnull
@@ -99,7 +75,7 @@ public class GuavaTypeContext implements TypeContext {
     @Nonnull
     @Override
     public ClassLoader getClassLoader() {
-        return placeholderResolver.getClassLoader();
+        return classLoader;
     }
 
     @Nonnull
