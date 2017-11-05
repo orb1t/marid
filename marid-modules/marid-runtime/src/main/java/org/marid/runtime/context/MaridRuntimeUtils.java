@@ -121,14 +121,54 @@ public interface MaridRuntimeUtils {
         if (executable.getParameterCount() == args.length) {
             final Class<?>[] types = executable.getParameterTypes();
             for (int i = 0; i < args.length; i++) {
-                final Class<?> type = types[i];
-                if (args[i] != null && !type.isInstance(args[i])) {
+                final Class<?> to = types[i];
+                if (args[i] != null) {
+                    final Class<?> from = args[i].getClass();
+                    if (!compatible(to, from)) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    static boolean compatible(@Nonnull Executable executable, @Nonnull Class<?>... types) {
+        if (executable.getParameterCount() == types.length) {
+            final Class<?>[] parameterTypes = executable.getParameterTypes();
+            for (int i = 0; i < types.length; i++) {
+                if (!compatible(parameterTypes[i], types[i])) {
                     return false;
                 }
             }
             return true;
         } else {
             return false;
+        }
+    }
+
+    static boolean compatible(@Nonnull Class<?> t1, @Nonnull Class<?> t2) {
+        return t1.equals(t2)
+                || t1.isAssignableFrom(t2)
+                || t1.isPrimitive() && compatible(wrapper(t1), t2)
+                || t2.isPrimitive() && compatible(t1, wrapper(t2));
+    }
+
+    @Nonnull
+    static Class<?> wrapper(@Nonnull Class<?> primitiveType) {
+        switch (primitiveType.getName()) {
+            case "int": return Integer.class;
+            case "long": return Long.class;
+            case "boolean": return Boolean.class;
+            case "short": return Short.class;
+            case "byte": return Byte.class;
+            case "char": return Character.class;
+            case "float": return Float.class;
+            case "double": return Double.class;
+            case "void": return Void.class;
+            default: throw new IllegalArgumentException(primitiveType.getName());
         }
     }
 }

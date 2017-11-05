@@ -104,6 +104,10 @@ public final class BeanContext implements MaridRuntime, AutoCloseable {
 
     @Override
     public Object getBean(String name) {
+        return getContext(name).instance;
+    }
+
+    public BeanContext getContext(String name) {
         if (parent == null) {
             throw new MaridBeanNotFoundException(name);
         } else {
@@ -113,18 +117,17 @@ public final class BeanContext implements MaridRuntime, AutoCloseable {
                         return parent.children.stream()
                                 .filter(c -> c.bean == brother)
                                 .findFirst()
-                                .map(c -> c.instance)
                                 .orElseGet(() -> {
                                     final BeanContext c = new BeanContext(parent, configuration, brother);
                                     parent.children.add(c);
-                                    return c.instance;
+                                    return c;
                                 });
                     } catch (CircularBeanException x) {
                         // continue
                     }
                 }
             }
-            return parent.getBean(name);
+            return parent.getContext(name);
         }
     }
 
@@ -144,14 +147,14 @@ public final class BeanContext implements MaridRuntime, AutoCloseable {
     }
 
     @Override
-    public MaridBean getBean() {
+    public RuntimeBean getBean() {
         return bean;
     }
 
     private Object create(RuntimeBean bean, BeanContext context) {
         if (processing.add(bean)) {
             try {
-                return bean.getFactory().evaluate(context.instance, context);
+                return bean.getFactory().evaluate(null, null, context);
             } finally {
                 processing.remove(bean);
             }

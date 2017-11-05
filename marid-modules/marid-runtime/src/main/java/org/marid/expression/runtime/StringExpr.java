@@ -45,7 +45,13 @@ public final class StringExpr extends Expr implements StringExpression {
     }
 
     @Override
-    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
+    @Nonnull
+    public Class<?> getType(@Nonnull BeanContext context, @Nullable Class<?> self) {
+        return String.class;
+    }
+
+    @Override
+    protected Object execute(@Nullable Object self, @Nullable Class<?> selfType, @Nonnull BeanContext context) {
         return context.resolvePlaceholders(getValue());
     }
 

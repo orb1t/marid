@@ -21,7 +21,6 @@
 
 package org.marid.expression.runtime;
 
-import org.marid.expression.generic.ClassExpression;
 import org.marid.expression.generic.SetExpression;
 import org.marid.runtime.context.BeanContext;
 import org.w3c.dom.Element;
@@ -29,10 +28,9 @@ import org.w3c.dom.Element;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.NoSuchElementException;
-import java.util.stream.Stream;
 
-import static java.util.Objects.requireNonNull;
 import static org.marid.io.Xmls.attribute;
 import static org.marid.io.Xmls.element;
 
@@ -60,35 +58,33 @@ public final class SetExpr extends Expr implements SetExpression {
         value = element("value", element).map(Expr::of).orElseThrow(() -> new NullPointerException("value"));
     }
 
+    @Nonnull
     @Override
-    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
-        final String field = context.resolvePlaceholders(getField());
-        if (getTarget() instanceof ClassExpression) {
-            final Class<?> t = (Class<?>) requireNonNull(getTarget().evaluate(self, context), "target");
-            final Field f = Stream.of(t.getFields())
-                    .filter(m -> field.equals(m.getName()))
-                    .findFirst()
-                    .orElseThrow(() -> new NoSuchElementException(field));
-            try {
-                f.setAccessible(true);
-                f.set(null, getValue().evaluate(self, context));
-                return null;
-            } catch (IllegalAccessException x) {
-                throw new IllegalStateException(x);
-            }
-        } else {
-            final Object t = requireNonNull(getTarget().evaluate(self, context), "target");
-            final Object v = getValue().evaluate(self, context);
-            try {
-                final Field f = t.getClass().getField(field);
-                f.setAccessible(true);
-                f.set(t, v);
+    public Class<?> getType(@Nonnull BeanContext context, @Nullable Class<?> self) {
+        return getTarget().targetType(context, self);
+    }
+
+    @Override
+    protected Object execute(@Nullable Object self, @Nullable Class<?> selfType, @Nonnull BeanContext context) {
+        final Class<?> target = getTarget().targetType(context, selfType);
+        final Field field;
+        try {
+            field = target.getField(getField());
+        } catch (NoSuchFieldException x) {
+            throw new NoSuchElementException(getField());
+        }
+        try {
+            final Object v = getValue().evaluate(self, selfType, context);
+            if (Modifier.isStatic(field.getModifiers())) {
+                field.set(null, v);
+                return target;
+            } else {
+                final Object t = getTarget().evaluate(self, selfType, context);
+                field.set(t, v);
                 return t;
-            } catch (NoSuchFieldException x) {
-                throw new NoSuchElementException(field);
-            } catch (IllegalAccessException x) {
-                throw new IllegalStateException(x);
             }
+        } catch (IllegalAccessException x) {
+            throw new IllegalStateException(x);
         }
     }
 

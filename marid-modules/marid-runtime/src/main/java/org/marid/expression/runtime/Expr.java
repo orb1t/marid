@@ -51,16 +51,24 @@ public abstract class Expr implements Expression {
         return initializers;
     }
 
+    @Nonnull
+    public abstract Class<?> getType(@Nonnull BeanContext context, @Nullable Class<?> self);
+
+    public Class<?> targetType(@Nonnull BeanContext context, @Nullable Class<?> self) {
+        return getType(context, self);
+    }
+
     @Nullable
-    public final Object evaluate(@Nullable Object self, @Nonnull BeanContext context) {
-        final Object v = execute(self, context);
+    public final Object evaluate(@Nullable Object self, @Nullable Class<?> selfType, @Nonnull BeanContext context) {
+        final Object v = execute(self, selfType, context);
+        final Class<?> t = getType(context, selfType);
         for (final Expr initializer : getInitializers()) {
-            initializer.evaluate(v, context);
+            initializer.evaluate(v, t, context);
         }
         return v;
     }
 
-    protected abstract Object execute(@Nullable Object self, @Nonnull BeanContext context);
+    protected abstract Object execute(@Nullable Object self, @Nullable Class<?> selfType, @Nonnull BeanContext context);
 
     public String getTag() {
         return getClass().getSimpleName().replace("Expr", "").toLowerCase();
@@ -68,6 +76,7 @@ public abstract class Expr implements Expression {
 
     public static Expr of(@Nonnull Element element) {
         switch (element.getTagName()) {
+            case "call": return new CallExpr(element);
             case "class": return new ClassExpr(element);
             case "this": return new ThisExpr(element);
             case "string": return new StringExpr(element);
@@ -76,7 +85,6 @@ public abstract class Expr implements Expression {
             case "get": return new GetExpr(element);
             case "set": return new SetExpr(element);
             case "null": return new NullExpr(element);
-            case "call": return new CallExpr(element);
             default: throw new IllegalArgumentException(element.getTagName());
         }
     }

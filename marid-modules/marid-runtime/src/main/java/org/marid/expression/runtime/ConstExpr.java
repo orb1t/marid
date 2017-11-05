@@ -45,7 +45,12 @@ public final class ConstExpr extends ValueExpr implements ConstExpression {
     }
 
     @Override
-    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
+    public Class<?> getType(@Nonnull BeanContext context, @Nullable Class<?> selfType) {
+        return getType().type;
+    }
+
+    @Override
+    protected Object execute(@Nullable Object self, @Nullable Class<?> selfType, @Nonnull BeanContext context) {
         final String v = context.resolvePlaceholders(getValue()).trim();
         if (v.isEmpty()) {
             return null;

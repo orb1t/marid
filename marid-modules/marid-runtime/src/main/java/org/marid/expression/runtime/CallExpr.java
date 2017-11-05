@@ -22,26 +22,26 @@
 package org.marid.expression.runtime;
 
 import org.marid.expression.generic.CallExpression;
-import org.marid.expression.generic.ClassExpression;
+import org.marid.misc.Calls;
 import org.marid.runtime.context.BeanContext;
+import org.marid.runtime.context.MaridRuntimeUtils;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.marid.io.Xmls.*;
-import static org.marid.runtime.context.MaridRuntimeUtils.compatible;
-import static org.marid.runtime.context.MaridRuntimeUtils.value;
 
 public final class CallExpr extends Expr implements CallExpression {
 
@@ -68,67 +68,61 @@ public final class CallExpr extends Expr implements CallExpression {
     }
 
     @Override
-    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
-        if (getTarget() instanceof ClassExpression) {
-            if ("new".equals(getMethod())) {
-                final Class<?> t = (Class<?>) requireNonNull(getTarget().evaluate(self, context), "target");
-                final Object[] ps = getArgs().stream().map(p -> p.evaluate(self, context)).toArray();
-                final Constructor ct = Stream.of(t.getConstructors())
-                        .filter(co -> compatible(co, ps))
-                        .findFirst()
-                        .orElseThrow(() -> new NoSuchElementException("No constructor found for " + t));
-                final Class<?>[] types = ct.getParameterTypes();
-                for (int i = 0; i < types.length; i++) {
-                    ps[i] = value(types[i], ps[i]);
-                }
-                try {
-                    ct.setAccessible(true);
-                    return ct.newInstance(ps);
-                } catch (IllegalAccessException | InstantiationException | InvocationTargetException x) {
-                    throw new IllegalStateException(x);
-                }
-            } else {
-                final Class<?> t = (Class<?>) requireNonNull(getTarget().evaluate(self, context), "target");
-                final Object[] ps = getArgs().stream().map(p -> p.evaluate(null, context)).toArray();
-                final Method mt = Stream.of(t.getMethods())
-                        .filter(m -> getMethod().equals(m.getName()))
-                        .filter(m -> compatible(m, ps))
-                        .findFirst()
-                        .orElseThrow(() -> new NoSuchElementException(getMethod()));
-                final Class<?>[] types = mt.getParameterTypes();
-                for (int i = 0; i < types.length; i++) {
-                    ps[i] = value(types[i], ps[i]);
-                }
-                try {
-                    mt.setAccessible(true);
-                    return mt.invoke(null, ps);
-                } catch (IllegalAccessException | InvocationTargetException x) {
-                    throw new IllegalStateException(x);
-                }
-            }
-        } else {
-            final Object t = requireNonNull(getTarget().evaluate(self, context), "target");
-            final Object[] ps = getArgs().stream().map(p -> p.evaluate(t, context)).toArray();
-            final Method mt = Stream.of(t.getClass().getMethods())
-                    .filter(m -> getMethod().equals(m.getName()))
-                    .filter(m -> compatible(m, ps))
+    protected Object execute(@Nullable Object self, @Nullable Class<?> selfType, @Nonnull BeanContext context) {
+        final Class<?> target = getTarget().targetType(context, selfType);
+        final Object[] args = getArgs().stream().map(a -> a.evaluate(self, selfType, context)).toArray();
+        final Supplier<NoSuchElementException> errorSupplier = () -> new NoSuchElementException(Stream.of(args)
+                .map(v -> v == null ? "*" : v.getClass().getName())
+                .collect(joining(",", "No such method " + getMethod() + "(", ")")));
+        final MethodHandle handle;
+        if ("new".equals(getMethod())) {
+            handle = Stream.of(target.getConstructors())
+                    .filter(c -> MaridRuntimeUtils.compatible(c, args))
                     .findFirst()
-                    .orElseThrow(() -> new NoSuchElementException(getMethod()));
-            final Class<?>[] types = mt.getParameterTypes();
-            for (int i = 0; i < types.length; i++) {
-                ps[i] = value(types[i], ps[i]);
-            }
-            try {
-                mt.setAccessible(true);
-                if (mt.getReturnType() == void.class) {
-                    mt.invoke(t, ps);
-                    return t;
-                } else {
-                    return mt.invoke(t, ps);
-                }
-            } catch (IllegalAccessException | InvocationTargetException x) {
-                throw new IllegalStateException(x);
-            }
+                    .map(c -> Calls.call(() -> MethodHandles.publicLookup().unreflectConstructor(c)))
+                    .orElseThrow(errorSupplier).asFixedArity();
+        } else {
+            handle = Stream.of(target.getMethods())
+                    .filter(m -> m.getName().equals(getMethod()))
+                    .filter(m -> MaridRuntimeUtils.compatible(m, args))
+                    .findFirst()
+                    .map(m -> Calls.call(() -> {
+                        final MethodHandle h = MethodHandles.publicLookup().unreflect(m);
+                        if (Modifier.isStatic(m.getModifiers())) {
+                            return h;
+                        } else {
+                            final Object t = getTarget().evaluate(self, selfType, context);
+                            return h.bindTo(t);
+                        }
+                    }))
+                    .orElseThrow(errorSupplier).asFixedArity();
+        }
+        final MethodHandle h = MethodHandles.explicitCastArguments(handle, handle.type().generic());
+        try {
+            return h.invokeWithArguments(args);
+        } catch (RuntimeException | Error x) {
+            throw x;
+        } catch (Throwable x) {
+            throw new IllegalStateException(x);
+        }
+    }
+
+    @Override
+    @Nonnull
+    public Class<?> getType(@Nonnull BeanContext context, @Nullable Class<?> selfType) {
+        final Class<?> target = getTarget().targetType(context, selfType);
+        if ("new".equals(getMethod())) {
+            return target;
+        } else {
+            final Class<?>[] types = getArgs().stream().map(a -> a.getType(context, selfType)).toArray(Class<?>[]::new);
+            return Stream.of(target.getMethods())
+                    .filter(m -> m.getName().equals(getMethod()))
+                    .filter(m -> MaridRuntimeUtils.compatible(m, types))
+                    .findFirst()
+                    .map(Method::getReturnType)
+                    .orElseThrow(() -> new NoSuchElementException(Stream.of(types)
+                            .map(Class::getName)
+                            .collect(joining(",", "No such method " + getMethod() + "(", ")"))));
         }
     }
 

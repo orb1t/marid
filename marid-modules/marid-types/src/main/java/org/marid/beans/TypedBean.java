@@ -25,9 +25,6 @@ import org.marid.expression.TypedExpression;
 
 import javax.annotation.Nonnull;
 import java.util.List;
-import java.util.stream.Stream;
-
-import static java.util.stream.Stream.*;
 
 public interface TypedBean extends MaridBean {
 
@@ -41,26 +38,4 @@ public interface TypedBean extends MaridBean {
     @Nonnull
     @Override
     List<? extends TypedBean> getChildren();
-
-    @Nonnull
-    default Stream<? extends TypedBean> ancestors() {
-        return ofNullable(getParent()).flatMap(p -> concat(of(p), p.ancestors()));
-    }
-
-    @Nonnull
-    default Stream<? extends TypedBean> descendants() {
-        return getChildren().stream().flatMap(b -> concat(of(b), b.descendants()));
-    }
-
-    @Nonnull
-    default Stream<? extends TypedBean> siblings() {
-        return ofNullable(getParent()).flatMap(p -> p.getChildren().stream().filter(c -> c != this));
-    }
-
-    @Nonnull
-    default Stream<? extends TypedBean> matchingCandidates() {
-        return concat(siblings(), ancestors()
-                .filter(p -> p.getParent() != null)
-                .flatMap(p -> concat(of(p), p.siblings())));
-    }
 }

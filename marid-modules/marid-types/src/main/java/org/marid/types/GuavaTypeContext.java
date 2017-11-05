@@ -50,6 +50,8 @@ public class GuavaTypeContext implements TypeContext {
     public Type getBeanType(@Nonnull String name) {
         return bean.matchingCandidates()
                 .filter(b -> name.equals(b.getName()))
+                .filter(TypedBean.class::isInstance)
+                .map(TypedBean.class::cast)
                 .findFirst()
                 .map(b -> b.getFactory().resolveType(null, new GuavaTypeContext(b, classLoader)))
                 .orElse(WILDCARD);
