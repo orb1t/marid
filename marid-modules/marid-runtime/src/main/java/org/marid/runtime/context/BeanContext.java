@@ -131,6 +131,10 @@ public final class BeanContext implements MaridRuntime, AutoCloseable {
         }
     }
 
+    public Class<?> getType() {
+        return bean.getFactory().getType(this, null);
+    }
+
     @Override
     public ClassLoader getClassLoader() {
         return configuration.getPlaceholderResolver().getClassLoader();
@@ -189,11 +193,11 @@ public final class BeanContext implements MaridRuntime, AutoCloseable {
         }
     }
 
-    private Stream<BeanContext> contexts() {
+    public Stream<BeanContext> contexts() {
         return parent == null ? of(this) : concat(parent.contexts(), of(this));
     }
 
-    private Stream<BeanContext> children() {
+    public Stream<BeanContext> children() {
         return children.stream().flatMap(e -> concat(of(e), e.children()));
     }
 

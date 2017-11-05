@@ -22,7 +22,6 @@
 package org.marid.runtime.context;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.Comparator;
@@ -92,29 +91,6 @@ public interface MaridRuntimeUtils {
         }, "repl", 96L * 1024L);
         daemon.setDaemon(true);
         return daemon;
-    }
-
-    @Nullable
-    static Object value(@Nonnull Class<?> target, @Nullable Object v) {
-        if (target.isPrimitive()) {
-            if (v == null) {
-                switch (target.getName()) {
-                    case "int": return 0;
-                    case "long": return 0L;
-                    case "short": return (short) 0;
-                    case "byte": return (byte) 0;
-                    case "char": return (char) 0;
-                    case "double": return 0d;
-                    case "float": return 0f;
-                    case "boolean": return false;
-                    default: throw new IllegalArgumentException(target.getName());
-                }
-            } else {
-                return v;
-            }
-        } else {
-            return v;
-        }
     }
 
     static boolean compatible(@Nonnull Executable executable, @Nonnull Object... args) {

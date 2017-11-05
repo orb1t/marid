@@ -44,6 +44,7 @@ public final class ConstExpr extends ValueExpr implements ConstExpression {
         type = attribute(element, "type").map(ConstantType::valueOf).orElseThrow(() -> new NullPointerException("type"));
     }
 
+    @Nonnull
     @Override
     public Class<?> getType(@Nonnull BeanContext context, @Nullable Class<?> selfType) {
         return getType().type;
