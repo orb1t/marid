@@ -31,11 +31,11 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -68,32 +68,28 @@ public final class CallExpr extends Expr implements CallExpression {
     }
 
     @Override
-    protected Object execute(@Nullable Object self, @Nullable Class<?> selfType, @Nonnull BeanContext context) {
-        final Class<?> target = getTarget().targetType(context, selfType);
-        final Object[] args = getArgs().stream().map(a -> a.evaluate(self, selfType, context)).toArray();
+    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
+        final Object target = Objects.requireNonNull(getTarget().evaluate(self, context));
+        final Class<?> targetClass = getTarget() instanceof ClassExpr ? (Class<?>) target : target.getClass();
+        final Object[] args = getArgs().stream().map(a -> a.evaluate(self, context)).toArray();
         final Supplier<NoSuchElementException> errorSupplier = () -> new NoSuchElementException(Stream.of(args)
                 .map(v -> v == null ? "*" : v.getClass().getName())
                 .collect(joining(",", "No such method " + getMethod() + "(", ")")));
         final MethodHandle handle;
         if ("new".equals(getMethod())) {
-            handle = Stream.of(target.getConstructors())
+            handle = Stream.of(targetClass.getConstructors())
                     .filter(c -> MaridRuntimeUtils.compatible(c, args))
                     .findFirst()
                     .map(c -> Calls.call(() -> MethodHandles.publicLookup().unreflectConstructor(c)))
                     .orElseThrow(errorSupplier).asFixedArity();
         } else {
-            handle = Stream.of(target.getMethods())
+            handle = Stream.of(targetClass.getMethods())
                     .filter(m -> m.getName().equals(getMethod()))
                     .filter(m -> MaridRuntimeUtils.compatible(m, args))
                     .findFirst()
                     .map(m -> Calls.call(() -> {
                         final MethodHandle h = MethodHandles.publicLookup().unreflect(m);
-                        if (Modifier.isStatic(m.getModifiers())) {
-                            return h;
-                        } else {
-                            final Object t = getTarget().evaluate(self, selfType, context);
-                            return h.bindTo(t);
-                        }
+                        return Modifier.isStatic(m.getModifiers()) ? h : h.bindTo(target);
                     }))
                     .orElseThrow(errorSupplier).asFixedArity();
         }
@@ -104,25 +100,6 @@ public final class CallExpr extends Expr implements CallExpression {
             throw x;
         } catch (Throwable x) {
             throw new IllegalStateException(x);
-        }
-    }
-
-    @Override
-    @Nonnull
-    public Class<?> getType(@Nonnull BeanContext context, @Nullable Class<?> selfType) {
-        final Class<?> target = getTarget().targetType(context, selfType);
-        if ("new".equals(getMethod())) {
-            return target;
-        } else {
-            final Class<?>[] types = getArgs().stream().map(a -> a.getType(context, selfType)).toArray(Class<?>[]::new);
-            return Stream.of(target.getMethods())
-                    .filter(m -> m.getName().equals(getMethod()))
-                    .filter(m -> MaridRuntimeUtils.compatible(m, types))
-                    .findFirst()
-                    .map(Method::getReturnType)
-                    .orElseThrow(() -> new NoSuchElementException(Stream.of(types)
-                            .map(Class::getName)
-                            .collect(joining(",", "No such method " + getMethod() + "(", ")"))));
         }
     }
 

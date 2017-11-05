@@ -28,8 +28,8 @@ import org.w3c.dom.Element;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 import static org.marid.io.Xmls.attribute;
 import static org.marid.io.Xmls.element;
@@ -54,31 +54,17 @@ public final class GetExpr extends Expr implements GetExpression {
     }
 
     @Override
-    @Nonnull
-    public Class<?> getType(@Nonnull BeanContext context, @Nullable Class<?> self) {
-        final Class<?> target = getTarget().targetType(context, self);
-        try {
-            return target.getField(getField()).getType();
-        } catch (NoSuchFieldException x) {
-            throw new NoSuchElementException(getField());
-        }
-    }
-
-    @Override
-    protected Object execute(@Nullable Object self, @Nullable Class<?> selfType, @Nonnull BeanContext context) {
-        final Class<?> target = getTarget().targetType(context, selfType);
+    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
+        final Object target = Objects.requireNonNull(getTarget().evaluate(self, context));
+        final Class<?> targetClass = getTarget() instanceof ClassExpr ? (Class<?>) target : target.getClass();
         final Field field;
         try {
-            field = target.getField(getField());
+            field = targetClass.getField(getField());
         } catch (NoSuchFieldException x) {
             throw new NoSuchElementException(getField());
         }
         try {
-            if (Modifier.isStatic(field.getModifiers())) {
-                return field.get(null);
-            } else {
-                return field.get(getTarget().evaluate(self, selfType, context));
-            }
+            return field.get(target);
         } catch (IllegalAccessException x) {
             throw new IllegalStateException(x);
         }

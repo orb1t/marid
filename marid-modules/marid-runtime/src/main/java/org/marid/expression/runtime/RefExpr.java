@@ -44,14 +44,7 @@ public final class RefExpr extends Expr implements RefExpression {
     }
 
     @Override
-    @Nonnull
-    public Class<?> getType(@Nonnull BeanContext context, @Nullable Class<?> self) {
-        final BeanContext c = context.getContext(getReference());
-        return c.getBean().getFactory().getType(c, self);
-    }
-
-    @Override
-    protected Object execute(@Nullable Object self, @Nullable Class<?> selfType, @Nonnull BeanContext context) {
+    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
         return context.getBean(getReference());
     }
 

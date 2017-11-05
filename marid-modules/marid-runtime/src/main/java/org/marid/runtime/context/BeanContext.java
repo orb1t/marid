@@ -131,10 +131,6 @@ public final class BeanContext implements MaridRuntime, AutoCloseable {
         }
     }
 
-    public Class<?> getType() {
-        return bean.getFactory().getType(this, null);
-    }
-
     @Override
     public ClassLoader getClassLoader() {
         return configuration.getPlaceholderResolver().getClassLoader();
@@ -158,7 +154,7 @@ public final class BeanContext implements MaridRuntime, AutoCloseable {
     private Object create(RuntimeBean bean, BeanContext context) {
         if (processing.add(bean)) {
             try {
-                return bean.getFactory().evaluate(null, null, context);
+                return bean.getFactory().evaluate(null, context);
             } finally {
                 processing.remove(bean);
             }

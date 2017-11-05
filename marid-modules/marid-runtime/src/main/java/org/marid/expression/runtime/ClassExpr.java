@@ -45,24 +45,13 @@ public final class ClassExpr extends Expr implements ClassExpression {
         className = attribute(element, "class").orElseThrow(() -> new NullPointerException("class"));
     }
 
-    @Nonnull
     @Override
-    public Class<?> getType(@Nonnull BeanContext context, @Nullable Class<?> selfType) {
-        return Class.class;
-    }
-
-    @Override
-    public Class<?> targetType(@Nonnull BeanContext context, @Nullable Class<?> selfType) {
+    protected Class<?> execute(@Nullable Object self, @Nonnull BeanContext context) {
         try {
             return context.getClassLoader().loadClass(getClassName());
         } catch (ClassNotFoundException x) {
             throw new NoSuchElementException(getClassName());
         }
-    }
-
-    @Override
-    protected Class<?> execute(@Nullable Object self, @Nullable Class<?> selfType, @Nonnull BeanContext context) {
-        return targetType(context, selfType);
     }
 
     @Nonnull

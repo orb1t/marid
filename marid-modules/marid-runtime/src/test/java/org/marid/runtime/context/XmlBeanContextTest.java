@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 
@@ -72,7 +71,6 @@ class XmlBeanContextTest {
                 .findFirst()
                 .orElseThrow(() -> new NoSuchElementException("b1"));
         assertEquals("str", b.getInstance());
-        assertEquals(String.class, b.getType());
     }
 
     @Test
@@ -82,7 +80,6 @@ class XmlBeanContextTest {
                 .findFirst()
                 .orElseThrow(() -> new NoSuchElementException("b2"));
         assertEquals(BigInteger.valueOf(1L), b.getInstance());
-        assertEquals(BigInteger.class, b.getType());
     }
 
     @Test
@@ -92,6 +89,5 @@ class XmlBeanContextTest {
                 .findFirst()
                 .orElseThrow(() -> new NoSuchElementException("b3"));
         assertEquals(singletonList(BigInteger.valueOf(1L)), b.getInstance());
-        assertEquals(ArrayList.class, b.getType());
     }
 }

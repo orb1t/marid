@@ -51,24 +51,16 @@ public abstract class Expr implements Expression {
         return initializers;
     }
 
-    @Nonnull
-    public abstract Class<?> getType(@Nonnull BeanContext context, @Nullable Class<?> self);
-
-    public Class<?> targetType(@Nonnull BeanContext context, @Nullable Class<?> self) {
-        return getType(context, self);
-    }
-
     @Nullable
-    public final Object evaluate(@Nullable Object self, @Nullable Class<?> selfType, @Nonnull BeanContext context) {
-        final Object v = execute(self, selfType, context);
-        final Class<?> t = getType(context, selfType);
+    public final Object evaluate(@Nullable Object self, @Nonnull BeanContext context) {
+        final Object v = execute(self, context);
         for (final Expr initializer : getInitializers()) {
-            initializer.evaluate(v, t, context);
+            initializer.evaluate(v, context);
         }
         return v;
     }
 
-    protected abstract Object execute(@Nullable Object self, @Nullable Class<?> selfType, @Nonnull BeanContext context);
+    protected abstract Object execute(@Nullable Object self, @Nonnull BeanContext context);
 
     public String getTag() {
         return getClass().getSimpleName().replace("Expr", "").toLowerCase();

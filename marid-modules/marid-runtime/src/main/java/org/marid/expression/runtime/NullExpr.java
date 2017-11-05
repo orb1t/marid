@@ -33,14 +33,8 @@ public final class NullExpr extends Expr implements NullExpression {
     public NullExpr() {
     }
 
-    @Nonnull
     @Override
-    public Class<?> getType(@Nonnull BeanContext context, @Nullable Class<?> self) {
-        return Void.class;
-    }
-
-    @Override
-    protected Object execute(@Nullable Object self, @Nullable Class<?> selfType, @Nonnull BeanContext context) {
+    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
         return null;
     }
 
