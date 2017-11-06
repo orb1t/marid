@@ -23,6 +23,7 @@ package org.marid.runtime.context;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Executable;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Comparator;
 import java.util.Scanner;
@@ -30,8 +31,14 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
+import static java.lang.reflect.Modifier.isPublic;
+import static java.util.Optional.ofNullable;
 import static java.util.logging.Level.WARNING;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.IntStream.range;
+import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 import static org.marid.logging.Log.log;
 
@@ -95,34 +102,41 @@ public interface MaridRuntimeUtils {
 
     static boolean compatible(@Nonnull Executable executable, @Nonnull Object... args) {
         if (executable.getParameterCount() == args.length) {
-            final Class<?>[] types = executable.getParameterTypes();
-            for (int i = 0; i < args.length; i++) {
-                final Class<?> to = types[i];
-                if (args[i] != null) {
-                    final Class<?> from = args[i].getClass();
-                    if (!compatible(to, from)) {
-                        return false;
-                    }
-                }
-            }
-            return true;
+            final Class<?>[] ts = executable.getParameterTypes();
+            return range(0, ts.length).filter(i -> args[i] != null).allMatch(i -> compatible(ts[i], args[i].getClass()));
         } else {
             return false;
         }
     }
 
-    static boolean compatible(@Nonnull Executable executable, @Nonnull Class<?>... types) {
-        if (executable.getParameterCount() == types.length) {
-            final Class<?>[] parameterTypes = executable.getParameterTypes();
-            for (int i = 0; i < types.length; i++) {
-                if (!compatible(parameterTypes[i], types[i])) {
-                    return false;
-                }
-            }
-            return true;
-        } else {
-            return false;
-        }
+    @Nonnull
+    static Stream<Class<?>> superClasses(@Nonnull Class<?> type) {
+        return ofNullable(type.getSuperclass()).map(s -> concat(of(type), superClasses(s))).orElseGet(() -> of(type));
+    }
+
+    @Nonnull
+    static Stream<Class<?>> enclosingClasses(@Nonnull Class<?> type) {
+        return ofNullable(type.getEnclosingClass()).stream().flatMap(e -> concat(of(e), enclosingClasses(e)));
+    }
+
+    static boolean isAccessible(@Nonnull Class<?> type) {
+        return isPublic(type.getModifiers()) && enclosingClasses(type).allMatch(MaridRuntimeUtils::isAccessible);
+    }
+
+    @Nonnull
+    static Stream<Method> accessibleMethods(@Nonnull Class<?> type) {
+        return concat(superClasses(type), of(type.getInterfaces()))
+                .flatMap(c -> of(c.getMethods()))
+                .filter(m -> isAccessible(m.getDeclaringClass()))
+                .distinct();
+    }
+
+    @Nonnull
+    static Stream<Field> accessibleFields(@Nonnull Class<?> type) {
+        return concat(superClasses(type), of(type.getInterfaces()))
+                .flatMap(c -> of(c.getFields()))
+                .filter(f -> isAccessible(f.getDeclaringClass()))
+                .distinct();
     }
 
     static boolean compatible(@Nonnull Class<?> t1, @Nonnull Class<?> t2) {
@@ -146,5 +160,13 @@ public interface MaridRuntimeUtils {
             case "void": return Void.class;
             default: throw new IllegalArgumentException(primitiveType.getName());
         }
+    }
+
+    @Nonnull
+    static IllegalStateException methodState(@Nonnull String method, @Nonnull Object[] args, @Nonnull Throwable cause) {
+        return new IllegalStateException(
+                of(args).map(v -> v == null ? "*" : v.getClass().getName()).collect(joining(",", method + "(", ")")),
+                cause
+        );
     }
 }

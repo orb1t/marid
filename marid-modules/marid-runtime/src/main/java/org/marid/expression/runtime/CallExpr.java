@@ -22,26 +22,24 @@
 package org.marid.expression.runtime;
 
 import org.marid.expression.generic.CallExpression;
-import org.marid.misc.Calls;
 import org.marid.runtime.context.BeanContext;
 import org.marid.runtime.context.MaridRuntimeUtils;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.marid.io.Xmls.*;
+import static org.marid.runtime.context.MaridRuntimeUtils.methodState;
 
 public final class CallExpr extends Expr implements CallExpression {
 
@@ -72,34 +70,27 @@ public final class CallExpr extends Expr implements CallExpression {
         final Object target = Objects.requireNonNull(getTarget().evaluate(self, context));
         final Class<?> targetClass = getTarget() instanceof ClassExpr ? (Class<?>) target : target.getClass();
         final Object[] args = getArgs().stream().map(a -> a.evaluate(self, context)).toArray();
-        final Supplier<NoSuchElementException> errorSupplier = () -> new NoSuchElementException(Stream.of(args)
-                .map(v -> v == null ? "*" : v.getClass().getName())
-                .collect(joining(",", "No such method " + getMethod() + "(", ")")));
-        final MethodHandle handle;
         if ("new".equals(getMethod())) {
-            handle = Stream.of(targetClass.getConstructors())
+            final Constructor<?> constructor = Stream.of(targetClass.getConstructors())
                     .filter(c -> MaridRuntimeUtils.compatible(c, args))
                     .findFirst()
-                    .map(c -> Calls.call(() -> MethodHandles.publicLookup().unreflectConstructor(c)))
-                    .orElseThrow(errorSupplier).asFixedArity();
+                    .orElseThrow(() -> methodState(getMethod(), args, new NoSuchElementException()));
+            try {
+                return constructor.newInstance(args);
+            } catch (ReflectiveOperationException x) {
+                throw methodState(getMethod(), args, x);
+            }
         } else {
-            handle = Stream.of(targetClass.getMethods())
+            final Method method = MaridRuntimeUtils.accessibleMethods(targetClass)
                     .filter(m -> m.getName().equals(getMethod()))
                     .filter(m -> MaridRuntimeUtils.compatible(m, args))
                     .findFirst()
-                    .map(m -> Calls.call(() -> {
-                        final MethodHandle h = MethodHandles.publicLookup().unreflect(m);
-                        return Modifier.isStatic(m.getModifiers()) ? h : h.bindTo(target);
-                    }))
-                    .orElseThrow(errorSupplier).asFixedArity();
-        }
-        final MethodHandle h = MethodHandles.explicitCastArguments(handle, handle.type().generic());
-        try {
-            return h.invokeWithArguments(args);
-        } catch (RuntimeException | Error x) {
-            throw x;
-        } catch (Throwable x) {
-            throw new IllegalStateException(x);
+                    .orElseThrow(() -> methodState(getMethod(), args, new NoSuchElementException()));
+            try {
+                return method.invoke(target, args);
+            } catch (ReflectiveOperationException x) {
+                throw methodState(getMethod(), args, x);
+            }
         }
     }
 

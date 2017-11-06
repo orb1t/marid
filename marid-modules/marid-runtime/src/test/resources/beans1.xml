@@ -65,4 +65,21 @@
             </call>
         </factory>
     </bean>
+
+    <bean name="b4">
+        <factory>
+            <call method="size">
+                <target>
+                    <call method="singletonList">
+                        <target>
+                            <class class="java.util.Collections"/>
+                        </target>
+                        <args>
+                            <const type="INT" value="1"/>
+                        </args>
+                    </call>
+                </target>
+            </call>
+        </factory>
+    </bean>
 </bean>

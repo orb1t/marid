@@ -86,6 +86,7 @@
                         <manifestFile>build/MANIFEST.MF</manifestFile>
                         <manifestEntries>
                             <JavaFX-Version>9.0</JavaFX-Version>
+                            <Automatic-Module-Name>marid.ide</Automatic-Module-Name>
                         </manifestEntries>
                     </archive>
                 </configuration>

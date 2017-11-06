@@ -23,6 +23,7 @@ package org.marid.expression.runtime;
 
 import org.marid.expression.generic.GetExpression;
 import org.marid.runtime.context.BeanContext;
+import org.marid.runtime.context.MaridRuntimeUtils;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
@@ -57,12 +58,10 @@ public final class GetExpr extends Expr implements GetExpression {
     protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
         final Object target = Objects.requireNonNull(getTarget().evaluate(self, context));
         final Class<?> targetClass = getTarget() instanceof ClassExpr ? (Class<?>) target : target.getClass();
-        final Field field;
-        try {
-            field = targetClass.getField(getField());
-        } catch (NoSuchFieldException x) {
-            throw new NoSuchElementException(getField());
-        }
+        final Field field = MaridRuntimeUtils.accessibleFields(targetClass)
+                .filter(f -> f.getName().equals(getField()))
+                .findFirst()
+                .orElseThrow(() -> new NoSuchElementException(getField()));
         try {
             return field.get(target);
         } catch (IllegalAccessException x) {
