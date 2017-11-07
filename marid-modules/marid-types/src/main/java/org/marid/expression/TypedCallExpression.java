@@ -60,14 +60,11 @@ public interface TypedCallExpression extends CallExpression, TypedExpression {
 						.orElse(WILDCARD);
 			} else { // static method
 				return TypeUtils.classType(targetType)
-						.flatMap(t -> {
-							final Class<?> targetClass = context.getRaw(t);
-							return Stream.of(targetClass.getMethods())
-									.filter(m -> m.getName().equals(getMethod()) && Modifier.isStatic(m.getModifiers()))
-									.filter(e -> TypeUtils.matches(this, e, owner, context))
-									.findFirst()
-									.map(m -> TypeUtils.type(m, getArgs(), owner, context));
-						})
+						.flatMap(t -> Stream.of(context.getRaw(t).getMethods())
+								.filter(m -> m.getName().equals(getMethod()) && Modifier.isStatic(m.getModifiers()))
+								.filter(e -> TypeUtils.matches(this, e, owner, context))
+								.findFirst()
+								.map(m -> TypeUtils.type(m, getArgs(), owner, context)))
 						.orElse(WILDCARD);
 			}
 		} else { // virtual method
