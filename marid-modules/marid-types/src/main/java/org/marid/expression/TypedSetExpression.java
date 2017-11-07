@@ -48,7 +48,7 @@ public interface TypedSetExpression extends SetExpression, TypedExpression {
 	@Nonnull
 	@Override
 	default Type resolve(@Nonnull Type type, @Nonnull TypeContext context) {
-		if (type instanceof Class<?>) {
+		if (type instanceof Class<?> || !(getTarget() instanceof TypedThisExpression)) {
 			return type;
 		} else {
 			return MaridRuntimeUtils.accessibleFields(context.getRaw(type))

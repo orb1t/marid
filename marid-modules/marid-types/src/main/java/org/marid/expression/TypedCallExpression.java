@@ -81,7 +81,7 @@ public interface TypedCallExpression extends CallExpression, TypedExpression {
 	@Nonnull
 	@Override
 	default Type resolve(@Nonnull Type type, @Nonnull TypeContext context) {
-		if (type instanceof Class<?>) {
+		if (type instanceof Class<?> || !(getTarget() instanceof TypedThisExpression)) {
 			return type;
 		} else {
 			final Type[] ats = getArgs().stream().map(a -> a.resolveType(type, context)).toArray(Type[]::new);
