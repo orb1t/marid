@@ -31,16 +31,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class JavaParsers {
 
-    @Bean
-    public PrettyPrinterConfiguration prettyPrinterConfiguration() {
-        return new PrettyPrinterConfiguration()
-                .setIndent("  ")
-                .setPrintComments(true)
-                .setEndOfLineCharacter("\n");
-    }
+	@Bean
+	public PrettyPrinterConfiguration prettyPrinterConfiguration() {
+		return new PrettyPrinterConfiguration()
+				.setIndent("  ")
+				.setPrintComments(true)
+				.setEndOfLineCharacter("\n");
+	}
 
-    @Bean
-    public PrettyPrinter prettyPrinter(PrettyPrinterConfiguration configuration) {
-        return new PrettyPrinter(configuration);
-    }
+	@Bean
+	public PrettyPrinter prettyPrinter(PrettyPrinterConfiguration configuration) {
+		return new PrettyPrinter(configuration);
+	}
 }

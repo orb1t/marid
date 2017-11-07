@@ -30,9 +30,9 @@ import java.lang.reflect.Type;
 
 public interface TypedThisExpression extends ThisExpression, TypedExpression {
 
-    @Nonnull
-    @Override
-    default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
-        return owner == null ? void.class : owner;
-    }
+	@Nonnull
+	@Override
+	default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
+		return owner == null ? void.class : owner;
+	}
 }

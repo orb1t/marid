@@ -29,42 +29,42 @@ import java.util.function.Consumer;
 
 public class BeanPreDestroyEvent extends MaridEvent {
 
-    @Nonnull
-    private final String name;
+	@Nonnull
+	private final String name;
 
-    @Nullable
-    private final Object bean;
+	@Nullable
+	private final Object bean;
 
-    @Nonnull
-    private final Consumer<Throwable> exceptionConsumer;
+	@Nonnull
+	private final Consumer<Throwable> exceptionConsumer;
 
-    public BeanPreDestroyEvent(@Nonnull MaridRuntime context,
-                               @Nonnull String name,
-                               @Nullable Object bean,
-                               @Nonnull Consumer<Throwable> exceptionConsumer) {
-        super(context);
-        this.name = name;
-        this.bean = bean;
-        this.exceptionConsumer = exceptionConsumer;
-    }
+	public BeanPreDestroyEvent(@Nonnull MaridRuntime context,
+														 @Nonnull String name,
+														 @Nullable Object bean,
+														 @Nonnull Consumer<Throwable> exceptionConsumer) {
+		super(context);
+		this.name = name;
+		this.bean = bean;
+		this.exceptionConsumer = exceptionConsumer;
+	}
 
-    @Nonnull
-    public String getName() {
-        return name;
-    }
+	@Nonnull
+	public String getName() {
+		return name;
+	}
 
-    @Nullable
-    public Object getBean() {
-        return bean;
-    }
+	@Nullable
+	public Object getBean() {
+		return bean;
+	}
 
-    @Nonnull
-    public Consumer<Throwable> getExceptionConsumer() {
-        return exceptionConsumer;
-    }
+	@Nonnull
+	public Consumer<Throwable> getExceptionConsumer() {
+		return exceptionConsumer;
+	}
 
-    @Override
-    public String toString() {
-        return super.toString() + "(" + name + ")";
-    }
+	@Override
+	public String toString() {
+		return super.toString() + "(" + name + ")";
+	}
 }

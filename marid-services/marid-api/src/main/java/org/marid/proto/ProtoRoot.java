@@ -30,18 +30,18 @@ import java.util.Map;
  */
 public interface ProtoRoot extends Proto, Closeable {
 
-    @Override
-    default Proto getParent() {
-        return null;
-    }
+	@Override
+	default Proto getParent() {
+		return null;
+	}
 
-    Map<String, ? extends ProtoBus> getItems();
+	Map<String, ? extends ProtoBus> getItems();
 
-    @Override
-    default void close() throws IOException {
-        final IOException exception = Proto.close(getItems());
-        if (exception.getSuppressed().length > 0) {
-            throw exception;
-        }
-    }
+	@Override
+	default void close() throws IOException {
+		final IOException exception = Proto.close(getItems());
+		if (exception.getSuppressed().length > 0) {
+			throw exception;
+		}
+	}
 }

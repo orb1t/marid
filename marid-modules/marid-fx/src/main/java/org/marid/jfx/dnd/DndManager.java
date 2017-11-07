@@ -28,21 +28,21 @@ import java.lang.ref.WeakReference;
 
 public class DndManager {
 
-    private WeakReference<Dragboard> dragboardRef;
+	private WeakReference<Dragboard> dragboardRef;
 
-    public Clipboard clipboard() {
-        final WeakReference<Dragboard> ref = dragboardRef;
-        if (ref == null) {
-            return Clipboard.getSystemClipboard();
-        }
-        final Dragboard dragboard = ref.get();
-        if (dragboard == null) {
-            return Clipboard.getSystemClipboard();
-        }
-        return dragboard;
-    }
+	public Clipboard clipboard() {
+		final WeakReference<Dragboard> ref = dragboardRef;
+		if (ref == null) {
+			return Clipboard.getSystemClipboard();
+		}
+		final Dragboard dragboard = ref.get();
+		if (dragboard == null) {
+			return Clipboard.getSystemClipboard();
+		}
+		return dragboard;
+	}
 
-    public void updateDragboard(Dragboard dragboard) {
-        dragboardRef = new WeakReference<>(dragboard);
-    }
+	public void updateDragboard(Dragboard dragboard) {
+		dragboardRef = new WeakReference<>(dragboard);
+	}
 }

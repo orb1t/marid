@@ -28,30 +28,30 @@ import javax.annotation.Nullable;
 
 public final class BeanPostConstructEvent extends MaridEvent {
 
-    @Nonnull
-    private final String name;
+	@Nonnull
+	private final String name;
 
-    @Nullable
-    private final Object bean;
+	@Nullable
+	private final Object bean;
 
-    public BeanPostConstructEvent(@Nonnull MaridRuntime context, @Nonnull String name, @Nullable Object bean) {
-        super(context);
-        this.name = name;
-        this.bean = bean;
-    }
+	public BeanPostConstructEvent(@Nonnull MaridRuntime context, @Nonnull String name, @Nullable Object bean) {
+		super(context);
+		this.name = name;
+		this.bean = bean;
+	}
 
-    @Nonnull
-    public String getName() {
-        return name;
-    }
+	@Nonnull
+	public String getName() {
+		return name;
+	}
 
-    @Nullable
-    public Object getBean() {
-        return bean;
-    }
+	@Nullable
+	public Object getBean() {
+		return bean;
+	}
 
-    @Override
-    public String toString() {
-        return super.toString() + "(" + name + ")";
-    }
+	@Override
+	public String toString() {
+		return super.toString() + "(" + name + ")";
+	}
 }

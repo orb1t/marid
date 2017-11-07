@@ -34,38 +34,38 @@ import java.io.OutputStream;
  */
 public class HalfDuplexProtoIO implements ProtoIO {
 
-    private final ProtoIO delegate;
+	private final ProtoIO delegate;
 
-    public HalfDuplexProtoIO(ProtoIO delegate) {
-        this.delegate = delegate;
-    }
+	public HalfDuplexProtoIO(ProtoIO delegate) {
+		this.delegate = delegate;
+	}
 
-    @Override
-    public InputStream getInputStream() {
-        return delegate.getInputStream();
-    }
+	@Override
+	public InputStream getInputStream() {
+		return delegate.getInputStream();
+	}
 
-    @Override
-    public OutputStream getOutputStream() {
-        return delegate.getOutputStream();
-    }
+	@Override
+	public OutputStream getOutputStream() {
+		return delegate.getOutputStream();
+	}
 
-    @Override
-    public void doWith(IOBiConsumer<InputStream, OutputStream> consumer) throws IOException {
-        synchronized (delegate) {
-            ProtoIO.super.doWith(consumer);
-        }
-    }
+	@Override
+	public void doWith(IOBiConsumer<InputStream, OutputStream> consumer) throws IOException {
+		synchronized (delegate) {
+			ProtoIO.super.doWith(consumer);
+		}
+	}
 
-    @Override
-    public <T> T call(IOBiFunction<InputStream, OutputStream, T> function) throws IOException {
-        synchronized (delegate) {
-            return ProtoIO.super.call(function);
-        }
-    }
+	@Override
+	public <T> T call(IOBiFunction<InputStream, OutputStream, T> function) throws IOException {
+		synchronized (delegate) {
+			return ProtoIO.super.call(function);
+		}
+	}
 
-    @Override
-    public void close() throws IOException {
-        delegate.close();
-    }
+	@Override
+	public void close() throws IOException {
+		delegate.close();
+	}
 }

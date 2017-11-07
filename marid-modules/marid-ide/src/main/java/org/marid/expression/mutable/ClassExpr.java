@@ -31,28 +31,28 @@ import static org.marid.io.Xmls.attribute;
 
 public class ClassExpr extends Expr implements TypedClassExpression {
 
-    public final StringProperty className;
+	public final StringProperty className;
 
-    public ClassExpr(@Nonnull String className) {
-        this.className = new SimpleStringProperty(className);
-    }
+	public ClassExpr(@Nonnull String className) {
+		this.className = new SimpleStringProperty(className);
+	}
 
-    ClassExpr(@Nonnull Element element) {
-        super(element);
-        this.className = new SimpleStringProperty(
-                attribute(element, "class").orElseThrow(() -> new NullPointerException("class"))
-        );
-    }
+	ClassExpr(@Nonnull Element element) {
+		super(element);
+		this.className = new SimpleStringProperty(
+				attribute(element, "class").orElseThrow(() -> new NullPointerException("class"))
+		);
+	}
 
-    @Nonnull
-    @Override
-    public String getClassName() {
-        return className.get();
-    }
+	@Nonnull
+	@Override
+	public String getClassName() {
+		return className.get();
+	}
 
-    @Override
-    public void writeTo(@Nonnull Element element) {
-        super.writeTo(element);
-        element.setAttribute("class", getClassName());
-    }
+	@Override
+	public void writeTo(@Nonnull Element element) {
+		super.writeTo(element);
+		element.setAttribute("class", getClassName());
+	}
 }

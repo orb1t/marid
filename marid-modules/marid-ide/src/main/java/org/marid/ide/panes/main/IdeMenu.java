@@ -38,16 +38,16 @@ import java.util.function.Supplier;
 @Component
 public class IdeMenu extends MenuBar {
 
-    private final Supplier<List<FxAction>> actionFactory;
+	private final Supplier<List<FxAction>> actionFactory;
 
-    @Autowired
-    public IdeMenu(@IdeAction Supplier<List<FxAction>> actionFactory) {
-        this.actionFactory = actionFactory;
-        setUseSystemMenuBar(true);
-    }
+	@Autowired
+	public IdeMenu(@IdeAction Supplier<List<FxAction>> actionFactory) {
+		this.actionFactory = actionFactory;
+		setUseSystemMenuBar(true);
+	}
 
-    @EventListener
-    private void onIdeStart(ContextStartedEvent event) {
-        getMenus().setAll(MaridActions.menus(actionFactory.get()));
-    }
+	@EventListener
+	private void onIdeStart(ContextStartedEvent event) {
+		getMenus().setAll(MaridActions.menus(actionFactory.get()));
+	}
 }

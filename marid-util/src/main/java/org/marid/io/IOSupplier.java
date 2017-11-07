@@ -31,14 +31,14 @@ import java.util.function.Supplier;
 @FunctionalInterface
 public interface IOSupplier<T> extends Supplier<T> {
 
-    @Override
-    default T get() throws UncheckedIOException {
-        try {
-            return ioGet();
-        } catch (IOException x) {
-            throw new UncheckedIOException(x);
-        }
-    }
+	@Override
+	default T get() throws UncheckedIOException {
+		try {
+			return ioGet();
+		} catch (IOException x) {
+			throw new UncheckedIOException(x);
+		}
+	}
 
-    T ioGet() throws IOException;
+	T ioGet() throws IOException;
 }

@@ -27,12 +27,12 @@ import java.nio.file.Path;
  */
 public class TextFileRemovedEvent extends PropagatedEvent {
 
-    public TextFileRemovedEvent(Path source) {
-        super(source);
-    }
+	public TextFileRemovedEvent(Path source) {
+		super(source);
+	}
 
-    @Override
-    public Path getSource() {
-        return (Path) super.getSource();
-    }
+	@Override
+	public Path getSource() {
+		return (Path) super.getSource();
+	}
 }

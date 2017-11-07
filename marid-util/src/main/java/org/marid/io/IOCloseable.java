@@ -31,11 +31,11 @@ import java.io.UncheckedIOException;
 @FunctionalInterface
 public interface IOCloseable extends Closeable {
 
-    default void closeSafely() throws UncheckedIOException {
-        try {
-            close();
-        } catch (IOException x) {
-            throw new UncheckedIOException(x);
-        }
-    }
+	default void closeSafely() throws UncheckedIOException {
+		try {
+			close();
+		} catch (IOException x) {
+			throw new UncheckedIOException(x);
+		}
+	}
 }

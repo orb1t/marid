@@ -31,24 +31,24 @@ import org.springframework.stereotype.Component;
 @Component
 public class MavenTab extends GenericGridPane implements SettingsEditor {
 
-    private final MavenSettings pref;
+	private final MavenSettings pref;
 
-    @Autowired
-    public MavenTab(MavenSettings pref) {
-        this.pref = pref;
-        addTextField("Releases update policy by default", pref.releaseUpdatePolicy);
-        addTextField("Snapshot update policy by default", pref.snapshotUpdatePolicy);
-        addSeparator();
-        addTextField("Dependency plugin version", pref.dependencyPluginVersion);
-        addTextField("Compiler plugin version", pref.compilerPluginVersion);
-        addTextField("JAR plugin version", pref.jarPluginVersion);
-        addTextField("Resources plugin version", pref.resourcesPluginVersion);
-        addSeparator();
-        addTextField("Exec plugin version", pref.execPluginVersion);
-    }
+	@Autowired
+	public MavenTab(MavenSettings pref) {
+		this.pref = pref;
+		addTextField("Releases update policy by default", pref.releaseUpdatePolicy);
+		addTextField("Snapshot update policy by default", pref.snapshotUpdatePolicy);
+		addSeparator();
+		addTextField("Dependency plugin version", pref.dependencyPluginVersion);
+		addTextField("Compiler plugin version", pref.compilerPluginVersion);
+		addTextField("JAR plugin version", pref.jarPluginVersion);
+		addTextField("Resources plugin version", pref.resourcesPluginVersion);
+		addSeparator();
+		addTextField("Exec plugin version", pref.execPluginVersion);
+	}
 
-    @Override
-    public MavenSettings getSettings() {
-        return pref;
-    }
+	@Override
+	public MavenSettings getSettings() {
+		return pref;
+	}
 }

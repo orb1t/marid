@@ -42,48 +42,48 @@ import static java.lang.Math.min;
  */
 public class IdeTaskBar extends BorderPane {
 
-    public IdeTaskBar(HBox taskBox) {
-        final ScrollPane scrollPane = new ScrollPane(taskBox);
-        setCenter(scrollPane);
+	public IdeTaskBar(HBox taskBox) {
+		final ScrollPane scrollPane = new ScrollPane(taskBox);
+		setCenter(scrollPane);
 
-        scrollPane.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, null, null)));
-        scrollPane.setFitToWidth(false);
-        scrollPane.setFitToHeight(true);
-        scrollPane.setPannable(true);
-        scrollPane.setVbarPolicy(ScrollBarPolicy.NEVER);
-        scrollPane.setHbarPolicy(ScrollBarPolicy.NEVER);
+		scrollPane.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, null, null)));
+		scrollPane.setFitToWidth(false);
+		scrollPane.setFitToHeight(true);
+		scrollPane.setPannable(true);
+		scrollPane.setVbarPolicy(ScrollBarPolicy.NEVER);
+		scrollPane.setHbarPolicy(ScrollBarPolicy.NEVER);
 
-        taskBox.setFillHeight(true);
-        taskBox.setAlignment(Pos.CENTER_LEFT);
+		taskBox.setFillHeight(true);
+		taskBox.setAlignment(Pos.CENTER_LEFT);
 
-        final Button left = new Button(null, FontIcons.glyphIcon("D_ARROW_LEFT_BOLD", 20));
-        left.disableProperty().bind(scrollPane.hvalueProperty().lessThanOrEqualTo(0.0001));
-        final InvalidationListener lChange = o -> {
-            final boolean update = taskBox.getWidth() > scrollPane.getWidth();
-            Platform.runLater(() -> setLeft(update ? left : null));
-        };
-        scrollPane.widthProperty().addListener(lChange);
-        taskBox.widthProperty().addListener(lChange);
-        setAlignment(left, Pos.CENTER_LEFT);
-        setMargin(left, new Insets(0, 5, 0, 5));
-        left.setOnAction(event -> {
-            final double step = scrollPane.getWidth() / (taskBox.getWidth() * 2);
-            scrollPane.setHvalue(max(0.0, scrollPane.getHvalue() - step));
-        });
+		final Button left = new Button(null, FontIcons.glyphIcon("D_ARROW_LEFT_BOLD", 20));
+		left.disableProperty().bind(scrollPane.hvalueProperty().lessThanOrEqualTo(0.0001));
+		final InvalidationListener lChange = o -> {
+			final boolean update = taskBox.getWidth() > scrollPane.getWidth();
+			Platform.runLater(() -> setLeft(update ? left : null));
+		};
+		scrollPane.widthProperty().addListener(lChange);
+		taskBox.widthProperty().addListener(lChange);
+		setAlignment(left, Pos.CENTER_LEFT);
+		setMargin(left, new Insets(0, 5, 0, 5));
+		left.setOnAction(event -> {
+			final double step = scrollPane.getWidth() / (taskBox.getWidth() * 2);
+			scrollPane.setHvalue(max(0.0, scrollPane.getHvalue() - step));
+		});
 
-        final Button right = new Button(null, FontIcons.glyphIcon("D_ARROW_RIGHT_BOLD", 20));
-        right.disableProperty().bind(scrollPane.hvalueProperty().greaterThan(0.9999));
-        final InvalidationListener rChange = o -> {
-            final boolean update = taskBox.getWidth() > scrollPane.getWidth();
-            Platform.runLater(() -> setRight(update ? right : null));
-        };
-        scrollPane.widthProperty().addListener(rChange);
-        taskBox.widthProperty().addListener(rChange);
-        setAlignment(right, Pos.CENTER_LEFT);
-        setMargin(right, new Insets(0, 5, 0, 5));
-        right.setOnAction(event -> {
-            final double step = scrollPane.getWidth() / (taskBox.getWidth() * 2);
-            scrollPane.setHvalue(min(1.0, scrollPane.getHvalue() + step));
-        });
-    }
+		final Button right = new Button(null, FontIcons.glyphIcon("D_ARROW_RIGHT_BOLD", 20));
+		right.disableProperty().bind(scrollPane.hvalueProperty().greaterThan(0.9999));
+		final InvalidationListener rChange = o -> {
+			final boolean update = taskBox.getWidth() > scrollPane.getWidth();
+			Platform.runLater(() -> setRight(update ? right : null));
+		};
+		scrollPane.widthProperty().addListener(rChange);
+		taskBox.widthProperty().addListener(rChange);
+		setAlignment(right, Pos.CENTER_LEFT);
+		setMargin(right, new Insets(0, 5, 0, 5));
+		right.setOnAction(event -> {
+			final double step = scrollPane.getWidth() / (taskBox.getWidth() * 2);
+			scrollPane.setHvalue(min(1.0, scrollPane.getHvalue() + step));
+		});
+	}
 }

@@ -31,29 +31,29 @@ import static org.marid.io.Xmls.attribute;
 
 public class ConstExpr extends ValueExpr implements TypedConstExpression {
 
-    public final ObjectProperty<ConstantType> type;
+	public final ObjectProperty<ConstantType> type;
 
-    public ConstExpr(@Nonnull ConstantType type, @Nonnull String value) {
-        super(value);
-        this.type = new SimpleObjectProperty<>(type);
-    }
+	public ConstExpr(@Nonnull ConstantType type, @Nonnull String value) {
+		super(value);
+		this.type = new SimpleObjectProperty<>(type);
+	}
 
-    ConstExpr(@Nonnull Element element) {
-        super(element);
-        this.type = new SimpleObjectProperty<>(
-                attribute(element, "type").map(ConstantType::valueOf).orElseThrow(() -> new NullPointerException("type"))
-        );
-    }
+	ConstExpr(@Nonnull Element element) {
+		super(element);
+		this.type = new SimpleObjectProperty<>(
+				attribute(element, "type").map(ConstantType::valueOf).orElseThrow(() -> new NullPointerException("type"))
+		);
+	}
 
-    @Nonnull
-    @Override
-    public ConstantType getType() {
-        return type.get();
-    }
+	@Nonnull
+	@Override
+	public ConstantType getType() {
+		return type.get();
+	}
 
-    @Override
-    public void writeTo(@Nonnull Element element) {
-        super.writeTo(element);
-        element.setAttribute("type", getType().name());
-    }
+	@Override
+	public void writeTo(@Nonnull Element element) {
+		super.writeTo(element);
+		element.setAttribute("type", getType().name());
+	}
 }

@@ -39,5 +39,5 @@ import static org.springframework.beans.factory.config.ConfigurableBeanFactory.S
 @Component
 public @interface PrototypeComponent {
 
-    String value() default "";
+	String value() default "";
 }

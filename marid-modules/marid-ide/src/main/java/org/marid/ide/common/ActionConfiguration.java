@@ -43,22 +43,22 @@ import java.util.stream.StreamSupport;
 @Component
 public class ActionConfiguration {
 
-    @IdeAction
-    public Supplier<List<FxAction>> ideActions(@IdeAction ObjectFactory<List<FxAction>> actions,
-                                               @IdeAction ObjectFactory<List<Spliterator<FxAction>>> actionQueues) {
-        return () -> Stream.concat(
-                actions.getObject().stream(),
-                actionQueues.getObject().stream().flatMap(s -> StreamSupport.stream(s, false))
-        ).collect(Collectors.toList());
-    }
+	@IdeAction
+	public Supplier<List<FxAction>> ideActions(@IdeAction ObjectFactory<List<FxAction>> actions,
+																						 @IdeAction ObjectFactory<List<Spliterator<FxAction>>> actionQueues) {
+		return () -> Stream.concat(
+				actions.getObject().stream(),
+				actionQueues.getObject().stream().flatMap(s -> StreamSupport.stream(s, false))
+		).collect(Collectors.toList());
+	}
 
-    @Bean
-    public PeriodicObservable bySeconds(ScheduledThreadPoolExecutor scheduledExecutorService) {
-        return new PeriodicObservable(scheduledExecutorService, 1L, TimeUnit.SECONDS);
-    }
+	@Bean
+	public PeriodicObservable bySeconds(ScheduledThreadPoolExecutor scheduledExecutorService) {
+		return new PeriodicObservable(scheduledExecutorService, 1L, TimeUnit.SECONDS);
+	}
 
-    @Bean
-    public DndManager dndManager() {
-        return new DndManager();
-    }
+	@Bean
+	public DndManager dndManager() {
+		return new DndManager();
+	}
 }

@@ -29,7 +29,7 @@ import static java.util.prefs.Preferences.userNodeForPackage;
  */
 public abstract class AbstractSettings {
 
-    protected final Preferences preferences = userNodeForPackage(getClass()).node(getClass().getName()).node(getName());
+	protected final Preferences preferences = userNodeForPackage(getClass()).node(getClass().getName()).node(getName());
 
-    public abstract String getName();
+	public abstract String getName();
 }

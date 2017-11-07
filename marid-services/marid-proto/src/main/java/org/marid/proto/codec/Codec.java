@@ -26,7 +26,7 @@ package org.marid.proto.codec;
  */
 public interface Codec<T> {
 
-    T decode(byte[] data);
+	T decode(byte[] data);
 
-    byte[] encode(T data);
+	byte[] encode(T data);
 }

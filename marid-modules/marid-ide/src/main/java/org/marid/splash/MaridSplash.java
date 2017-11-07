@@ -57,104 +57,104 @@ import static org.marid.l10n.L10n.m;
  */
 public class MaridSplash extends BorderPane implements AutoCloseable {
 
-    private static final Color BACKGROUND = Color.DIMGRAY.darker().darker();
+	private static final Color BACKGROUND = Color.DIMGRAY.darker().darker();
 
-    private final ObservableList<LogRecord> records;
-    private final ListChangeListener<LogRecord> listener;
-    private final RotateTransition transition;
-    private final AtomicInteger counter = new AtomicInteger(1);
-    private final int maxCount;
-    private final Font monospaced;
-    private final TextFlow flow;
+	private final ObservableList<LogRecord> records;
+	private final ListChangeListener<LogRecord> listener;
+	private final RotateTransition transition;
+	private final AtomicInteger counter = new AtomicInteger(1);
+	private final int maxCount;
+	private final Font monospaced;
+	private final TextFlow flow;
 
-    public MaridSplash(Stage stage, ObservableList<LogRecord> logRecords) {
-        stage.setOnShown(event -> {
-            close();
-            stage.setOnShown(null);
-        });
-        records = logRecords;
-        maxCount = IdePrefs.PREFERENCES.getInt("splashMaxLogRecords", 100);
-        setBackground(new Background(new BackgroundFill(BACKGROUND, null, null)));
-        setBorder(new Border(new BorderStroke(GRAY, SOLID, null, new BorderWidths(3))));
-        setCacheHint(CacheHint.SPEED);
+	public MaridSplash(Stage stage, ObservableList<LogRecord> logRecords) {
+		stage.setOnShown(event -> {
+			close();
+			stage.setOnShown(null);
+		});
+		records = logRecords;
+		maxCount = IdePrefs.PREFERENCES.getInt("splashMaxLogRecords", 100);
+		setBackground(new Background(new BackgroundFill(BACKGROUND, null, null)));
+		setBorder(new Border(new BorderStroke(GRAY, SOLID, null, new BorderWidths(3))));
+		setCacheHint(CacheHint.SPEED);
 
-        final ImageView image = new ImageView(MaridIconFx.getImage(32, Color.GREEN));
-        image.setCacheHint(CacheHint.SPEED);
-        image.setClip(new Circle(16, 16, 16));
+		final ImageView image = new ImageView(MaridIconFx.getImage(32, Color.GREEN));
+		image.setCacheHint(CacheHint.SPEED);
+		image.setClip(new Circle(16, 16, 16));
 
-        final Label title = new Label("Marid IDE", image);
-        title.setPadding(new Insets(16));
-        title.setGraphicTextGap(10);
-        title.setPrefWidth(800);
-        title.setTextFill(Color.WHITE);
-        title.setFont(Font.font("System", FontWeight.BOLD, 24));
-        title.setEffect(new MotionBlur(30, 2));
+		final Label title = new Label("Marid IDE", image);
+		title.setPadding(new Insets(16));
+		title.setGraphicTextGap(10);
+		title.setPrefWidth(800);
+		title.setTextFill(Color.WHITE);
+		title.setFont(Font.font("System", FontWeight.BOLD, 24));
+		title.setEffect(new MotionBlur(30, 2));
 
-        setTop(title);
+		setTop(title);
 
-        transition = new RotateTransition(Duration.millis(1000), image);
-        transition.setFromAngle(0);
-        transition.setToAngle(359);
-        transition.setCycleCount(Animation.INDEFINITE);
+		transition = new RotateTransition(Duration.millis(1000), image);
+		transition.setFromAngle(0);
+		transition.setToAngle(359);
+		transition.setCycleCount(Animation.INDEFINITE);
 
-        final Color background = Color.DARKGRAY.deriveColor(1, 1, 0.2, 1);
-        flow = new TextFlow();
-        flow.setBackground(new Background(new BackgroundFill(background, null, null)));
-        flow.setPrefHeight(400);
-        flow.setLineSpacing(4);
+		final Color background = Color.DARKGRAY.deriveColor(1, 1, 0.2, 1);
+		flow = new TextFlow();
+		flow.setBackground(new Background(new BackgroundFill(background, null, null)));
+		flow.setPrefHeight(400);
+		flow.setLineSpacing(4);
 
-        final ScrollPane scrollPane = new ScrollPane(flow);
-        scrollPane.setPadding(new Insets(10));
-        scrollPane.setFitToHeight(true);
-        scrollPane.setFitToWidth(true);
-        scrollPane.setBackground(new Background(new BackgroundFill(background, null, null)));
-        scrollPane.setHbarPolicy(ScrollBarPolicy.NEVER);
-        scrollPane.setVbarPolicy(ScrollBarPolicy.NEVER);
-        scrollPane.setEffect(new MotionBlur(30, 2));
+		final ScrollPane scrollPane = new ScrollPane(flow);
+		scrollPane.setPadding(new Insets(10));
+		scrollPane.setFitToHeight(true);
+		scrollPane.setFitToWidth(true);
+		scrollPane.setBackground(new Background(new BackgroundFill(background, null, null)));
+		scrollPane.setHbarPolicy(ScrollBarPolicy.NEVER);
+		scrollPane.setVbarPolicy(ScrollBarPolicy.NEVER);
+		scrollPane.setEffect(new MotionBlur(30, 2));
 
-        final StackPane group = new StackPane(scrollPane);
-        group.setPadding(new Insets(0, 16, 0, 16));
+		final StackPane group = new StackPane(scrollPane);
+		group.setPadding(new Insets(0, 16, 0, 16));
 
-        setCenter(group);
+		setCenter(group);
 
-        final ProgressBar progressBar = new ProgressBar();
-        progressBar.setMaxWidth(Double.MAX_VALUE);
-        progressBar.setPadding(new Insets(16));
-        progressBar.setBackground(new Background(new BackgroundFill(BACKGROUND, null, null)));
-        setBottom(progressBar);
+		final ProgressBar progressBar = new ProgressBar();
+		progressBar.setMaxWidth(Double.MAX_VALUE);
+		progressBar.setPadding(new Insets(16));
+		progressBar.setBackground(new Background(new BackgroundFill(BACKGROUND, null, null)));
+		setBottom(progressBar);
 
-        monospaced = Font.font("Monospaced", FontWeight.NORMAL, 10);
-        listener = c -> {
-            progressBar.setProgress(Math.min(counter.getAndIncrement() / (double) maxCount, 1.0));
-            while (c.next()) {
-                if (c.wasAdded()) {
-                    if (!c.getAddedSubList().isEmpty()) {
-                        flow.getChildren().addAll(texts(c.getAddedSubList()));
-                        flow.layout();
-                        scrollPane.setVvalue(1.0);
-                    }
-                }
-            }
-        };
+		monospaced = Font.font("Monospaced", FontWeight.NORMAL, 10);
+		listener = c -> {
+			progressBar.setProgress(Math.min(counter.getAndIncrement() / (double) maxCount, 1.0));
+			while (c.next()) {
+				if (c.wasAdded()) {
+					if (!c.getAddedSubList().isEmpty()) {
+						flow.getChildren().addAll(texts(c.getAddedSubList()));
+						flow.layout();
+						scrollPane.setVvalue(1.0);
+					}
+				}
+			}
+		};
 
-        flow.getChildren().addAll(texts(records));
-        records.addListener(listener);
-        transition.play();
-    }
+		flow.getChildren().addAll(texts(records));
+		records.addListener(listener);
+		transition.play();
+	}
 
-    private Text[] texts(List<? extends LogRecord> logRecords) {
-        return logRecords.parallelStream()
-                .map(r -> new Text(m(r.getMessage(), r.getParameters()) + System.lineSeparator()))
-                .peek(t -> t.setFont(monospaced))
-                .peek(t -> t.setFill(Color.LIGHTGREEN))
-                .toArray(Text[]::new);
-    }
+	private Text[] texts(List<? extends LogRecord> logRecords) {
+		return logRecords.parallelStream()
+				.map(r -> new Text(m(r.getMessage(), r.getParameters()) + System.lineSeparator()))
+				.peek(t -> t.setFont(monospaced))
+				.peek(t -> t.setFill(Color.LIGHTGREEN))
+				.toArray(Text[]::new);
+	}
 
-    @Override
-    public void close() {
-        IdePrefs.PREFERENCES.putInt("splashMaxLogRecords", Math.max(counter.get(), 100));
-        transition.stop();
-        records.removeListener(listener);
-        getScene().getWindow().hide();
-    }
+	@Override
+	public void close() {
+		IdePrefs.PREFERENCES.putInt("splashMaxLogRecords", Math.max(counter.get(), 100));
+		transition.stop();
+		records.removeListener(listener);
+		getScene().getWindow().hide();
+	}
 }

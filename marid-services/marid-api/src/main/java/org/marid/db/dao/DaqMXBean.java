@@ -26,9 +26,10 @@ package org.marid.db.dao;
  */
 public interface DaqMXBean {
 
-    /**
-     * Get record count.
-     * @return Record count.
-     */
-    long getRecordCount();
+	/**
+	 * Get record count.
+	 *
+	 * @return Record count.
+	 */
+	long getRecordCount();
 }

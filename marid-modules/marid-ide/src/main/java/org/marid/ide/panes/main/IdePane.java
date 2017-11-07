@@ -33,18 +33,18 @@ import org.springframework.stereotype.Component;
 @Lazy(false)
 public class IdePane extends BorderPane {
 
-    @Autowired
-    private void center(IdeMainPane pane) {
-        setCenter(pane);
-    }
+	@Autowired
+	private void center(IdeMainPane pane) {
+		setCenter(pane);
+	}
 
-    @Autowired
-    private void top(IdeMenu ideMenu) {
-        setTop(ideMenu);
-    }
+	@Autowired
+	private void top(IdeMenu ideMenu) {
+		setTop(ideMenu);
+	}
 
-    @Autowired
-    private void bottom(IdeStatusBar statusBar) {
-        setBottom(statusBar);
-    }
+	@Autowired
+	private void bottom(IdeStatusBar statusBar) {
+		setBottom(statusBar);
+	}
 }

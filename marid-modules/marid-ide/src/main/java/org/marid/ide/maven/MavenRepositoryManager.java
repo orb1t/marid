@@ -38,22 +38,22 @@ import java.util.stream.Stream;
 @Lazy(false)
 public class MavenRepositoryManager implements AutoCloseable {
 
-    @Autowired
-    public MavenRepositoryManager(MavenRepositories repositories) throws Exception {
-    }
+	@Autowired
+	public MavenRepositoryManager(MavenRepositories repositories) throws Exception {
+	}
 
-    @IdeAction
-    public Spliterator<FxAction> repositoryActions() {
-        final LinkedList<FxAction> list = new LinkedList<>();
-        return list.spliterator();
-    }
+	@IdeAction
+	public Spliterator<FxAction> repositoryActions() {
+		final LinkedList<FxAction> list = new LinkedList<>();
+		return list.spliterator();
+	}
 
-    public Stream<MavenArtifact> getMaridArtifacts(String group) {
-        return Stream.empty();
-    }
+	public Stream<MavenArtifact> getMaridArtifacts(String group) {
+		return Stream.empty();
+	}
 
-    @Override
-    public void close() throws Exception {
+	@Override
+	public void close() throws Exception {
 
-    }
+	}
 }

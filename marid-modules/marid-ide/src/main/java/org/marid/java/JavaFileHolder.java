@@ -49,62 +49,62 @@ import static org.marid.logging.Log.log;
 @Component
 public class JavaFileHolder {
 
-    private final TextFile javaFile;
-    private final PrettyPrinter prettyPrinter;
-    private final ObjectProperty<CompilationUnit> compilationUnit = new SimpleObjectProperty<>();
-    private final ObjectProperty<ClassOrInterfaceDeclaration> type = new SimpleObjectProperty<>();
+	private final TextFile javaFile;
+	private final PrettyPrinter prettyPrinter;
+	private final ObjectProperty<CompilationUnit> compilationUnit = new SimpleObjectProperty<>();
+	private final ObjectProperty<ClassOrInterfaceDeclaration> type = new SimpleObjectProperty<>();
 
-    @Autowired
-    public JavaFileHolder(TextFile javaFile, PrettyPrinter prettyPrinter) {
-        this.javaFile = javaFile;
-        this.prettyPrinter = prettyPrinter;
-    }
+	@Autowired
+	public JavaFileHolder(TextFile javaFile, PrettyPrinter prettyPrinter) {
+		this.javaFile = javaFile;
+		this.prettyPrinter = prettyPrinter;
+	}
 
-    public ObjectProperty<CompilationUnit> compilationUnitProperty() {
-        return compilationUnit;
-    }
+	public ObjectProperty<CompilationUnit> compilationUnitProperty() {
+		return compilationUnit;
+	}
 
-    public CompilationUnit getCompilationUnit() {
-        return compilationUnit.get();
-    }
+	public CompilationUnit getCompilationUnit() {
+		return compilationUnit.get();
+	}
 
-    public ClassOrInterfaceDeclaration getType() {
-        return type.get();
-    }
+	public ClassOrInterfaceDeclaration getType() {
+		return type.get();
+	}
 
-    @PostConstruct
-    public void update() {
-        try {
-            compilationUnit.set(JavaParser.parse(javaFile.getPath(), UTF_8));
-            type.set(compilationUnit.get().getTypes().stream()
-                .filter(ClassOrInterfaceDeclaration.class::isInstance)
-                .map(ClassOrInterfaceDeclaration.class::cast)
-                .findFirst()
-                .orElse(null));
-            log(INFO, "Updated {0}", javaFile);
-        } catch (Exception x) {
-            log(WARNING, "Unable to parse {0}", x, javaFile);
-        }
-    }
+	@PostConstruct
+	public void update() {
+		try {
+			compilationUnit.set(JavaParser.parse(javaFile.getPath(), UTF_8));
+			type.set(compilationUnit.get().getTypes().stream()
+					.filter(ClassOrInterfaceDeclaration.class::isInstance)
+					.map(ClassOrInterfaceDeclaration.class::cast)
+					.findFirst()
+					.orElse(null));
+			log(INFO, "Updated {0}", javaFile);
+		} catch (Exception x) {
+			log(WARNING, "Unable to parse {0}", x, javaFile);
+		}
+	}
 
-    public void save() {
-        try {
-            Files.write(javaFile.getPath(), prettyPrinter.print(getCompilationUnit()).getBytes(UTF_8));
-        } catch (IOException x) {
-            log(WARNING, "Unable to save {0}", x, javaFile);
-        }
-    }
+	public void save() {
+		try {
+			Files.write(javaFile.getPath(), prettyPrinter.print(getCompilationUnit()).getBytes(UTF_8));
+		} catch (IOException x) {
+			log(WARNING, "Unable to save {0}", x, javaFile);
+		}
+	}
 
-    @EventListener(condition = "@javaFile.path.equals(#event.source)")
-    public void onMove(TextFileMovedEvent event) {
-        Platform.runLater(() -> {
-            javaFile.setPath(event.getTarget());
-            update();
-        });
-    }
+	@EventListener(condition = "@javaFile.path.equals(#event.source)")
+	public void onMove(TextFileMovedEvent event) {
+		Platform.runLater(() -> {
+			javaFile.setPath(event.getTarget());
+			update();
+		});
+	}
 
-    @EventListener(condition = "@javaFile.path.equals(#event.source)")
-    public void onChange(TextFileChangedEvent event) {
-        Platform.runLater(this::update);
-    }
+	@EventListener(condition = "@javaFile.path.equals(#event.source)")
+	public void onChange(TextFileChangedEvent event) {
+		Platform.runLater(this::update);
+	}
 }

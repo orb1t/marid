@@ -39,30 +39,30 @@ import java.nio.file.Path;
 @Configuration
 class HsqldbDatabaseTestConf {
 
-    @Bean
-    public Path directory() throws IOException {
-        return Files.createTempDirectory("hsqldb");
-    }
+	@Bean
+	public Path directory() throws IOException {
+		return Files.createTempDirectory("hsqldb");
+	}
 
-    @Bean
-    public Closeable directoryCleaner(Path directory) throws IOException {
-        return () -> FileSystemUtils.deleteRecursively(directory.toFile());
-    }
+	@Bean
+	public Closeable directoryCleaner(Path directory) throws IOException {
+		return () -> FileSystemUtils.deleteRecursively(directory.toFile());
+	}
 
-    @Bean
-    public HsqldbProperties hsqldbProperties(Path directory) {
-        return new Builder<>(new HsqldbProperties())
-                .set(HsqldbProperties::setDirectory, directory.toFile())
-                .build();
-    }
+	@Bean
+	public HsqldbProperties hsqldbProperties(Path directory) {
+		return new Builder<>(new HsqldbProperties())
+				.set(HsqldbProperties::setDirectory, directory.toFile())
+				.build();
+	}
 
-    @Bean
-    public HsqldbDatabase wrapper(HsqldbProperties hsqldbProperties) throws MalformedURLException {
-        return new HsqldbDatabase(hsqldbProperties);
-    }
+	@Bean
+	public HsqldbDatabase wrapper(HsqldbProperties hsqldbProperties) throws MalformedURLException {
+		return new HsqldbDatabase(hsqldbProperties);
+	}
 
-    @Bean
-    public NumericWriter numericWriter(HsqldbDatabase wrapper) throws IOException {
-        return new HsqldbDaqNumericWriter(wrapper.dataSource("NUMERICS"), "NUMERICS");
-    }
+	@Bean
+	public NumericWriter numericWriter(HsqldbDatabase wrapper) throws IOException {
+		return new HsqldbDaqNumericWriter(wrapper.dataSource("NUMERICS"), "NUMERICS");
+	}
 }

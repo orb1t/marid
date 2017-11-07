@@ -39,8 +39,8 @@ import java.lang.annotation.Target;
 @Bean
 public @interface PrototypeBean {
 
-    String[] value() default {};
+	String[] value() default {};
 
-    @AliasFor(annotation = Bean.class, attribute = "initMethod")
-    String initMethod() default "";
+	@AliasFor(annotation = Bean.class, attribute = "initMethod")
+	String initMethod() default "";
 }

@@ -30,20 +30,20 @@ import javax.annotation.Nullable;
 
 public final class NullExpr extends Expr implements NullExpression {
 
-    public NullExpr() {
-    }
+	public NullExpr() {
+	}
 
-    @Override
-    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
-        return null;
-    }
+	@Override
+	protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
+		return null;
+	}
 
-    NullExpr(Element element) {
-        super(element);
-    }
+	NullExpr(Element element) {
+		super(element);
+	}
 
-    @Override
-    public String toString() {
-        return "null";
-    }
+	@Override
+	public String toString() {
+		return "null";
+	}
 }

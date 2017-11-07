@@ -34,32 +34,32 @@ import java.util.logging.Level;
  */
 public interface IconFactory {
 
-    static Node icon(Level level) {
-        return icon(level, 16);
-    }
+	static Node icon(Level level) {
+		return icon(level, 16);
+	}
 
-    static Node icon(Level level, int size) {
-        switch (level.intValue()) {
-            case Integer.MAX_VALUE: return icon("D_SELECT_OFF", Color.RED, size);
-            case Integer.MIN_VALUE: return icon("D_ARROW_ALL", Color.GREEN, size);
-            case 1000: return icon("M_ERROR", Color.RED, size);
-            case 900: return icon("F_WARNING", Color.ORANGE, size);
-            case 800: return icon("F_INFO_CIRCLE", Color.BLUE, size);
-            case 700: return icon("M_CONTROL_POINT", Color.GREEN, size);
-            case 500: return icon("D_BATTERY_60", Color.GREEN, size);
-            case 400: return icon("D_BATTERY_80", Color.GREEN, size);
-            case 300: return icon("D_BATTERY_CHARGING_100", Color.GREEN, size);
-            default: return icon("D_BATTERY_UNKNOWN", Color.GRAY, size);
-        }
-    }
+	static Node icon(Level level, int size) {
+		switch (level.intValue()) {
+			case Integer.MAX_VALUE: return icon("D_SELECT_OFF", Color.RED, size);
+			case Integer.MIN_VALUE: return icon("D_ARROW_ALL", Color.GREEN, size);
+			case 1000: return icon("M_ERROR", Color.RED, size);
+			case 900: return icon("F_WARNING", Color.ORANGE, size);
+			case 800: return icon("F_INFO_CIRCLE", Color.BLUE, size);
+			case 700: return icon("M_CONTROL_POINT", Color.GREEN, size);
+			case 500: return icon("D_BATTERY_60", Color.GREEN, size);
+			case 400: return icon("D_BATTERY_80", Color.GREEN, size);
+			case 300: return icon("D_BATTERY_CHARGING_100", Color.GREEN, size);
+			default: return icon("D_BATTERY_UNKNOWN", Color.GRAY, size);
+		}
+	}
 
-    static Node icon(@PropertyKey(resourceBundle = "fonts.meta") String icon, Paint paint, int size) {
-        final Text glyphIcon = FontIcons.glyphIcon(icon, size);
-        glyphIcon.setFill(paint);
-        return glyphIcon;
-    }
+	static Node icon(@PropertyKey(resourceBundle = "fonts.meta") String icon, Paint paint, int size) {
+		final Text glyphIcon = FontIcons.glyphIcon(icon, size);
+		glyphIcon.setFill(paint);
+		return glyphIcon;
+	}
 
-    static Node icon(@PropertyKey(resourceBundle = "fonts.meta") String icon, Paint paint) {
-        return icon(icon, paint, 16);
-    }
+	static Node icon(@PropertyKey(resourceBundle = "fonts.meta") String icon, Paint paint) {
+		return icon(icon, paint, 16);
+	}
 }

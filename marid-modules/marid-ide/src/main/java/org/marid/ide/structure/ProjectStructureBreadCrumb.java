@@ -38,26 +38,26 @@ import java.nio.file.Path;
 @Component
 public class ProjectStructureBreadCrumb extends BreadCrumbBar<Path> {
 
-    @Autowired
-    public ProjectStructureBreadCrumb(ProjectStructureTree tree) {
-        final ObservableValue<TreeItem<Path>> selectedItem = tree.getSelectionModel().selectedItemProperty();
-        final ChangeListener<TreeItem<Path>> treeSelectionChangeListener = (o, oV, nV) -> setSelectedCrumb(nV);
-        selectedItem.addListener(treeSelectionChangeListener);
-        selectedCrumbProperty().addListener((o, oV, nV) -> {
-            selectedItem.removeListener(treeSelectionChangeListener);
-            tree.getSelectionModel().select(nV);
-            selectedItem.addListener(treeSelectionChangeListener);
-            tree.requestFocus();
-        });
-    }
+	@Autowired
+	public ProjectStructureBreadCrumb(ProjectStructureTree tree) {
+		final ObservableValue<TreeItem<Path>> selectedItem = tree.getSelectionModel().selectedItemProperty();
+		final ChangeListener<TreeItem<Path>> treeSelectionChangeListener = (o, oV, nV) -> setSelectedCrumb(nV);
+		selectedItem.addListener(treeSelectionChangeListener);
+		selectedCrumbProperty().addListener((o, oV, nV) -> {
+			selectedItem.removeListener(treeSelectionChangeListener);
+			tree.getSelectionModel().select(nV);
+			selectedItem.addListener(treeSelectionChangeListener);
+			tree.requestFocus();
+		});
+	}
 
-    @PostConstruct
-    public void initCrumbs() {
-        final Callback<TreeItem<Path>, Button> crumbFactory = getCrumbFactory();
-        setCrumbFactory(param -> {
-            final Button button = crumbFactory.call(param);
-            button.setText(param.getValue().getFileName().toString());
-            return button;
-        });
-    }
+	@PostConstruct
+	public void initCrumbs() {
+		final Callback<TreeItem<Path>, Button> crumbFactory = getCrumbFactory();
+		setCrumbFactory(param -> {
+			final Button button = crumbFactory.call(param);
+			button.setText(param.getValue().getFileName().toString());
+			return button;
+		});
+	}
 }

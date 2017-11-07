@@ -34,26 +34,27 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class GuavaResolverTest {
 
-    @Test
-    void testResolveWithOwner() throws Exception {
-        class X extends ArrayList<Integer> {
-        }
+	@Test
+	void testResolveWithOwner() throws Exception {
+		class X extends ArrayList<Integer> {
+		}
 
-        final Method m1 = List.class.getMethod("add", Object.class);
-        final Type argType = m1.getGenericParameterTypes()[0];
-        final TypeToken<?> ownerToken = TypeToken.of(X.class);
-        final TypeToken<?> resolvedToken = ownerToken.resolveType(argType);
-        final Type resolvedType = resolvedToken.getType();
-        assertEquals(Integer.class, resolvedType);
-    }
+		final Method m1 = List.class.getMethod("add", Object.class);
+		final Type argType = m1.getGenericParameterTypes()[0];
+		final TypeToken<?> ownerToken = TypeToken.of(X.class);
+		final TypeToken<?> resolvedToken = ownerToken.resolveType(argType);
+		final Type resolvedType = resolvedToken.getType();
+		assertEquals(Integer.class, resolvedType);
+	}
 
-    @Test
-    void testResolver1() throws Exception {
-        final Method m1 = List.class.getMethod("add", Object.class);
-        final Type listType = TypeToken.of(List.class).getSupertype(List.class).getType();
-        final Type type = new TypeResolver()
-                .where(m1.getGenericParameterTypes()[0], Integer.class)
-                .resolveType(listType);
-        assertEquals(new TypeToken<List<Integer>>() {}.getType(), type);
-    }
+	@Test
+	void testResolver1() throws Exception {
+		final Method m1 = List.class.getMethod("add", Object.class);
+		final Type listType = TypeToken.of(List.class).getSupertype(List.class).getType();
+		final Type type = new TypeResolver()
+				.where(m1.getGenericParameterTypes()[0], Integer.class)
+				.resolveType(listType);
+		assertEquals(new TypeToken<List<Integer>>() {
+		}.getType(), type);
+	}
 }

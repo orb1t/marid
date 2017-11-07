@@ -30,14 +30,14 @@ import java.util.Map;
  */
 public interface ProtoDriver extends Proto, Closeable {
 
-    ProtoBus getParent();
+	ProtoBus getParent();
 
-    void start();
+	void start();
 
-    boolean isRunning();
+	boolean isRunning();
 
-    @Override
-    default Map<String, ? extends Proto> getItems() {
-        return Collections.emptyMap();
-    }
+	@Override
+	default Map<String, ? extends Proto> getItems() {
+		return Collections.emptyMap();
+	}
 }

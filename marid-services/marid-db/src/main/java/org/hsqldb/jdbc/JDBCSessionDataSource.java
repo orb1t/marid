@@ -34,17 +34,17 @@ import java.sql.SQLException;
 @MaridBean
 public class JDBCSessionDataSource extends JDBCDataSource {
 
-    private final Database database;
-    private final String schema;
+	private final Database database;
+	private final String schema;
 
-    @MaridBeanFactory
-    public JDBCSessionDataSource(Database database, String schema) {
-        this.database = database;
-        this.schema = schema;
-    }
+	@MaridBeanFactory
+	public JDBCSessionDataSource(Database database, String schema) {
+		this.database = database;
+		this.schema = schema;
+	}
 
-    @Override
-    public Connection getConnection() throws SQLException {
-        return new JDBCSessionConnection(database, schema);
-    }
+	@Override
+	public Connection getConnection() throws SQLException {
+		return new JDBCSessionConnection(database, schema);
+	}
 }

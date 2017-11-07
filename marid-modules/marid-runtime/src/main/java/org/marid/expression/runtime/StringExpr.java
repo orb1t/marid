@@ -32,31 +32,31 @@ import static org.marid.io.Xmls.content;
 
 public final class StringExpr extends Expr implements StringExpression {
 
-    @Nonnull
-    private final String value;
+	@Nonnull
+	private final String value;
 
-    public StringExpr(@Nonnull String value) {
-        this.value = value;
-    }
+	public StringExpr(@Nonnull String value) {
+		this.value = value;
+	}
 
-    StringExpr(@Nonnull Element element) {
-        super(element);
-        value = content(element).orElseThrow(() -> new NullPointerException("content"));
-    }
+	StringExpr(@Nonnull Element element) {
+		super(element);
+		value = content(element).orElseThrow(() -> new NullPointerException("content"));
+	}
 
-    @Override
-    protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
-        return context.resolvePlaceholders(getValue());
-    }
+	@Override
+	protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
+		return context.resolvePlaceholders(getValue());
+	}
 
-    @Nonnull
-    @Override
-    public String getValue() {
-        return value;
-    }
+	@Nonnull
+	@Override
+	public String getValue() {
+		return value;
+	}
 
-    @Override
-    public String toString() {
-        return "\"" + value.replace("\"", "\\\"") + "\"";
-    }
+	@Override
+	public String toString() {
+		return "\"" + value.replace("\"", "\\\"") + "\"";
+	}
 }

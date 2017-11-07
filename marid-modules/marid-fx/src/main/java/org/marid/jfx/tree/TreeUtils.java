@@ -36,15 +36,15 @@ import static java.util.stream.Stream.of;
  */
 public interface TreeUtils {
 
-    static <T> Stream<TreeItem<T>> treeStream(TreeView<T> treeView) {
-        return treeStream(treeView.getRoot());
-    }
+	static <T> Stream<TreeItem<T>> treeStream(TreeView<T> treeView) {
+		return treeStream(treeView.getRoot());
+	}
 
-    static <T> Stream<TreeItem<T>> treeStream(TreeTableView<T> treeTableView) {
-        return treeStream(treeTableView.getRoot());
-    }
+	static <T> Stream<TreeItem<T>> treeStream(TreeTableView<T> treeTableView) {
+		return treeStream(treeTableView.getRoot());
+	}
 
-    static <T> Stream<TreeItem<T>> treeStream(TreeItem<T> treeItem) {
-        return concat(of(treeItem), treeItem.getChildren().stream().flatMap(TreeUtils::treeStream));
-    }
+	static <T> Stream<TreeItem<T>> treeStream(TreeItem<T> treeItem) {
+		return concat(of(treeItem), treeItem.getChildren().stream().flatMap(TreeUtils::treeStream));
+	}
 }

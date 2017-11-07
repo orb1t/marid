@@ -37,43 +37,43 @@ import java.util.function.Function;
 
 public class PeriodicObservable implements Observable, AutoCloseable {
 
-    private final ConcurrentLinkedQueue<InvalidationListener> listeners = new ConcurrentLinkedQueue<>();
-    private final ScheduledFuture<?> timerTask;
+	private final ConcurrentLinkedQueue<InvalidationListener> listeners = new ConcurrentLinkedQueue<>();
+	private final ScheduledFuture<?> timerTask;
 
-    public PeriodicObservable(ScheduledExecutorService executorService, long period, TimeUnit timeUnit) {
-        this(task -> executorService.scheduleWithFixedDelay(task, period, period, timeUnit));
-    }
+	public PeriodicObservable(ScheduledExecutorService executorService, long period, TimeUnit timeUnit) {
+		this(task -> executorService.scheduleWithFixedDelay(task, period, period, timeUnit));
+	}
 
-    public PeriodicObservable(Function<Runnable, ScheduledFuture<?>> scheduler) {
-        timerTask = scheduler.apply(() -> {
-            if (!listeners.isEmpty()) {
-                Platform.runLater(() -> listeners.forEach(l -> l.invalidated(this)));
-            }
-        });
-    }
+	public PeriodicObservable(Function<Runnable, ScheduledFuture<?>> scheduler) {
+		timerTask = scheduler.apply(() -> {
+			if (!listeners.isEmpty()) {
+				Platform.runLater(() -> listeners.forEach(l -> l.invalidated(this)));
+			}
+		});
+	}
 
-    @Override
-    public void addListener(InvalidationListener listener) {
-        listeners.add(listener);
-    }
+	@Override
+	public void addListener(InvalidationListener listener) {
+		listeners.add(listener);
+	}
 
-    @Override
-    public void removeListener(InvalidationListener listener) {
-        listeners.remove(listener);
-    }
+	@Override
+	public void removeListener(InvalidationListener listener) {
+		listeners.remove(listener);
+	}
 
-    @Override
-    public void close() {
-        timerTask.cancel(false);
-    }
+	@Override
+	public void close() {
+		timerTask.cancel(false);
+	}
 
-    public BooleanBinding b(BooleanSupplier supplier, Observable... observables) {
-        return Bindings.createBooleanBinding(supplier::getAsBoolean, observables(observables));
-    }
+	public BooleanBinding b(BooleanSupplier supplier, Observable... observables) {
+		return Bindings.createBooleanBinding(supplier::getAsBoolean, observables(observables));
+	}
 
-    private Observable[] observables(Observable... observables) {
-        final Observable[] result = Arrays.copyOf(observables, observables.length + 1);
-        result[observables.length] = this;
-        return result;
-    }
+	private Observable[] observables(Observable... observables) {
+		final Observable[] result = Arrays.copyOf(observables, observables.length + 1);
+		result[observables.length] = this;
+		return result;
+	}
 }

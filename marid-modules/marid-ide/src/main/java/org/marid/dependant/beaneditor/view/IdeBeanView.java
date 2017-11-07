@@ -28,11 +28,11 @@ import javax.annotation.Nonnull;
 
 public abstract class IdeBeanView extends HBox {
 
-    public static IdeBeanView view(@Nonnull Expr expr) {
-        return null;
-    }
+	public static IdeBeanView view(@Nonnull Expr expr) {
+		return null;
+	}
 
-    public static Text glyph(@Nonnull Expr expr) {
-        return null;
-    }
+	public static Text glyph(@Nonnull Expr expr) {
+		return null;
+	}
 }

@@ -37,45 +37,45 @@ import static org.marid.l10n.L10n.m;
  */
 public class LogComponent extends ListView<LogRecord> {
 
-    public LogComponent(ObservableList<LogRecord> records) {
-        super(records);
-        setCellFactory(p -> {
-            final ListCell<LogRecord> cell = new ListCell<LogRecord>() {
-                @Override
-                protected void updateItem(LogRecord item, boolean empty) {
-                    super.updateItem(item, empty);
-                    if (empty || item == null) {
-                        setGraphic(null);
-                        setText(null);
-                    } else {
-                        setText(m(item.getMessage(), item.getParameters()));
-                        setGraphic(IconFactory.icon(item.getLevel()));
-                    }
-                }
-            };
-            cell.setFont(Font.font("Monospaced", cell.getFont().getSize() * 0.75));
-            return cell;
-        });
-        setContextMenu(new ContextMenu(
-                removeItems(),
-                new SeparatorMenuItem(),
-                clearAllItem()
-        ));
-    }
+	public LogComponent(ObservableList<LogRecord> records) {
+		super(records);
+		setCellFactory(p -> {
+			final ListCell<LogRecord> cell = new ListCell<LogRecord>() {
+				@Override
+				protected void updateItem(LogRecord item, boolean empty) {
+					super.updateItem(item, empty);
+					if (empty || item == null) {
+						setGraphic(null);
+						setText(null);
+					} else {
+						setText(m(item.getMessage(), item.getParameters()));
+						setGraphic(IconFactory.icon(item.getLevel()));
+					}
+				}
+			};
+			cell.setFont(Font.font("Monospaced", cell.getFont().getSize() * 0.75));
+			return cell;
+		});
+		setContextMenu(new ContextMenu(
+				removeItems(),
+				new SeparatorMenuItem(),
+				clearAllItem()
+		));
+	}
 
-    private MenuItem clearAllItem() {
-        final MenuItem menuItem = new MenuItem();
-        menuItem.textProperty().bind(ls("Clear all"));
-        menuItem.setOnAction(event -> getItems().clear());
-        menuItem.disableProperty().bind(Bindings.isEmpty(getItems()));
-        return menuItem;
-    }
+	private MenuItem clearAllItem() {
+		final MenuItem menuItem = new MenuItem();
+		menuItem.textProperty().bind(ls("Clear all"));
+		menuItem.setOnAction(event -> getItems().clear());
+		menuItem.disableProperty().bind(Bindings.isEmpty(getItems()));
+		return menuItem;
+	}
 
-    private MenuItem removeItems() {
-        final MenuItem menuItem = new MenuItem();
-        menuItem.textProperty().bind(ls("Remove selected items"));
-        menuItem.setOnAction(event -> getItems().retainAll(getSelectionModel().getSelectedItems()));
-        menuItem.disableProperty().bind(Bindings.isEmpty(getSelectionModel().getSelectedItems()));
-        return menuItem;
-    }
+	private MenuItem removeItems() {
+		final MenuItem menuItem = new MenuItem();
+		menuItem.textProperty().bind(ls("Remove selected items"));
+		menuItem.setOnAction(event -> getItems().retainAll(getSelectionModel().getSelectedItems()));
+		menuItem.disableProperty().bind(Bindings.isEmpty(getSelectionModel().getSelectedItems()));
+		return menuItem;
+	}
 }

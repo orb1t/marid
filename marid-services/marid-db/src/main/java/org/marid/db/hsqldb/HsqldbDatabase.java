@@ -58,116 +58,116 @@ import static org.marid.logging.Log.log;
 @MaridBean
 public final class HsqldbDatabase implements Closeable {
 
-    static {
-        System.setProperty("hsqldb.reconfig_logging", "false");
-    }
+	static {
+		System.setProperty("hsqldb.reconfig_logging", "false");
+	}
 
-    private final Server server;
-    private final File directory;
-    private final long shutdownTimeout;
-    private final Map<String, URL> databaseNameToIndex = new LinkedHashMap<>();
+	private final Server server;
+	private final File directory;
+	private final long shutdownTimeout;
+	private final Map<String, URL> databaseNameToIndex = new LinkedHashMap<>();
 
-    private PrintWriter outWriter;
-    private PrintWriter errWriter;
+	private PrintWriter outWriter;
+	private PrintWriter errWriter;
 
-    @MaridBeanFactory
-    public HsqldbDatabase(HsqldbProperties properties) throws MalformedURLException {
-        log(INFO, "{0}", properties);
-        directory = properties.getDirectory();
-        shutdownTimeout = SECONDS.toMillis(properties.getShutdownTimeoutSeconds());
-        server = new Server();
-        server.setNoSystemExit(true);
-        server.setRestartOnShutdown(false);
-        server.setPort(properties.getPort());
-        server.setSilent(properties.isSilent());
-        if (properties.getDatabases() == null) {
-            setDatabase("NUMERICS", getClass().getResource("default.sql"));
-        } else {
-            for (final String database : properties.getDatabases().stringPropertyNames()) {
-                final String urlText = properties.getDatabases().getProperty(database);
-                if (!urlText.contains("://")) {
-                    setDatabase(database, getClass().getClassLoader().getResource(urlText));
-                } else {
-                    setDatabase(database, new URL(urlText));
-                }
-            }
-        }
-    }
+	@MaridBeanFactory
+	public HsqldbDatabase(HsqldbProperties properties) throws MalformedURLException {
+		log(INFO, "{0}", properties);
+		directory = properties.getDirectory();
+		shutdownTimeout = SECONDS.toMillis(properties.getShutdownTimeoutSeconds());
+		server = new Server();
+		server.setNoSystemExit(true);
+		server.setRestartOnShutdown(false);
+		server.setPort(properties.getPort());
+		server.setSilent(properties.isSilent());
+		if (properties.getDatabases() == null) {
+			setDatabase("NUMERICS", getClass().getResource("default.sql"));
+		} else {
+			for (final String database : properties.getDatabases().stringPropertyNames()) {
+				final String urlText = properties.getDatabases().getProperty(database);
+				if (!urlText.contains("://")) {
+					setDatabase(database, getClass().getClassLoader().getResource(urlText));
+				} else {
+					setDatabase(database, new URL(urlText));
+				}
+			}
+		}
+	}
 
-    private void setDatabase(String name, URL url) {
-        final int index = databaseNameToIndex.size();
-        server.setDatabaseName(index, name);
-        server.setDatabasePath(index, new File(directory, name).getAbsolutePath());
-        databaseNameToIndex.put(name, url);
-    }
+	private void setDatabase(String name, URL url) {
+		final int index = databaseNameToIndex.size();
+		server.setDatabaseName(index, name);
+		server.setDatabasePath(index, new File(directory, name).getAbsolutePath());
+		databaseNameToIndex.put(name, url);
+	}
 
-    @PostConstruct
-    public void init() throws IOException {
-        outWriter = new PrintWriter(new File(directory, "output.log"));
-        errWriter = new PrintWriter(new File(directory, "errors.log"));
-        server.start();
-        for (final Map.Entry<String, URL> e : databaseNameToIndex.entrySet()) {
-            try {
-                initDatabase(e.getKey(), e.getValue());
-            } catch (IOException | SQLException x) {
-                log(WARNING, "Unable to init DB {0}", x, e.getKey());
-            }
-        }
-    }
+	@PostConstruct
+	public void init() throws IOException {
+		outWriter = new PrintWriter(new File(directory, "output.log"));
+		errWriter = new PrintWriter(new File(directory, "errors.log"));
+		server.start();
+		for (final Map.Entry<String, URL> e : databaseNameToIndex.entrySet()) {
+			try {
+				initDatabase(e.getKey(), e.getValue());
+			} catch (IOException | SQLException x) {
+				log(WARNING, "Unable to init DB {0}", x, e.getKey());
+			}
+		}
+	}
 
-    @PreDestroy
-    public void destroy() throws IOException {
-        close();
-    }
+	@PreDestroy
+	public void destroy() throws IOException {
+		close();
+	}
 
-    private void initDatabase(String name, URL url) throws SQLException, IOException {
-        try (final Connection c = dataSource(name).getConnection()) {
-            c.setAutoCommit(true);
-            final boolean tableExists;
-            try (final ResultSet rs = c.getMetaData().getTables(null, null, name, new String[]{"TABLE"})) {
-                tableExists = rs.next();
-            }
-            if (tableExists) {
-                log(INFO, "Table {0} already exists", name);
-                return;
-            }
-            try (final Statement s = c.createStatement()) {
-                try (final Scanner scanner = new Scanner(url.openStream())) {
-                    while (scanner.hasNextLine()) {
-                        final String sql = scanner.nextLine().trim();
-                        if (sql.startsWith("--") || sql.isEmpty()) {
-                            continue;
-                        }
-                        try {
-                            log(INFO, "Executing {0}", sql);
-                            s.execute(sql);
-                        } catch (SQLException x) {
-                            log(WARNING, "Unable to execute '{0}'", x, sql);
-                        }
-                    }
-                }
-            }
-        }
-    }
+	private void initDatabase(String name, URL url) throws SQLException, IOException {
+		try (final Connection c = dataSource(name).getConnection()) {
+			c.setAutoCommit(true);
+			final boolean tableExists;
+			try (final ResultSet rs = c.getMetaData().getTables(null, null, name, new String[]{"TABLE"})) {
+				tableExists = rs.next();
+			}
+			if (tableExists) {
+				log(INFO, "Table {0} already exists", name);
+				return;
+			}
+			try (final Statement s = c.createStatement()) {
+				try (final Scanner scanner = new Scanner(url.openStream())) {
+					while (scanner.hasNextLine()) {
+						final String sql = scanner.nextLine().trim();
+						if (sql.startsWith("--") || sql.isEmpty()) {
+							continue;
+						}
+						try {
+							log(INFO, "Executing {0}", sql);
+							s.execute(sql);
+						} catch (SQLException x) {
+							log(WARNING, "Unable to execute '{0}'", x, sql);
+						}
+					}
+				}
+			}
+		}
+	}
 
-    @Override
-    public void close() throws IOException {
-        try (final PrintWriter out = outWriter; final PrintWriter err = errWriter) {
-            server.shutdown();
-            for (final long startTime = currentTimeMillis(); currentTimeMillis() - startTime < shutdownTimeout; ) {
-                if (server.getState() == ServerConstants.SERVER_STATE_SHUTDOWN) {
-                    return;
-                }
-                LockSupport.parkNanos(MILLISECONDS.toNanos(10L));
-            }
-            throw new InterruptedIOException("Server shutdown timeout exceeded");
-        }
-    }
+	@Override
+	public void close() throws IOException {
+		try (final PrintWriter out = outWriter; final PrintWriter err = errWriter) {
+			server.shutdown();
+			for (final long startTime = currentTimeMillis(); currentTimeMillis() - startTime < shutdownTimeout; ) {
+				if (server.getState() == ServerConstants.SERVER_STATE_SHUTDOWN) {
+					return;
+				}
+				LockSupport.parkNanos(MILLISECONDS.toNanos(10L));
+			}
+			throw new InterruptedIOException("Server shutdown timeout exceeded");
+		}
+	}
 
-    @MaridBeanFactory(name = "Data Source", icon = "D_DATABASE_OUTLINE")
-    public DataSource dataSource(String name) {
-        final int dbIndex = new ArrayList<>(databaseNameToIndex.keySet()).indexOf(name);
-        final Database database = DatabaseManager.getDatabase(dbIndex);
-        return new JDBCSessionDataSource(database, "PUBLIC");
-    }
+	@MaridBeanFactory(name = "Data Source", icon = "D_DATABASE_OUTLINE")
+	public DataSource dataSource(String name) {
+		final int dbIndex = new ArrayList<>(databaseNameToIndex.keySet()).indexOf(name);
+		final Database database = DatabaseManager.getDatabase(dbIndex);
+		return new JDBCSessionDataSource(database, "PUBLIC");
+	}
 }

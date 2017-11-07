@@ -48,73 +48,73 @@ import static org.marid.logging.Log.log;
  */
 public class Ide extends Application {
 
-    public static final FxScope FX_SCOPE = new FxScope();
+	public static final FxScope FX_SCOPE = new FxScope();
 
-    public static volatile Stage primaryStage;
+	public static volatile Stage primaryStage;
 
-    private final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+	private final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 
-    @Override
-    public void init() throws Exception {
-        context.getBeanFactory().addBeanPostProcessor(new MaridCommonPostProcessor());
-        context.getBeanFactory().registerScope("fx", FX_SCOPE);
-        context.register(IdeContext.class);
-        context.setAllowBeanDefinitionOverriding(true);
-        context.setAllowCircularReferences(false);
+	@Override
+	public void init() throws Exception {
+		context.getBeanFactory().addBeanPostProcessor(new MaridCommonPostProcessor());
+		context.getBeanFactory().registerScope("fx", FX_SCOPE);
+		context.register(IdeContext.class);
+		context.setAllowBeanDefinitionOverriding(true);
+		context.setAllowCircularReferences(false);
 
-        new Thread(() -> {
-            context.refresh();
-            final IdePane idePane = context.getBean(IdePane.class);
+		new Thread(() -> {
+			context.refresh();
+			final IdePane idePane = context.getBean(IdePane.class);
 
-            while (primaryStage == null) {
-                Thread.onSpinWait();
-            }
+			while (primaryStage == null) {
+				Thread.onSpinWait();
+			}
 
-            Platform.runLater(() -> {
-                context.start();
-                primaryStage.setMinWidth(750.0);
-                primaryStage.setMinHeight(550.0);
-                primaryStage.setTitle("Marid IDE");
-                primaryStage.setScene(new Scene(idePane, 1024, 768));
-                primaryStage.getIcons().addAll(MaridIconFx.getIcons(24, 32));
-                primaryStage.setMaximized(true);
-                primaryStage.show();
-            });
-        }).start();
-    }
+			Platform.runLater(() -> {
+				context.start();
+				primaryStage.setMinWidth(750.0);
+				primaryStage.setMinHeight(550.0);
+				primaryStage.setTitle("Marid IDE");
+				primaryStage.setScene(new Scene(idePane, 1024, 768));
+				primaryStage.getIcons().addAll(MaridIconFx.getIcons(24, 32));
+				primaryStage.setMaximized(true);
+				primaryStage.show();
+			});
+		}).start();
+	}
 
-    @Override
-    public void start(Stage primaryStage) throws Exception {
-        Ide.primaryStage = primaryStage;
+	@Override
+	public void start(Stage primaryStage) throws Exception {
+		Ide.primaryStage = primaryStage;
 
-        final Stage splash = new Stage(StageStyle.UNDECORATED);
-        splash.setTitle("Marid");
-        splash.getIcons().addAll(MaridIconFx.getIcons(24, 32));
-        splash.setScene(new Scene(new MaridSplash(primaryStage, IdeLogHandler.LOG_RECORDS)));
-        splash.show();
+		final Stage splash = new Stage(StageStyle.UNDECORATED);
+		splash.setTitle("Marid");
+		splash.getIcons().addAll(MaridIconFx.getIcons(24, 32));
+		splash.setScene(new Scene(new MaridSplash(primaryStage, IdeLogHandler.LOG_RECORDS)));
+		splash.show();
 
-        setUserAgentStylesheet(PREFERENCES.get("style", STYLESHEET_MODENA));
-    }
+		setUserAgentStylesheet(PREFERENCES.get("style", STYLESHEET_MODENA));
+	}
 
-    @Override
-    public void stop() throws Exception {
-        context.close();
-    }
+	@Override
+	public void stop() throws Exception {
+		context.close();
+	}
 
-    public static void main(String... args) throws Exception {
-        // locale
-        final String locale = PREFERENCES.get("locale", null);
-        if (locale != null) {
-            Locale.setDefault(Locale.forLanguageTag(locale));
-        }
+	public static void main(String... args) throws Exception {
+		// locale
+		final String locale = PREFERENCES.get("locale", null);
+		if (locale != null) {
+			Locale.setDefault(Locale.forLanguageTag(locale));
+		}
 
-        // logging
-        LogManager.getLogManager().reset();
-        Logger.getLogger("").addHandler(new IdeLogHandler());
-        Logger.getLogger("").addHandler(new IdeLogConsoleHandler());
-        Thread.setDefaultUncaughtExceptionHandler((t, e) -> log(WARNING, "Exception in {0}", e, t));
+		// logging
+		LogManager.getLogManager().reset();
+		Logger.getLogger("").addHandler(new IdeLogHandler());
+		Logger.getLogger("").addHandler(new IdeLogConsoleHandler());
+		Thread.setDefaultUncaughtExceptionHandler((t, e) -> log(WARNING, "Exception in {0}", e, t));
 
-        // launch application
-        Application.launch(args);
-    }
+		// launch application
+		Application.launch(args);
+	}
 }

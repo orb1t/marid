@@ -30,17 +30,17 @@ import java.util.Properties;
  */
 public interface MaridRuntime {
 
-    String getName();
+	String getName();
 
-    MaridRuntime getParent();
+	MaridRuntime getParent();
 
-    Object getBean(String name);
+	Object getBean(String name);
 
-    ClassLoader getClassLoader();
+	ClassLoader getClassLoader();
 
-    String resolvePlaceholders(String value);
+	String resolvePlaceholders(String value);
 
-    Properties getApplicationProperties();
+	Properties getApplicationProperties();
 
-    MaridBean getBean();
+	MaridBean getBean();
 }

@@ -41,73 +41,73 @@ import static org.marid.io.Xmls.elements;
 
 public abstract class Expr implements TypedExpression {
 
-    public final ObservableList<Expr> initializers;
+	public final ObservableList<Expr> initializers;
 
-    public Expr() {
-        initializers = observableArrayList(Expr::getObservables);
-    }
+	public Expr() {
+		initializers = observableArrayList(Expr::getObservables);
+	}
 
-    Expr(@Nonnull Element element) {
-        initializers = elements("initializers", element)
-                .map(Expr::of)
-                .collect(Collectors.toCollection(() -> observableArrayList(Expr::getObservables)));
-    }
+	Expr(@Nonnull Element element) {
+		initializers = elements("initializers", element)
+				.map(Expr::of)
+				.collect(Collectors.toCollection(() -> observableArrayList(Expr::getObservables)));
+	}
 
-    @Nonnull
-    @Override
-    public ObservableList<Expr> getInitializers() {
-        return initializers;
-    }
+	@Nonnull
+	@Override
+	public ObservableList<Expr> getInitializers() {
+		return initializers;
+	}
 
-    public Observable[] getObservables() {
-        return ostream().toArray(Observable[]::new);
-    }
+	public Observable[] getObservables() {
+		return ostream().toArray(Observable[]::new);
+	}
 
-    public String getTag() {
-        return getClass().getSimpleName().replace("Expr", "").toLowerCase();
-    }
+	public String getTag() {
+		return getClass().getSimpleName().replace("Expr", "").toLowerCase();
+	}
 
-    public void writeTo(@Nonnull Element element) {
-        if (!initializers.isEmpty()) {
-            create(element, "initializers", is -> getInitializers().forEach(i -> create(is, i.getTag(), i::writeTo)));
-        }
-    }
+	public void writeTo(@Nonnull Element element) {
+		if (!initializers.isEmpty()) {
+			create(element, "initializers", is -> getInitializers().forEach(i -> create(is, i.getTag(), i::writeTo)));
+		}
+	}
 
-    private Stream<Observable> ostream() {
-        return Stream.of(getClass().getFields())
-                .filter(f -> Observable.class.isAssignableFrom(f.getType()))
-                .sorted(Comparator.comparing(Field::getName))
-                .map(f -> Calls.call(() -> (Observable) f.get(this)));
-    }
+	private Stream<Observable> ostream() {
+		return Stream.of(getClass().getFields())
+				.filter(f -> Observable.class.isAssignableFrom(f.getType()))
+				.sorted(Comparator.comparing(Field::getName))
+				.map(f -> Calls.call(() -> (Observable) f.get(this)));
+	}
 
-    private Stream<Object> stream() {
-        return ostream().map(v -> v instanceof ObservableValue ? ((ObservableValue) v).getValue() : v);
-    }
+	private Stream<Object> stream() {
+		return ostream().map(v -> v instanceof ObservableValue ? ((ObservableValue) v).getValue() : v);
+	}
 
-    @Override
-    public int hashCode() {
-        return stream().mapToInt(Objects::hashCode).reduce(0, (a, e) -> 31 * a + e);
-    }
+	@Override
+	public int hashCode() {
+		return stream().mapToInt(Objects::hashCode).reduce(0, (a, e) -> 31 * a + e);
+	}
 
-    @Override
-    public boolean equals(Object obj) {
-        return obj != null
-                && obj.getClass() == getClass()
-                && deepEquals(stream().toArray(), ((Expr) obj).stream().toArray());
-    }
+	@Override
+	public boolean equals(Object obj) {
+		return obj != null
+				&& obj.getClass() == getClass()
+				&& deepEquals(stream().toArray(), ((Expr) obj).stream().toArray());
+	}
 
-    public static Expr of(@Nonnull Element element) {
-        switch (element.getTagName()) {
-            case "class": return new ClassExpr(element);
-            case "this": return new ThisExpr(element);
-            case "string": return new StringExpr(element);
-            case "ref": return new RefExpr(element);
-            case "const": return new ConstExpr(element);
-            case "get": return new GetExpr(element);
-            case "set": return new SetExpr(element);
-            case "null": return new NullExpr(element);
-            case "call": return new CallExpr(element);
-            default: throw new IllegalArgumentException(element.getTagName());
-        }
-    }
+	public static Expr of(@Nonnull Element element) {
+		switch (element.getTagName()) {
+			case "class": return new ClassExpr(element);
+			case "this": return new ThisExpr(element);
+			case "string": return new StringExpr(element);
+			case "ref": return new RefExpr(element);
+			case "const": return new ConstExpr(element);
+			case "get": return new GetExpr(element);
+			case "set": return new SetExpr(element);
+			case "null": return new NullExpr(element);
+			case "call": return new CallExpr(element);
+			default: throw new IllegalArgumentException(element.getTagName());
+		}
+	}
 }

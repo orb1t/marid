@@ -33,20 +33,20 @@ import java.net.Socket;
 @MaridBean
 public class StdProtoSocketIO extends StdProtoIO {
 
-    private final Socket socket;
+	private final Socket socket;
 
-    @MaridBeanFactory(name = "Standard Network Socket I/O", icon = "D_NEEDLE")
-    public StdProtoSocketIO(Socket socket) throws IOException {
-        super(socket.getInputStream(), socket.getOutputStream());
-        this.socket = socket;
-    }
+	@MaridBeanFactory(name = "Standard Network Socket I/O", icon = "D_NEEDLE")
+	public StdProtoSocketIO(Socket socket) throws IOException {
+		super(socket.getInputStream(), socket.getOutputStream());
+		this.socket = socket;
+	}
 
-    @Override
-    public void close() throws IOException {
-        try {
-            super.close();
-        } finally {
-            socket.close();
-        }
-    }
+	@Override
+	public void close() throws IOException {
+		try {
+			super.close();
+		} finally {
+			socket.close();
+		}
+	}
 }

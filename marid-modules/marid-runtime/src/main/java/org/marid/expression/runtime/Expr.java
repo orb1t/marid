@@ -35,49 +35,49 @@ import static org.marid.io.Xmls.elements;
 
 public abstract class Expr implements Expression {
 
-    private final List<Expr> initializers;
+	private final List<Expr> initializers;
 
-    public Expr(@Nonnull Element element) {
-        initializers = elements("initializers", element).map(Expr::of).collect(toList());
-    }
+	public Expr(@Nonnull Element element) {
+		initializers = elements("initializers", element).map(Expr::of).collect(toList());
+	}
 
-    public Expr() {
-        initializers = new ArrayList<>();
-    }
+	public Expr() {
+		initializers = new ArrayList<>();
+	}
 
-    @Nonnull
-    @Override
-    public List<Expr> getInitializers() {
-        return initializers;
-    }
+	@Nonnull
+	@Override
+	public List<Expr> getInitializers() {
+		return initializers;
+	}
 
-    @Nullable
-    public final Object evaluate(@Nullable Object self, @Nonnull BeanContext context) {
-        final Object v = execute(self, context);
-        for (final Expr initializer : getInitializers()) {
-            initializer.evaluate(v, context);
-        }
-        return v;
-    }
+	@Nullable
+	public final Object evaluate(@Nullable Object self, @Nonnull BeanContext context) {
+		final Object v = execute(self, context);
+		for (final Expr initializer : getInitializers()) {
+			initializer.evaluate(v, context);
+		}
+		return v;
+	}
 
-    protected abstract Object execute(@Nullable Object self, @Nonnull BeanContext context);
+	protected abstract Object execute(@Nullable Object self, @Nonnull BeanContext context);
 
-    public String getTag() {
-        return getClass().getSimpleName().replace("Expr", "").toLowerCase();
-    }
+	public String getTag() {
+		return getClass().getSimpleName().replace("Expr", "").toLowerCase();
+	}
 
-    public static Expr of(@Nonnull Element element) {
-        switch (element.getTagName()) {
-            case "call": return new CallExpr(element);
-            case "class": return new ClassExpr(element);
-            case "this": return new ThisExpr(element);
-            case "string": return new StringExpr(element);
-            case "ref": return new RefExpr(element);
-            case "const": return new ConstExpr(element);
-            case "get": return new GetExpr(element);
-            case "set": return new SetExpr(element);
-            case "null": return new NullExpr(element);
-            default: throw new IllegalArgumentException(element.getTagName());
-        }
-    }
+	public static Expr of(@Nonnull Element element) {
+		switch (element.getTagName()) {
+			case "call": return new CallExpr(element);
+			case "class": return new ClassExpr(element);
+			case "this": return new ThisExpr(element);
+			case "string": return new StringExpr(element);
+			case "ref": return new RefExpr(element);
+			case "const": return new ConstExpr(element);
+			case "get": return new GetExpr(element);
+			case "set": return new SetExpr(element);
+			case "null": return new NullExpr(element);
+			default: throw new IllegalArgumentException(element.getTagName());
+		}
+	}
 }

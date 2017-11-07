@@ -25,12 +25,12 @@ import javax.annotation.Nonnull;
 
 public interface SetExpression extends Expression {
 
-    @Nonnull
-    Expression getTarget();
+	@Nonnull
+	Expression getTarget();
 
-    @Nonnull
-    String getField();
+	@Nonnull
+	String getField();
 
-    @Nonnull
-    Expression getValue();
+	@Nonnull
+	Expression getValue();
 }

@@ -37,68 +37,68 @@ import static org.marid.types.TypeUtils.WILDCARD;
 
 public class GuavaTypeContext implements TypeContext {
 
-    private final TypedBean bean;
-    private final ClassLoader classLoader;
+	private final TypedBean bean;
+	private final ClassLoader classLoader;
 
-    public GuavaTypeContext(TypedBean bean, ClassLoader classLoader) {
-        this.bean = bean;
-        this.classLoader = classLoader;
-    }
+	public GuavaTypeContext(TypedBean bean, ClassLoader classLoader) {
+		this.bean = bean;
+		this.classLoader = classLoader;
+	}
 
-    @Nonnull
-    @Override
-    public Type getBeanType(@Nonnull String name) {
-        return bean.matchingCandidates()
-                .filter(b -> name.equals(b.getName()))
-                .filter(TypedBean.class::isInstance)
-                .map(TypedBean.class::cast)
-                .findFirst()
-                .map(b -> b.getFactory().resolveType(null, new GuavaTypeContext(b, classLoader)))
-                .orElse(WILDCARD);
-    }
+	@Nonnull
+	@Override
+	public Type getBeanType(@Nonnull String name) {
+		return bean.matchingCandidates()
+				.filter(b -> name.equals(b.getName()))
+				.filter(TypedBean.class::isInstance)
+				.map(TypedBean.class::cast)
+				.findFirst()
+				.map(b -> b.getFactory().resolveType(null, new GuavaTypeContext(b, classLoader)))
+				.orElse(WILDCARD);
+	}
 
-    @Nonnull
-    @Override
-    public Type resolve(@Nullable Type owner, @Nonnull Type type) {
-        return owner == null ? type : TypeToken.of(owner).resolveType(type).getType();
-    }
+	@Nonnull
+	@Override
+	public Type resolve(@Nullable Type owner, @Nonnull Type type) {
+		return owner == null ? type : TypeToken.of(owner).resolveType(type).getType();
+	}
 
-    @Nonnull
-    @Override
-    public Class<?> getRaw(@Nonnull Type type) {
-        return TypeToken.of(type).getRawType();
-    }
+	@Nonnull
+	@Override
+	public Class<?> getRaw(@Nonnull Type type) {
+		return TypeToken.of(type).getRawType();
+	}
 
-    @Override
-    public boolean isAssignable(@Nonnull Type from, @Nonnull Type to) {
-        return TypeUtils.isAssignable(to, from);
-    }
+	@Override
+	public boolean isAssignable(@Nonnull Type from, @Nonnull Type to) {
+		return TypeUtils.isAssignable(to, from);
+	}
 
-    @Nonnull
-    @Override
-    public ClassLoader getClassLoader() {
-        return classLoader;
-    }
+	@Nonnull
+	@Override
+	public ClassLoader getClassLoader() {
+		return classLoader;
+	}
 
-    @Nonnull
-    @Override
-    public Type getClassType(@Nonnull Class<?> type) {
-        final ParameterizedType parameterizedType = (ParameterizedType) getType(Class.class);
-        return new TypeResolver()
-                .where(parameterizedType.getActualTypeArguments()[0], type)
-                .resolveType(parameterizedType);
-    }
+	@Nonnull
+	@Override
+	public Type getClassType(@Nonnull Class<?> type) {
+		final ParameterizedType parameterizedType = (ParameterizedType) getType(Class.class);
+		return new TypeResolver()
+				.where(parameterizedType.getActualTypeArguments()[0], type)
+				.resolveType(parameterizedType);
+	}
 
-    @Nonnull
-    @Override
-    public Type getType(@Nonnull Class<?> type) {
-        final TypeToken<?> t = TypeToken.of(type);
-        final TypeToken<?> c = t.getSupertype(Casts.cast(type));
-        return c.getType();
-    }
+	@Nonnull
+	@Override
+	public Type getType(@Nonnull Class<?> type) {
+		final TypeToken<?> t = TypeToken.of(type);
+		final TypeToken<?> c = t.getSupertype(Casts.cast(type));
+		return c.getType();
+	}
 
-    @Override
-    public <T> T evaluate(@Nonnull Function<TypeEvaluator, T> callback) {
-        return callback.apply(new GuavaTypeEvaluator());
-    }
+	@Override
+	public <T> T evaluate(@Nonnull Function<TypeEvaluator, T> callback) {
+		return callback.apply(new GuavaTypeEvaluator());
+	}
 }

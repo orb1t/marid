@@ -33,16 +33,16 @@ import static org.marid.jfx.props.Props.value;
 @Component
 public class JavaTab extends GenericGridPane implements SettingsEditor {
 
-    private final JavaSettings pref;
+	private final JavaSettings pref;
 
-    @Autowired
-    public JavaTab(JavaSettings pref) throws Exception {
-        this.pref = pref;
-        addTextField("Java executable", value(pref::getJavaExecutable, pref::setJavaExecutable));
-    }
+	@Autowired
+	public JavaTab(JavaSettings pref) throws Exception {
+		this.pref = pref;
+		addTextField("Java executable", value(pref::getJavaExecutable, pref::setJavaExecutable));
+	}
 
-    @Override
-    public JavaSettings getSettings() {
-        return pref;
-    }
+	@Override
+	public JavaSettings getSettings() {
+		return pref;
+	}
 }

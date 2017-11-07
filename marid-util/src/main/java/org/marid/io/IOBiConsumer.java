@@ -31,14 +31,14 @@ import java.util.function.BiConsumer;
 @FunctionalInterface
 public interface IOBiConsumer<T, U> extends BiConsumer<T, U> {
 
-    void ioAccept(T t, U u) throws IOException;
+	void ioAccept(T t, U u) throws IOException;
 
-    @Override
-    default void accept(T t, U u) throws UncheckedIOException {
-        try {
-            ioAccept(t, u);
-        } catch (IOException x) {
-            throw new UncheckedIOException(x);
-        }
-    }
+	@Override
+	default void accept(T t, U u) throws UncheckedIOException {
+		try {
+			ioAccept(t, u);
+		} catch (IOException x) {
+			throw new UncheckedIOException(x);
+		}
+	}
 }

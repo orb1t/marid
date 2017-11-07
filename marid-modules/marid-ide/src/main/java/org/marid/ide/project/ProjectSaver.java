@@ -30,18 +30,18 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProjectSaver {
 
-    private final ProjectPrerequisites projectPrerequisites;
-    private final ApplicationEventPublisher publisher;
+	private final ProjectPrerequisites projectPrerequisites;
+	private final ApplicationEventPublisher publisher;
 
-    @Autowired
-    public ProjectSaver(ProjectPrerequisites projectPrerequisites, ApplicationEventPublisher publisher) {
-        this.projectPrerequisites = projectPrerequisites;
-        this.publisher = publisher;
-    }
+	@Autowired
+	public ProjectSaver(ProjectPrerequisites projectPrerequisites, ApplicationEventPublisher publisher) {
+		this.projectPrerequisites = projectPrerequisites;
+		this.publisher = publisher;
+	}
 
-    public void save(ProjectProfile profile) {
-        publisher.publishEvent(new ProjectSaveEvent(this));
-        projectPrerequisites.apply(profile);
-        profile.save();
-    }
+	public void save(ProjectProfile profile) {
+		publisher.publishEvent(new ProjectSaveEvent(this));
+		projectPrerequisites.apply(profile);
+		profile.save();
+	}
 }

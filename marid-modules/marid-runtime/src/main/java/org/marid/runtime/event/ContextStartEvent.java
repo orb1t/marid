@@ -25,7 +25,7 @@ import org.marid.runtime.context.MaridRuntime;
 
 public final class ContextStartEvent extends MaridEvent {
 
-    public ContextStartEvent(MaridRuntime context) {
-        super(context);
-    }
+	public ContextStartEvent(MaridRuntime context) {
+		super(context);
+	}
 }

@@ -33,11 +33,11 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.TYPE, ElementType.METHOD, ElementType.PACKAGE})
 public @interface MetaInfo {
 
-    String group() default "";
+	String group() default "";
 
-    String name() default "";
+	String name() default "";
 
-    String description() default "";
+	String description() default "";
 
-    String icon() default "";
+	String icon() default "";
 }

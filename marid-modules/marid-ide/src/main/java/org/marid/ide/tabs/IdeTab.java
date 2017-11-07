@@ -33,15 +33,15 @@ import java.util.Optional;
  */
 public class IdeTab extends Tab {
 
-    @Autowired
-    private void init(GenericApplicationContext context, IdeTabPane tabPane) {
-        tabPane.getTabs().add(this);
-        tabPane.getSelectionModel().select(this);
-        Props.addHandler(onClosedProperty(), event -> context.close());
-    }
+	@Autowired
+	private void init(GenericApplicationContext context, IdeTabPane tabPane) {
+		tabPane.getTabs().add(this);
+		tabPane.getSelectionModel().select(this);
+		Props.addHandler(onClosedProperty(), event -> context.close());
+	}
 
-    @PreDestroy
-    private void destroy() {
-        Optional.ofNullable(getTabPane()).ifPresent(tabPane -> tabPane.getTabs().remove(this));
-    }
+	@PreDestroy
+	private void destroy() {
+		Optional.ofNullable(getTabPane()).ifPresent(tabPane -> tabPane.getTabs().remove(this));
+	}
 }

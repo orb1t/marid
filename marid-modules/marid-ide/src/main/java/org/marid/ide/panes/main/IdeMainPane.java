@@ -37,24 +37,24 @@ import java.util.prefs.Preferences;
 @Component
 public class IdeMainPane extends BorderPane {
 
-    private final HiddenSidesPane pane;
-    private final IdeTabPane tabPane;
-    private final IdeLogPane ideLogPane;
-    private final Preferences preferences;
+	private final HiddenSidesPane pane;
+	private final IdeTabPane tabPane;
+	private final IdeLogPane ideLogPane;
+	private final Preferences preferences;
 
-    @Autowired
-    public IdeMainPane(IdeTabPane tabPane, IdeLogPane ideLogPane, IdeToolbar toolbar, Preferences preferences) {
-        this.pane = new HiddenSidesPane(tabPane, null, null, ideLogPane, null);
-        this.tabPane = tabPane;
-        this.ideLogPane = ideLogPane;
-        this.preferences = preferences;
-        this.ideLogPane.maxHeightProperty().bind(heightProperty().subtract(100.0));
-        setTop(toolbar);
-        setCenter(pane);
-        setFocusTraversable(false);
-    }
+	@Autowired
+	public IdeMainPane(IdeTabPane tabPane, IdeLogPane ideLogPane, IdeToolbar toolbar, Preferences preferences) {
+		this.pane = new HiddenSidesPane(tabPane, null, null, ideLogPane, null);
+		this.tabPane = tabPane;
+		this.ideLogPane = ideLogPane;
+		this.preferences = preferences;
+		this.ideLogPane.maxHeightProperty().bind(heightProperty().subtract(100.0));
+		setTop(toolbar);
+		setCenter(pane);
+		setFocusTraversable(false);
+	}
 
-    public void setPinnedSide(Side side) {
-        pane.setPinnedSide(side);
-    }
+	public void setPinnedSide(Side side) {
+		pane.setPinnedSide(side);
+	}
 }

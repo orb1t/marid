@@ -45,61 +45,61 @@ import static org.marid.logging.Log.log;
 @Repository
 public class MavenRepositories {
 
-    private static final String MAVEN_URL = "http://www.apache.org/dist/maven/maven-3/3.5.2/binaries/apache-maven-3.5.2-bin.zip";
+	private static final String MAVEN_URL = "http://www.apache.org/dist/maven/maven-3/3.5.2/binaries/apache-maven-3.5.2-bin.zip";
 
-    private final Path baseDir;
-    private final File centralDir;
-    private final List<MavenRepository> repositories = new ArrayList<>();
+	private final Path baseDir;
+	private final File centralDir;
+	private final List<MavenRepository> repositories = new ArrayList<>();
 
-    @Autowired
-    public MavenRepositories(Directories directories) {
-        baseDir = directories.getMarid().resolve("cache").resolve("repos");
-        centralDir = baseDir.resolve("central").resolve("cache").toFile();
+	@Autowired
+	public MavenRepositories(Directories directories) {
+		baseDir = directories.getMarid().resolve("cache").resolve("repos");
+		centralDir = baseDir.resolve("central").resolve("cache").toFile();
 
-        // maven central
-        repositories.add(new MavenRepository("central", centralDir, "http://repo1.maven.org/maven2"));
+		// maven central
+		repositories.add(new MavenRepository("central", centralDir, "http://repo1.maven.org/maven2"));
 
-        // local repository
-        repositories.add(new MavenRepository("local", directories.getRepo().toFile(), null));
-    }
+		// local repository
+		repositories.add(new MavenRepository("local", directories.getRepo().toFile(), null));
+	}
 
-    public Path getBaseDir() {
-        return baseDir;
-    }
+	public Path getBaseDir() {
+		return baseDir;
+	}
 
-    public List<MavenRepository> getRepositories() {
-        return repositories;
-    }
+	public List<MavenRepository> getRepositories() {
+		return repositories;
+	}
 
-    @Autowired
-    private void initMaven(Directories directories) {
-        final Path mavenHome = directories.getMaven();
-        final Pattern slashPattern = Pattern.compile("/");
+	@Autowired
+	private void initMaven(Directories directories) {
+		final Path mavenHome = directories.getMaven();
+		final Pattern slashPattern = Pattern.compile("/");
 
-        try {
-            if (Files.notExists(mavenHome) || Files.list(mavenHome).count() == 0) {
-                final URL mavenZip = new URL(MAVEN_URL);
-                try (final ZipInputStream zis = new ZipInputStream(mavenZip.openStream())) {
-                    for (ZipEntry e = zis.getNextEntry(); e != null; e = zis.getNextEntry()) {
-                        if (e.isDirectory()) {
-                            continue;
-                        }
-                        try {
-                            final Path path = slashPattern.splitAsStream(e.getName())
-                                    .skip(1L)
-                                    .reduce(mavenHome, Path::resolve, (p1, p2) -> p2);
-                            final Path dir = path.getParent();
-                            Files.createDirectories(dir);
-                            Files.copy(zis, path, REPLACE_EXISTING);
-                            log(INFO, "Copied {0} to {1}", e.getName(), path);
-                        } finally {
-                            zis.closeEntry();
-                        }
-                    }
-                }
-            }
-        } catch (Exception x) {
-            log(WARNING, "Unable to initialize maven", x);
-        }
-    }
+		try {
+			if (Files.notExists(mavenHome) || Files.list(mavenHome).count() == 0) {
+				final URL mavenZip = new URL(MAVEN_URL);
+				try (final ZipInputStream zis = new ZipInputStream(mavenZip.openStream())) {
+					for (ZipEntry e = zis.getNextEntry(); e != null; e = zis.getNextEntry()) {
+						if (e.isDirectory()) {
+							continue;
+						}
+						try {
+							final Path path = slashPattern.splitAsStream(e.getName())
+									.skip(1L)
+									.reduce(mavenHome, Path::resolve, (p1, p2) -> p2);
+							final Path dir = path.getParent();
+							Files.createDirectories(dir);
+							Files.copy(zis, path, REPLACE_EXISTING);
+							log(INFO, "Copied {0} to {1}", e.getName(), path);
+						} finally {
+							zis.closeEntry();
+						}
+					}
+				}
+			}
+		} catch (Exception x) {
+			log(WARNING, "Unable to initialize maven", x);
+		}
+	}
 }

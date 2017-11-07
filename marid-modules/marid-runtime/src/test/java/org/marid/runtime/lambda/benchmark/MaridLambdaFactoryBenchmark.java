@@ -46,79 +46,79 @@ import static org.marid.misc.Casts.cast;
 @OperationsPerInvocation(MaridLambdaFactoryBenchmark.COUNT)
 public class MaridLambdaFactoryBenchmark {
 
-    public static final int COUNT = 100_000;
+	public static final int COUNT = 100_000;
 
-    @Benchmark
-    public void hardO2P(GlobalState state, Blackhole blackhole) {
-        for (int i = 0; i < COUNT; i++) {
-            blackhole.consume(state.ho2p.applyAsInt(state.strings[i]));
-        }
-    }
+	@Benchmark
+	public void hardO2P(GlobalState state, Blackhole blackhole) {
+		for (int i = 0; i < COUNT; i++) {
+			blackhole.consume(state.ho2p.applyAsInt(state.strings[i]));
+		}
+	}
 
-    @Benchmark
-    public void proxyO2P(GlobalState state, Blackhole blackhole) {
-        for (int i = 0; i < COUNT; i++) {
-            blackhole.consume(state.po2p.applyAsInt(state.strings[i]));
-        }
-    }
+	@Benchmark
+	public void proxyO2P(GlobalState state, Blackhole blackhole) {
+		for (int i = 0; i < COUNT; i++) {
+			blackhole.consume(state.po2p.applyAsInt(state.strings[i]));
+		}
+	}
 
-    @Benchmark
-    public void hardP2P(GlobalState state, Blackhole blackhole) {
-        for (int i = 0; i < COUNT; i++) {
-            blackhole.consume(state.hp2p.applyAsLong(state.doubles[i]));
-        }
-    }
+	@Benchmark
+	public void hardP2P(GlobalState state, Blackhole blackhole) {
+		for (int i = 0; i < COUNT; i++) {
+			blackhole.consume(state.hp2p.applyAsLong(state.doubles[i]));
+		}
+	}
 
-    @Benchmark
-    public void proxyP2P(GlobalState state, Blackhole blackhole) {
-        for (int i = 0; i < COUNT; i++) {
-            blackhole.consume(state.pp2p.applyAsLong(state.doubles[i]));
-        }
-    }
+	@Benchmark
+	public void proxyP2P(GlobalState state, Blackhole blackhole) {
+		for (int i = 0; i < COUNT; i++) {
+			blackhole.consume(state.pp2p.applyAsLong(state.doubles[i]));
+		}
+	}
 
-    @Benchmark
-    public void hardO2O(GlobalState state, Blackhole blackhole) {
-        for (int i = 0; i < COUNT; i++) {
-            blackhole.consume(state.ho2o.apply(state.strings[i]));
-        }
-    }
+	@Benchmark
+	public void hardO2O(GlobalState state, Blackhole blackhole) {
+		for (int i = 0; i < COUNT; i++) {
+			blackhole.consume(state.ho2o.apply(state.strings[i]));
+		}
+	}
 
-    @Benchmark
-    public void proxyO2O(GlobalState state, Blackhole blackhole) {
-        for (int i = 0; i < COUNT; i++) {
-            blackhole.consume(state.po2o.apply(state.strings[i]));
-        }
-    }
+	@Benchmark
+	public void proxyO2O(GlobalState state, Blackhole blackhole) {
+		for (int i = 0; i < COUNT; i++) {
+			blackhole.consume(state.po2o.apply(state.strings[i]));
+		}
+	}
 
-    @State(Scope.Benchmark)
-    public static class GlobalState {
+	@State(Scope.Benchmark)
+	public static class GlobalState {
 
-        private final Random random = new Random(0L);
-        private final String[] strings = IntStream.range(0, COUNT)
-                .mapToObj(i -> new byte[random.nextInt(100) + 1])
-                .peek(random::nextBytes)
-                .map(a -> new String(a, StandardCharsets.ISO_8859_1))
-                .toArray(String[]::new);
-        private final double[] doubles = IntStream.range(0, COUNT)
-                .mapToDouble(i -> random.nextDouble())
-                .toArray();
-        private final ToIntFunction<String> ho2p = String::length;
-        private final ToIntFunction<String> po2p = cast(call(() -> MaridLambdaFactory.lambda(
-                ToIntFunction.class, String.class.getMethod("length")))
-        );
-        private final DoubleToLongFunction hp2p = Double::doubleToLongBits;
-        private final DoubleToLongFunction pp2p = call(() -> MaridLambdaFactory.lambda(
-                DoubleToLongFunction.class, Double.class.getMethod("doubleToLongBits", double.class))
-        );
-        private final Function<String, String> ho2o = String::trim;
-        private final Function<String, String> po2o = cast(call(() -> MaridLambdaFactory.lambda(
-                Function.class, String.class.getMethod("trim")))
-        );
-    }
+		private final Random random = new Random(0L);
+		private final String[] strings = IntStream.range(0, COUNT)
+				.mapToObj(i -> new byte[random.nextInt(100) + 1])
+				.peek(random::nextBytes)
+				.map(a -> new String(a, StandardCharsets.ISO_8859_1))
+				.toArray(String[]::new);
+		private final double[] doubles = IntStream.range(0, COUNT)
+				.mapToDouble(i -> random.nextDouble())
+				.toArray();
+		private final ToIntFunction<String> ho2p = String::length;
+		private final ToIntFunction<String> po2p = cast(call(() -> MaridLambdaFactory.lambda(
+				ToIntFunction.class, String.class.getMethod("length")))
+		);
+		private final DoubleToLongFunction hp2p = Double::doubleToLongBits;
+		private final DoubleToLongFunction pp2p = call(() -> MaridLambdaFactory.lambda(
+				DoubleToLongFunction.class, Double.class.getMethod("doubleToLongBits", double.class))
+		);
+		private final Function<String, String> ho2o = String::trim;
+		private final Function<String, String> po2o = cast(call(() -> MaridLambdaFactory.lambda(
+				Function.class, String.class.getMethod("trim")))
+		);
+	}
 
-    public static void main(String... args) throws Exception {
-        new Runner(new OptionsBuilder()
-                .build()
-        ).run();
-    }
+	public static void main(String... args) throws Exception {
+		new Runner(new OptionsBuilder()
+				.build()
+		).run();
+	}
 }

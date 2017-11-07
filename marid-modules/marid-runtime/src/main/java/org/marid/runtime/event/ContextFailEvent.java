@@ -27,30 +27,30 @@ import javax.annotation.Nonnull;
 
 public final class ContextFailEvent extends MaridEvent {
 
-    @Nonnull
-    private final Throwable cause;
+	@Nonnull
+	private final Throwable cause;
 
-    @Nonnull
-    private final String beanName;
+	@Nonnull
+	private final String beanName;
 
-    public ContextFailEvent(@Nonnull MaridRuntime context, @Nonnull String beanName, @Nonnull Throwable cause) {
-        super(context);
-        this.beanName = beanName;
-        this.cause = cause;
-    }
+	public ContextFailEvent(@Nonnull MaridRuntime context, @Nonnull String beanName, @Nonnull Throwable cause) {
+		super(context);
+		this.beanName = beanName;
+		this.cause = cause;
+	}
 
-    @Nonnull
-    public String getBeanName() {
-        return beanName;
-    }
+	@Nonnull
+	public String getBeanName() {
+		return beanName;
+	}
 
-    @Nonnull
-    public Throwable getCause() {
-        return cause;
-    }
+	@Nonnull
+	public Throwable getCause() {
+		return cause;
+	}
 
-    @Override
-    public String toString() {
-        return super.toString() + "(" + cause + ")";
-    }
+	@Override
+	public String toString() {
+		return super.toString() + "(" + cause + ")";
+	}
 }

@@ -33,24 +33,24 @@ import java.util.function.Supplier;
 @Component
 public class IdeTabPane extends TabPane {
 
-    private static final Object TAB_KEY = new Object();
+	private static final Object TAB_KEY = new Object();
 
-    public IdeTabPane() {
-        setTabClosingPolicy(TabClosingPolicy.ALL_TABS);
-        setFocusTraversable(false);
-    }
+	public IdeTabPane() {
+		setTabClosingPolicy(TabClosingPolicy.ALL_TABS);
+		setFocusTraversable(false);
+	}
 
-    public void addTab(@Nonnull Object key, @Nonnull Supplier<? extends Tab> tabSupplier) {
-        for (int i = getTabs().size() - 1; i >= 0; i--) {
-            final Object v = getTabs().get(i).getProperties().get(TAB_KEY);
-            if (v != null && v.equals(key)) {
-                getSelectionModel().select(i);
-                return;
-            }
-        }
+	public void addTab(@Nonnull Object key, @Nonnull Supplier<? extends Tab> tabSupplier) {
+		for (int i = getTabs().size() - 1; i >= 0; i--) {
+			final Object v = getTabs().get(i).getProperties().get(TAB_KEY);
+			if (v != null && v.equals(key)) {
+				getSelectionModel().select(i);
+				return;
+			}
+		}
 
-        final Tab tab = tabSupplier.get();
-        tab.getProperties().put(TAB_KEY, key);
-        getTabs().add(tab);
-    }
+		final Tab tab = tabSupplier.get();
+		tab.getProperties().put(TAB_KEY, key);
+		getTabs().add(tab);
+	}
 }

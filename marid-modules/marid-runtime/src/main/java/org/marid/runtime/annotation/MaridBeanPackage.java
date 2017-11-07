@@ -36,11 +36,11 @@ import java.lang.annotation.Target;
 @MetaInfoType("Bean")
 public @interface MaridBeanPackage {
 
-    String group() default "";
+	String group() default "";
 
-    String name() default "";
+	String name() default "";
 
-    String icon() default "";
+	String icon() default "";
 
-    String description() default "";
+	String description() default "";
 }

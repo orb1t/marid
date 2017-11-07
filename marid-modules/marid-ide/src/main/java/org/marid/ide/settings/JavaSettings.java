@@ -31,28 +31,28 @@ import java.util.Optional;
 @Component
 public class JavaSettings extends AbstractSettings {
 
-    public String getJavaExecutable() {
-        return preferences.get("javaExecutable", ProcessHandle.current().info().command().orElse("java"));
-    }
+	public String getJavaExecutable() {
+		return preferences.get("javaExecutable", ProcessHandle.current().info().command().orElse("java"));
+	}
 
-    public void setJavaExecutable(String value) {
-        if (StringUtils.isBlank(value)) {
-            preferences.remove("javaExecutable");
-        } else {
-            preferences.put("javaExecutable", value);
-        }
-    }
+	public void setJavaExecutable(String value) {
+		if (StringUtils.isBlank(value)) {
+			preferences.remove("javaExecutable");
+		} else {
+			preferences.put("javaExecutable", value);
+		}
+	}
 
-    public String[] getJavaArguments() {
-        return Optional.ofNullable(preferences.get("javaArguments", null)).map(s -> s.split("\\000")).orElse(new String[0]);
-    }
+	public String[] getJavaArguments() {
+		return Optional.ofNullable(preferences.get("javaArguments", null)).map(s -> s.split("\\000")).orElse(new String[0]);
+	}
 
-    public void setJavaArguments(String[] arguments) {
-        preferences.put("javaArguments", String.join("\000", arguments));
-    }
+	public void setJavaArguments(String[] arguments) {
+		preferences.put("javaArguments", String.join("\000", arguments));
+	}
 
-    @Override
-    public String getName() {
-        return "Java";
-    }
+	@Override
+	public String getName() {
+		return "Java";
+	}
 }

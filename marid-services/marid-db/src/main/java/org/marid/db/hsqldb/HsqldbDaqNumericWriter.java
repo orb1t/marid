@@ -38,28 +38,28 @@ import java.sql.SQLException;
 @MaridBean
 public class HsqldbDaqNumericWriter extends HsqldbDaqAbstractWriter<Double> implements NumericWriter {
 
-    @MaridBeanFactory
-    public HsqldbDaqNumericWriter(DataSource dataSource, String table) {
-        super(dataSource, table);
-    }
+	@MaridBeanFactory
+	public HsqldbDaqNumericWriter(DataSource dataSource, String table) {
+		super(dataSource, table);
+	}
 
-    @Override
-    protected void setValue(PreparedStatement statement, int index, Double value) throws SQLException {
-        statement.setDouble(index, value);
-    }
+	@Override
+	protected void setValue(PreparedStatement statement, int index, Double value) throws SQLException {
+		statement.setDouble(index, value);
+	}
 
-    @Override
-    protected Double getValue(ResultSet resultSet, int index) throws SQLException {
-        return resultSet.getDouble(index);
-    }
+	@Override
+	protected Double getValue(ResultSet resultSet, int index) throws SQLException {
+		return resultSet.getDouble(index);
+	}
 
-    @Override
-    protected byte[] toByteArray(@Nonnull Double value) {
-        return ByteBuffer.allocate(8).putDouble(0, value).array();
-    }
+	@Override
+	protected byte[] toByteArray(@Nonnull Double value) {
+		return ByteBuffer.allocate(8).putDouble(0, value).array();
+	}
 
-    @Override
-    protected String getSqlTypeName() {
-        return "double";
-    }
+	@Override
+	protected String getSqlTypeName() {
+		return "double";
+	}
 }

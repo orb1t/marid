@@ -38,37 +38,37 @@ import static org.marid.logging.Log.log;
 @ComponentScan
 public class BeanConfiguration {
 
-    private final ProjectProfile profile;
+	private final ProjectProfile profile;
 
-    public BeanConfiguration(ProjectProfile profile) {
-        this.profile = profile;
-    }
+	public BeanConfiguration(ProjectProfile profile) {
+		this.profile = profile;
+	}
 
-    @Bean
-    public ProjectProfile profile() {
-        return profile;
-    }
+	@Bean
+	public ProjectProfile profile() {
+		return profile;
+	}
 
-    @Bean
-    public IdeBean root() {
-        final Path beansFile = profile.get(ProjectFileType.BEANS_XML);
-        if (Files.isRegularFile(beansFile)) {
-            try {
-                return Xmls.read(beansFile, IdeBean::new);
-            } catch (Exception x) {
-                log(WARNING, "Unable to read {0}", x, beansFile);
-            }
-        }
-        return new IdeBean();
-    }
+	@Bean
+	public IdeBean root() {
+		final Path beansFile = profile.get(ProjectFileType.BEANS_XML);
+		if (Files.isRegularFile(beansFile)) {
+			try {
+				return Xmls.read(beansFile, IdeBean::new);
+			} catch (Exception x) {
+				log(WARNING, "Unable to read {0}", x, beansFile);
+			}
+		}
+		return new IdeBean();
+	}
 
-    @Override
-    public int hashCode() {
-        return profile.hashCode();
-    }
+	@Override
+	public int hashCode() {
+		return profile.hashCode();
+	}
 
-    @Override
-    public boolean equals(Object obj) {
-        return obj == this || (obj instanceof BeanConfiguration && ((BeanConfiguration) obj).profile.equals(profile));
-    }
+	@Override
+	public boolean equals(Object obj) {
+		return obj == this || (obj instanceof BeanConfiguration && ((BeanConfiguration) obj).profile.equals(profile));
+	}
 }

@@ -33,21 +33,21 @@ import java.util.Map;
 @MaridBean
 public class StdProtoRoot extends StdProto implements ProtoRoot {
 
-    private final Map<String, StdProtoBus> children = new LinkedHashMap<>();
-    private final ThreadGroup threadGroup;
+	private final Map<String, StdProtoBus> children = new LinkedHashMap<>();
+	private final ThreadGroup threadGroup;
 
-    @MaridBeanFactory(name = "Proto Root")
-    public StdProtoRoot(String id, String name) {
-        super(id, name);
-        this.threadGroup = new ThreadGroup(id);
-    }
+	@MaridBeanFactory(name = "Proto Root")
+	public StdProtoRoot(String id, String name) {
+		super(id, name);
+		this.threadGroup = new ThreadGroup(id);
+	}
 
-    @Override
-    public Map<String, StdProtoBus> getItems() {
-        return children;
-    }
+	@Override
+	public Map<String, StdProtoBus> getItems() {
+		return children;
+	}
 
-    public ThreadGroup getThreadGroup() {
-        return threadGroup;
-    }
+	public ThreadGroup getThreadGroup() {
+		return threadGroup;
+	}
 }

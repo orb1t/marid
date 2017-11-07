@@ -44,37 +44,37 @@ import static org.marid.jfx.icons.FontIcons.glyphIcon;
 @FxComponent
 public class IconViewerTable extends TableView<String> {
 
-    public IconViewerTable() {
-        super(FXCollections.observableList(icons()));
-        setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
-        {
-            final TableColumn<String, String> column = new TableColumn<>(L10n.s("Name"));
-            column.setMinWidth(100);
-            column.setPrefWidth(110);
-            column.setMaxWidth(500);
-            column.setCellValueFactory(param -> new SimpleStringProperty(param.getValue()));
-            getColumns().add(column);
-        }
-        {
-            final TableColumn<String, Node> column = new TableColumn<>(L10n.s("Icon"));
-            column.setMaxWidth(128);
-            column.setPrefWidth(128);
-            column.setMaxWidth(128);
-            column.setCellValueFactory(param -> new SimpleObjectProperty<>(glyphIcon(param.getValue(), 32)));
-            column.setSortable(false);
-            column.setStyle("-fx-alignment: center");
-            getColumns().add(column);
-        }
-    }
+	public IconViewerTable() {
+		super(FXCollections.observableList(icons()));
+		setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
+		{
+			final TableColumn<String, String> column = new TableColumn<>(L10n.s("Name"));
+			column.setMinWidth(100);
+			column.setPrefWidth(110);
+			column.setMaxWidth(500);
+			column.setCellValueFactory(param -> new SimpleStringProperty(param.getValue()));
+			getColumns().add(column);
+		}
+		{
+			final TableColumn<String, Node> column = new TableColumn<>(L10n.s("Icon"));
+			column.setMaxWidth(128);
+			column.setPrefWidth(128);
+			column.setMaxWidth(128);
+			column.setCellValueFactory(param -> new SimpleObjectProperty<>(glyphIcon(param.getValue(), 32)));
+			column.setSortable(false);
+			column.setStyle("-fx-alignment: center");
+			getColumns().add(column);
+		}
+	}
 
-    private static List<String> icons() {
-        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        final Properties properties = new Properties();
-        try (final InputStream inputStream = classLoader.getResourceAsStream("fonts/meta.properties")) {
-            properties.load(inputStream);
-        } catch (IOException x) {
-            throw new UncheckedIOException(x);
-        }
-        return properties.stringPropertyNames().stream().sorted().collect(Collectors.toList());
-    }
+	private static List<String> icons() {
+		final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		final Properties properties = new Properties();
+		try (final InputStream inputStream = classLoader.getResourceAsStream("fonts/meta.properties")) {
+			properties.load(inputStream);
+		} catch (IOException x) {
+			throw new UncheckedIOException(x);
+		}
+		return properties.stringPropertyNames().stream().sorted().collect(Collectors.toList());
+	}
 }

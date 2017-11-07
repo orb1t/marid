@@ -31,10 +31,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProjectStructurePane extends BorderPane {
 
-    @Autowired
-    public ProjectStructurePane(ProjectStructureTree tree, ProjectStructureBreadCrumb crumb) {
-        setCenter(tree);
-        setBottom(crumb);
-        BorderPane.setMargin(crumb, new Insets(2));
-    }
+	@Autowired
+	public ProjectStructurePane(ProjectStructureTree tree, ProjectStructureBreadCrumb crumb) {
+		setCenter(tree);
+		setBottom(crumb);
+		BorderPane.setMargin(crumb, new Insets(2));
+	}
 }

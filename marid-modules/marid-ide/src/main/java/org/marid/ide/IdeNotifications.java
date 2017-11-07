@@ -52,105 +52,105 @@ import static org.marid.logging.Log.log;
  */
 public class IdeNotifications {
 
-    public static void n(@Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
-                         @Nonnull String message,
-                         @Nonnull Object... args) {
-        log(4, level, message, null, args);
-        n0(level, message, null, null, args);
-    }
+	public static void n(@Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
+											 @Nonnull String message,
+											 @Nonnull Object... args) {
+		log(4, level, message, null, args);
+		n0(level, message, null, null, args);
+	}
 
-    public static void n(@Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
-                         @Nonnull String message,
-                         @Nullable Parent details,
-                         @Nonnull Object... args) {
-        log(4, level, message, null, args);
-        n0(level, message, details, null, args);
-    }
+	public static void n(@Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
+											 @Nonnull String message,
+											 @Nullable Parent details,
+											 @Nonnull Object... args) {
+		log(4, level, message, null, args);
+		n0(level, message, details, null, args);
+	}
 
-    public static void n(@Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
-                         @Nonnull String message,
-                         @Nullable Throwable thrown,
-                         @Nonnull Object... args) {
-        log(4, level, message, thrown, args);
-        n0(level, message, null, thrown, args);
-    }
+	public static void n(@Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
+											 @Nonnull String message,
+											 @Nullable Throwable thrown,
+											 @Nonnull Object... args) {
+		log(4, level, message, thrown, args);
+		n0(level, message, null, thrown, args);
+	}
 
-    public static void n(@Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
-                         @Nonnull String message,
-                         @Nullable Parent details,
-                         @Nullable Throwable thrown,
-                         @Nonnull Object... args) {
-        log(4, level, message, thrown, args);
-        n0(level, message, details, thrown, args);
-    }
+	public static void n(@Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
+											 @Nonnull String message,
+											 @Nullable Parent details,
+											 @Nullable Throwable thrown,
+											 @Nonnull Object... args) {
+		log(4, level, message, thrown, args);
+		n0(level, message, details, thrown, args);
+	}
 
-    private static void n0(@Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
-                           @Nonnull String message,
-                           @Nullable Parent details,
-                           @Nullable Throwable thrown,
-                           @Nonnull Object... args) {
-        final String text = m(Locale.getDefault(), message, args);
-        final List<Action> actions = new ArrayList<>();
-        if (details != null) {
-            final Action action = new Action(actionEvent -> {
-                details.setDisable(false);
-                final Stage stage = new Stage();
-                stage.initOwner(Ide.primaryStage);
-                stage.setScene(new Scene(details));
-                stage.setResizable(true);
-                stage.titleProperty().bind(ls("Details"));
-                stage.show();
-            });
-            action.textProperty().bind(ls("Details"));
-            action.setGraphic(FontIcons.glyphIcon("D_DETAILS", 20));
-            actions.add(action);
-        }
-        if (thrown != null) {
-            final Action action = new Action(event -> {
-                final Stage stage = new Stage();
-                stage.initOwner(Ide.primaryStage);
-                final TextArea textArea = new TextArea(StringUtils.throwableText(thrown));
-                textArea.setFont(new Font("Monospace", 12));
-                stage.setScene(new Scene(textArea));
-                stage.setResizable(true);
-                stage.titleProperty().bind(ls("Error text"));
-                stage.show();
-            });
-            action.textProperty().bind(ls("Error text"));
-            action.setGraphic(FontIcons.glyphIcon("D_PANORAMA_WIDE_ANGLE", 20));
-            actions.add(action);
-        }
-        final Notifications notifications = Notifications.create()
-                .text(text)
-                .title(s(level.getName()))
-                .action(actions.toArray(new Action[actions.size()]))
-                .darkStyle()
-                .position(Pos.TOP_RIGHT);
-        final Runnable task = () -> {
-            notifications.owner(Ide.primaryStage);
-            switch (level.getName()) {
-                case "INFO":
-                    notifications.showInformation();
-                    break;
-                case "ERROR":
-                case "SEVERE":
-                    notifications.showError();
-                    break;
-                case "WARNING":
-                    notifications.showWarning();
-                    break;
-                case "CONFIG":
-                    notifications.showConfirm();
-                    break;
-                default:
-                    notifications.show();
-                    break;
-            }
-        };
-        if (Platform.isFxApplicationThread()) {
-            task.run();
-        } else {
-            Platform.runLater(task);
-        }
-    }
+	private static void n0(@Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
+												 @Nonnull String message,
+												 @Nullable Parent details,
+												 @Nullable Throwable thrown,
+												 @Nonnull Object... args) {
+		final String text = m(Locale.getDefault(), message, args);
+		final List<Action> actions = new ArrayList<>();
+		if (details != null) {
+			final Action action = new Action(actionEvent -> {
+				details.setDisable(false);
+				final Stage stage = new Stage();
+				stage.initOwner(Ide.primaryStage);
+				stage.setScene(new Scene(details));
+				stage.setResizable(true);
+				stage.titleProperty().bind(ls("Details"));
+				stage.show();
+			});
+			action.textProperty().bind(ls("Details"));
+			action.setGraphic(FontIcons.glyphIcon("D_DETAILS", 20));
+			actions.add(action);
+		}
+		if (thrown != null) {
+			final Action action = new Action(event -> {
+				final Stage stage = new Stage();
+				stage.initOwner(Ide.primaryStage);
+				final TextArea textArea = new TextArea(StringUtils.throwableText(thrown));
+				textArea.setFont(new Font("Monospace", 12));
+				stage.setScene(new Scene(textArea));
+				stage.setResizable(true);
+				stage.titleProperty().bind(ls("Error text"));
+				stage.show();
+			});
+			action.textProperty().bind(ls("Error text"));
+			action.setGraphic(FontIcons.glyphIcon("D_PANORAMA_WIDE_ANGLE", 20));
+			actions.add(action);
+		}
+		final Notifications notifications = Notifications.create()
+				.text(text)
+				.title(s(level.getName()))
+				.action(actions.toArray(new Action[actions.size()]))
+				.darkStyle()
+				.position(Pos.TOP_RIGHT);
+		final Runnable task = () -> {
+			notifications.owner(Ide.primaryStage);
+			switch (level.getName()) {
+				case "INFO":
+					notifications.showInformation();
+					break;
+				case "ERROR":
+				case "SEVERE":
+					notifications.showError();
+					break;
+				case "WARNING":
+					notifications.showWarning();
+					break;
+				case "CONFIG":
+					notifications.showConfirm();
+					break;
+				default:
+					notifications.show();
+					break;
+			}
+		};
+		if (Platform.isFxApplicationThread()) {
+			task.run();
+		} else {
+			Platform.runLater(task);
+		}
+	}
 }

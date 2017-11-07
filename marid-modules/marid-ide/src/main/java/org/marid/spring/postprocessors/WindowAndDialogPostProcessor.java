@@ -37,46 +37,46 @@ import java.util.List;
  */
 public class WindowAndDialogPostProcessor implements BeanPostProcessor {
 
-    private final List<Dialog<?>> dialogs = new ArrayList<>();
-    private final List<Window> windows = new ArrayList<>();
-    private final AnnotationConfigApplicationContext context;
+	private final List<Dialog<?>> dialogs = new ArrayList<>();
+	private final List<Window> windows = new ArrayList<>();
+	private final AnnotationConfigApplicationContext context;
 
-    public WindowAndDialogPostProcessor(@Nonnull AnnotationConfigApplicationContext context) {
-        this.context = context;
-    }
+	public WindowAndDialogPostProcessor(@Nonnull AnnotationConfigApplicationContext context) {
+		this.context = context;
+	}
 
-    @Override
-    public Object postProcessBeforeInitialization(@Nullable Object bean, String beanName) throws BeansException {
-        return bean;
-    }
+	@Override
+	public Object postProcessBeforeInitialization(@Nullable Object bean, String beanName) throws BeansException {
+		return bean;
+	}
 
-    @Override
-    public Object postProcessAfterInitialization(@Nullable Object bean, String beanName) throws BeansException {
-        if (beanName != null) {
-            if (bean instanceof Dialog<?> && context.isSingleton(beanName)) {
-                final Dialog<?> dialog = (Dialog<?>) bean;
-                dialog.showingProperty().addListener((observable, oldValue, newValue) -> {
-                    if (!newValue) {
-                        dialogs.remove(dialog);
-                        closeIfNecessary();
-                    }
-                });
-                dialogs.add(dialog);
-            } else if (bean instanceof Window && context.isSingleton(beanName)) {
-                final Window window = (Window) bean;
-                window.addEventHandler(WindowEvent.WINDOW_HIDDEN, event -> {
-                    windows.remove(window);
-                    closeIfNecessary();
-                });
-                windows.add(window);
-            }
-        }
-        return bean;
-    }
+	@Override
+	public Object postProcessAfterInitialization(@Nullable Object bean, String beanName) throws BeansException {
+		if (beanName != null) {
+			if (bean instanceof Dialog<?> && context.isSingleton(beanName)) {
+				final Dialog<?> dialog = (Dialog<?>) bean;
+				dialog.showingProperty().addListener((observable, oldValue, newValue) -> {
+					if (!newValue) {
+						dialogs.remove(dialog);
+						closeIfNecessary();
+					}
+				});
+				dialogs.add(dialog);
+			} else if (bean instanceof Window && context.isSingleton(beanName)) {
+				final Window window = (Window) bean;
+				window.addEventHandler(WindowEvent.WINDOW_HIDDEN, event -> {
+					windows.remove(window);
+					closeIfNecessary();
+				});
+				windows.add(window);
+			}
+		}
+		return bean;
+	}
 
-    private void closeIfNecessary() {
-        if (dialogs.isEmpty() && windows.isEmpty()) {
-            context.close();
-        }
-    }
+	private void closeIfNecessary() {
+		if (dialogs.isEmpty() && windows.isEmpty()) {
+			context.close();
+		}
+	}
 }

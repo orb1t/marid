@@ -27,13 +27,13 @@ import java.io.File;
  */
 public class MavenRepository {
 
-    public final String id;
-    public final File directory;
-    public final String url;
+	public final String id;
+	public final File directory;
+	public final String url;
 
-    public MavenRepository(String id, File directory, String url) {
-        this.id = id;
-        this.directory = directory;
-        this.url = url;
-    }
+	public MavenRepository(String id, File directory, String url) {
+		this.id = id;
+		this.directory = directory;
+		this.url = url;
+	}
 }

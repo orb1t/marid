@@ -33,14 +33,14 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class CodecManager {
 
-    private final ObservableList<ModbusCodec<?>> codecs;
+	private final ObservableList<ModbusCodec<?>> codecs;
 
-    @Autowired
-    public CodecManager(ModbusCodec<?>[] codecs) {
-        this.codecs = FXCollections.observableArrayList(codecs);
-    }
+	@Autowired
+	public CodecManager(ModbusCodec<?>[] codecs) {
+		this.codecs = FXCollections.observableArrayList(codecs);
+	}
 
-    public <T> ObservableList<ModbusCodec<T>> getCodecs(Class<T> type) {
-        return Casts.cast(codecs.filtered(e -> type.isAssignableFrom(e.getType())));
-    }
+	public <T> ObservableList<ModbusCodec<T>> getCodecs(Class<T> type) {
+		return Casts.cast(codecs.filtered(e -> type.isAssignableFrom(e.getType())));
+	}
 }

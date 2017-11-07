@@ -31,29 +31,29 @@ import javax.annotation.Nullable;
 
 public class FxObject<T> extends SimpleObjectProperty<T> {
 
-    private final WeakInvalidationListener invalidationListener = new WeakInvalidationListener(this::onInvalidate);
+	private final WeakInvalidationListener invalidationListener = new WeakInvalidationListener(this::onInvalidate);
 
-    public FxObject(@Nonnull Callback<T, Observable[]> observables, @Nullable T value) {
-        this(observables);
-        set(value);
-    }
+	public FxObject(@Nonnull Callback<T, Observable[]> observables, @Nullable T value) {
+		this(observables);
+		set(value);
+	}
 
-    public FxObject(@Nonnull Callback<T, Observable[]> observables) {
-        addListener((o, oV, nV) -> {
-            if (oV != null) {
-                for (final Observable observable : observables.call(oV)) {
-                    observable.removeListener(invalidationListener);
-                }
-            }
-            if (nV != null) {
-                for (final Observable observable : observables.call(nV)) {
-                    observable.addListener(invalidationListener);
-                }
-            }
-        });
-    }
+	public FxObject(@Nonnull Callback<T, Observable[]> observables) {
+		addListener((o, oV, nV) -> {
+			if (oV != null) {
+				for (final Observable observable : observables.call(oV)) {
+					observable.removeListener(invalidationListener);
+				}
+			}
+			if (nV != null) {
+				for (final Observable observable : observables.call(nV)) {
+					observable.addListener(invalidationListener);
+				}
+			}
+		});
+	}
 
-    private void onInvalidate(Observable observable) {
-        fireValueChangedEvent();
-    }
+	private void onInvalidate(Observable observable) {
+		fireValueChangedEvent();
+	}
 }

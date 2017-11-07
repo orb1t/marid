@@ -24,7 +24,7 @@ import org.marid.ide.event.PropagatedEvent;
 
 public class ProjectSaveEvent extends PropagatedEvent {
 
-    public ProjectSaveEvent(Object source) {
-        super(source);
-    }
+	public ProjectSaveEvent(Object source) {
+		super(source);
+	}
 }

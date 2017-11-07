@@ -29,14 +29,14 @@ import java.util.Map;
  */
 public interface ProtoBus extends Proto, Closeable {
 
-    void reset();
+	void reset();
 
-    @Override
-    ProtoRoot getParent();
+	@Override
+	ProtoRoot getParent();
 
-    Map<String, ? extends ProtoDriver> getItems();
+	Map<String, ? extends ProtoDriver> getItems();
 
-    ProtoBusTaskRunner<? extends ProtoBus> getTaskRunner();
+	ProtoBusTaskRunner<? extends ProtoBus> getTaskRunner();
 
-    ProtoHealth getHealth();
+	ProtoHealth getHealth();
 }

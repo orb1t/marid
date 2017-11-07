@@ -40,23 +40,23 @@ import static org.marid.io.Xmls.read;
  */
 public class MaridLauncher {
 
-    public static void main(String... args) throws Exception {
-        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        final URL beansXmlUrl = classLoader.getResource("META-INF/marid/beans.xml");
-        if (beansXmlUrl == null) {
-            throw new IllegalStateException("No beans.xml file found");
-        }
+	public static void main(String... args) throws Exception {
+		final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		final URL beansXmlUrl = classLoader.getResource("META-INF/marid/beans.xml");
+		if (beansXmlUrl == null) {
+			throw new IllegalStateException("No beans.xml file found");
+		}
 
-        final AtomicReference<BeanContext> contextRef = new AtomicReference<>();
-        MaridRuntimeUtils.daemonThread(contextRef).start();
+		final AtomicReference<BeanContext> contextRef = new AtomicReference<>();
+		MaridRuntimeUtils.daemonThread(contextRef).start();
 
-        try (final Reader reader = new InputStreamReader(beansXmlUrl.openStream(), UTF_8)) {
-            final BeanConfiguration configuration = new BeanConfiguration(classLoader, System.getProperties());
-            final RuntimeBean bean = read(reader, e -> new RuntimeBean(null, e));
-            final BeanContext context = new BeanContext(configuration, bean);
-            contextRef.set(context);
-        } catch (Throwable x) {
-            x.printStackTrace();
-        }
-    }
+		try (final Reader reader = new InputStreamReader(beansXmlUrl.openStream(), UTF_8)) {
+			final BeanConfiguration configuration = new BeanConfiguration(classLoader, System.getProperties());
+			final RuntimeBean bean = read(reader, e -> new RuntimeBean(null, e));
+			final BeanContext context = new BeanContext(configuration, bean);
+			contextRef.set(context);
+		} catch (Throwable x) {
+			x.printStackTrace();
+		}
+	}
 }

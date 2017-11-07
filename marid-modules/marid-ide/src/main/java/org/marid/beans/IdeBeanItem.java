@@ -33,27 +33,27 @@ import static org.marid.dependant.beaneditor.view.IdeBeanView.glyph;
 
 public class IdeBeanItem extends TreeItem<IdeBean> {
 
-    public IdeBeanItem(@Nonnull IdeBean bean) {
-        super(bean);
-        getChildren().setAll(bean.children.stream().map(IdeBeanItem::new).collect(toList()));
-        graphicProperty().bind(createObjectBinding(() -> glyph(bean.getFactory()), bean.factory));
-        bean.children.addListener(new WeakListChangeListener<IdeBean>(this::onChildrenChange));
-    }
+	public IdeBeanItem(@Nonnull IdeBean bean) {
+		super(bean);
+		getChildren().setAll(bean.children.stream().map(IdeBeanItem::new).collect(toList()));
+		graphicProperty().bind(createObjectBinding(() -> glyph(bean.getFactory()), bean.factory));
+		bean.children.addListener(new WeakListChangeListener<IdeBean>(this::onChildrenChange));
+	}
 
-    private void onChildrenChange(Change<? extends IdeBean> change) {
-        while (change.next()) {
-            final int from = change.getFrom();
-            final int to = change.getTo();
-            if (change.wasUpdated()) {
-                for (int i = from; i < to; i++) {
-                    final TreeItem<IdeBean> item = getChildren().get(i);
-                    Event.fireEvent(item, new TreeModificationEvent<>(valueChangedEvent(), item));
-                }
-            } else if (change.wasRemoved()) {
-                getChildren().remove(from, to);
-            } else if (change.wasAdded()) {
-                getChildren().addAll(from, change.getAddedSubList().stream().map(IdeBeanItem::new).collect(toList()));
-            }
-        }
-    }
+	private void onChildrenChange(Change<? extends IdeBean> change) {
+		while (change.next()) {
+			final int from = change.getFrom();
+			final int to = change.getTo();
+			if (change.wasUpdated()) {
+				for (int i = from; i < to; i++) {
+					final TreeItem<IdeBean> item = getChildren().get(i);
+					Event.fireEvent(item, new TreeModificationEvent<>(valueChangedEvent(), item));
+				}
+			} else if (change.wasRemoved()) {
+				getChildren().remove(from, to);
+			} else if (change.wasAdded()) {
+				getChildren().addAll(from, change.getAddedSubList().stream().map(IdeBeanItem::new).collect(toList()));
+			}
+		}
+	}
 }

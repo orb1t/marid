@@ -38,15 +38,15 @@ import java.util.function.Supplier;
 @Component
 public class IdeToolbar extends ToolBar {
 
-    private final Supplier<List<FxAction>> actionsFactory;
+	private final Supplier<List<FxAction>> actionsFactory;
 
-    @Autowired
-    public IdeToolbar(@IdeAction Supplier<List<FxAction>> actionsFactory) {
-        this.actionsFactory = actionsFactory;
-    }
+	@Autowired
+	public IdeToolbar(@IdeAction Supplier<List<FxAction>> actionsFactory) {
+		this.actionsFactory = actionsFactory;
+	}
 
-    @EventListener
-    private void onIdeStart(ContextStartedEvent event) {
-        MaridActions.initToolbar(actionsFactory.get(), this);
-    }
+	@EventListener
+	private void onIdeStart(ContextStartedEvent event) {
+		MaridActions.initToolbar(actionsFactory.get(), this);
+	}
 }

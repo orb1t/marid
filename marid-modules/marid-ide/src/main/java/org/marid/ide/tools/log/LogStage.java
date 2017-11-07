@@ -41,32 +41,32 @@ import static org.marid.l10n.L10n.s;
 @PrototypeComponent
 public class LogStage extends FxStage {
 
-    @Autowired
-    public LogStage() {
-        super(StageStyle.DECORATED);
-        final Preferences preferences = IdePrefs.PREFERENCES.node("logs");
-        initOwner(Ide.primaryStage);
-        setOnCloseRequest(event -> {
-            preferences.putDouble("x", getX());
-            preferences.putDouble("y", getY());
-            preferences.putDouble("width", getWidth());
-            preferences.putDouble("height", getHeight());
-        });
-        setX(preferences.getDouble("x", getX()));
-        setY(preferences.getDouble("y", getY()));
-    }
+	@Autowired
+	public LogStage() {
+		super(StageStyle.DECORATED);
+		final Preferences preferences = IdePrefs.PREFERENCES.node("logs");
+		initOwner(Ide.primaryStage);
+		setOnCloseRequest(event -> {
+			preferences.putDouble("x", getX());
+			preferences.putDouble("y", getY());
+			preferences.putDouble("width", getWidth());
+			preferences.putDouble("height", getHeight());
+		});
+		setX(preferences.getDouble("x", getX()));
+		setY(preferences.getDouble("y", getY()));
+	}
 
-    @Autowired
-    private void init(@Qualifier("log") BorderPane logPane) {
-        final Preferences preferences = IdePrefs.PREFERENCES.node("logs");
-        setScene(new Scene(logPane, preferences.getDouble("width", 800), preferences.getDouble("height", 600)));
-    }
+	@Autowired
+	private void init(@Qualifier("log") BorderPane logPane) {
+		final Preferences preferences = IdePrefs.PREFERENCES.node("logs");
+		setScene(new Scene(logPane, preferences.getDouble("width", 800), preferences.getDouble("height", 600)));
+	}
 
-    @Autowired
-    private void initItems(@Qualifier("log") Menu actionsMenu) {
-        actionsMenu.getItems().add(new SeparatorMenuItem());
-        final CheckMenuItem menuItem = new CheckMenuItem(s("Always on top"), glyphIcon("M_BORDER_TOP", 16));
-        menuItem.setOnAction(event -> setAlwaysOnTop(!isAlwaysOnTop()));
-        actionsMenu.getItems().add(menuItem);
-    }
+	@Autowired
+	private void initItems(@Qualifier("log") Menu actionsMenu) {
+		actionsMenu.getItems().add(new SeparatorMenuItem());
+		final CheckMenuItem menuItem = new CheckMenuItem(s("Always on top"), glyphIcon("M_BORDER_TOP", 16));
+		menuItem.setOnAction(event -> setAlwaysOnTop(!isAlwaysOnTop()));
+		actionsMenu.getItems().add(menuItem);
+	}
 }

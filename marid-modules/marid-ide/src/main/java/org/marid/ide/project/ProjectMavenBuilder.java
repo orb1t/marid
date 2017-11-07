@@ -42,51 +42,51 @@ import static org.marid.logging.Log.log;
 @PrototypeComponent
 public class ProjectMavenBuilder {
 
-    private final List<String> goals = new ArrayList<>();
-    private final List<String> profiles = new ArrayList<>();
-    private final JavaSettings javaSettings;
-    private final Directories directories;
+	private final List<String> goals = new ArrayList<>();
+	private final List<String> profiles = new ArrayList<>();
+	private final JavaSettings javaSettings;
+	private final Directories directories;
 
-    private ProjectProfile profile;
+	private ProjectProfile profile;
 
-    @Autowired
-    public ProjectMavenBuilder(JavaSettings javaSettings, Directories directories) {
-        this.javaSettings = javaSettings;
-        this.directories = directories;
-    }
+	@Autowired
+	public ProjectMavenBuilder(JavaSettings javaSettings, Directories directories) {
+		this.javaSettings = javaSettings;
+		this.directories = directories;
+	}
 
-    public ProjectMavenBuilder goals(String... goals) {
-        Collections.addAll(this.goals, goals);
-        return this;
-    }
+	public ProjectMavenBuilder goals(String... goals) {
+		Collections.addAll(this.goals, goals);
+		return this;
+	}
 
-    public ProjectMavenBuilder profiles(String... ids) {
-        Collections.addAll(profiles, ids);
-        return this;
-    }
+	public ProjectMavenBuilder profiles(String... ids) {
+		Collections.addAll(profiles, ids);
+		return this;
+	}
 
-    public ProjectMavenBuilder profile(ProjectProfile profile) {
-        this.profile = profile;
-        return this;
-    }
+	public ProjectMavenBuilder profile(ProjectProfile profile) {
+		this.profile = profile;
+		return this;
+	}
 
-    public ProcessManager build(Consumer<String> out, Consumer<String> err) throws IOException {
-        final List<String> args = new LinkedList<>();
-        args.add(javaSettings.getJavaExecutable());
-        args.add("-Dmaven.multiModuleProjectDirectory=" + profile.getPath());
-        args.add("-Dmaven.home=" + directories.getMaven());
-        args.add("-Dclassworlds.conf=" + directories.getMaven().resolve("bin").resolve("m2.conf"));
-        args.add("-Dfile.encoding=UTF-8");
-        args.add("-cp");
-        args.add(directories.getMaven().resolve("boot").resolve("plexus-classworlds-2.5.2.jar").toString());
-        args.add("org.codehaus.classworlds.Launcher");
-        if (!profiles.isEmpty()) {
-            args.add("-P" + String.join(",", profiles));
-        }
-        args.addAll(goals);
+	public ProcessManager build(Consumer<String> out, Consumer<String> err) throws IOException {
+		final List<String> args = new LinkedList<>();
+		args.add(javaSettings.getJavaExecutable());
+		args.add("-Dmaven.multiModuleProjectDirectory=" + profile.getPath());
+		args.add("-Dmaven.home=" + directories.getMaven());
+		args.add("-Dclassworlds.conf=" + directories.getMaven().resolve("bin").resolve("m2.conf"));
+		args.add("-Dfile.encoding=UTF-8");
+		args.add("-cp");
+		args.add(directories.getMaven().resolve("boot").resolve("plexus-classworlds-2.5.2.jar").toString());
+		args.add("org.codehaus.classworlds.Launcher");
+		if (!profiles.isEmpty()) {
+			args.add("-P" + String.join(",", profiles));
+		}
+		args.addAll(goals);
 
-        log(INFO, "Executing {0}", String.join(" ", args));
-        final Process process = new ProcessBuilder(args).directory(profile.getPath().toFile()).start();
-        return new ProcessManager(profile.getName(), process, out, err);
-    }
+		log(INFO, "Executing {0}", String.join(" ", args));
+		final Process process = new ProcessBuilder(args).directory(profile.getPath().toFile()).start();
+		return new ProcessManager(profile.getName(), process, out, err);
+	}
 }

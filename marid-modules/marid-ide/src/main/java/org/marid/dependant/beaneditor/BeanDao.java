@@ -52,87 +52,87 @@ import static org.springframework.asm.Opcodes.ASM6;
 @Repository
 public class BeanDao {
 
-    private final ProjectProfile profile;
-    private final ConcurrentLinkedQueue<Class<?>> publicClasses = new ConcurrentLinkedQueue<>();
+	private final ProjectProfile profile;
+	private final ConcurrentLinkedQueue<Class<?>> publicClasses = new ConcurrentLinkedQueue<>();
 
-    @Autowired
-    public BeanDao(ProjectProfile profile) {
-        (this.profile = profile).addOnUpdate(this::onUpdate);
-        onUpdate(profile);
-    }
+	@Autowired
+	public BeanDao(ProjectProfile profile) {
+		(this.profile = profile).addOnUpdate(this::onUpdate);
+		onUpdate(profile);
+	}
 
-    private void onUpdate(ProjectProfile profile) {
-        final Path lib = profile.get(TARGET_LIB);
-        final ConcurrentLinkedQueue<ClassReader> classReaders = new ConcurrentLinkedQueue<>();
-        try (final DirectoryStream<Path> libStream = Files.newDirectoryStream(lib, "*.jar")) {
-            for (final Path jar : libStream) {
-                try (final FileSystem fileSystem = FileSystems.newFileSystem(jar, getClass().getClassLoader())) {
-                    for (final Path root : fileSystem.getRootDirectories()) {
-                        try {
-                            fillClassReaders(root, classReaders);
-                        } catch (Exception x) {
-                            log(WARNING, "Unable to process {0}", x, root);
-                        }
-                    }
-                }
-            }
-        } catch (Exception x) {
-            log(WARNING, "Unable to enumerate jar files", x);
-        }
-        try {
-            fillClassReaders(profile.get(TARGET_CLASSES), classReaders);
-        } catch (Exception x) {
-            log(WARNING, "Unable to enumerate class files", x);
-        }
-        final ConcurrentLinkedQueue<String> classNames = new ConcurrentLinkedQueue<>();
-        classReaders.parallelStream().forEach(r -> r.accept(new ClassVisitor(ASM6) {
-            @Override
-            public void visit(int v, int access, String name, String signature, String superName, String[] interfaces) {
-                if (!name.contains("$") && (access & ACC_PUBLIC) != 0) {
-                    classNames.add(name.replace('/', '.'));
-                }
-            }
-        }, SKIP_CODE | SKIP_DEBUG | SKIP_FRAMES));
-        publicClasses.clear();
-        classNames.parallelStream().forEach(c -> {
-            try {
-                final Class<?> type = Class.forName(c, false, profile.getClassLoader());
-                if (type.getConstructors().length > 0) {
-                    publicClasses.add(type);
-                } else if (Stream.of(type.getMethods()).anyMatch(m -> Modifier.isStatic(m.getModifiers()))) {
-                    publicClasses.add(type);
-                } else if (Stream.of(type.getFields()).anyMatch(f -> Modifier.isStatic(f.getModifiers()))) {
-                    publicClasses.add(type);
-                }
-            } catch (NoClassDefFoundError | ClassNotFoundException x) {
-                // skip
-            } catch (Throwable x) {
-                log(WARNING, "Unable to load {0}", x, c);
-            }
-        });
-        log(INFO, "{0} Public classes updated: {1}", profile, publicClasses.size());
-    }
+	private void onUpdate(ProjectProfile profile) {
+		final Path lib = profile.get(TARGET_LIB);
+		final ConcurrentLinkedQueue<ClassReader> classReaders = new ConcurrentLinkedQueue<>();
+		try (final DirectoryStream<Path> libStream = Files.newDirectoryStream(lib, "*.jar")) {
+			for (final Path jar : libStream) {
+				try (final FileSystem fileSystem = FileSystems.newFileSystem(jar, getClass().getClassLoader())) {
+					for (final Path root : fileSystem.getRootDirectories()) {
+						try {
+							fillClassReaders(root, classReaders);
+						} catch (Exception x) {
+							log(WARNING, "Unable to process {0}", x, root);
+						}
+					}
+				}
+			}
+		} catch (Exception x) {
+			log(WARNING, "Unable to enumerate jar files", x);
+		}
+		try {
+			fillClassReaders(profile.get(TARGET_CLASSES), classReaders);
+		} catch (Exception x) {
+			log(WARNING, "Unable to enumerate class files", x);
+		}
+		final ConcurrentLinkedQueue<String> classNames = new ConcurrentLinkedQueue<>();
+		classReaders.parallelStream().forEach(r -> r.accept(new ClassVisitor(ASM6) {
+			@Override
+			public void visit(int v, int access, String name, String signature, String superName, String[] interfaces) {
+				if (!name.contains("$") && (access & ACC_PUBLIC) != 0) {
+					classNames.add(name.replace('/', '.'));
+				}
+			}
+		}, SKIP_CODE | SKIP_DEBUG | SKIP_FRAMES));
+		publicClasses.clear();
+		classNames.parallelStream().forEach(c -> {
+			try {
+				final Class<?> type = Class.forName(c, false, profile.getClassLoader());
+				if (type.getConstructors().length > 0) {
+					publicClasses.add(type);
+				} else if (Stream.of(type.getMethods()).anyMatch(m -> Modifier.isStatic(m.getModifiers()))) {
+					publicClasses.add(type);
+				} else if (Stream.of(type.getFields()).anyMatch(f -> Modifier.isStatic(f.getModifiers()))) {
+					publicClasses.add(type);
+				}
+			} catch (NoClassDefFoundError | ClassNotFoundException x) {
+				// skip
+			} catch (Throwable x) {
+				log(WARNING, "Unable to load {0}", x, c);
+			}
+		});
+		log(INFO, "{0} Public classes updated: {1}", profile, publicClasses.size());
+	}
 
-    public Collection<Class<?>> publicClasses() {
-        return Collections.unmodifiableCollection(publicClasses);
-    }
+	public Collection<Class<?>> publicClasses() {
+		return Collections.unmodifiableCollection(publicClasses);
+	}
 
-    private void fillClassReaders(Path root, Collection<ClassReader> classReaders) throws Exception {
-        try (final Stream<Path> classStream = find(root, MAX_VALUE, PathMatchers::isClassFile)) {
-            classStream.parallel().forEach(path -> {
-                final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                try {
-                    Files.copy(path, bos);
-                } catch (IOException x) {
-                    throw new UncheckedIOException(x);
-                }
-                classReaders.add(new ClassReader(bos.toByteArray()));
-            });
-        }
-    }
+	private void fillClassReaders(Path root, Collection<ClassReader> classReaders) throws Exception {
+		try (final Stream<Path> classStream = find(root, MAX_VALUE, PathMatchers::isClassFile)) {
+			classStream.parallel().forEach(path -> {
+				final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+				try {
+					Files.copy(path, bos);
+				} catch (IOException x) {
+					throw new UncheckedIOException(x);
+				}
+				classReaders.add(new ClassReader(bos.toByteArray()));
+			});
+		}
+	}
 
-    @PreDestroy
-    private void close() {
-        profile.removeOnUpdate(this::onUpdate);
-    }
+	@PreDestroy
+	private void close() {
+		profile.removeOnUpdate(this::onUpdate);
+	}
 }

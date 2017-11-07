@@ -31,40 +31,40 @@ import org.marid.runtime.annotation.MaridBean;
 @MaridBean(name = "Proto Bus Properties")
 public class StdProtoBusProps {
 
-    private long terminationTimeout = 10_000L;
-    private int threadCount = 1;
-    private long stackSize;
-    private IOSupplier<? extends ProtoIO> ioSupplier;
+	private long terminationTimeout = 10_000L;
+	private int threadCount = 1;
+	private long stackSize;
+	private IOSupplier<? extends ProtoIO> ioSupplier;
 
-    public long getTerminationTimeout() {
-        return terminationTimeout;
-    }
+	public long getTerminationTimeout() {
+		return terminationTimeout;
+	}
 
-    public void setTerminationTimeout(long terminationTimeout) {
-        this.terminationTimeout = terminationTimeout;
-    }
+	public void setTerminationTimeout(long terminationTimeout) {
+		this.terminationTimeout = terminationTimeout;
+	}
 
-    public int getThreadCount() {
-        return threadCount;
-    }
+	public int getThreadCount() {
+		return threadCount;
+	}
 
-    public void setThreadCount(int threadCount) {
-        this.threadCount = threadCount;
-    }
+	public void setThreadCount(int threadCount) {
+		this.threadCount = threadCount;
+	}
 
-    public long getStackSize() {
-        return stackSize;
-    }
+	public long getStackSize() {
+		return stackSize;
+	}
 
-    public void setStackSize(long stackSize) {
-        this.stackSize = stackSize;
-    }
+	public void setStackSize(long stackSize) {
+		this.stackSize = stackSize;
+	}
 
-    public IOSupplier<? extends ProtoIO> getIoSupplier() {
-        return ioSupplier;
-    }
+	public IOSupplier<? extends ProtoIO> getIoSupplier() {
+		return ioSupplier;
+	}
 
-    public void setIoSupplier(IOSupplier<? extends ProtoIO> ioSupplier) {
-        this.ioSupplier = ioSupplier;
-    }
+	public void setIoSupplier(IOSupplier<? extends ProtoIO> ioSupplier) {
+		this.ioSupplier = ioSupplier;
+	}
 }

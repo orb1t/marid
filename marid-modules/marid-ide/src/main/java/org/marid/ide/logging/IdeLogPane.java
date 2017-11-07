@@ -40,32 +40,32 @@ import static java.lang.Math.min;
 @Component
 public class IdeLogPane extends BorderPane {
 
-    private final Separator divider;
-    private final LogComponent component = new LogComponent(IdeLogHandler.LOG_RECORDS);
+	private final Separator divider;
+	private final LogComponent component = new LogComponent(IdeLogHandler.LOG_RECORDS);
 
-    public IdeLogPane() {
-        setTop(divider = new Separator(Orientation.HORIZONTAL));
-        setMinHeight(100);
-        setPrefHeight(250);
+	public IdeLogPane() {
+		setTop(divider = new Separator(Orientation.HORIZONTAL));
+		setMinHeight(100);
+		setPrefHeight(250);
 
-        final AtomicDouble lastPos = new AtomicDouble();
-        final AtomicDouble lastHeight = new AtomicDouble();
-        divider.setOnMouseEntered(event -> {
-            divider.getScene().setCursor(Cursor.V_RESIZE);
-            lastPos.set(event.getScreenY());
-            lastHeight.set(getHeight());
-        });
-        divider.setOnMouseExited(event -> divider.getScene().setCursor(Cursor.DEFAULT));
-        divider.setOnMouseDragged(event -> {
-            final double delta = event.getScreenY() - lastPos.get();
-            setPrefHeight(min(getMaxHeight(), max(getMinHeight(), lastHeight.get() - delta)));
-            getParent().requestLayout();
-        });
-    }
+		final AtomicDouble lastPos = new AtomicDouble();
+		final AtomicDouble lastHeight = new AtomicDouble();
+		divider.setOnMouseEntered(event -> {
+			divider.getScene().setCursor(Cursor.V_RESIZE);
+			lastPos.set(event.getScreenY());
+			lastHeight.set(getHeight());
+		});
+		divider.setOnMouseExited(event -> divider.getScene().setCursor(Cursor.DEFAULT));
+		divider.setOnMouseDragged(event -> {
+			final double delta = event.getScreenY() - lastPos.get();
+			setPrefHeight(min(getMaxHeight(), max(getMinHeight(), lastHeight.get() - delta)));
+			getParent().requestLayout();
+		});
+	}
 
-    @EventListener
-    public void onContextStart(ContextStartedEvent event) {
-        setCenter(component);
-        component.scrollTo(component.getItems().size() - 1);
-    }
+	@EventListener
+	public void onContextStart(ContextStartedEvent event) {
+		setCenter(component);
+		component.scrollTo(component.getItems().size() - 1);
+	}
 }

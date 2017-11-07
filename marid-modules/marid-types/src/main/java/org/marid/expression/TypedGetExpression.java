@@ -35,27 +35,27 @@ import static org.marid.types.TypeUtils.classType;
 
 public interface TypedGetExpression extends GetExpression, TypedExpression {
 
-    @Nonnull
-    @Override
-    TypedExpression getTarget();
+	@Nonnull
+	@Override
+	TypedExpression getTarget();
 
-    @Nonnull
-    @Override
-    default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
-        final Type targetType = getTarget().resolveType(owner, context);
-        if (getTarget() instanceof ClassExpression) {
-            return classType(targetType).stream().flatMap(t -> accessibleFields(context.getRaw(t)))
-                    .filter(f -> f.getName().equals(getField()))
-                    .map(f -> context.resolve(owner, f.getGenericType()))
-                    .findFirst()
-                    .orElse(WILDCARD);
-        } else {
-            return accessibleFields(context.getRaw(targetType))
-                    .filter(f -> f.getName().equals(getField()))
-                    .map(f -> context.resolve(targetType, f.getGenericType()))
-                    .map(t -> context.resolve(owner, t))
-                    .findFirst()
-                    .orElse(WILDCARD);
-        }
-    }
+	@Nonnull
+	@Override
+	default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
+		final Type targetType = getTarget().resolveType(owner, context);
+		if (getTarget() instanceof ClassExpression) {
+			return classType(targetType).stream().flatMap(t -> accessibleFields(context.getRaw(t)))
+					.filter(f -> f.getName().equals(getField()))
+					.map(f -> context.resolve(owner, f.getGenericType()))
+					.findFirst()
+					.orElse(WILDCARD);
+		} else {
+			return accessibleFields(context.getRaw(targetType))
+					.filter(f -> f.getName().equals(getField()))
+					.map(f -> context.resolve(targetType, f.getGenericType()))
+					.map(t -> context.resolve(owner, t))
+					.findFirst()
+					.orElse(WILDCARD);
+		}
+	}
 }

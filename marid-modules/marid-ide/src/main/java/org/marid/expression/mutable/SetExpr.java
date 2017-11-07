@@ -32,54 +32,54 @@ import static org.marid.io.Xmls.*;
 
 public class SetExpr extends Expr implements TypedSetExpression {
 
-    public final FxObject<Expr> target;
-    public final StringProperty field;
-    public final FxObject<Expr> value;
+	public final FxObject<Expr> target;
+	public final StringProperty field;
+	public final FxObject<Expr> value;
 
-    public SetExpr(@Nonnull Expr target, @Nonnull String field, @Nonnull Expr value) {
-        this.target = new FxObject<>(Expr::getObservables, target);
-        this.field = new SimpleStringProperty(field);
-        this.value = new FxObject<>(Expr::getObservables, value);
-    }
+	public SetExpr(@Nonnull Expr target, @Nonnull String field, @Nonnull Expr value) {
+		this.target = new FxObject<>(Expr::getObservables, target);
+		this.field = new SimpleStringProperty(field);
+		this.value = new FxObject<>(Expr::getObservables, value);
+	}
 
-    SetExpr(@Nonnull Element element) {
-        super(element);
-        this.target = new FxObject<>(
-                Expr::getObservables,
-                element("target", element).map(Expr::of).orElseThrow(() -> new NullPointerException("target"))
-        );
-        this.field = new SimpleStringProperty(
-                attribute(element, "field").orElseThrow(() -> new NullPointerException("field"))
-        );
-        this.value = new FxObject<>(
-                Expr::getObservables,
-                element("value", element).map(Expr::of).orElseThrow(() -> new NullPointerException("value"))
-        );
-    }
+	SetExpr(@Nonnull Element element) {
+		super(element);
+		this.target = new FxObject<>(
+				Expr::getObservables,
+				element("target", element).map(Expr::of).orElseThrow(() -> new NullPointerException("target"))
+		);
+		this.field = new SimpleStringProperty(
+				attribute(element, "field").orElseThrow(() -> new NullPointerException("field"))
+		);
+		this.value = new FxObject<>(
+				Expr::getObservables,
+				element("value", element).map(Expr::of).orElseThrow(() -> new NullPointerException("value"))
+		);
+	}
 
-    @Nonnull
-    @Override
-    public Expr getTarget() {
-        return target.get();
-    }
+	@Nonnull
+	@Override
+	public Expr getTarget() {
+		return target.get();
+	}
 
-    @Nonnull
-    @Override
-    public String getField() {
-        return field.get();
-    }
+	@Nonnull
+	@Override
+	public String getField() {
+		return field.get();
+	}
 
-    @Nonnull
-    @Override
-    public Expr getValue() {
-        return value.get();
-    }
+	@Nonnull
+	@Override
+	public Expr getValue() {
+		return value.get();
+	}
 
-    @Override
-    public void writeTo(@Nonnull Element element) {
-        super.writeTo(element);
-        create(element, "target", t -> create(t, getTarget().getTag(), getTarget()::writeTo));
-        element.setAttribute("field", getField());
-        create(element, "value", v -> create(v, getValue().getTag(), getValue()::writeTo));
-    }
+	@Override
+	public void writeTo(@Nonnull Element element) {
+		super.writeTo(element);
+		create(element, "target", t -> create(t, getTarget().getTag(), getTarget()::writeTo));
+		element.setAttribute("field", getField());
+		create(element, "value", v -> create(v, getValue().getTag(), getValue()::writeTo));
+	}
 }

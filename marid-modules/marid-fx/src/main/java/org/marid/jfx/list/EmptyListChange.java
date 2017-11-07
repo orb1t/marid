@@ -33,36 +33,36 @@ import java.util.List;
  */
 public class EmptyListChange<E> extends ListChangeListener.Change<E> {
 
-    public EmptyListChange(ObservableList<E> list) {
-        super(list);
-    }
+	public EmptyListChange(ObservableList<E> list) {
+		super(list);
+	}
 
-    @Override
-    public boolean next() {
-        return false;
-    }
+	@Override
+	public boolean next() {
+		return false;
+	}
 
-    @Override
-    public void reset() {
-    }
+	@Override
+	public void reset() {
+	}
 
-    @Override
-    public int getFrom() {
-        return 0;
-    }
+	@Override
+	public int getFrom() {
+		return 0;
+	}
 
-    @Override
-    public int getTo() {
-        return 0;
-    }
+	@Override
+	public int getTo() {
+		return 0;
+	}
 
-    @Override
-    public List<E> getRemoved() {
-        return Collections.emptyList();
-    }
+	@Override
+	public List<E> getRemoved() {
+		return Collections.emptyList();
+	}
 
-    @Override
-    protected int[] getPermutation() {
-        return new int[0];
-    }
+	@Override
+	protected int[] getPermutation() {
+		return new int[0];
+	}
 }

@@ -33,11 +33,11 @@ import static org.marid.types.TypeUtils.WILDCARD;
 
 public interface TypedClassExpression extends ClassExpression, TypedExpression {
 
-    @Nonnull
-    @Override
-    default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
-        return TypeUtils.getClass(context.getClassLoader(), getClassName())
-                .map(context::getClassType)
-                .orElse(WILDCARD);
-    }
+	@Nonnull
+	@Override
+	default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
+		return TypeUtils.getClass(context.getClassLoader(), getClassName())
+				.map(context::getClassType)
+				.orElse(WILDCARD);
+	}
 }

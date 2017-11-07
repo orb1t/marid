@@ -27,19 +27,19 @@ import java.nio.file.Path;
  */
 public class FileMovedEvent extends PropagatedEvent {
 
-    private final Path target;
+	private final Path target;
 
-    public FileMovedEvent(Path source, Path target) {
-        super(source);
-        this.target = target;
-    }
+	public FileMovedEvent(Path source, Path target) {
+		super(source);
+		this.target = target;
+	}
 
-    @Override
-    public Path getSource() {
-        return (Path) super.getSource();
-    }
+	@Override
+	public Path getSource() {
+		return (Path) super.getSource();
+	}
 
-    public Path getTarget() {
-        return target;
-    }
+	public Path getTarget() {
+		return target;
+	}
 }

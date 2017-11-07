@@ -31,30 +31,30 @@ import java.util.function.Supplier;
  */
 public interface Suppliers {
 
-    static <T> Supplier<T> memoized(Supplier<T> supplier) {
-        final AtomicMarkableReference<T> ref = new AtomicMarkableReference<>(null, false);
-        return () -> {
-            if (ref.isMarked()) {
-                return ref.getReference();
-            } else {
-                synchronized (ref) {
-                    if (ref.isMarked()) {
-                        return ref.getReference();
-                    } else {
-                        final T v = supplier.get();
-                        ref.set(v, true);
-                        return v;
-                    }
-                }
-            }
-        };
-    }
+	static <T> Supplier<T> memoized(Supplier<T> supplier) {
+		final AtomicMarkableReference<T> ref = new AtomicMarkableReference<>(null, false);
+		return () -> {
+			if (ref.isMarked()) {
+				return ref.getReference();
+			} else {
+				synchronized (ref) {
+					if (ref.isMarked()) {
+						return ref.getReference();
+					} else {
+						final T v = supplier.get();
+						ref.set(v, true);
+						return v;
+					}
+				}
+			}
+		};
+	}
 
-    static <T, R> Function<T, R> elseFunc(Function<T, R> func) {
-        return v -> v == null ? null : func.apply(v);
-    }
+	static <T, R> Function<T, R> elseFunc(Function<T, R> func) {
+		return v -> v == null ? null : func.apply(v);
+	}
 
-    static <T, U, R> BiFunction<T, U, R> elseBiFunc(BiFunction<T, U, R> func) {
-        return (t, u) -> t == null ? null : func.apply(t, u);
-    }
+	static <T, U, R> BiFunction<T, U, R> elseBiFunc(BiFunction<T, U, R> func) {
+		return (t, u) -> t == null ? null : func.apply(t, u);
+	}
 }

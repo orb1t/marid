@@ -34,15 +34,15 @@ import java.io.OutputStream;
  */
 public interface ProtoIO extends IOCloseable {
 
-    InputStream getInputStream();
+	InputStream getInputStream();
 
-    OutputStream getOutputStream();
+	OutputStream getOutputStream();
 
-    default void doWith(IOBiConsumer<InputStream, OutputStream> consumer) throws IOException {
-        consumer.accept(getInputStream(), getOutputStream());
-    }
+	default void doWith(IOBiConsumer<InputStream, OutputStream> consumer) throws IOException {
+		consumer.accept(getInputStream(), getOutputStream());
+	}
 
-    default <T> T call(IOBiFunction<InputStream, OutputStream, T> function) throws IOException {
-        return function.apply(getInputStream(), getOutputStream());
-    }
+	default <T> T call(IOBiFunction<InputStream, OutputStream, T> function) throws IOException {
+		return function.apply(getInputStream(), getOutputStream());
+	}
 }

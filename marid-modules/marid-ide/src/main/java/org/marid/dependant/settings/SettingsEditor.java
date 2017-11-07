@@ -28,9 +28,9 @@ import org.marid.ide.settings.AbstractSettings;
  */
 public interface SettingsEditor {
 
-    AbstractSettings getSettings();
+	AbstractSettings getSettings();
 
-    default Node getNode() {
-        return (Node) this;
-    }
+	default Node getNode() {
+		return (Node) this;
+	}
 }

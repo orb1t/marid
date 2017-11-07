@@ -39,74 +39,74 @@ import static org.marid.logging.Log.log;
 
 public class FxScope implements Scope {
 
-    private final Set<String> conversationIds = new ConcurrentSkipListSet<>();
-    private final ConcurrentMap<String, ConcurrentMap<String, Object>> map = new ConcurrentHashMap<>();
-    private final ConcurrentMap<String, ConcurrentMap<String, Runnable>> destroyers = new ConcurrentHashMap<>();
+	private final Set<String> conversationIds = new ConcurrentSkipListSet<>();
+	private final ConcurrentMap<String, ConcurrentMap<String, Object>> map = new ConcurrentHashMap<>();
+	private final ConcurrentMap<String, ConcurrentMap<String, Runnable>> destroyers = new ConcurrentHashMap<>();
 
-    private volatile String conversationId;
+	private volatile String conversationId;
 
-    String nextConversationId() {
-        return IntStream.range(0, Integer.MAX_VALUE)
-                .mapToObj(Integer::toString)
-                .filter(v -> !conversationIds.contains(v))
-                .findFirst()
-                .orElse("-");
-    }
+	String nextConversationId() {
+		return IntStream.range(0, Integer.MAX_VALUE)
+				.mapToObj(Integer::toString)
+				.filter(v -> !conversationIds.contains(v))
+				.findFirst()
+				.orElse("-");
+	}
 
-    void setConversationId(String conversationId) {
-        conversationIds.add(conversationId);
-        if (!conversationId.equals(this.conversationId)) {
-            this.conversationId = conversationId;
-            log(INFO, "Activated FxScope[{0}]", conversationId);
-        }
-    }
+	void setConversationId(String conversationId) {
+		conversationIds.add(conversationId);
+		if (!conversationId.equals(this.conversationId)) {
+			this.conversationId = conversationId;
+			log(INFO, "Activated FxScope[{0}]", conversationId);
+		}
+	}
 
-    void destroy(String conversationId) {
-        conversationIds.remove(conversationId);
-        map.remove(conversationId);
-        ofNullable(destroyers.remove(conversationId)).ifPresent(d -> d.forEach((k, v) -> {
-            try {
-                v.run();
-            } catch (Throwable x) {
-                log(WARNING, "Unable to destroy FxScope[{0}].{1}", x, conversationId, k);
-            }
-        }));
-        log(INFO, "Destroyed FxScope[{0}]", conversationId);
-    }
+	void destroy(String conversationId) {
+		conversationIds.remove(conversationId);
+		map.remove(conversationId);
+		ofNullable(destroyers.remove(conversationId)).ifPresent(d -> d.forEach((k, v) -> {
+			try {
+				v.run();
+			} catch (Throwable x) {
+				log(WARNING, "Unable to destroy FxScope[{0}].{1}", x, conversationId, k);
+			}
+		}));
+		log(INFO, "Destroyed FxScope[{0}]", conversationId);
+	}
 
-    @Nonnull
-    @Override
-    public Object get(@Nonnull String name, @Nonnull ObjectFactory<?> objectFactory) {
-        return map
-                .computeIfAbsent(conversationId, k -> new ConcurrentHashMap<>())
-                .computeIfAbsent(name, k -> objectFactory.getObject());
-    }
+	@Nonnull
+	@Override
+	public Object get(@Nonnull String name, @Nonnull ObjectFactory<?> objectFactory) {
+		return map
+				.computeIfAbsent(conversationId, k -> new ConcurrentHashMap<>())
+				.computeIfAbsent(name, k -> objectFactory.getObject());
+	}
 
-    @Nullable
-    @Override
-    public Object remove(@Nonnull String name) {
-        return Stream.ofNullable(map.remove(conversationId))
-                .map(m -> m.get(name))
-                .findFirst()
-                .orElse(null);
-    }
+	@Nullable
+	@Override
+	public Object remove(@Nonnull String name) {
+		return Stream.ofNullable(map.remove(conversationId))
+				.map(m -> m.get(name))
+				.findFirst()
+				.orElse(null);
+	}
 
-    @Override
-    public void registerDestructionCallback(@Nonnull String name, @Nonnull Runnable callback) {
-        destroyers
-                .computeIfAbsent(conversationId, k -> new ConcurrentHashMap<>())
-                .put(name, callback);
-    }
+	@Override
+	public void registerDestructionCallback(@Nonnull String name, @Nonnull Runnable callback) {
+		destroyers
+				.computeIfAbsent(conversationId, k -> new ConcurrentHashMap<>())
+				.put(name, callback);
+	}
 
-    @Nullable
-    @Override
-    public Object resolveContextualObject(@Nonnull String key) {
-        return null;
-    }
+	@Nullable
+	@Override
+	public Object resolveContextualObject(@Nonnull String key) {
+		return null;
+	}
 
-    @Nullable
-    @Override
-    public String getConversationId() {
-        return conversationId;
-    }
+	@Nullable
+	@Override
+	public String getConversationId() {
+		return conversationId;
+	}
 }

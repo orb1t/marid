@@ -33,35 +33,35 @@ import static org.marid.io.Xmls.attribute;
 
 public final class ClassExpr extends Expr implements ClassExpression {
 
-    @Nonnull
-    private final String className;
+	@Nonnull
+	private final String className;
 
-    public ClassExpr(@Nonnull String className) {
-        this.className = className;
-    }
+	public ClassExpr(@Nonnull String className) {
+		this.className = className;
+	}
 
-    ClassExpr(@Nonnull Element element) {
-        super(element);
-        className = attribute(element, "class").orElseThrow(() -> new NullPointerException("class"));
-    }
+	ClassExpr(@Nonnull Element element) {
+		super(element);
+		className = attribute(element, "class").orElseThrow(() -> new NullPointerException("class"));
+	}
 
-    @Override
-    protected Class<?> execute(@Nullable Object self, @Nonnull BeanContext context) {
-        try {
-            return context.getClassLoader().loadClass(getClassName());
-        } catch (ClassNotFoundException x) {
-            throw new NoSuchElementException(getClassName());
-        }
-    }
+	@Override
+	protected Class<?> execute(@Nullable Object self, @Nonnull BeanContext context) {
+		try {
+			return context.getClassLoader().loadClass(getClassName());
+		} catch (ClassNotFoundException x) {
+			throw new NoSuchElementException(getClassName());
+		}
+	}
 
-    @Nonnull
-    @Override
-    public String getClassName() {
-        return className;
-    }
+	@Nonnull
+	@Override
+	public String getClassName() {
+		return className;
+	}
 
-    @Override
-    public String toString() {
-        return "&" + className;
-    }
+	@Override
+	public String toString() {
+		return "&" + className;
+	}
 }

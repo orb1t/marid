@@ -54,75 +54,75 @@ import static org.marid.logging.Log.log;
 @Service
 public class JavaTextFileUpdater {
 
-    private final PrettyPrinter prettyPrinter;
-    private final ProjectManager projectManager;
+	private final PrettyPrinter prettyPrinter;
+	private final ProjectManager projectManager;
 
-    @Autowired
-    public JavaTextFileUpdater(PrettyPrinter prettyPrinter, ProjectManager projectManager) {
-        this.prettyPrinter = prettyPrinter;
-        this.projectManager = projectManager;
-    }
+	@Autowired
+	public JavaTextFileUpdater(PrettyPrinter prettyPrinter, ProjectManager projectManager) {
+		this.prettyPrinter = prettyPrinter;
+		this.projectManager = projectManager;
+	}
 
-    @EventListener
-    public void onRename(TextFileMovedEvent renamedEvent) {
-        process(renamedEvent.getTarget());
-    }
+	@EventListener
+	public void onRename(TextFileMovedEvent renamedEvent) {
+		process(renamedEvent.getTarget());
+	}
 
-    @EventListener
-    public void onAdd(TextFileAddedEvent addedEvent) {
-        process(addedEvent.getSource());
-    }
+	@EventListener
+	public void onAdd(TextFileAddedEvent addedEvent) {
+		process(addedEvent.getSource());
+	}
 
-    private void process(Path file) {
-        final ProjectProfile profile = projectManager.getProfile(file).orElse(null);
-        if (profile == null) {
-            return;
-        }
-        final Path javaBase = profile.getJavaBaseDir(file);
-        if (javaBase == null) {
-            return;
-        }
-        final Path path = javaBase.relativize(file);
-        final String pkg = stream(path.getParent().spliterator(), false).map(Path::toString).collect(joining("."));
-        final AtomicBoolean updated = new AtomicBoolean();
-        try {
-            final CompilationUnit compilationUnit = JavaParser.parse(file);
+	private void process(Path file) {
+		final ProjectProfile profile = projectManager.getProfile(file).orElse(null);
+		if (profile == null) {
+			return;
+		}
+		final Path javaBase = profile.getJavaBaseDir(file);
+		if (javaBase == null) {
+			return;
+		}
+		final Path path = javaBase.relativize(file);
+		final String pkg = stream(path.getParent().spliterator(), false).map(Path::toString).collect(joining("."));
+		final AtomicBoolean updated = new AtomicBoolean();
+		try {
+			final CompilationUnit compilationUnit = JavaParser.parse(file);
 
-            compilationUnit.getPackageDeclaration()
-                    .map(d -> {
-                        final Name name = d.getName();
-                        if (!pkg.equals(name.getIdentifier())) {
-                            d.setName(pkg);
-                            updated.set(true);
-                        }
-                        return d;
-                    })
-                    .orElseGet(() -> {
-                        final PackageDeclaration d = new PackageDeclaration(new Name(pkg));
-                        compilationUnit.setPackageDeclaration(d);
-                        updated.set(true);
-                        return d;
-                    });
+			compilationUnit.getPackageDeclaration()
+					.map(d -> {
+						final Name name = d.getName();
+						if (!pkg.equals(name.getIdentifier())) {
+							d.setName(pkg);
+							updated.set(true);
+						}
+						return d;
+					})
+					.orElseGet(() -> {
+						final PackageDeclaration d = new PackageDeclaration(new Name(pkg));
+						compilationUnit.setPackageDeclaration(d);
+						updated.set(true);
+						return d;
+					});
 
-            compilationUnit.getTypes().stream()
-                    .filter(TypeDeclaration::isTopLevelType)
-                    .findFirst()
-                    .ifPresent(t -> {
-                        final String fileName = StringUtils.getFilename(path.getFileName().toString());
-                        final String name = fileName.replace(".java", "");
-                        if (!t.getNameAsString().equals(name)) {
-                            t.setName(name);
-                            updated.set(true);
-                        }
-                    });
+			compilationUnit.getTypes().stream()
+					.filter(TypeDeclaration::isTopLevelType)
+					.findFirst()
+					.ifPresent(t -> {
+						final String fileName = StringUtils.getFilename(path.getFileName().toString());
+						final String name = fileName.replace(".java", "");
+						if (!t.getNameAsString().equals(name)) {
+							t.setName(name);
+							updated.set(true);
+						}
+					});
 
-            if (updated.get()) {
-                final String source = prettyPrinter.print(compilationUnit);
-                Files.write(file, source.getBytes(UTF_8));
-                log(INFO, "Updated {0}", file);
-            }
-        } catch (Exception x) {
-            log(WARNING, "Unable to parse or save {0}", x, file);
-        }
-    }
+			if (updated.get()) {
+				final String source = prettyPrinter.print(compilationUnit);
+				Files.write(file, source.getBytes(UTF_8));
+				log(INFO, "Updated {0}", file);
+			}
+		} catch (Exception x) {
+			log(WARNING, "Unable to parse or save {0}", x, file);
+		}
+	}
 }

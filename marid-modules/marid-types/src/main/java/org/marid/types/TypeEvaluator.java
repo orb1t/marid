@@ -26,9 +26,9 @@ import java.lang.reflect.Type;
 
 public interface TypeEvaluator {
 
-    @Nonnull
-    TypeEvaluator where(Type formal, Type actual);
+	@Nonnull
+	TypeEvaluator where(Type formal, Type actual);
 
-    @Nonnull
-    Type resolve(Type type);
+	@Nonnull
+	Type resolve(Type type);
 }

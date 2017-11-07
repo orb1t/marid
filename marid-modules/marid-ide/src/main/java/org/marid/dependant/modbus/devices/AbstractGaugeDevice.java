@@ -37,38 +37,38 @@ import static java.util.Optional.of;
  */
 abstract class AbstractGaugeDevice extends AbstractDevice<Float> {
 
-    final Gauge gauge;
-    final Slider slider;
+	final Gauge gauge;
+	final Slider slider;
 
-    AbstractGaugeDevice(Gauge gauge) {
-        super(Float.class);
-        setCenter(this.gauge = gauge);
-        setRight(this.slider = new Slider());
-        slider.setShowTickMarks(true);
-        slider.setOrientation(Orientation.VERTICAL);
-        slider.setPadding(new Insets(4));
-        slider.maxProperty().bindBidirectional(gauge.maxValueProperty());
-        slider.minProperty().bindBidirectional(gauge.minValueProperty());
-        slider.valueProperty().bindBidirectional(gauge.valueProperty());
-        slider.majorTickUnitProperty().bindBidirectional(gauge.majorTickSpaceProperty());
-        gauge.setKeepAspect(true);
-    }
+	AbstractGaugeDevice(Gauge gauge) {
+		super(Float.class);
+		setCenter(this.gauge = gauge);
+		setRight(this.slider = new Slider());
+		slider.setShowTickMarks(true);
+		slider.setOrientation(Orientation.VERTICAL);
+		slider.setPadding(new Insets(4));
+		slider.maxProperty().bindBidirectional(gauge.maxValueProperty());
+		slider.minProperty().bindBidirectional(gauge.minValueProperty());
+		slider.valueProperty().bindBidirectional(gauge.valueProperty());
+		slider.majorTickUnitProperty().bindBidirectional(gauge.majorTickSpaceProperty());
+		gauge.setKeepAspect(true);
+	}
 
-    @Override
-    public byte[] getData() {
-        final ModbusCodec<Float> codec = this.codec.getValue();
-        return codec.encode((float) gauge.getValue());
-    }
+	@Override
+	public byte[] getData() {
+		final ModbusCodec<Float> codec = this.codec.getValue();
+		return codec.encode((float) gauge.getValue());
+	}
 
-    @Override
-    public void loadFrom(Document document, Element element) {
-        super.loadFrom(document, element);
-        of(element.getAttribute("value")).filter(s -> !s.isEmpty()).ifPresent(v -> slider.setValue(parseDouble(v)));
-    }
+	@Override
+	public void loadFrom(Document document, Element element) {
+		super.loadFrom(document, element);
+		of(element.getAttribute("value")).filter(s -> !s.isEmpty()).ifPresent(v -> slider.setValue(parseDouble(v)));
+	}
 
-    @Override
-    public void writeTo(Document document, Element element) {
-        super.writeTo(document, element);
-        element.setAttribute("value", Double.toString(slider.getValue()));
-    }
+	@Override
+	public void writeTo(Document document, Element element) {
+		super.writeTo(document, element);
+		element.setAttribute("value", Double.toString(slider.getValue()));
+	}
 }

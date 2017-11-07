@@ -33,59 +33,59 @@ import static java.util.stream.StreamSupport.stream;
 
 public class BeanConfiguration {
 
-    private final MaridPlaceholderResolver placeholderResolver;
-    private final MaridContextListener[] contextListeners;
+	private final MaridPlaceholderResolver placeholderResolver;
+	private final MaridContextListener[] contextListeners;
 
-    public BeanConfiguration(ClassLoader cl, Properties ps, MaridContextListener... listeners) {
-        this.placeholderResolver = new MaridPlaceholderResolver(cl, ps);
-        this.contextListeners = listeners;
-    }
+	public BeanConfiguration(ClassLoader cl, Properties ps, MaridContextListener... listeners) {
+		this.placeholderResolver = new MaridPlaceholderResolver(cl, ps);
+		this.contextListeners = listeners;
+	}
 
-    public BeanConfiguration(ClassLoader classLoader, Properties applicationProperties) {
-        this(classLoader, applicationProperties, listeners(classLoader));
-    }
+	public BeanConfiguration(ClassLoader classLoader, Properties applicationProperties) {
+		this(classLoader, applicationProperties, listeners(classLoader));
+	}
 
-    public MaridPlaceholderResolver getPlaceholderResolver() {
-        return placeholderResolver;
-    }
+	public MaridPlaceholderResolver getPlaceholderResolver() {
+		return placeholderResolver;
+	}
 
-    void fireEvent(Consumer<MaridContextListener> event, Consumer<Throwable> errorConsumer) {
-        final boolean reverse = errorConsumer != null;
-        for (int i = contextListeners.length - 1; i >= 0; i--) {
-            final MaridContextListener listener = contextListeners[reverse ? i : contextListeners.length - i - 1];
-            try {
-                event.accept(listener);
-            } catch (Throwable x) {
-                if (reverse) {
-                    errorConsumer.accept(x);
-                } else {
-                    throw x;
-                }
-            }
-        }
-    }
+	void fireEvent(Consumer<MaridContextListener> event, Consumer<Throwable> errorConsumer) {
+		final boolean reverse = errorConsumer != null;
+		for (int i = contextListeners.length - 1; i >= 0; i--) {
+			final MaridContextListener listener = contextListeners[reverse ? i : contextListeners.length - i - 1];
+			try {
+				event.accept(listener);
+			} catch (Throwable x) {
+				if (reverse) {
+					errorConsumer.accept(x);
+				} else {
+					throw x;
+				}
+			}
+		}
+	}
 
-    private static MaridContextListener[] listeners(ClassLoader classLoader) {
-        try {
-            final ServiceLoader<MaridContextListener> serviceLoader = load(MaridContextListener.class, classLoader);
-            final Stream<MaridContextListener> listenerStream = stream(serviceLoader.spliterator(), false);
-            return listenerStream.sorted().toArray(MaridContextListener[]::new);
-        } catch (Throwable x) {
-            throw new IllegalStateException("Unable to load context listeners", x);
-        }
-    }
+	private static MaridContextListener[] listeners(ClassLoader classLoader) {
+		try {
+			final ServiceLoader<MaridContextListener> serviceLoader = load(MaridContextListener.class, classLoader);
+			final Stream<MaridContextListener> listenerStream = stream(serviceLoader.spliterator(), false);
+			return listenerStream.sorted().toArray(MaridContextListener[]::new);
+		} catch (Throwable x) {
+			throw new IllegalStateException("Unable to load context listeners", x);
+		}
+	}
 
-    private static Properties applicationProperties(ClassLoader classLoader) {
-        final Properties properties = new Properties(System.getProperties());
-        try (final InputStream inputStream = classLoader.getResourceAsStream("application.properties")) {
-            if (inputStream != null) {
-                try (final Reader reader = new InputStreamReader(inputStream, UTF_8)) {
-                    properties.load(reader);
-                }
-            }
-        } catch (IOException x) {
-            throw new UncheckedIOException(x);
-        }
-        return properties;
-    }
+	private static Properties applicationProperties(ClassLoader classLoader) {
+		final Properties properties = new Properties(System.getProperties());
+		try (final InputStream inputStream = classLoader.getResourceAsStream("application.properties")) {
+			if (inputStream != null) {
+				try (final Reader reader = new InputStreamReader(inputStream, UTF_8)) {
+					properties.load(reader);
+				}
+			}
+		} catch (IOException x) {
+			throw new UncheckedIOException(x);
+		}
+		return properties;
+	}
 }

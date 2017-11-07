@@ -28,24 +28,24 @@ import java.util.Set;
  */
 public class MaridCircularPlaceholderException extends RuntimeException {
 
-    private final Set<String> passed;
-    private final String name;
+	private final Set<String> passed;
+	private final String name;
 
-    public MaridCircularPlaceholderException(Set<String> passed, String name) {
-        this.passed = passed;
-        this.name = name;
-    }
+	public MaridCircularPlaceholderException(Set<String> passed, String name) {
+		this.passed = passed;
+		this.name = name;
+	}
 
-    @Override
-    public String getMessage() {
-        return name + "/" + passed;
-    }
+	@Override
+	public String getMessage() {
+		return name + "/" + passed;
+	}
 
-    public Set<String> getPassed() {
-        return passed;
-    }
+	public Set<String> getPassed() {
+		return passed;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public String getName() {
+		return name;
+	}
 }

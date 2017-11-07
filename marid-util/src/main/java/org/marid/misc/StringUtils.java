@@ -34,39 +34,39 @@ import java.util.regex.Pattern;
  */
 public interface StringUtils {
 
-    static Predicate<Path> pathEndsWith(String suffix) {
-        return p -> p.getFileName().toString().endsWith(suffix);
-    }
+	static Predicate<Path> pathEndsWith(String suffix) {
+		return p -> p.getFileName().toString().endsWith(suffix);
+	}
 
-    static String throwableText(Throwable throwable) {
-        final StringWriter writer = new StringWriter();
-        try (final PrintWriter w = new PrintWriter(writer)) {
-            throwable.printStackTrace(w);
-        }
-        return writer.toString();
-    }
+	static String throwableText(Throwable throwable) {
+		final StringWriter writer = new StringWriter();
+		try (final PrintWriter w = new PrintWriter(writer)) {
+			throwable.printStackTrace(w);
+		}
+		return writer.toString();
+	}
 
-    static String replaceAll(CharSequence text, Pattern pattern, Function<Matcher, String> func) {
-        final Matcher matcher = pattern.matcher(text);
-        boolean result = matcher.find();
-        if (result) {
-            final StringBuffer buffer = new StringBuffer();
-            do {
-                matcher.appendReplacement(buffer, func.apply(matcher));
-                result = matcher.find();
-            } while (result);
-            matcher.appendTail(buffer);
-            return buffer.toString();
-        } else {
-            return text.toString();
-        }
-    }
+	static String replaceAll(CharSequence text, Pattern pattern, Function<Matcher, String> func) {
+		final Matcher matcher = pattern.matcher(text);
+		boolean result = matcher.find();
+		if (result) {
+			final StringBuffer buffer = new StringBuffer();
+			do {
+				matcher.appendReplacement(buffer, func.apply(matcher));
+				result = matcher.find();
+			} while (result);
+			matcher.appendTail(buffer);
+			return buffer.toString();
+		} else {
+			return text.toString();
+		}
+	}
 
-    static int count(String string, char c) {
-        int count = 0, i = -1;
-        while ((i = string.indexOf(c, i + 1)) >= 0) {
-            count++;
-        }
-        return count;
-    }
+	static int count(String string, char c) {
+		int count = 0, i = -1;
+		while ((i = string.indexOf(c, i + 1)) >= 0) {
+			count++;
+		}
+		return count;
+	}
 }

@@ -47,135 +47,135 @@ import static org.marid.logging.Log.log;
  */
 public interface MaridRuntimeUtils {
 
-    static TreeSet<Method> methods(@Nonnull Object bean,
-                                   @Nonnull Predicate<Method> filter,
-                                   @Nonnull Comparator<Method> methodComparator) {
-        final TreeSet<Method> methods = new TreeSet<>(methodComparator);
-        final Consumer<Class<?>> consumer = c -> of(c.getDeclaredMethods())
-                .filter(m -> m.getParameterCount() == 0)
-                .filter(filter)
-                .peek(m -> m.setAccessible(true))
-                .forEach(methods::add);
-        for (Class<?> c = bean.getClass(); c != null; c = c.getSuperclass()) {
-            consumer.accept(c);
-        }
-        for (final Class<?> c : bean.getClass().getInterfaces()) {
-            consumer.accept(c);
-        }
-        return methods;
-    }
+	static TreeSet<Method> methods(@Nonnull Object bean,
+																 @Nonnull Predicate<Method> filter,
+																 @Nonnull Comparator<Method> methodComparator) {
+		final TreeSet<Method> methods = new TreeSet<>(methodComparator);
+		final Consumer<Class<?>> consumer = c -> of(c.getDeclaredMethods())
+				.filter(m -> m.getParameterCount() == 0)
+				.filter(filter)
+				.peek(m -> m.setAccessible(true))
+				.forEach(methods::add);
+		for (Class<?> c = bean.getClass(); c != null; c = c.getSuperclass()) {
+			consumer.accept(c);
+		}
+		for (final Class<?> c : bean.getClass().getInterfaces()) {
+			consumer.accept(c);
+		}
+		return methods;
+	}
 
-    static Thread daemonThread(AtomicReference<? extends AutoCloseable> contextRef) {
-        final Thread daemon = new Thread(null, () -> {
-            final Scanner scanner = new Scanner(System.in);
-            try {
-                while (scanner.hasNextLine()) {
-                    final String line = scanner.nextLine().trim();
-                    if (line.isEmpty()) {
-                        continue;
-                    }
-                    System.err.println(line);
-                    switch (line) {
-                        case "close":
-                            try {
-                                final AutoCloseable context = contextRef.get();
-                                if (context != null) {
-                                    context.close();
-                                    contextRef.set(null);
-                                }
-                            } catch (Exception x) {
-                                x.printStackTrace();
-                            }
-                            break;
-                        case "exit":
-                            System.exit(1);
-                            break;
-                    }
-                }
-            } catch (Exception x) {
-                log(WARNING, "Command processing error", x);
-            }
-        }, "repl", 96L * 1024L);
-        daemon.setDaemon(true);
-        return daemon;
-    }
+	static Thread daemonThread(AtomicReference<? extends AutoCloseable> contextRef) {
+		final Thread daemon = new Thread(null, () -> {
+			final Scanner scanner = new Scanner(System.in);
+			try {
+				while (scanner.hasNextLine()) {
+					final String line = scanner.nextLine().trim();
+					if (line.isEmpty()) {
+						continue;
+					}
+					System.err.println(line);
+					switch (line) {
+						case "close":
+							try {
+								final AutoCloseable context = contextRef.get();
+								if (context != null) {
+									context.close();
+									contextRef.set(null);
+								}
+							} catch (Exception x) {
+								x.printStackTrace();
+							}
+							break;
+						case "exit":
+							System.exit(1);
+							break;
+					}
+				}
+			} catch (Exception x) {
+				log(WARNING, "Command processing error", x);
+			}
+		}, "repl", 96L * 1024L);
+		daemon.setDaemon(true);
+		return daemon;
+	}
 
-    static boolean compatible(@Nonnull Executable executable, @Nonnull Object... args) {
-        if (executable.getParameterCount() == args.length) {
-            final Class<?>[] ts = executable.getParameterTypes();
-            return range(0, ts.length).filter(i -> args[i] != null).allMatch(i -> compatible(ts[i], args[i].getClass()));
-        } else {
-            return false;
-        }
-    }
+	static boolean compatible(@Nonnull Executable executable, @Nonnull Object... args) {
+		if (executable.getParameterCount() == args.length) {
+			final Class<?>[] ts = executable.getParameterTypes();
+			return range(0, ts.length).filter(i -> args[i] != null).allMatch(i -> compatible(ts[i], args[i].getClass()));
+		} else {
+			return false;
+		}
+	}
 
-    static boolean compatible(@Nonnull Executable executable, @Nonnull Class<?>... types) {
-        if (executable.getParameterCount() == types.length) {
-            final Class<?>[] ts = executable.getParameterTypes();
-            return range(0, ts.length).allMatch(i -> compatible(ts[i], types[i]));
-        } else {
-            return false;
-        }
-    }
+	static boolean compatible(@Nonnull Executable executable, @Nonnull Class<?>... types) {
+		if (executable.getParameterCount() == types.length) {
+			final Class<?>[] ts = executable.getParameterTypes();
+			return range(0, ts.length).allMatch(i -> compatible(ts[i], types[i]));
+		} else {
+			return false;
+		}
+	}
 
-    @Nonnull
-    static Stream<Class<?>> superClasses(@Nonnull Class<?> type) {
-        return ofNullable(type.getSuperclass()).map(s -> concat(of(type), superClasses(s))).orElseGet(() -> of(type));
-    }
+	@Nonnull
+	static Stream<Class<?>> superClasses(@Nonnull Class<?> type) {
+		return ofNullable(type.getSuperclass()).map(s -> concat(of(type), superClasses(s))).orElseGet(() -> of(type));
+	}
 
-    @Nonnull
-    static Stream<Class<?>> enclosingClasses(@Nonnull Class<?> type) {
-        return ofNullable(type.getEnclosingClass()).stream().flatMap(e -> concat(of(e), enclosingClasses(e)));
-    }
+	@Nonnull
+	static Stream<Class<?>> enclosingClasses(@Nonnull Class<?> type) {
+		return ofNullable(type.getEnclosingClass()).stream().flatMap(e -> concat(of(e), enclosingClasses(e)));
+	}
 
-    static boolean isAccessible(@Nonnull Class<?> type) {
-        return isPublic(type.getModifiers()) && enclosingClasses(type).allMatch(MaridRuntimeUtils::isAccessible);
-    }
+	static boolean isAccessible(@Nonnull Class<?> type) {
+		return isPublic(type.getModifiers()) && enclosingClasses(type).allMatch(MaridRuntimeUtils::isAccessible);
+	}
 
-    @Nonnull
-    static Stream<Method> accessibleMethods(@Nonnull Class<?> type) {
-        return concat(superClasses(type), of(type.getInterfaces()))
-                .flatMap(c -> of(c.getMethods()))
-                .filter(m -> isAccessible(m.getDeclaringClass()))
-                .distinct();
-    }
+	@Nonnull
+	static Stream<Method> accessibleMethods(@Nonnull Class<?> type) {
+		return concat(superClasses(type), of(type.getInterfaces()))
+				.flatMap(c -> of(c.getMethods()))
+				.filter(m -> isAccessible(m.getDeclaringClass()))
+				.distinct();
+	}
 
-    @Nonnull
-    static Stream<Field> accessibleFields(@Nonnull Class<?> type) {
-        return concat(superClasses(type), of(type.getInterfaces()))
-                .flatMap(c -> of(c.getFields()))
-                .filter(f -> isAccessible(f.getDeclaringClass()))
-                .distinct();
-    }
+	@Nonnull
+	static Stream<Field> accessibleFields(@Nonnull Class<?> type) {
+		return concat(superClasses(type), of(type.getInterfaces()))
+				.flatMap(c -> of(c.getFields()))
+				.filter(f -> isAccessible(f.getDeclaringClass()))
+				.distinct();
+	}
 
-    static boolean compatible(@Nonnull Class<?> t1, @Nonnull Class<?> t2) {
-        return t1.equals(t2)
-                || t1.isAssignableFrom(t2)
-                || t1.isPrimitive() && compatible(wrapper(t1), t2)
-                || t2.isPrimitive() && compatible(t1, wrapper(t2));
-    }
+	static boolean compatible(@Nonnull Class<?> t1, @Nonnull Class<?> t2) {
+		return t1.equals(t2)
+				|| t1.isAssignableFrom(t2)
+				|| t1.isPrimitive() && compatible(wrapper(t1), t2)
+				|| t2.isPrimitive() && compatible(t1, wrapper(t2));
+	}
 
-    @Nonnull
-    static Class<?> wrapper(@Nonnull Class<?> primitiveType) {
-        switch (primitiveType.getName()) {
-            case "int": return Integer.class;
-            case "long": return Long.class;
-            case "boolean": return Boolean.class;
-            case "short": return Short.class;
-            case "byte": return Byte.class;
-            case "char": return Character.class;
-            case "float": return Float.class;
-            case "double": return Double.class;
-            case "void": return Void.class;
-            default: throw new IllegalArgumentException(primitiveType.getName());
-        }
-    }
+	@Nonnull
+	static Class<?> wrapper(@Nonnull Class<?> primitiveType) {
+		switch (primitiveType.getName()) {
+			case "int": return Integer.class;
+			case "long": return Long.class;
+			case "boolean": return Boolean.class;
+			case "short": return Short.class;
+			case "byte": return Byte.class;
+			case "char": return Character.class;
+			case "float": return Float.class;
+			case "double": return Double.class;
+			case "void": return Void.class;
+			default: throw new IllegalArgumentException(primitiveType.getName());
+		}
+	}
 
-    @Nonnull
-    static IllegalStateException methodState(@Nonnull String method, @Nonnull Object[] args, @Nonnull Throwable cause) {
-        return new IllegalStateException(
-                of(args).map(v -> v == null ? "*" : v.getClass().getName()).collect(joining(",", method + "(", ")")),
-                cause
-        );
-    }
+	@Nonnull
+	static IllegalStateException methodState(@Nonnull String method, @Nonnull Object[] args, @Nonnull Throwable cause) {
+		return new IllegalStateException(
+				of(args).map(v -> v == null ? "*" : v.getClass().getName()).collect(joining(",", method + "(", ")")),
+				cause
+		);
+	}
 }

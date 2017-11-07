@@ -34,30 +34,30 @@ import org.springframework.stereotype.Service;
 @Service
 public class TextFilesUpdater {
 
-    private final ApplicationEventPublisher eventPublisher;
+	private final ApplicationEventPublisher eventPublisher;
 
-    @Autowired
-    public TextFilesUpdater(ApplicationEventPublisher eventPublisher) {
-        this.eventPublisher = eventPublisher;
-    }
+	@Autowired
+	public TextFilesUpdater(ApplicationEventPublisher eventPublisher) {
+		this.eventPublisher = eventPublisher;
+	}
 
-    @EventListener(condition = "@textFilePathMatcher.matches(#addedEvent.source)")
-    public void onAdded(FileAddedEvent addedEvent) {
-        eventPublisher.publishEvent(new TextFileAddedEvent(addedEvent.getSource()));
-    }
+	@EventListener(condition = "@textFilePathMatcher.matches(#addedEvent.source)")
+	public void onAdded(FileAddedEvent addedEvent) {
+		eventPublisher.publishEvent(new TextFileAddedEvent(addedEvent.getSource()));
+	}
 
-    @EventListener(condition = "@textFilePathMatcher.matches(#removedEvent.source)")
-    public void onRemoved(FileRemovedEvent removedEvent) {
-        eventPublisher.publishEvent(new TextFileRemovedEvent(removedEvent.getSource()));
-    }
+	@EventListener(condition = "@textFilePathMatcher.matches(#removedEvent.source)")
+	public void onRemoved(FileRemovedEvent removedEvent) {
+		eventPublisher.publishEvent(new TextFileRemovedEvent(removedEvent.getSource()));
+	}
 
-    @EventListener(condition = "@textFilePathMatcher.matches(#changedEvent.source)")
-    public void onChanged(FileChangedEvent changedEvent) {
-        eventPublisher.publishEvent(new TextFileChangedEvent(changedEvent.getSource()));
-    }
+	@EventListener(condition = "@textFilePathMatcher.matches(#changedEvent.source)")
+	public void onChanged(FileChangedEvent changedEvent) {
+		eventPublisher.publishEvent(new TextFileChangedEvent(changedEvent.getSource()));
+	}
 
-    @EventListener(condition = "@textFilePathMatcher.matches(#movedEvent.source)")
-    public void onMoved(FileMovedEvent movedEvent) {
-        eventPublisher.publishEvent(new TextFileMovedEvent(movedEvent.getSource(), movedEvent.getTarget()));
-    }
+	@EventListener(condition = "@textFilePathMatcher.matches(#movedEvent.source)")
+	public void onMoved(FileMovedEvent movedEvent) {
+		eventPublisher.publishEvent(new TextFileMovedEvent(movedEvent.getSource(), movedEvent.getTarget()));
+	}
 }

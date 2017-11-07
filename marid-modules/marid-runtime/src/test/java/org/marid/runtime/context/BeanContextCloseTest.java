@@ -38,66 +38,66 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Tag("normal")
 class BeanContextCloseTest {
 
-    private static final ConcurrentLinkedQueue<String> QUEUE = new ConcurrentLinkedQueue<>();
+	private static final ConcurrentLinkedQueue<String> QUEUE = new ConcurrentLinkedQueue<>();
 
-    @Test
-    void closeables() {
-        final BeanConfiguration configuration = new BeanConfiguration(
-                Thread.currentThread().getContextClassLoader(),
-                new Properties(),
-                new MaridDefaultContextListener()
-        );
-        final RuntimeBean root = new RuntimeBean()
-                .add("bean1", new CallExpr(new ClassExpr(C1.class.getName()), "new"), b -> {
-                    b.add("bean11", new CallExpr(new ClassExpr(C2.class.getName()), "new"));
-                })
-                .add("bean2", new CallExpr(new ClassExpr(C2.class.getName()), "new"), b -> {
-                    b.add("bean21", new CallExpr(new ClassExpr(C3.class.getName()), "new"), bb -> {
-                        bb.add("bean211", new CallExpr(new ClassExpr(C4.class.getName()), "new"));
-                    });
-                });
-        try (final BeanContext context = new BeanContext(configuration, root)) {
-            throw new AssertionError("Unreachable");
-        } catch (Throwable x) {
-            assertTrue(x instanceof MaridBeanInitializationException);
-        }
-        assertArrayEquals(new String[] {"c4", "c3", "c2", "c2", "c1"}, QUEUE.toArray(new String[QUEUE.size()]));
-    }
+	@Test
+	void closeables() {
+		final BeanConfiguration configuration = new BeanConfiguration(
+				Thread.currentThread().getContextClassLoader(),
+				new Properties(),
+				new MaridDefaultContextListener()
+		);
+		final RuntimeBean root = new RuntimeBean()
+				.add("bean1", new CallExpr(new ClassExpr(C1.class.getName()), "new"), b -> {
+					b.add("bean11", new CallExpr(new ClassExpr(C2.class.getName()), "new"));
+				})
+				.add("bean2", new CallExpr(new ClassExpr(C2.class.getName()), "new"), b -> {
+					b.add("bean21", new CallExpr(new ClassExpr(C3.class.getName()), "new"), bb -> {
+						bb.add("bean211", new CallExpr(new ClassExpr(C4.class.getName()), "new"));
+					});
+				});
+		try (final BeanContext context = new BeanContext(configuration, root)) {
+			throw new AssertionError("Unreachable");
+		} catch (Throwable x) {
+			assertTrue(x instanceof MaridBeanInitializationException);
+		}
+		assertArrayEquals(new String[]{"c4", "c3", "c2", "c2", "c1"}, QUEUE.toArray(new String[QUEUE.size()]));
+	}
 
-    public static class C1 implements AutoCloseable {
+	public static class C1 implements AutoCloseable {
 
-        @Override
-        public void close() throws Exception {
-            QUEUE.add("c1");
-        }
-    }
+		@Override
+		public void close() throws Exception {
+			QUEUE.add("c1");
+		}
+	}
 
-    public static class C2 implements AutoCloseable {
+	public static class C2 implements AutoCloseable {
 
-        @Override
-        public void close() throws Exception {
-            QUEUE.add("c2");
-        }
-    }
+		@Override
+		public void close() throws Exception {
+			QUEUE.add("c2");
+		}
+	}
 
-    public static class C3 implements AutoCloseable {
+	public static class C3 implements AutoCloseable {
 
-        @Override
-        public void close() throws Exception {
-            QUEUE.add("c3");
-        }
-    }
+		@Override
+		public void close() throws Exception {
+			QUEUE.add("c3");
+		}
+	}
 
-    public static class C4 implements AutoCloseable {
+	public static class C4 implements AutoCloseable {
 
-        @PostConstruct
-        public void init() {
-            throw new IllegalStateException();
-        }
+		@PostConstruct
+		public void init() {
+			throw new IllegalStateException();
+		}
 
-        @Override
-        public void close() throws Exception {
-            QUEUE.add("c4");
-        }
-    }
+		@Override
+		public void close() throws Exception {
+			QUEUE.add("c4");
+		}
+	}
 }

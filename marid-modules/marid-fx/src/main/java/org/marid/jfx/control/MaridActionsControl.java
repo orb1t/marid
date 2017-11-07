@@ -34,13 +34,13 @@ import java.util.function.Function;
  */
 public interface MaridActionsControl<T> {
 
-    ObservableList<Function<T, FxAction>> actions();
+	ObservableList<Function<T, FxAction>> actions();
 
-    MultipleSelectionModel<T> getSelectionModel();
+	MultipleSelectionModel<T> getSelectionModel();
 
-    List<Observable> observables();
+	List<Observable> observables();
 
-    List<Runnable> onConstructListeners();
+	List<Runnable> onConstructListeners();
 
-    List<Runnable> onDestroyListeners();
+	List<Runnable> onDestroyListeners();
 }

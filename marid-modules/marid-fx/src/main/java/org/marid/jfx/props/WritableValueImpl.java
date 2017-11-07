@@ -31,31 +31,31 @@ import java.util.function.Supplier;
  */
 public class WritableValueImpl<T> implements WritableObjectValue<T> {
 
-    private final Consumer<T> consumer;
-    private final Supplier<T> supplier;
+	private final Consumer<T> consumer;
+	private final Supplier<T> supplier;
 
-    public WritableValueImpl(Consumer<T> consumer, Supplier<T> supplier) {
-        this.consumer = consumer;
-        this.supplier = supplier;
-    }
+	public WritableValueImpl(Consumer<T> consumer, Supplier<T> supplier) {
+		this.consumer = consumer;
+		this.supplier = supplier;
+	}
 
-    @Override
-    public T getValue() {
-        return get();
-    }
+	@Override
+	public T getValue() {
+		return get();
+	}
 
-    @Override
-    public void setValue(T value) {
-        set(value);
-    }
+	@Override
+	public void setValue(T value) {
+		set(value);
+	}
 
-    @Override
-    public T get() {
-        return supplier.get();
-    }
+	@Override
+	public T get() {
+		return supplier.get();
+	}
 
-    @Override
-    public void set(T value) {
-        consumer.accept(value);
-    }
+	@Override
+	public void set(T value) {
+		consumer.accept(value);
+	}
 }

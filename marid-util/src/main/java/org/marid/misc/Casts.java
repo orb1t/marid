@@ -28,8 +28,8 @@ import javax.annotation.Nullable;
  */
 public interface Casts {
 
-    @SuppressWarnings("unchecked")
-    static <T> T cast(@Nullable Object object) {
-        return (T) object;
-    }
+	@SuppressWarnings("unchecked")
+	static <T> T cast(@Nullable Object object) {
+		return (T) object;
+	}
 }

@@ -32,24 +32,24 @@ import java.nio.file.Path;
  */
 public interface FileEditor {
 
-    @Nullable
-    Runnable getEditAction(@Nonnull Path path);
+	@Nullable
+	Runnable getEditAction(@Nonnull Path path);
 
-    @Nonnull
-    String getName();
+	@Nonnull
+	String getName();
 
-    @Nonnull
-    String getIcon();
+	@Nonnull
+	String getIcon();
 
-    @Nonnull
-    String getGroup();
+	@Nonnull
+	String getGroup();
 
-    @Nullable
-    default SpecialAction getSpecialAction() {
-        return null;
-    }
+	@Nullable
+	default SpecialAction getSpecialAction() {
+		return null;
+	}
 
-    default String icon(@PropertyKey(resourceBundle = "fonts.meta") String icon) {
-        return icon;
-    }
+	default String icon(@PropertyKey(resourceBundle = "fonts.meta") String icon) {
+		return icon;
+	}
 }

@@ -45,56 +45,56 @@ import static org.marid.l10n.L10n.s;
  */
 public class AbstractDeviceEditor<E, T extends AbstractDevice<E>> extends Dialog<Boolean> {
 
-    protected final T device;
-    protected final GenericGridPane table = new GenericGridPane();
-    protected final Spinner<Integer> address;
-    protected final ComboBox<ModbusCodec<E>> codecs;
-    protected final ComboBox<FunctionCode> functions = new ComboBox<>(observableArrayList(FunctionCode.values()));
+	protected final T device;
+	protected final GenericGridPane table = new GenericGridPane();
+	protected final Spinner<Integer> address;
+	protected final ComboBox<ModbusCodec<E>> codecs;
+	protected final ComboBox<FunctionCode> functions = new ComboBox<>(observableArrayList(FunctionCode.values()));
 
-    public AbstractDeviceEditor(T device, Stage stage) {
-        this.device = device;
-        this.codecs = new ComboBox<>(device.codec.getItems());
-        this.address = new Spinner<>(0, 65535, device.getAddress());
-        initOwner(stage);
-        initModality(Modality.WINDOW_MODAL);
-        getDialogPane().getButtonTypes().addAll(ButtonType.APPLY, ButtonType.CANCEL);
-        getDialogPane().setContent(MaridControls.createMaridScrollPane(table));
-        setTitle(s(device.getClass().getSimpleName()));
-        setResultConverter(t -> {
-            switch (t.getButtonData()) {
-                case APPLY:
-                    accept();
-                    return true;
-                default:
-                    return null;
-            }
-        });
-        setResizable(true);
-    }
+	public AbstractDeviceEditor(T device, Stage stage) {
+		this.device = device;
+		this.codecs = new ComboBox<>(device.codec.getItems());
+		this.address = new Spinner<>(0, 65535, device.getAddress());
+		initOwner(stage);
+		initModality(Modality.WINDOW_MODAL);
+		getDialogPane().getButtonTypes().addAll(ButtonType.APPLY, ButtonType.CANCEL);
+		getDialogPane().setContent(MaridControls.createMaridScrollPane(table));
+		setTitle(s(device.getClass().getSimpleName()));
+		setResultConverter(t -> {
+			switch (t.getButtonData()) {
+				case APPLY:
+					accept();
+					return true;
+				default:
+					return null;
+			}
+		});
+		setResizable(true);
+	}
 
-    @PostConstruct
-    private void initAddress() {
-        address.getValueFactory().setConverter(new MaridConverter<>(i -> format("%04X", i), s -> parseInt(s, 16)));
-        address.setEditable(true);
-        table.addControl("Address", () -> address);
-    }
+	@PostConstruct
+	private void initAddress() {
+		address.getValueFactory().setConverter(new MaridConverter<>(i -> format("%04X", i), s -> parseInt(s, 16)));
+		address.setEditable(true);
+		table.addControl("Address", () -> address);
+	}
 
-    @PostConstruct
-    private void initCodecs() {
-        codecs.setConverter(new MaridConverter<>(ModbusCodec::getName));
-        codecs.getSelectionModel().select(device.codec.getSelectionModel().getSelectedIndex());
-        table.addControl("Codec", () -> codecs);
-    }
+	@PostConstruct
+	private void initCodecs() {
+		codecs.setConverter(new MaridConverter<>(ModbusCodec::getName));
+		codecs.getSelectionModel().select(device.codec.getSelectionModel().getSelectedIndex());
+		table.addControl("Codec", () -> codecs);
+	}
 
-    @PostConstruct
-    private void initFuncs() {
-        functions.getSelectionModel().select(device.getFunctionCode());
-        table.addControl("Function", () -> functions);
-    }
+	@PostConstruct
+	private void initFuncs() {
+		functions.getSelectionModel().select(device.getFunctionCode());
+		table.addControl("Function", () -> functions);
+	}
 
-    protected void accept() {
-        device.address.setText(String.format("%04X", address.getValue()));
-        device.codec.getSelectionModel().select(codecs.getSelectionModel().getSelectedItem());
-        device.functions.getSelectionModel().select(functions.getSelectionModel().getSelectedItem());
-    }
+	protected void accept() {
+		device.address.setText(String.format("%04X", address.getValue()));
+		device.codec.getSelectionModel().select(codecs.getSelectionModel().getSelectedItem());
+		device.functions.getSelectionModel().select(functions.getSelectionModel().getSelectedItem());
+	}
 }

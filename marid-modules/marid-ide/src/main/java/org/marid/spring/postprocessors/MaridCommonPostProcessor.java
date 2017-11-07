@@ -34,43 +34,43 @@ import static org.marid.logging.Log.log;
  */
 public class MaridCommonPostProcessor implements DestructionAwareBeanPostProcessor, Ordered {
 
-    @Override
-    public void postProcessBeforeDestruction(@Nullable Object bean, @Nullable String beanName) throws BeansException {
-        if (beanName == null) {
-            if (bean != null) {
-                try {
-                    log(INFO, "Destructing {0}", bean);
-                } catch (Exception x) {
-                    log(INFO, "Destructing {0}", bean.getClass().getSimpleName());
-                }
-            }
-        } else {
-            log(INFO, "Destructing {0}", beanName);
-        }
-    }
+	@Override
+	public void postProcessBeforeDestruction(@Nullable Object bean, @Nullable String beanName) throws BeansException {
+		if (beanName == null) {
+			if (bean != null) {
+				try {
+					log(INFO, "Destructing {0}", bean);
+				} catch (Exception x) {
+					log(INFO, "Destructing {0}", bean.getClass().getSimpleName());
+				}
+			}
+		} else {
+			log(INFO, "Destructing {0}", beanName);
+		}
+	}
 
-    @Override
-    public boolean requiresDestruction(Object bean) {
-        return true;
-    }
+	@Override
+	public boolean requiresDestruction(Object bean) {
+		return true;
+	}
 
-    @Override
-    public Object postProcessBeforeInitialization(@Nullable Object bean, String beanName) throws BeansException {
-        return bean;
-    }
+	@Override
+	public Object postProcessBeforeInitialization(@Nullable Object bean, String beanName) throws BeansException {
+		return bean;
+	}
 
-    @Override
-    public Object postProcessAfterInitialization(@Nullable Object bean, String beanName) throws BeansException {
-        if (beanName != null) {
-            log(INFO, "Initialized {0}", beanName);
-        } else {
-            log(INFO, "Initialized {0}", bean);
-        }
-        return bean;
-    }
+	@Override
+	public Object postProcessAfterInitialization(@Nullable Object bean, String beanName) throws BeansException {
+		if (beanName != null) {
+			log(INFO, "Initialized {0}", beanName);
+		} else {
+			log(INFO, "Initialized {0}", bean);
+		}
+		return bean;
+	}
 
-    @Override
-    public int getOrder() {
-        return Ordered.HIGHEST_PRECEDENCE;
-    }
+	@Override
+	public int getOrder() {
+		return Ordered.HIGHEST_PRECEDENCE;
+	}
 }

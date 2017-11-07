@@ -26,11 +26,11 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 public interface PathMatchers {
 
-    static boolean isClassFile(Path path, BasicFileAttributes a) {
-        return path.getFileName() != null && path.getFileName().toString().endsWith(".class");
-    }
+	static boolean isClassFile(Path path, BasicFileAttributes a) {
+		return path.getFileName() != null && path.getFileName().toString().endsWith(".class");
+	}
 
-    static boolean isJarFile(Path path, BasicFileAttributes a) {
-        return path.getFileName() != null && path.getFileName().toString().endsWith(".jar");
-    }
+	static boolean isJarFile(Path path, BasicFileAttributes a) {
+		return path.getFileName() != null && path.getFileName().toString().endsWith(".jar");
+	}
 }

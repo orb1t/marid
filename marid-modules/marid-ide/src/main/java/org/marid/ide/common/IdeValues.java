@@ -38,27 +38,27 @@ import java.util.Locale;
 @Lazy(false)
 public class IdeValues {
 
-    public final String implementationVersion;
+	public final String implementationVersion;
 
-    @Autowired
-    public IdeValues(@Value("${implementation.version}") String implementationVersion) {
-        this.implementationVersion = implementationVersion;
-    }
+	@Autowired
+	public IdeValues(@Value("${implementation.version}") String implementationVersion) {
+		this.implementationVersion = implementationVersion;
+	}
 
-    @PostConstruct
-    private void init() {
-        IdePrefs.PREFERENCES.addPreferenceChangeListener(evt -> {
-            if ("locale".equals(evt.getKey())) {
-                final Locale locale = Locale.forLanguageTag(evt.getNewValue());
-                if (locale != null && !Locale.ROOT.equals(locale) && !Locale.getDefault().equals(locale)) {
-                    Locale.setDefault(locale);
-                    if (Platform.isFxApplicationThread()) {
-                        LocalizedStrings.LOCALE.set(locale);
-                    } else {
-                        Platform.runLater(() -> LocalizedStrings.LOCALE.set(locale));
-                    }
-                }
-            }
-        });
-    }
+	@PostConstruct
+	private void init() {
+		IdePrefs.PREFERENCES.addPreferenceChangeListener(evt -> {
+			if ("locale".equals(evt.getKey())) {
+				final Locale locale = Locale.forLanguageTag(evt.getNewValue());
+				if (locale != null && !Locale.ROOT.equals(locale) && !Locale.getDefault().equals(locale)) {
+					Locale.setDefault(locale);
+					if (Platform.isFxApplicationThread()) {
+						LocalizedStrings.LOCALE.set(locale);
+					} else {
+						Platform.runLater(() -> LocalizedStrings.LOCALE.set(locale));
+					}
+				}
+			}
+		});
+	}
 }

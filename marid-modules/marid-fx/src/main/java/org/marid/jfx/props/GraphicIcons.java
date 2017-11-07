@@ -31,14 +31,14 @@ import org.marid.jfx.icons.FontIcons;
 @SuppressWarnings("unchecked")
 public interface GraphicIcons<T extends GraphicIcons<T>> {
 
-    ObjectProperty<Node> graphicProperty();
+	ObjectProperty<Node> graphicProperty();
 
-    default T icon(String icon, int size) {
-        graphicProperty().set(FontIcons.glyphIcon(icon, size));
-        return (T) this;
-    }
+	default T icon(String icon, int size) {
+		graphicProperty().set(FontIcons.glyphIcon(icon, size));
+		return (T) this;
+	}
 
-    default T icon(String icon) {
-        return icon(icon, 16);
-    }
+	default T icon(String icon) {
+		return icon(icon, 16);
+	}
 }

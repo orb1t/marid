@@ -33,11 +33,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class ApplicationConfiguration {
 
-    @IdeAction
-    public FxAction exitAction() {
-        return new FxAction("x", "Application")
-                .bindText("Exit")
-                .setIcon("D_EXIT_TO_APP")
-                .setEventHandler(event -> Platform.exit());
-    }
+	@IdeAction
+	public FxAction exitAction() {
+		return new FxAction("x", "Application")
+				.bindText("Exit")
+				.setIcon("D_EXIT_TO_APP")
+				.setEventHandler(event -> Platform.exit());
+	}
 }

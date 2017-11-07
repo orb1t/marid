@@ -30,12 +30,12 @@ import java.security.NoSuchAlgorithmException;
  */
 public interface Digests {
 
-    @Nonnull
-    static MessageDigest digest(@Nonnull String algorithm) {
-        try {
-            return MessageDigest.getInstance(algorithm);
-        } catch (NoSuchAlgorithmException x) {
-            throw new IllegalArgumentException(algorithm, x);
-        }
-    }
+	@Nonnull
+	static MessageDigest digest(@Nonnull String algorithm) {
+		try {
+			return MessageDigest.getInstance(algorithm);
+		} catch (NoSuchAlgorithmException x) {
+			throw new IllegalArgumentException(algorithm, x);
+		}
+	}
 }

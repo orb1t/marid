@@ -36,64 +36,64 @@ import static java.util.Comparator.comparingInt;
 
 public interface MaridActionsListControl<T> extends MaridActionsControl<T> {
 
-    ObservableList<T> getItems();
+	ObservableList<T> getItems();
 
-    @Resource
-    default void setSelectAndRemoveActions(SpecialActions specialActions) {
-        if (getClass().isAnnotationPresent(DisableStdSelectAndRemoveActions.class)) {
-            return;
-        }
+	@Resource
+	default void setSelectAndRemoveActions(SpecialActions specialActions) {
+		if (getClass().isAnnotationPresent(DisableStdSelectAndRemoveActions.class)) {
+			return;
+		}
 
-        actions().add(e -> new FxAction(specialActions.get(SpecialActionType.REMOVE))
-                .bindDisabled(Bindings.isEmpty(getSelectionModel().getSelectedItems()))
-                .setEventHandler(event -> getItems().removeAll(getSelectionModel().getSelectedItems()))
-        );
+		actions().add(e -> new FxAction(specialActions.get(SpecialActionType.REMOVE))
+				.bindDisabled(Bindings.isEmpty(getSelectionModel().getSelectedItems()))
+				.setEventHandler(event -> getItems().removeAll(getSelectionModel().getSelectedItems()))
+		);
 
-        actions().add(e -> new FxAction(specialActions.get(SpecialActionType.SELECT_ALL))
-                .setDisabled(getSelectionModel().getSelectionMode().equals(SelectionMode.SINGLE))
-                .setEventHandler(event -> getSelectionModel().selectAll())
-        );
+		actions().add(e -> new FxAction(specialActions.get(SpecialActionType.SELECT_ALL))
+				.setDisabled(getSelectionModel().getSelectionMode().equals(SelectionMode.SINGLE))
+				.setEventHandler(event -> getSelectionModel().selectAll())
+		);
 
-        actions().add(e -> new FxAction(specialActions.get(SpecialActionType.CLEAR_ALL))
-                .setEventHandler(event -> getItems().clear())
-        );
-    }
+		actions().add(e -> new FxAction(specialActions.get(SpecialActionType.CLEAR_ALL))
+				.setEventHandler(event -> getItems().clear())
+		);
+	}
 
-    @Resource
-    default void setUpAndDownActions(SpecialActions specialActions) {
-        if (getClass().isAnnotationPresent(DisableStdUpAndDownActions.class)) {
-            return;
-        }
+	@Resource
+	default void setUpAndDownActions(SpecialActions specialActions) {
+		if (getClass().isAnnotationPresent(DisableStdUpAndDownActions.class)) {
+			return;
+		}
 
-        actions().add(e -> new FxAction(specialActions.get(SpecialActionType.UP))
-                .bindDisabled(Bindings.createBooleanBinding(() -> {
-                    final ObservableList<Integer> indices = getSelectionModel().getSelectedIndices();
-                    return indices.stream().mapToInt(Integer::intValue).min().orElse(0) == 0;
-                }, getSelectionModel().getSelectedIndices()))
-                .setEventHandler(event -> {
-                    final ObservableList<Integer> indices = getSelectionModel().getSelectedIndices();
-                    indices.stream().sorted().forEach(index -> {
-                        final T element = getItems().remove(index.intValue());
-                        getItems().add(index - 1, element);
-                        getSelectionModel().select(index - 1);
-                    });
-                })
-        );
-        actions().add(e -> new FxAction(specialActions.get(SpecialActionType.DOWN))
-                .bindDisabled(Bindings.createBooleanBinding(() -> {
-                    final ObservableList<Integer> indices = getSelectionModel().getSelectedIndices();
-                    final int last = getItems().size() - 1;
-                    return indices.stream().mapToInt(Integer::intValue).max().orElse(last) == last;
-                }, getSelectionModel().getSelectedIndices()))
-                .setEventHandler(event -> {
-                    final ObservableList<Integer> indices = getSelectionModel().getSelectedIndices();
-                    indices.stream().sorted(comparingInt(Integer::intValue).reversed()).forEach(index -> {
-                        getSelectionModel().clearSelection(index);
-                        final T element = getItems().remove(index.intValue());
-                        getItems().add(index + 1, element);
-                        getSelectionModel().select(index + 1);
-                    });
-                })
-        );
-    }
+		actions().add(e -> new FxAction(specialActions.get(SpecialActionType.UP))
+				.bindDisabled(Bindings.createBooleanBinding(() -> {
+					final ObservableList<Integer> indices = getSelectionModel().getSelectedIndices();
+					return indices.stream().mapToInt(Integer::intValue).min().orElse(0) == 0;
+				}, getSelectionModel().getSelectedIndices()))
+				.setEventHandler(event -> {
+					final ObservableList<Integer> indices = getSelectionModel().getSelectedIndices();
+					indices.stream().sorted().forEach(index -> {
+						final T element = getItems().remove(index.intValue());
+						getItems().add(index - 1, element);
+						getSelectionModel().select(index - 1);
+					});
+				})
+		);
+		actions().add(e -> new FxAction(specialActions.get(SpecialActionType.DOWN))
+				.bindDisabled(Bindings.createBooleanBinding(() -> {
+					final ObservableList<Integer> indices = getSelectionModel().getSelectedIndices();
+					final int last = getItems().size() - 1;
+					return indices.stream().mapToInt(Integer::intValue).max().orElse(last) == last;
+				}, getSelectionModel().getSelectedIndices()))
+				.setEventHandler(event -> {
+					final ObservableList<Integer> indices = getSelectionModel().getSelectedIndices();
+					indices.stream().sorted(comparingInt(Integer::intValue).reversed()).forEach(index -> {
+						getSelectionModel().clearSelection(index);
+						final T element = getItems().remove(index.intValue());
+						getItems().add(index + 1, element);
+						getSelectionModel().select(index + 1);
+					});
+				})
+		);
+	}
 }

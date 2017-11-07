@@ -34,13 +34,13 @@ import java.util.concurrent.TimeUnit;
  */
 public interface ProtoBusTaskRunner<T extends ProtoBus> {
 
-    Future<?> runAsync(IOBiConsumer<T, ProtoIO> consumer);
+	Future<?> runAsync(IOBiConsumer<T, ProtoIO> consumer);
 
-    <R> Future<R> callAsync(IOBiFunction<T, ProtoIO, R> function);
+	<R> Future<R> callAsync(IOBiFunction<T, ProtoIO, R> function);
 
-    ScheduledFuture<?> schedule(IOBiConsumer<T, ProtoIO> task, long delay, long period, TimeUnit unit, boolean fair);
+	ScheduledFuture<?> schedule(IOBiConsumer<T, ProtoIO> task, long delay, long period, TimeUnit unit, boolean fair);
 
-    void run(IOBiConsumer<T, ProtoIO> consumer);
+	void run(IOBiConsumer<T, ProtoIO> consumer);
 
-    <R> R call(IOBiFunction<T, ProtoIO, R> function);
+	<R> R call(IOBiFunction<T, ProtoIO, R> function);
 }

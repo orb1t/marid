@@ -31,13 +31,13 @@ import java.nio.ByteBuffer;
 @MaridBean(name = "4-bytes integer codec")
 public class IntCodec implements Codec<Integer> {
 
-    @Override
-    public Integer decode(byte[] data) {
-        return ByteBuffer.wrap(data).getInt(0);
-    }
+	@Override
+	public Integer decode(byte[] data) {
+		return ByteBuffer.wrap(data).getInt(0);
+	}
 
-    @Override
-    public byte[] encode(Integer data) {
-        return ByteBuffer.allocate(4).putInt(0, data).array();
-    }
+	@Override
+	public byte[] encode(Integer data) {
+		return ByteBuffer.allocate(4).putInt(0, data).array();
+	}
 }
