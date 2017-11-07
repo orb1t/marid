@@ -35,9 +35,9 @@ public interface TypedClassExpression extends ClassExpression, TypedExpression {
 
     @Nonnull
     @Override
-    default Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {
-        return TypeUtils.getClass(typeContext.getClassLoader(), getClassName())
-                .map(typeContext::getClassType)
+    default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
+        return TypeUtils.getClass(context.getClassLoader(), getClassName())
+                .map(context::getClassType)
                 .orElse(WILDCARD);
     }
 }

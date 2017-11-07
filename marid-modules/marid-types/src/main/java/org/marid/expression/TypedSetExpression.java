@@ -22,9 +22,8 @@
 package org.marid.expression;
 
 import org.marid.expression.generic.SetExpression;
-import org.marid.expression.generic.ThisExpression;
+import org.marid.runtime.context.MaridRuntimeUtils;
 import org.marid.types.TypeContext;
-import org.marid.types.TypeUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -42,22 +41,24 @@ public interface TypedSetExpression extends SetExpression, TypedExpression {
 
     @Nonnull
     @Override
-    default Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {
-        return getTarget().getType(owner, typeContext);
+    default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
+        return getTarget().getType(owner, context);
     }
 
     @Nonnull
     @Override
-    default Type resolve(@Nonnull Type type, @Nonnull TypeContext typeContext) {
-        if (getTarget() instanceof ThisExpression && !(type instanceof Class<?>)) {
-            return TypeUtils.getField(typeContext.getRaw(type), getField())
-                    .map(f -> typeContext.resolve(type, f.getGenericType()))
-                    .map(t -> typeContext.evaluate(e -> e.where(t, getValue()
-                            .resolveType(type, typeContext))
+    default Type resolve(@Nonnull Type type, @Nonnull TypeContext context) {
+        if (type instanceof Class<?>) {
+            return type;
+        } else {
+            return MaridRuntimeUtils.accessibleFields(context.getRaw(type))
+                    .filter(f -> f.getName().equals(getField()))
+                    .findFirst()
+                    .map(f -> context.resolve(type, f.getGenericType()))
+                    .map(t -> context.evaluate(e -> e.where(t, getValue()
+                            .resolveType(type, context))
                             .resolve(type)))
                     .orElse(type);
-        } else {
-            return type;
         }
     }
 }

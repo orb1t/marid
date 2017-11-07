@@ -94,7 +94,7 @@ public class MaridSplash extends BorderPane implements AutoCloseable {
 
         transition = new RotateTransition(Duration.millis(1000), image);
         transition.setFromAngle(0);
-        transition.setToAngle(360);
+        transition.setToAngle(359);
         transition.setCycleCount(Animation.INDEFINITE);
 
         final Color background = Color.DARKGRAY.deriveColor(1, 1, 0.2, 1);

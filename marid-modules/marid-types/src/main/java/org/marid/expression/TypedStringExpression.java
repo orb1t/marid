@@ -32,7 +32,7 @@ public interface TypedStringExpression extends StringExpression, TypedExpression
 
     @Nonnull
     @Override
-    default Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {
+    default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
         return String.class;
     }
 }

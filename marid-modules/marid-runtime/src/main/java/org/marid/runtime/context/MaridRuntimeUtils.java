@@ -109,6 +109,15 @@ public interface MaridRuntimeUtils {
         }
     }
 
+    static boolean compatible(@Nonnull Executable executable, @Nonnull Class<?>... types) {
+        if (executable.getParameterCount() == types.length) {
+            final Class<?>[] ts = executable.getParameterTypes();
+            return range(0, ts.length).allMatch(i -> compatible(ts[i], types[i]));
+        } else {
+            return false;
+        }
+    }
+
     @Nonnull
     static Stream<Class<?>> superClasses(@Nonnull Class<?> type) {
         return ofNullable(type.getSuperclass()).map(s -> concat(of(type), superClasses(s))).orElseGet(() -> of(type));

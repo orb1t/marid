@@ -91,15 +91,6 @@ public interface TypeUtils {
         }
     }
 
-    @Nonnull
-    static Optional<Field> getField(@Nonnull Class<?> type, String name) {
-        try {
-            return Optional.of(type.getField(name));
-        } catch (NoSuchFieldException x) {
-            return Optional.empty();
-        }
-    }
-
     static boolean matches(TypedCallExpression expr, Executable e, Type owner, TypeContext context) {
         if (e.getParameterCount() == expr.getArgs().size()) {
             final Type[] pt = e.getGenericParameterTypes();

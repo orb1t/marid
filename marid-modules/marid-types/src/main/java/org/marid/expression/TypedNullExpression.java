@@ -34,7 +34,7 @@ public interface TypedNullExpression extends NullExpression, TypedExpression {
 
     @Nonnull
     @Override
-    default Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {
+    default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
         return WILDCARD;
     }
 }

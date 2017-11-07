@@ -32,7 +32,7 @@ public interface TypedConstExpression extends ConstExpression, TypedValueExpress
 
     @Nonnull
     @Override
-    default Type getType(@Nullable Type owner, @Nonnull TypeContext typeContext) {
+    default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
         return getType().type;
     }
 }
