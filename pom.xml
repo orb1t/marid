@@ -394,28 +394,6 @@
                     <artifactId>build-helper-maven-plugin</artifactId>
                     <version>3.0.0</version>
                 </plugin>
-
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>versions-maven-plugin</artifactId>
-                    <version>2.4</version>
-                    <configuration>
-                        <generateBackupPoms>false</generateBackupPoms>
-                        <excludes>
-                            <exclude>de.jensd:fontawesomefx</exclude>
-                            <exclude>org.eclipse.aether:aether-transport-http</exclude>
-                            <exclude>org.eclipse.aether:aether-transport-file</exclude>
-                        </excludes>
-                        <updateDependencies>true</updateDependencies>
-                        <updatePropertyVersions>true</updatePropertyVersions>
-                    </configuration>
-                </plugin>
-
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>license-maven-plugin</artifactId>
-                    <version>1.14</version>
-                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -460,11 +438,23 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <generateBackupPoms>false</generateBackupPoms>
+                    <excludes>
+                        <exclude>de.jensd:fontawesomefx</exclude>
+                        <exclude>org.eclipse.aether:aether-transport-http</exclude>
+                        <exclude>org.eclipse.aether:aether-transport-file</exclude>
+                    </excludes>
+                    <updateDependencies>true</updateDependencies>
+                    <updatePropertyVersions>true</updatePropertyVersions>
+                </configuration>
             </plugin>
 
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>license-maven-plugin</artifactId>
+                <version>1.14</version>
                 <configuration>
                     <licenseName>agpl_v3</licenseName>
                     <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
