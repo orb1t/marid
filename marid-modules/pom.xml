@@ -2,42 +2,42 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation=" http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-    <parent>
-        <groupId>org.marid</groupId>
-        <artifactId>marid</artifactId>
-        <version>0.9.6.4-SNAPSHOT</version>
-    </parent>
-    <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.marid</groupId>
+    <artifactId>marid</artifactId>
+    <version>0.9.6.4-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>marid-modules</artifactId>
-    <packaging>pom</packaging>
+  <artifactId>marid-modules</artifactId>
+  <packaging>pom</packaging>
 
-    <modules>
-        <module>marid-ide</module>
-        <module>marid-fx</module>
-        <module>marid-runtime</module>
-        <module>marid-types</module>
-    </modules>
+  <modules>
+    <module>marid-ide</module>
+    <module>marid-fx</module>
+    <module>marid-runtime</module>
+    <module>marid-types</module>
+  </modules>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.marid</groupId>
-            <artifactId>marid-test</artifactId>
-            <scope>test</scope>
-            <version>${project.version}</version>
-        </dependency>
-    </dependencies>
+  <dependencies>
+    <dependency>
+      <groupId>org.marid</groupId>
+      <artifactId>marid-test</artifactId>
+      <scope>test</scope>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <systemPropertyVariables>
-                        <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
-                    </systemPropertyVariables>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <systemPropertyVariables>
+            <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+          </systemPropertyVariables>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

@@ -20,66 +20,66 @@
   -->
 
 <bean name="beans">
+  <factory>
+    <null/>
+  </factory>
+
+  <bean name="b1">
     <factory>
-        <null/>
+      <string>str</string>
     </factory>
+  </bean>
 
-    <bean name="b1">
-        <factory>
-            <string>str</string>
-        </factory>
-    </bean>
+  <bean name="b2">
+    <factory>
+      <call method="valueOf">
+        <target>
+          <class class="java.math.BigInteger"/>
+        </target>
+        <args>
+          <const type="LONG" value="1"/>
+        </args>
+        <initializers>
+          <call method="add">
+            <target>
+              <ref ref="b3"/>
+            </target>
+            <args>
+              <this/>
+            </args>
+          </call>
+        </initializers>
+      </call>
+    </factory>
+  </bean>
 
-    <bean name="b2">
-        <factory>
-            <call method="valueOf">
-                <target>
-                    <class class="java.math.BigInteger"/>
-                </target>
-                <args>
-                    <const type="LONG" value="1"/>
-                </args>
-                <initializers>
-                    <call method="add">
-                        <target>
-                            <ref ref="b3"/>
-                        </target>
-                        <args>
-                            <this/>
-                        </args>
-                    </call>
-                </initializers>
-            </call>
-        </factory>
-    </bean>
+  <bean name="b3">
+    <factory>
+      <call method="new">
+        <target>
+          <class class="java.util.ArrayList"/>
+        </target>
+        <args>
+          <const type="INT" value="10"/>
+        </args>
+      </call>
+    </factory>
+  </bean>
 
-    <bean name="b3">
-        <factory>
-            <call method="new">
-                <target>
-                    <class class="java.util.ArrayList"/>
-                </target>
-                <args>
-                    <const type="INT" value="10"/>
-                </args>
-            </call>
-        </factory>
-    </bean>
-
-    <bean name="b4">
-        <factory>
-            <call method="size">
-                <target>
-                    <call method="singletonList">
-                        <target>
-                            <class class="java.util.Collections"/>
-                        </target>
-                        <args>
-                            <const type="INT" value="1"/>
-                        </args>
-                    </call>
-                </target>
-            </call>
-        </factory>
-    </bean>
+  <bean name="b4">
+    <factory>
+      <call method="size">
+        <target>
+          <call method="singletonList">
+            <target>
+              <class class="java.util.Collections"/>
+            </target>
+            <args>
+              <const type="INT" value="1"/>
+            </args>
+          </call>
+        </target>
+      </call>
+    </factory>
+  </bean>
 </bean>

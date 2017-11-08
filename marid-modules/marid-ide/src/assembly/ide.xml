@@ -22,34 +22,34 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0.xsd">
 
-    <id>distr</id>
+  <id>distr</id>
 
-    <includeBaseDirectory>false</includeBaseDirectory>
-    <includeSiteDirectory>false</includeSiteDirectory>
+  <includeBaseDirectory>false</includeBaseDirectory>
+  <includeSiteDirectory>false</includeSiteDirectory>
 
-    <fileSets>
-        <fileSet>
-            <filtered>true</filtered>
-            <fileMode>0777</fileMode>
-            <directory>src/assembly/marid</directory>
-            <outputDirectory>.</outputDirectory>
-        </fileSet>
-    </fileSets>
+  <fileSets>
+    <fileSet>
+      <filtered>true</filtered>
+      <fileMode>0777</fileMode>
+      <directory>src/assembly/marid</directory>
+      <outputDirectory>.</outputDirectory>
+    </fileSet>
+  </fileSets>
 
-    <dependencySets>
-        <dependencySet>
-            <outputDirectory>lib</outputDirectory>
-            <useProjectArtifact>false</useProjectArtifact>
-            <useTransitiveDependencies>true</useTransitiveDependencies>
-            <useProjectAttachments>true</useProjectAttachments>
-        </dependencySet>
+  <dependencySets>
+    <dependencySet>
+      <outputDirectory>lib</outputDirectory>
+      <useProjectArtifact>false</useProjectArtifact>
+      <useTransitiveDependencies>true</useTransitiveDependencies>
+      <useProjectAttachments>true</useProjectAttachments>
+    </dependencySet>
 
-        <dependencySet>
-            <fileMode>0777</fileMode>
-            <useProjectArtifact>true</useProjectArtifact>
-            <includes>
-                <include>org.marid:marid-ide</include>
-            </includes>
-        </dependencySet>
-    </dependencySets>
+    <dependencySet>
+      <fileMode>0777</fileMode>
+      <useProjectArtifact>true</useProjectArtifact>
+      <includes>
+        <include>org.marid:marid-ide</include>
+      </includes>
+    </dependencySet>
+  </dependencySets>
 </assembly>
