@@ -46,10 +46,10 @@ import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 /**
  * @author Dmitry Ovchinnikov.
  */
-@Tag("normal")
+@Tag("slow")
 @ContextConfiguration(classes = {HsqldbDatabaseTestConf.class})
 @ExtendWith(SpringExtension.class)
-public class HsqldbDatabaseTest {
+class HsqldbDatabaseTest {
 
 	private final long from = Instant.parse("2000-01-01T00:00:00Z").toEpochMilli();
 	private final long to = Instant.parse("2000-01-01T00:10:00Z").toEpochMilli();
@@ -58,7 +58,7 @@ public class HsqldbDatabaseTest {
 	private NumericWriter numericWriter;
 
 	@TestFactory
-	public Stream<DynamicTest> tests() {
+	Stream<DynamicTest> tests() {
 		return Stream.of(
 				dynamicTest("test01", this::test01),
 				dynamicTest("test02", this::test02),
