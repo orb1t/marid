@@ -19,7 +19,7 @@
  * #L%
  */
 
-package org.marid.proto.modbus;
+package org.marid.proto.impl.modbus;
 
 import net.wimpi.modbus.ModbusCoupler;
 import net.wimpi.modbus.net.ModbusTCPListener;
@@ -30,11 +30,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.marid.io.IOSupplier;
-import org.marid.proto.StdProtoBus;
-import org.marid.proto.StdProtoBusProps;
-import org.marid.proto.StdProtoRoot;
+import org.marid.proto.impl.StdProtoBus;
+import org.marid.proto.impl.StdProtoBusProps;
+import org.marid.proto.impl.StdProtoRoot;
+import org.marid.proto.impl.modbus.ModbusTcpDriver;
+import org.marid.proto.impl.modbus.ModbusTcpDriverProps;
 import org.marid.proto.io.ProtoIO;
-import org.marid.proto.io.StdProtoSocketIO;
+import org.marid.proto.impl.io.StdProtoSocketIO;
 
 import java.lang.reflect.Field;
 import java.net.ServerSocket;

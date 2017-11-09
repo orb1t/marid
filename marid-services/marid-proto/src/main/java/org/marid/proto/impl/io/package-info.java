@@ -22,7 +22,7 @@
 /**
  * @author Dmitry Ovchinnikov
  */
-@MaridBeanPackage(group = "Proto Modbus Support")
-package org.marid.proto.modbus;
+@MaridBeanPackage(group = "Proto I/O")
+package org.marid.proto.impl.io;
 
 import org.marid.runtime.annotation.MaridBeanPackage;

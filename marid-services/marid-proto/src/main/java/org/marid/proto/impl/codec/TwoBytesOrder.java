@@ -19,7 +19,7 @@
  * #L%
  */
 
-package org.marid.proto.codec;
+package org.marid.proto.impl.codec;
 
 import org.marid.runtime.annotation.MaridBean;
 import org.marid.runtime.annotation.MaridBeanFactory;

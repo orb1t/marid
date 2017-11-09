@@ -19,7 +19,7 @@
  * #L%
  */
 
-package org.marid.proto.codec;
+package org.marid.proto.impl.codec;
 
 import org.marid.runtime.annotation.MaridBean;
 
@@ -28,16 +28,16 @@ import java.nio.ByteBuffer;
 /**
  * @author Dmitry Ovchinnikov
  */
-@MaridBean(name = "4-bytes Floating Point Number Codec")
-public class FloatCodec implements Codec<Float> {
+@MaridBean(name = "4-bytes integer codec")
+public class IntCodec implements Codec<Integer> {
 
 	@Override
-	public Float decode(byte[] data) {
-		return ByteBuffer.wrap(data).getFloat(0);
+	public Integer decode(byte[] data) {
+		return ByteBuffer.wrap(data).getInt(0);
 	}
 
 	@Override
-	public byte[] encode(Float data) {
-		return ByteBuffer.allocate(4).putFloat(0, data).array();
+	public byte[] encode(Integer data) {
+		return ByteBuffer.allocate(4).putInt(0, data).array();
 	}
 }

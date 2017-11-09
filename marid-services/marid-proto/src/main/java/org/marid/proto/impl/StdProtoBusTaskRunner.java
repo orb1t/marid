@@ -19,11 +19,12 @@
  * #L%
  */
 
-package org.marid.proto;
+package org.marid.proto.impl;
 
 import org.marid.io.IOBiConsumer;
 import org.marid.io.IOBiFunction;
 import org.marid.io.IOConsumer;
+import org.marid.proto.ProtoBusTaskRunner;
 import org.marid.proto.io.ProtoIO;
 import org.marid.runtime.annotation.MaridBean;
 import org.marid.runtime.annotation.MaridBeanFactory;

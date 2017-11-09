@@ -19,35 +19,39 @@
  * #L%
  */
 
-package org.marid.proto;
+package org.marid.proto.impl;
 
+import org.marid.proto.Proto;
 import org.marid.runtime.annotation.MaridBean;
 import org.marid.runtime.annotation.MaridBeanFactory;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 @MaridBean
-public class StdProtoRoot extends StdProto implements ProtoRoot {
+public abstract class StdProto implements Proto {
 
-	private final Map<String, StdProtoBus> children = new LinkedHashMap<>();
-	private final ThreadGroup threadGroup;
+	private final String id;
+	private final String name;
 
-	@MaridBeanFactory(name = "Proto Root")
-	public StdProtoRoot(String id, String name) {
-		super(id, name);
-		this.threadGroup = new ThreadGroup(id);
+	@MaridBeanFactory(name = "Proto Object")
+	public StdProto(String id, String name) {
+		this.id = id;
+		this.name = name;
 	}
 
 	@Override
-	public Map<String, StdProtoBus> getItems() {
-		return children;
+	public String getId() {
+		return id;
 	}
 
-	public ThreadGroup getThreadGroup() {
-		return threadGroup;
+	@Override
+	public String getName() {
+		return name;
+	}
+
+	@Override
+	public String toString() {
+		return Proto.label(this);
 	}
 }

@@ -19,8 +19,9 @@
  * #L%
  */
 
-package org.marid.proto;
+package org.marid.proto.impl;
 
+import org.marid.proto.ProtoHealth;
 import org.marid.runtime.annotation.MaridBean;
 
 import java.sql.Timestamp;

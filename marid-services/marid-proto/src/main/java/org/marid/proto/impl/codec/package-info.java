@@ -22,7 +22,7 @@
 /**
  * @author Dmitry Ovchinnikov
  */
-@MaridBeanPackage(group = "Proto")
-package org.marid.proto;
+@MaridBeanPackage(group = "Proto Codecs")
+package org.marid.proto.impl.codec;
 
 import org.marid.runtime.annotation.MaridBeanPackage;

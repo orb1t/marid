@@ -19,25 +19,14 @@
  * #L%
  */
 
-package org.marid.proto.codec;
-
-import org.marid.runtime.annotation.MaridBean;
-
-import java.nio.ByteBuffer;
+package org.marid.proto.impl.codec;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@MaridBean(name = "4-bytes integer codec")
-public class IntCodec implements Codec<Integer> {
+public interface Codec<T> {
 
-	@Override
-	public Integer decode(byte[] data) {
-		return ByteBuffer.wrap(data).getInt(0);
-	}
+	T decode(byte[] data);
 
-	@Override
-	public byte[] encode(Integer data) {
-		return ByteBuffer.allocate(4).putInt(0, data).array();
-	}
+	byte[] encode(T data);
 }

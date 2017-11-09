@@ -19,14 +19,34 @@
  * #L%
  */
 
-package org.marid.proto.codec;
+package org.marid.proto.impl.io;
+
+import org.marid.runtime.annotation.MaridBean;
+import org.marid.runtime.annotation.MaridBeanFactory;
+
+import java.io.IOException;
+import java.net.Socket;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface Codec<T> {
+@MaridBean
+public class StdProtoSocketIO extends StdProtoIO {
 
-	T decode(byte[] data);
+	private final Socket socket;
 
-	byte[] encode(T data);
+	@MaridBeanFactory(name = "Standard Network Socket I/O", icon = "D_NEEDLE")
+	public StdProtoSocketIO(Socket socket) throws IOException {
+		super(socket.getInputStream(), socket.getOutputStream());
+		this.socket = socket;
+	}
+
+	@Override
+	public void close() throws IOException {
+		try {
+			super.close();
+		} finally {
+			socket.close();
+		}
+	}
 }

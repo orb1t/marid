@@ -19,7 +19,7 @@
  * #L%
  */
 
-package org.marid.proto.health;
+package org.marid.proto.impl.health;
 
 import org.marid.proto.ProtoBus;
 import org.marid.runtime.annotation.MaridBean;

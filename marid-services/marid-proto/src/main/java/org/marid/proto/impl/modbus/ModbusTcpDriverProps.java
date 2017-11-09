@@ -19,7 +19,7 @@
  * #L%
  */
 
-package org.marid.proto.modbus;
+package org.marid.proto.impl.modbus;
 
 import org.marid.runtime.annotation.MaridBean;
 

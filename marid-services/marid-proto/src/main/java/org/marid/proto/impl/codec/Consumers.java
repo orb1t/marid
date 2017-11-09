@@ -19,7 +19,7 @@
  * #L%
  */
 
-package org.marid.proto.codec;
+package org.marid.proto.impl.codec;
 
 import java.util.function.Consumer;
 

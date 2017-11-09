@@ -19,7 +19,7 @@
  * #L%
  */
 
-package org.marid.proto.io;
+package org.marid.proto.impl.io;
 
 import org.marid.io.IOSupplier;
 import org.marid.runtime.annotation.MaridBean;
