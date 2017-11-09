@@ -94,4 +94,44 @@
       </call>
     </factory>
   </bean>
+
+  <bean name="b6">
+    <factory>
+      <call method="singletonList">
+        <target>
+          <class class="java.util.Collections"/>
+        </target>
+        <args>
+          <ref ref="b5"/>
+        </args>
+      </call>
+    </factory>
+  </bean>
+
+  <bean name="b7">
+    <factory>
+      <call method="singletonList">
+        <target>
+          <class class="java.util.Collections"/>
+        </target>
+        <args>
+          <ref ref="b4"/>
+        </args>
+      </call>
+    </factory>
+  </bean>
+
+  <bean name="b8">
+    <factory>
+      <call method="singletonList">
+        <target>
+          <class class="java.util.Collections"/>
+        </target>
+        <args>
+          <ref ref="b4"/>
+          <ref ref="b5"/>
+        </args>
+      </call>
+    </factory>
+  </bean>
 </bean>

@@ -32,8 +32,8 @@ import javax.annotation.Nullable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.util.Arrays;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 import static org.marid.types.TypeUtils.WILDCARD;
 
@@ -73,12 +73,12 @@ public class GuavaTypeContext implements TypeContext {
 
 	@Override
 	public boolean isAssignable(@Nonnull Type from, @Nonnull Type to) {
-		if (to.equals(from)) {
+		if (to.equals(from) || Object.class == to) {
 			return true;
 		} else if (to instanceof Class<?>) {
 			return from instanceof Class<?> && MaridRuntimeUtils.compatible((Class<?>) to, (Class<?>) from);
 		} else if (to instanceof TypeVariable<?>) {
-			return Stream.of(((TypeVariable<?>) to).getBounds()).allMatch(t -> isAssignable(from, t));
+			return Arrays.stream(((TypeVariable<?>) to).getBounds()).allMatch(t -> isAssignable(from, t));
 		} else {
 			final TypeToken<?> tTo = TypeToken.of(to);
 			final TypeToken<?> tFrom = TypeToken.of(from);

@@ -18,13 +18,15 @@
  * #L%
  */
 
-package org.marid.expression;
+package org.marid.expression.mutable;
 
 import com.google.common.reflect.TypeToken;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.marid.idelib.beans.IdeBean;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.marid.idelib.beans.BeanUtils;
+import org.marid.idelib.beans.IdeBean;
 import org.marid.io.Xmls;
 import org.marid.types.GuavaTypeContext;
 
@@ -35,6 +37,7 @@ import java.lang.reflect.Type;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -52,43 +55,25 @@ class ExpressionTypeTest {
 		}
 	}
 
-	@Test
-	void testBean1() {
-		final IdeBean bean = BeanUtils.find(root, "b1");
-		final GuavaTypeContext context = new GuavaTypeContext(bean, classLoader);
-		final Type type = bean.getFactory().resolveType(null, context);
-		assertEquals(String.class, type);
+	private static Stream<Arguments> testData() {
+		return Stream.of(
+				() -> new Object[] {"b1", String.class},
+				() -> new Object[] {"b2", BigInteger.class},
+				() -> new Object[] {"b3", new TypeToken<ArrayList<Integer>>() {}.getType()},
+				() -> new Object[] {"b4", int.class},
+				() -> new Object[] {"b5", new TypeToken<List<Long>>() {}.getType()},
+				() -> new Object[] {"b6", new TypeToken<List<List<Long>>>() {}.getType()},
+				() -> new Object[] {"b7", new TypeToken<List<Integer>>() {}.getType()},
+				() -> new Object[] {"b8", new TypeToken<List<Object>>() {}.getType()}
+		);
 	}
 
-	@Test
-	void testBean2() {
-		final IdeBean bean = BeanUtils.find(root, "b2");
+	@ParameterizedTest
+	@MethodSource("testData")
+	void testBean(String beanName, Type expectedType) {
+		final IdeBean bean = BeanUtils.find(root, beanName);
 		final GuavaTypeContext context = new GuavaTypeContext(bean, classLoader);
 		final Type type = bean.getFactory().resolveType(null, context);
-		assertEquals(BigInteger.class, type);
-	}
-
-	@Test
-	void testBean3() {
-		final IdeBean bean = BeanUtils.find(root, "b3");
-		final GuavaTypeContext context = new GuavaTypeContext(bean, classLoader);
-		final Type type = bean.getFactory().resolveType(null, context);
-		assertEquals(new TypeToken<ArrayList<Integer>>() {}.getType(), type);
-	}
-
-	@Test
-	void testBean4() {
-		final IdeBean bean = BeanUtils.find(root, "b4");
-		final GuavaTypeContext context = new GuavaTypeContext(bean, classLoader);
-		final Type type = bean.getFactory().resolveType(null, context);
-		assertEquals(int.class, type);
-	}
-
-	@Test
-	void testBean5() {
-		final IdeBean bean = BeanUtils.find(root, "b5");
-		final GuavaTypeContext context = new GuavaTypeContext(bean, classLoader);
-		final Type type = bean.getFactory().resolveType(null, context);
-		assertEquals(new TypeToken<List<Long>>() {}.getType(), type);
+		assertEquals(expectedType, type);
 	}
 }

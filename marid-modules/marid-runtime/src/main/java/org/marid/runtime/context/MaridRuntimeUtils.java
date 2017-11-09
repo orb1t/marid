@@ -148,11 +148,11 @@ public interface MaridRuntimeUtils {
 				.distinct();
 	}
 
-	static boolean compatible(@Nonnull Class<?> t1, @Nonnull Class<?> t2) {
-		return t1.equals(t2)
-				|| t1.isAssignableFrom(t2)
-				|| t1.isPrimitive() && compatible(wrapper(t1), t2)
-				|| t2.isPrimitive() && compatible(t1, wrapper(t2));
+	static boolean compatible(@Nonnull Class<?> to, @Nonnull Class<?> from) {
+		return to.equals(from)
+				|| to.isAssignableFrom(from)
+				|| to.isPrimitive() && compatible(wrapper(to), from)
+				|| from.isPrimitive() && compatible(to, wrapper(from));
 	}
 
 	@Nonnull
