@@ -23,9 +23,9 @@ package org.marid.types;
 
 import com.google.common.reflect.TypeResolver;
 import com.google.common.reflect.TypeToken;
+import org.marid.misc.Casts;
 import org.marid.runtime.context.MaridRuntimeUtils;
 import org.marid.types.beans.TypedBean;
-import org.marid.misc.Casts;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

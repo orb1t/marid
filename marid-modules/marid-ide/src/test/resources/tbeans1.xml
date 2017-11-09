@@ -81,4 +81,17 @@
       </call>
     </factory>
   </bean>
+
+  <bean name="b5">
+    <factory>
+      <call method="singletonList">
+        <target>
+          <class class="java.util.Collections"/>
+        </target>
+        <args>
+          <const type="LONG" value="12"/>
+        </args>
+      </call>
+    </factory>
+  </bean>
 </bean>

@@ -34,6 +34,7 @@ import java.io.Reader;
 import java.lang.reflect.Type;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.List;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -81,5 +82,13 @@ class ExpressionTypeTest {
 		final GuavaTypeContext context = new GuavaTypeContext(bean, classLoader);
 		final Type type = bean.getFactory().resolveType(null, context);
 		assertEquals(int.class, type);
+	}
+
+	@Test
+	void testBean5() {
+		final IdeBean bean = TestBeanUtils.find(root, "b5");
+		final GuavaTypeContext context = new GuavaTypeContext(bean, classLoader);
+		final Type type = bean.getFactory().resolveType(null, context);
+		assertEquals(new TypeToken<List<Long>>() {}.getType(), type);
 	}
 }
