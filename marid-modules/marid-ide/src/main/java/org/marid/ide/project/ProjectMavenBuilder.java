@@ -23,7 +23,7 @@ package org.marid.ide.project;
 import org.marid.ide.common.Directories;
 import org.marid.ide.settings.JavaSettings;
 import org.marid.io.ProcessManager;
-import org.marid.spring.annotation.PrototypeComponent;
+import org.marid.idelib.spring.annotation.PrototypeComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;

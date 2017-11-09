@@ -18,21 +18,26 @@
  * #L%
  */
 
-package org.marid.spring.dependant;
+package org.marid.idelib.spring.annotation;
 
-import org.springframework.core.type.classreading.MetadataReader;
-import org.springframework.core.type.classreading.MetadataReaderFactory;
-import org.springframework.core.type.filter.TypeFilter;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
-import javax.annotation.Nonnull;
-import java.io.IOException;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public class IdeTypeFilter implements TypeFilter {
+import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 
-	@Override
-	public boolean match(@Nonnull MetadataReader metadataReader,
-											 @Nonnull MetadataReaderFactory metadataReaderFactory) throws IOException {
-		System.out.println(metadataReader.getClassMetadata().getClassName());
-		return metadataReader.getClassMetadata().getClassName().startsWith("org.marid.ide");
-	}
+/**
+ * @author Dmitry Ovchinnikov
+ */
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Scope(SCOPE_PROTOTYPE)
+@Component
+public @interface PrototypeComponent {
+
+	String value() default "";
 }

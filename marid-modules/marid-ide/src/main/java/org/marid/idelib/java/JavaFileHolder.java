@@ -18,7 +18,7 @@
  * #L%
  */
 
-package org.marid.java;
+package org.marid.idelib.java;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;

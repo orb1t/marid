@@ -23,7 +23,7 @@ package org.marid.ide.common;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.dnd.DndManager;
 import org.marid.jfx.track.PeriodicObservable;
-import org.marid.spring.annotation.IdeAction;
+import org.marid.idelib.spring.annotation.IdeAction;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;

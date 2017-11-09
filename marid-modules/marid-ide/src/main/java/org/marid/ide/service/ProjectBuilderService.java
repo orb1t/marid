@@ -31,7 +31,7 @@ import org.marid.ide.project.ProjectMavenBuilder;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.status.IdeService;
 import org.marid.io.ProcessManager;
-import org.marid.spring.annotation.PrototypeComponent;
+import org.marid.idelib.spring.annotation.PrototypeComponent;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 

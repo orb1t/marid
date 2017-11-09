@@ -18,7 +18,7 @@
  * #L%
  */
 
-package org.marid.beans;
+package org.marid.idelib.beans;
 
 import javafx.beans.Observable;
 import javafx.beans.property.SimpleStringProperty;

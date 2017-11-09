@@ -18,7 +18,7 @@
  * #L%
  */
 
-package org.marid.splash;
+package org.marid.idelib.splash;
 
 import javafx.animation.Animation;
 import javafx.animation.RotateTransition;

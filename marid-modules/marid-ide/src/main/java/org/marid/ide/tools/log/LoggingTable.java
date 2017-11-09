@@ -32,7 +32,7 @@ import org.marid.ide.logging.IdeLogHandler;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.jfx.track.Tracks;
 import org.marid.l10n.L10n;
-import org.marid.spring.ui.FxComponent;
+import org.marid.idelib.spring.ui.FxComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PreDestroy;

@@ -21,7 +21,7 @@
 package org.marid.dependant.modbus.devices;
 
 import javafx.stage.Stage;
-import org.marid.spring.annotation.PrototypeComponent;
+import org.marid.idelib.spring.annotation.PrototypeComponent;
 
 /**
  * @author Dmitry Ovchinnikov.

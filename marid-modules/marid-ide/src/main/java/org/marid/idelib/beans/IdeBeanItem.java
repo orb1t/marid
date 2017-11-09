@@ -18,7 +18,7 @@
  * #L%
  */
 
-package org.marid.beans;
+package org.marid.idelib.beans;
 
 import javafx.collections.ListChangeListener.Change;
 import javafx.collections.WeakListChangeListener;

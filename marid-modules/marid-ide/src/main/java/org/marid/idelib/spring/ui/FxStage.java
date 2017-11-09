@@ -18,7 +18,7 @@
  * #L%
  */
 
-package org.marid.spring.ui;
+package org.marid.idelib.spring.ui;
 
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;

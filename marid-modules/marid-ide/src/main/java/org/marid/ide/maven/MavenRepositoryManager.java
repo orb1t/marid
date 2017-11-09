@@ -22,7 +22,7 @@ package org.marid.ide.maven;
 
 import org.marid.ide.model.MavenArtifact;
 import org.marid.jfx.action.FxAction;
-import org.marid.spring.annotation.IdeAction;
+import org.marid.idelib.spring.annotation.IdeAction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;

@@ -27,7 +27,7 @@ import javafx.scene.Node;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import org.marid.l10n.L10n;
-import org.marid.spring.ui.FxComponent;
+import org.marid.idelib.spring.ui.FxComponent;
 
 import java.io.IOException;
 import java.io.InputStream;

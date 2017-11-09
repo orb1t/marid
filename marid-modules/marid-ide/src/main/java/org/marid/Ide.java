@@ -30,9 +30,9 @@ import org.marid.ide.logging.IdeLogConsoleHandler;
 import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.image.MaridIconFx;
-import org.marid.splash.MaridSplash;
-import org.marid.spring.postprocessors.MaridCommonPostProcessor;
-import org.marid.spring.ui.FxScope;
+import org.marid.idelib.splash.MaridSplash;
+import org.marid.idelib.spring.postprocessors.MaridCommonPostProcessor;
+import org.marid.idelib.spring.ui.FxScope;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.util.Locale;

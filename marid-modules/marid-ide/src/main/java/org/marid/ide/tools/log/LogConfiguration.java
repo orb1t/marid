@@ -25,8 +25,8 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.BorderPane;
-import org.marid.spring.ui.FxBean;
-import org.marid.spring.ui.FxComponent;
+import org.marid.idelib.spring.ui.FxBean;
+import org.marid.idelib.spring.ui.FxComponent;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.annotation.Order;
 

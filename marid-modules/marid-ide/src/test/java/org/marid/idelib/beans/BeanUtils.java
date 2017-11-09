@@ -18,26 +18,17 @@
  * #L%
  */
 
-package org.marid.spring.annotation;
+package org.marid.idelib.beans;
 
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
+import javax.annotation.Nonnull;
+import java.util.NoSuchElementException;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+public interface BeanUtils {
 
-import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
-
-/**
- * @author Dmitry Ovchinnikov
- */
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Scope(SCOPE_PROTOTYPE)
-@Component
-public @interface PrototypeComponent {
-
-	String value() default "";
+	static IdeBean find(@Nonnull IdeBean root, @Nonnull String name) {
+		return (IdeBean) root.descendants()
+				.filter(b -> name.equals(b.getName()))
+				.findFirst()
+				.orElseThrow(() -> new NoSuchElementException(name));
+	}
 }

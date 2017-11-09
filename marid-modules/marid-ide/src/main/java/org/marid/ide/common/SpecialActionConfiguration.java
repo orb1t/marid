@@ -25,7 +25,7 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import org.marid.jfx.action.SpecialAction;
 import org.marid.jfx.action.SpecialActions;
-import org.marid.spring.annotation.IdeAction;
+import org.marid.idelib.spring.annotation.IdeAction;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 

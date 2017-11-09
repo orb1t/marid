@@ -18,17 +18,21 @@
  * #L%
  */
 
-package org.marid.beans;
+package org.marid.idelib.spring.dependant;
+
+import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.core.type.filter.TypeFilter;
 
 import javax.annotation.Nonnull;
-import java.util.NoSuchElementException;
+import java.io.IOException;
 
-public interface TestBeanUtils {
+public class IdeTypeFilter implements TypeFilter {
 
-	static IdeBean find(@Nonnull IdeBean root, @Nonnull String name) {
-		return (IdeBean) root.descendants()
-				.filter(b -> name.equals(b.getName()))
-				.findFirst()
-				.orElseThrow(() -> new NoSuchElementException(name));
+	@Override
+	public boolean match(@Nonnull MetadataReader metadataReader,
+											 @Nonnull MetadataReaderFactory metadataReaderFactory) throws IOException {
+		System.out.println(metadataReader.getClassMetadata().getClassName());
+		return metadataReader.getClassMetadata().getClassName().startsWith("org.marid.ide");
 	}
 }

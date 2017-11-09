@@ -23,8 +23,8 @@ package org.marid.expression;
 import com.google.common.reflect.TypeToken;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.marid.beans.IdeBean;
-import org.marid.beans.TestBeanUtils;
+import org.marid.idelib.beans.IdeBean;
+import org.marid.idelib.beans.BeanUtils;
 import org.marid.io.Xmls;
 import org.marid.types.GuavaTypeContext;
 
@@ -54,7 +54,7 @@ class ExpressionTypeTest {
 
 	@Test
 	void testBean1() {
-		final IdeBean bean = TestBeanUtils.find(root, "b1");
+		final IdeBean bean = BeanUtils.find(root, "b1");
 		final GuavaTypeContext context = new GuavaTypeContext(bean, classLoader);
 		final Type type = bean.getFactory().resolveType(null, context);
 		assertEquals(String.class, type);
@@ -62,7 +62,7 @@ class ExpressionTypeTest {
 
 	@Test
 	void testBean2() {
-		final IdeBean bean = TestBeanUtils.find(root, "b2");
+		final IdeBean bean = BeanUtils.find(root, "b2");
 		final GuavaTypeContext context = new GuavaTypeContext(bean, classLoader);
 		final Type type = bean.getFactory().resolveType(null, context);
 		assertEquals(BigInteger.class, type);
@@ -70,7 +70,7 @@ class ExpressionTypeTest {
 
 	@Test
 	void testBean3() {
-		final IdeBean bean = TestBeanUtils.find(root, "b3");
+		final IdeBean bean = BeanUtils.find(root, "b3");
 		final GuavaTypeContext context = new GuavaTypeContext(bean, classLoader);
 		final Type type = bean.getFactory().resolveType(null, context);
 		assertEquals(new TypeToken<ArrayList<Integer>>() {}.getType(), type);
@@ -78,7 +78,7 @@ class ExpressionTypeTest {
 
 	@Test
 	void testBean4() {
-		final IdeBean bean = TestBeanUtils.find(root, "b4");
+		final IdeBean bean = BeanUtils.find(root, "b4");
 		final GuavaTypeContext context = new GuavaTypeContext(bean, classLoader);
 		final Type type = bean.getFactory().resolveType(null, context);
 		assertEquals(int.class, type);
@@ -86,7 +86,7 @@ class ExpressionTypeTest {
 
 	@Test
 	void testBean5() {
-		final IdeBean bean = TestBeanUtils.find(root, "b5");
+		final IdeBean bean = BeanUtils.find(root, "b5");
 		final GuavaTypeContext context = new GuavaTypeContext(bean, classLoader);
 		final Type type = bean.getFactory().resolveType(null, context);
 		assertEquals(new TypeToken<List<Long>>() {}.getType(), type);

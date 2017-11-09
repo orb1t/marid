@@ -18,7 +18,7 @@
  * #L%
  */
 
-package org.marid.spring.postprocessors;
+package org.marid.idelib.spring.postprocessors;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;

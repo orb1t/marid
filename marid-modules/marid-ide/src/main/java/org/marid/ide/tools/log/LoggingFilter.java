@@ -25,7 +25,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import org.marid.function.ForwardedPredicate;
-import org.marid.spring.ui.FxComponent;
+import org.marid.idelib.spring.ui.FxComponent;
 
 import java.util.Map;
 import java.util.function.Predicate;

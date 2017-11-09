@@ -18,28 +18,19 @@
  * #L%
  */
 
-package org.marid.util;
+package org.marid.idelib.spring.ui;
 
-import org.apache.maven.model.Dependency;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Scope;
 
-import java.util.Objects;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-/**
- * @author Dmitry Ovchinnikov.
- * @since 0.8
- */
-public interface Dependencies {
-
-	static boolean eq(Dependency d1, Dependency d2) {
-		if (!Objects.equals(d1.getGroupId(), d2.getGroupId())) {
-			return false;
-		}
-		if (!Objects.equals(d1.getArtifactId(), d2.getArtifactId())) {
-			return false;
-		}
-		if (!Objects.equals(d1.getVersion(), d2.getVersion())) {
-			return false;
-		}
-		return true;
-	}
+@Target({ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+@Bean
+@Scope("fx")
+public @interface FxBean {
 }

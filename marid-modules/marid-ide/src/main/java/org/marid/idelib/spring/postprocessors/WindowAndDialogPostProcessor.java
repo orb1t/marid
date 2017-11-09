@@ -18,7 +18,7 @@
  * #L%
  */
 
-package org.marid.spring.postprocessors;
+package org.marid.idelib.spring.postprocessors;
 
 import javafx.scene.control.Dialog;
 import javafx.stage.Window;

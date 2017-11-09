@@ -23,7 +23,7 @@ package org.marid.dependant.modbus.devices;
 import eu.hansolo.medusa.Gauge;
 import javafx.scene.paint.Color;
 import org.marid.dependant.modbus.annotation.DeviceIcon;
-import org.marid.spring.annotation.PrototypeComponent;
+import org.marid.idelib.spring.annotation.PrototypeComponent;
 
 import static eu.hansolo.medusa.Gauge.SkinType.KPI;
 

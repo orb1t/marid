@@ -20,7 +20,7 @@
 
 package org.marid.dependant.beaneditor;
 
-import org.marid.beans.IdeBean;
+import org.marid.idelib.beans.IdeBean;
 import org.marid.ide.project.ProjectFileType;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.project.ProjectSaveEvent;

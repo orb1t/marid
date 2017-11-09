@@ -28,8 +28,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.StageStyle;
 import org.marid.Ide;
 import org.marid.ide.IdePrefs;
-import org.marid.spring.annotation.PrototypeComponent;
-import org.marid.spring.ui.FxStage;
+import org.marid.idelib.spring.annotation.PrototypeComponent;
+import org.marid.idelib.spring.ui.FxStage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 

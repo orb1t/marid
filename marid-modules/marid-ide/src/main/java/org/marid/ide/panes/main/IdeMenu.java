@@ -23,7 +23,7 @@ package org.marid.ide.panes.main;
 import javafx.scene.control.MenuBar;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.MaridActions;
-import org.marid.spring.annotation.IdeAction;
+import org.marid.idelib.spring.annotation.IdeAction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;

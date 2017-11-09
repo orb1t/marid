@@ -38,7 +38,7 @@ import java.util.function.Consumer;
 import static javafx.beans.binding.Bindings.isEmpty;
 import static org.marid.l10n.L10n.m;
 import static org.marid.l10n.L10n.s;
-import static org.marid.util.Dependencies.eq;
+import static org.marid.idelib.util.Dependencies.eq;
 
 /**
  * @author Dmitry Ovchinnikov.

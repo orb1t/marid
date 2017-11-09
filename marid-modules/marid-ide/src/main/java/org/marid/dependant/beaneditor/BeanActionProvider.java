@@ -21,7 +21,7 @@
 package org.marid.dependant.beaneditor;
 
 import javafx.scene.control.TreeItem;
-import org.marid.beans.IdeBean;
+import org.marid.idelib.beans.IdeBean;
 import org.marid.jfx.action.FxAction;
 
 import java.util.Optional;

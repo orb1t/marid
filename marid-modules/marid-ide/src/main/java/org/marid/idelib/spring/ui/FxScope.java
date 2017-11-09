@@ -18,7 +18,7 @@
  * #L%
  */
 
-package org.marid.spring.ui;
+package org.marid.idelib.spring.ui;
 
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.Scope;
