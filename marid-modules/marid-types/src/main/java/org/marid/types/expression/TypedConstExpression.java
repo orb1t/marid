@@ -19,23 +19,20 @@
  * #L%
  */
 
-package org.marid.beans;
+package org.marid.types.expression;
 
-import org.marid.expression.TypedExpression;
+import org.marid.expression.generic.ConstExpression;
+import org.marid.types.TypeContext;
 
 import javax.annotation.Nonnull;
-import java.util.List;
+import javax.annotation.Nullable;
+import java.lang.reflect.Type;
 
-public interface TypedBean extends MaridBean {
-
-	@Override
-	TypedBean getParent();
+public interface TypedConstExpression extends ConstExpression, TypedValueExpression {
 
 	@Nonnull
 	@Override
-	TypedExpression getFactory();
-
-	@Nonnull
-	@Override
-	List<? extends TypedBean> getChildren();
+	default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
+		return getType().type;
+	}
 }

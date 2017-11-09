@@ -20,7 +20,66 @@
 
 package org.marid.expression;
 
-public class ExpressionTypeTest {
+import com.google.common.reflect.TypeToken;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.marid.beans.IdeBean;
+import org.marid.beans.TestBeanUtils;
+import org.marid.io.Xmls;
+import org.marid.types.GuavaTypeContext;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.lang.reflect.Type;
+import java.math.BigInteger;
+import java.util.ArrayList;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+class ExpressionTypeTest {
+
+	private static ClassLoader classLoader;
+	private static IdeBean root;
+
+	@BeforeAll
+	static void init() throws IOException {
+		classLoader = Thread.currentThread().getContextClassLoader();
+		try (final Reader reader = new InputStreamReader(classLoader.getResourceAsStream("tbeans1.xml"), UTF_8)) {
+			root = Xmls.read(reader, e -> new IdeBean(null, e));
+		}
+	}
+
+	@Test
+	void testBean1() {
+		final IdeBean bean = TestBeanUtils.find(root, "b1");
+		final GuavaTypeContext context = new GuavaTypeContext(bean, classLoader);
+		final Type type = bean.getFactory().resolveType(null, context);
+		assertEquals(String.class, type);
+	}
+
+	@Test
+	void testBean2() {
+		final IdeBean bean = TestBeanUtils.find(root, "b2");
+		final GuavaTypeContext context = new GuavaTypeContext(bean, classLoader);
+		final Type type = bean.getFactory().resolveType(null, context);
+		assertEquals(BigInteger.class, type);
+	}
+
+	@Test
+	void testBean3() {
+		final IdeBean bean = TestBeanUtils.find(root, "b3");
+		final GuavaTypeContext context = new GuavaTypeContext(bean, classLoader);
+		final Type type = bean.getFactory().resolveType(null, context);
+		assertEquals(new TypeToken<ArrayList<Integer>>() {}.getType(), type);
+	}
+
+	@Test
+	void testBean4() {
+		final IdeBean bean = TestBeanUtils.find(root, "b4");
+		final GuavaTypeContext context = new GuavaTypeContext(bean, classLoader);
+		final Type type = bean.getFactory().resolveType(null, context);
+		assertEquals(int.class, type);
+	}
 }

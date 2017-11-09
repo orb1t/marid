@@ -18,19 +18,17 @@
  * #L%
  */
 
-package org.marid.expression.mutable;
-
-import org.marid.types.expression.TypedNullExpression;
-import org.w3c.dom.Element;
+package org.marid.beans;
 
 import javax.annotation.Nonnull;
+import java.util.NoSuchElementException;
 
-public class NullExpr extends Expr implements TypedNullExpression {
+public interface TestBeanUtils {
 
-	public NullExpr() {
-	}
-
-	NullExpr(@Nonnull Element element) {
-		super(element);
+	static IdeBean find(@Nonnull IdeBean root, @Nonnull String name) {
+		return (IdeBean) root.descendants()
+				.filter(b -> name.equals(b.getName()))
+				.findFirst()
+				.orElseThrow(() -> new NoSuchElementException(name));
 	}
 }

@@ -29,6 +29,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.marid.expression.mutable.Expr;
 import org.marid.expression.mutable.NullExpr;
 import org.marid.jfx.props.FxObject;
+import org.marid.types.beans.TypedBean;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
@@ -70,7 +71,7 @@ public class IdeBean implements TypedBean {
 				Expr::getObservables,
 				element("factory", element).map(Expr::of).orElseThrow(() -> new NullPointerException("factory"))
 		);
-		this.children = elements("children", element)
+		this.children = elements(element, "bean")
 				.map(e -> new IdeBean(this, e))
 				.collect(Collectors.toCollection(() -> observableArrayList(IdeBean::observables)));
 	}

@@ -22,7 +22,7 @@ package org.marid.expression.mutable;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.marid.expression.TypedGetExpression;
+import org.marid.types.expression.TypedGetExpression;
 import org.marid.jfx.props.FxObject;
 import org.w3c.dom.Element;
 

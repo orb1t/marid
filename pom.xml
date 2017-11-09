@@ -38,6 +38,8 @@
     <repo-url>sftp://frs.sf.net/home/frs/project/marid/repo</repo-url>
 
     <lineLength>120</lineLength>
+
+    <test.groups>normal</test.groups>
   </properties>
 
   <scm>
@@ -404,7 +406,7 @@
           <reuseForks>false</reuseForks>
           <forkCount>1</forkCount>
           <threadCount>1</threadCount>
-          <groups>normal</groups>
+          <groups>${test.groups}</groups>
           <argLine>--add-opens java.base/java.lang=ALL-UNNAMED</argLine>
         </configuration>
         <dependencies>

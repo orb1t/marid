@@ -52,7 +52,6 @@ public class RuntimeBean implements MaridBean {
 		this.name = attribute(element, "name").orElseThrow(() -> new NullPointerException("name"));
 		this.factory = element("factory", element).map(Expr::of).orElseThrow(() -> new NullPointerException("factory"));
 		this.children = elements(element, "bean").map(e -> new RuntimeBean(this, e)).collect(toList());
-
 	}
 
 	public RuntimeBean() {

@@ -19,20 +19,22 @@
  * #L%
  */
 
-package org.marid.expression;
+package org.marid.types.expression;
 
-import org.marid.expression.generic.RefExpression;
+import org.marid.expression.generic.NullExpression;
 import org.marid.types.TypeContext;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
 
-public interface TypedRefExpression extends RefExpression, TypedExpression {
+import static org.marid.types.TypeUtils.WILDCARD;
+
+public interface TypedNullExpression extends NullExpression, TypedExpression {
 
 	@Nonnull
 	@Override
 	default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
-		return context.getBeanType(getReference());
+		return WILDCARD;
 	}
 }

@@ -19,10 +19,11 @@
  * #L%
  */
 
-package org.marid.expression;
+package org.marid.types.expression;
 
-import org.marid.expression.generic.NullExpression;
+import org.marid.expression.generic.ClassExpression;
 import org.marid.types.TypeContext;
+import org.marid.types.TypeUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -30,11 +31,13 @@ import java.lang.reflect.Type;
 
 import static org.marid.types.TypeUtils.WILDCARD;
 
-public interface TypedNullExpression extends NullExpression, TypedExpression {
+public interface TypedClassExpression extends ClassExpression, TypedExpression {
 
 	@Nonnull
 	@Override
 	default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
-		return WILDCARD;
+		return TypeUtils.getClass(context.getClassLoader(), getClassName())
+				.map(context::getClassType)
+				.orElse(WILDCARD);
 	}
 }

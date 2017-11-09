@@ -23,15 +23,17 @@ package org.marid.types;
 
 import com.google.common.reflect.TypeResolver;
 import com.google.common.reflect.TypeToken;
-import org.marid.beans.TypedBean;
+import org.marid.runtime.context.MaridRuntimeUtils;
+import org.marid.types.beans.TypedBean;
 import org.marid.misc.Casts;
-import org.springframework.util.TypeUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static org.marid.types.TypeUtils.WILDCARD;
 
@@ -71,7 +73,17 @@ public class GuavaTypeContext implements TypeContext {
 
 	@Override
 	public boolean isAssignable(@Nonnull Type from, @Nonnull Type to) {
-		return TypeUtils.isAssignable(to, from);
+		if (to.equals(from)) {
+			return true;
+		} else if (to instanceof Class<?>) {
+			return from instanceof Class<?> && MaridRuntimeUtils.compatible((Class<?>) to, (Class<?>) from);
+		} else if (to instanceof TypeVariable<?>) {
+			return Stream.of(((TypeVariable<?>) to).getBounds()).allMatch(t -> isAssignable(from, t));
+		} else {
+			final TypeToken<?> tTo = TypeToken.of(to);
+			final TypeToken<?> tFrom = TypeToken.of(from);
+			return tFrom.isSubtypeOf(tTo);
+		}
 	}
 
 	@Nonnull

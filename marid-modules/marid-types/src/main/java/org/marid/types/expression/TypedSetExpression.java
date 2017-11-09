@@ -19,37 +19,46 @@
  * #L%
  */
 
-package org.marid.expression;
+package org.marid.types.expression;
 
-import org.marid.expression.generic.Expression;
+import org.marid.expression.generic.SetExpression;
+import org.marid.runtime.context.MaridRuntimeUtils;
 import org.marid.types.TypeContext;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
-import java.util.List;
 
-public interface TypedExpression extends Expression {
+public interface TypedSetExpression extends SetExpression, TypedExpression {
 
 	@Nonnull
 	@Override
-	List<? extends TypedExpression> getInitializers();
+	TypedExpression getTarget();
 
 	@Nonnull
-	Type getType(@Nullable Type owner, @Nonnull TypeContext context);
+	@Override
+	TypedExpression getValue();
 
 	@Nonnull
-	default Type resolve(@Nonnull Type type, @Nonnull TypeContext context) {
-		return type;
+	@Override
+	default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
+		return getTarget().getType(owner, context);
 	}
 
 	@Nonnull
-	default Type resolveType(@Nullable Type owner, @Nonnull TypeContext context) {
-		final Type type = getType(owner, context);
-		if (type instanceof Class<?>) {
+	@Override
+	default Type resolve(@Nonnull Type type, @Nonnull TypeContext context) {
+		if (type instanceof Class<?> || !(getTarget() instanceof TypedThisExpression)) {
 			return type;
 		} else {
-			return getInitializers().stream().reduce(type, (t, i) -> i.resolve(t, context), (t1, t2) -> t2);
+			return MaridRuntimeUtils.accessibleFields(context.getRaw(type))
+					.filter(f -> f.getName().equals(getField()))
+					.findFirst()
+					.map(f -> context.resolve(type, f.getGenericType()))
+					.map(t -> context.evaluate(e -> e.where(t, getValue()
+							.resolveType(type, context))
+							.resolve(type)))
+					.orElse(type);
 		}
 	}
 }

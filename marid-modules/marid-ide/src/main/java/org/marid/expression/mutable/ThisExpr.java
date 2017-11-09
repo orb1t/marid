@@ -20,7 +20,7 @@
 
 package org.marid.expression.mutable;
 
-import org.marid.expression.TypedThisExpression;
+import org.marid.types.expression.TypedThisExpression;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;

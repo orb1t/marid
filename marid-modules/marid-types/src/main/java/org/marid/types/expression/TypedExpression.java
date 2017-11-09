@@ -19,20 +19,37 @@
  * #L%
  */
 
-package org.marid.expression;
+package org.marid.types.expression;
 
-import org.marid.expression.generic.ThisExpression;
+import org.marid.expression.generic.Expression;
 import org.marid.types.TypeContext;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
+import java.util.List;
 
-public interface TypedThisExpression extends ThisExpression, TypedExpression {
+public interface TypedExpression extends Expression {
 
 	@Nonnull
 	@Override
-	default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
-		return owner == null ? void.class : owner;
+	List<? extends TypedExpression> getInitializers();
+
+	@Nonnull
+	Type getType(@Nullable Type owner, @Nonnull TypeContext context);
+
+	@Nonnull
+	default Type resolve(@Nonnull Type type, @Nonnull TypeContext context) {
+		return type;
+	}
+
+	@Nonnull
+	default Type resolveType(@Nullable Type owner, @Nonnull TypeContext context) {
+		final Type type = getType(owner, context);
+		if (type instanceof Class<?>) {
+			return type;
+		} else {
+			return getInitializers().stream().reduce(type, (t, i) -> i.resolve(t, context), (t1, t2) -> t2);
+		}
 	}
 }

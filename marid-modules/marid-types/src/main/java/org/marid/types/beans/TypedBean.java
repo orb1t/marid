@@ -19,25 +19,24 @@
  * #L%
  */
 
-package org.marid.expression;
+package org.marid.types.beans;
 
-import org.marid.expression.generic.ClassExpression;
-import org.marid.types.TypeContext;
-import org.marid.types.TypeUtils;
+import org.marid.beans.MaridBean;
+import org.marid.types.expression.TypedExpression;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.lang.reflect.Type;
+import java.util.List;
 
-import static org.marid.types.TypeUtils.WILDCARD;
+public interface TypedBean extends MaridBean {
 
-public interface TypedClassExpression extends ClassExpression, TypedExpression {
+	@Override
+	TypedBean getParent();
 
 	@Nonnull
 	@Override
-	default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
-		return TypeUtils.getClass(context.getClassLoader(), getClassName())
-				.map(context::getClassType)
-				.orElse(WILDCARD);
-	}
+	TypedExpression getFactory();
+
+	@Nonnull
+	@Override
+	List<? extends TypedBean> getChildren();
 }

@@ -21,8 +21,8 @@
 
 package org.marid.types;
 
-import org.marid.expression.TypedCallExpression;
-import org.marid.expression.TypedExpression;
+import org.marid.types.expression.TypedCallExpression;
+import org.marid.types.expression.TypedExpression;
 import org.marid.misc.Calls;
 
 import javax.annotation.Nonnull;
@@ -96,7 +96,7 @@ public interface TypeUtils {
 			final Type[] pt = e.getGenericParameterTypes();
 			for (int i = 0; i < pt.length; i++) {
 				final Type at = expr.getArgs().get(i).getType(owner, context);
-				if (!context.isAssignable(pt[i], at)) {
+				if (!context.isAssignable(at, pt[i])) {
 					return false;
 				}
 			}

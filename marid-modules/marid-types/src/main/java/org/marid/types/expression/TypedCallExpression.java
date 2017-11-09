@@ -19,7 +19,7 @@
  * #L%
  */
 
-package org.marid.expression;
+package org.marid.types.expression;
 
 import org.marid.expression.generic.CallExpression;
 import org.marid.expression.generic.ClassExpression;

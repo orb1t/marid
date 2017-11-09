@@ -19,20 +19,20 @@
  * #L%
  */
 
-package org.marid.expression;
+package org.marid.types.expression;
 
-import org.marid.expression.generic.StringExpression;
+import org.marid.expression.generic.ThisExpression;
 import org.marid.types.TypeContext;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
 
-public interface TypedStringExpression extends StringExpression, TypedExpression {
+public interface TypedThisExpression extends ThisExpression, TypedExpression {
 
 	@Nonnull
 	@Override
 	default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
-		return String.class;
+		return owner == null ? void.class : owner;
 	}
 }

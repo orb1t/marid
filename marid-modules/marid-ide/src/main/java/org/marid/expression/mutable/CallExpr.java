@@ -23,7 +23,7 @@ package org.marid.expression.mutable;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
-import org.marid.expression.TypedCallExpression;
+import org.marid.types.expression.TypedCallExpression;
 import org.marid.jfx.props.FxObject;
 import org.w3c.dom.Element;
 

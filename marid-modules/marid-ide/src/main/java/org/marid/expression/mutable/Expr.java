@@ -23,7 +23,7 @@ package org.marid.expression.mutable;
 import javafx.beans.Observable;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-import org.marid.expression.TypedExpression;
+import org.marid.types.expression.TypedExpression;
 import org.marid.misc.Calls;
 import org.w3c.dom.Element;
 
