@@ -64,7 +64,7 @@ class ExpressionTypeTest {
 				() -> new Object[] {"b5", new TypeToken<List<Long>>() {}.getType()},
 				() -> new Object[] {"b6", new TypeToken<List<List<Long>>>() {}.getType()},
 				() -> new Object[] {"b7", new TypeToken<List<Integer>>() {}.getType()},
-				() -> new Object[] {"b8", new TypeToken<List<Object>>() {}.getType()}
+				() -> new Object[] {"b8", new TypeToken<ArrayList<Number>>() {}.getType()}
 		);
 	}
 
@@ -73,7 +73,7 @@ class ExpressionTypeTest {
 	void testBean(String beanName, Type expectedType) {
 		final IdeBean bean = BeanUtils.find(root, beanName);
 		final GuavaTypeContext context = new GuavaTypeContext(bean, classLoader);
-		final Type type = bean.getFactory().resolveType(null, context);
+		final Type type = bean.getFactory().getType(null, context);
 		assertEquals(expectedType, type);
 	}
 }

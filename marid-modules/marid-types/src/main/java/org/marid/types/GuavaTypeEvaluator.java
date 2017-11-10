@@ -47,7 +47,7 @@ public class GuavaTypeEvaluator implements TypeEvaluator {
 	}
 
 	private void where(TypeToken<?> formal, TypeToken<?> actual) {
-		if (!passed.add(formal)) {
+		if (!(formal.getType() instanceof TypeVariable<?>) && !passed.add(formal)) {
 			return;
 		}
 		if (formal.isArray() && actual.isArray()) {
@@ -83,9 +83,7 @@ public class GuavaTypeEvaluator implements TypeEvaluator {
 	@Override
 	public Type resolve(Type type) {
 		try {
-			return typeMappings.entrySet().stream()
-					.reduce(new TypeResolver(), this::where, (r1, r2) -> r2)
-					.resolveType(type);
+			return typeMappings.entrySet().stream().reduce(new TypeResolver(), this::where, (r1, r2) -> r2).resolveType(type);
 		} finally {
 			typeMappings.clear();
 			passed.clear();

@@ -25,6 +25,7 @@ import org.marid.expression.generic.CallExpression;
 import org.marid.expression.generic.ClassExpression;
 import org.marid.runtime.context.MaridRuntimeUtils;
 import org.marid.types.TypeContext;
+import org.marid.types.TypeEvaluator;
 import org.marid.types.TypeUtils;
 
 import javax.annotation.Nonnull;
@@ -49,17 +50,18 @@ public interface TypedCallExpression extends CallExpression, TypedExpression {
 	@Nonnull
 	@Override
 	default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
-		final Type targetType = getTarget().resolveType(owner, context);
+		final Type targetType = getTarget().getType(owner, context);
+		final Type result;
 		if (getTarget() instanceof ClassExpression) { // static call
 			if ("new".equals(getMethod())) { // constructor
-				return TypeUtils.classType(targetType)
+				result = TypeUtils.classType(targetType)
 						.flatMap(tc -> Stream.of(context.getRaw(tc).getConstructors())
 								.filter(e -> TypeUtils.matches(this, e, owner, context))
 								.findFirst()
 								.map(m -> TypeUtils.type(m, getArgs(), owner, context)))
 						.orElse(WILDCARD);
 			} else { // static method
-				return TypeUtils.classType(targetType)
+				result = TypeUtils.classType(targetType)
 						.flatMap(t -> Stream.of(context.getRaw(t).getMethods())
 								.filter(m -> m.getName().equals(getMethod()) && Modifier.isStatic(m.getModifiers()))
 								.filter(e -> TypeUtils.matches(this, e, owner, context))
@@ -68,7 +70,7 @@ public interface TypedCallExpression extends CallExpression, TypedExpression {
 						.orElse(WILDCARD);
 			}
 		} else { // virtual method
-			return Stream.of(context.getRaw(targetType).getMethods())
+			result = Stream.of(context.getRaw(targetType).getMethods())
 					.filter(m -> m.getName().equals(getMethod()) && !Modifier.isStatic(m.getModifiers()))
 					.filter(e -> TypeUtils.matches(this, e, owner, context))
 					.findFirst()
@@ -76,28 +78,21 @@ public interface TypedCallExpression extends CallExpression, TypedExpression {
 					.map(type -> context.resolve(targetType, type))
 					.orElse(WILDCARD);
 		}
+		return TypeUtils.resolve(this, result, context);
 	}
 
-	@Nonnull
 	@Override
-	default Type resolve(@Nonnull Type type, @Nonnull TypeContext context) {
-		if (type instanceof Class<?> || !(getTarget() instanceof TypedThisExpression)) {
-			return type;
-		} else {
-			final Type[] ats = getArgs().stream().map(a -> a.resolveType(type, context)).toArray(Type[]::new);
-			final Class<?>[] rts = Stream.of(ats).map(context::getRaw).toArray(Class<?>[]::new);
-			return MaridRuntimeUtils.accessibleMethods(context.getRaw(type))
-					.filter(m -> m.getName().equals(getMethod()))
-					.filter(m -> MaridRuntimeUtils.compatible(m, rts))
-					.reduce(type, (t, m) -> {
-						final Type[] ts = m.getGenericParameterTypes();
-						return context.evaluate(e -> {
-							for (int i = 0; i < ts.length; i++) {
-								e.where(context.resolve(type, ts[i]), ats[i]);
-							}
-							return e.resolve(t);
-						});
-					}, (t1, t2) -> t2);
-		}
+	default void resolve(@Nonnull Type type, @Nonnull TypeContext context, @Nonnull TypeEvaluator evaluator) {
+		final Type[] ats = getArgs().stream().map(a -> a.getType(type, context)).toArray(Type[]::new);
+		final Class<?>[] rts = Stream.of(ats).map(context::getRaw).toArray(Class<?>[]::new);
+		MaridRuntimeUtils.accessibleMethods(context.getRaw(type))
+				.filter(m -> m.getName().equals(getMethod()))
+				.filter(m -> MaridRuntimeUtils.compatible(m, rts))
+				.forEach(m -> {
+					final Type[] ts = m.getGenericParameterTypes();
+					for (int i = 0; i < ts.length; i++) {
+						evaluator.where(context.resolve(type, ts[i]), ats[i]);
+					}
+				});
 	}
 }

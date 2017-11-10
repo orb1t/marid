@@ -34,7 +34,6 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static java.lang.reflect.Modifier.isPublic;
-import static java.util.Optional.ofNullable;
 import static java.util.logging.Level.WARNING;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.IntStream.range;
@@ -120,16 +119,12 @@ public interface MaridRuntimeUtils {
 
 	@Nonnull
 	static Stream<Class<?>> superClasses(@Nonnull Class<?> type) {
-		return ofNullable(type.getSuperclass()).map(s -> concat(of(type), superClasses(s))).orElseGet(() -> of(type));
-	}
-
-	@Nonnull
-	static Stream<Class<?>> enclosingClasses(@Nonnull Class<?> type) {
-		return ofNullable(type.getEnclosingClass()).stream().flatMap(e -> concat(of(e), enclosingClasses(e)));
+		return type.getSuperclass() == null ? of(type) : concat(of(type), superClasses(type.getSuperclass()));
 	}
 
 	static boolean isAccessible(@Nonnull Class<?> type) {
-		return isPublic(type.getModifiers()) && enclosingClasses(type).allMatch(MaridRuntimeUtils::isAccessible);
+		final boolean isPublic = isPublic(type.getModifiers());
+		return type.getEnclosingClass() == null ? isPublic : isPublic && isAccessible(type.getEnclosingClass());
 	}
 
 	@Nonnull

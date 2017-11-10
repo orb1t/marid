@@ -55,7 +55,7 @@ public class GuavaTypeContext implements TypeContext {
 				.filter(TypedBean.class::isInstance)
 				.map(TypedBean.class::cast)
 				.findFirst()
-				.map(b -> b.getFactory().resolveType(null, new GuavaTypeContext(b, classLoader)))
+				.map(b -> b.getFactory().getType(null, new GuavaTypeContext(b, classLoader)))
 				.orElse(WILDCARD);
 	}
 

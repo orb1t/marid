@@ -24,6 +24,7 @@ package org.marid.types.expression;
 import org.marid.expression.generic.SetExpression;
 import org.marid.runtime.context.MaridRuntimeUtils;
 import org.marid.types.TypeContext;
+import org.marid.types.TypeEvaluator;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -45,20 +46,12 @@ public interface TypedSetExpression extends SetExpression, TypedExpression {
 		return getTarget().getType(owner, context);
 	}
 
-	@Nonnull
 	@Override
-	default Type resolve(@Nonnull Type type, @Nonnull TypeContext context) {
-		if (type instanceof Class<?> || !(getTarget() instanceof TypedThisExpression)) {
-			return type;
-		} else {
-			return MaridRuntimeUtils.accessibleFields(context.getRaw(type))
+	default void resolve(@Nonnull Type type, @Nonnull TypeContext context, @Nonnull TypeEvaluator evaluator) {
+			MaridRuntimeUtils.accessibleFields(context.getRaw(type))
 					.filter(f -> f.getName().equals(getField()))
 					.findFirst()
 					.map(f -> context.resolve(type, f.getGenericType()))
-					.map(t -> context.evaluate(e -> e.where(t, getValue()
-							.resolveType(type, context))
-							.resolve(type)))
-					.orElse(type);
-		}
+					.ifPresent(t -> evaluator.where(t, getValue().getType(type, context)));
 	}
 }

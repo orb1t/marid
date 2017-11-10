@@ -123,14 +123,28 @@
 
   <bean name="b8">
     <factory>
-      <call method="singletonList">
+      <call method="new">
         <target>
-          <class class="java.util.Collections"/>
+          <class class="java.util.ArrayList"/>
         </target>
-        <args>
-          <ref ref="b4"/>
-          <ref ref="b5"/>
-        </args>
+        <initializers>
+          <call method="add">
+            <target>
+              <this/>
+            </target>
+            <args>
+              <const type="INT" value="2"/>
+            </args>
+          </call>
+          <call method="add">
+            <target>
+              <this/>
+            </target>
+            <args>
+              <const type="LONG" value="2"/>
+            </args>
+          </call>
+        </initializers>
       </call>
     </factory>
   </bean>

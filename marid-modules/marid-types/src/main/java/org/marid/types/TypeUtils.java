@@ -21,9 +21,9 @@
 
 package org.marid.types;
 
+import org.marid.misc.Calls;
 import org.marid.types.expression.TypedCallExpression;
 import org.marid.types.expression.TypedExpression;
-import org.marid.misc.Calls;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -58,12 +58,16 @@ public interface TypeUtils {
 									 @Nonnull List<? extends TypedExpression> args,
 									 @Nullable Type owner,
 									 @Nonnull TypeContext context) {
-		return context.evaluate(e -> {
-			for (int i = 0; i < argTypes.length; i++) {
-				e.where(argTypes[i], args.get(i).getType(owner, context));
-			}
-			return e.resolve(returnType);
-		});
+		if (returnType instanceof Class<?>) {
+			return returnType;
+		} else {
+			return context.evaluate(e -> {
+				for (int i = 0; i < argTypes.length; i++) {
+					e.where(argTypes[i], args.get(i).getType(owner, context));
+				}
+				return e.resolve(returnType);
+			});
+		}
 	}
 
 	@Nonnull
@@ -79,7 +83,8 @@ public interface TypeUtils {
 									 @Nonnull List<? extends TypedExpression> args,
 									 @Nullable Type owner,
 									 @Nonnull TypeContext context) {
-		return type(context.getType(constructor.getDeclaringClass()), constructor.getGenericParameterTypes(), args, owner, context);
+		final Class<?> decl = constructor.getDeclaringClass();
+		return type(context.getType(decl), constructor.getGenericParameterTypes(), args, owner, context);
 	}
 
 	@Nonnull
@@ -91,7 +96,10 @@ public interface TypeUtils {
 		}
 	}
 
-	static boolean matches(TypedCallExpression expr, Executable e, Type owner, TypeContext context) {
+	static boolean matches(@Nonnull TypedCallExpression expr,
+												 @Nonnull Executable e,
+												 @Nullable Type owner,
+												 @Nonnull TypeContext context) {
 		if (e.getParameterCount() == expr.getArgs().size()) {
 			final Type[] pt = e.getGenericParameterTypes();
 			for (int i = 0; i < pt.length; i++) {
@@ -103,6 +111,18 @@ public interface TypeUtils {
 			return true;
 		} else {
 			return false;
+		}
+	}
+
+	@Nonnull
+	static Type resolve(@Nonnull TypedExpression expression, @Nonnull Type type, @Nonnull TypeContext context) {
+		if (type instanceof Class<?>) {
+			return type;
+		} else {
+			return context.evaluate(e -> {
+				expression.getInitializers().forEach(i -> i.resolve(type, context, e));
+				return e.resolve(type);
+			});
 		}
 	}
 }

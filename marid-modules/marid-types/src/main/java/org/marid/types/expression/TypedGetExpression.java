@@ -24,6 +24,7 @@ package org.marid.types.expression;
 import org.marid.expression.generic.ClassExpression;
 import org.marid.expression.generic.GetExpression;
 import org.marid.types.TypeContext;
+import org.marid.types.TypeUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -42,20 +43,22 @@ public interface TypedGetExpression extends GetExpression, TypedExpression {
 	@Nonnull
 	@Override
 	default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
-		final Type targetType = getTarget().resolveType(owner, context);
+		final Type targetType = getTarget().getType(owner, context);
+		final Type result;
 		if (getTarget() instanceof ClassExpression) {
-			return classType(targetType).stream().flatMap(t -> accessibleFields(context.getRaw(t)))
+			result = classType(targetType).stream().flatMap(t -> accessibleFields(context.getRaw(t)))
 					.filter(f -> f.getName().equals(getField()))
 					.map(f -> context.resolve(owner, f.getGenericType()))
 					.findFirst()
 					.orElse(WILDCARD);
 		} else {
-			return accessibleFields(context.getRaw(targetType))
+			result = accessibleFields(context.getRaw(targetType))
 					.filter(f -> f.getName().equals(getField()))
 					.map(f -> context.resolve(targetType, f.getGenericType()))
 					.map(t -> context.resolve(owner, t))
 					.findFirst()
 					.orElse(WILDCARD);
 		}
+		return TypeUtils.resolve(this, result, context);
 	}
 }
