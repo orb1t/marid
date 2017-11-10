@@ -64,7 +64,10 @@ class ExpressionTypeTest {
 				() -> new Object[] {"b5", new TypeToken<List<Long>>() {}.getType()},
 				() -> new Object[] {"b6", new TypeToken<List<List<Long>>>() {}.getType()},
 				() -> new Object[] {"b7", new TypeToken<List<Integer>>() {}.getType()},
-				() -> new Object[] {"b8", new TypeToken<ArrayList<Number>>() {}.getType()}
+				() -> new Object[] {"b8", new TypeToken<ArrayList<Number>>() {}.getType()},
+				() -> new Object[] {"b9", new TypeToken<List<List<Integer>>>() {}.getType()},
+				() -> new Object[] {"bA", new TypeToken<List<Long>[]>() {}.getType()},
+				() -> new Object[] {"bB", int[].class}
 		);
 	}
 

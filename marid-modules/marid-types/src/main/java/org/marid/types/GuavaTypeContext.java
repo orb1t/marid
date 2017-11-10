@@ -24,7 +24,6 @@ package org.marid.types;
 import com.google.common.reflect.TypeResolver;
 import com.google.common.reflect.TypeToken;
 import org.marid.misc.Casts;
-import org.marid.runtime.context.MaridRuntimeUtils;
 import org.marid.types.beans.TypedBean;
 
 import javax.annotation.Nonnull;
@@ -35,6 +34,8 @@ import java.lang.reflect.TypeVariable;
 import java.util.Arrays;
 import java.util.function.Function;
 
+import static java.util.Objects.requireNonNull;
+import static org.marid.runtime.context.MaridRuntimeUtils.compatible;
 import static org.marid.types.TypeUtils.WILDCARD;
 
 public class GuavaTypeContext implements TypeContext {
@@ -76,13 +77,19 @@ public class GuavaTypeContext implements TypeContext {
 		if (to.equals(from) || Object.class == to) {
 			return true;
 		} else if (to instanceof Class<?>) {
-			return from instanceof Class<?> && MaridRuntimeUtils.compatible((Class<?>) to, (Class<?>) from);
+			return from instanceof Class<?> && compatible((Class<?>) to, (Class<?>) from);
 		} else if (to instanceof TypeVariable<?>) {
 			return Arrays.stream(((TypeVariable<?>) to).getBounds()).allMatch(t -> isAssignable(from, t));
 		} else {
 			final TypeToken<?> tTo = TypeToken.of(to);
 			final TypeToken<?> tFrom = TypeToken.of(from);
-			return tFrom.isSubtypeOf(tTo);
+			if (tTo.isArray() && tFrom.isArray()) {
+				final Type fromCt = requireNonNull(tFrom.getComponentType()).getType();
+				final Type toCt = requireNonNull(tTo.getComponentType()).getType();
+				return isAssignable(fromCt, toCt);
+			} else {
+				return tFrom.isSubtypeOf(tTo);
+			}
 		}
 	}
 

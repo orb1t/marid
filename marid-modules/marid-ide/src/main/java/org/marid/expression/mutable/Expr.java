@@ -98,6 +98,7 @@ public abstract class Expr implements TypedExpression {
 
 	public static Expr of(@Nonnull Element element) {
 		switch (element.getTagName()) {
+			case "array": return new ArrayExpr(element);
 			case "class": return new ClassExpr(element);
 			case "this": return new ThisExpr(element);
 			case "string": return new StringExpr(element);

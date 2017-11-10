@@ -68,6 +68,7 @@ public abstract class Expr implements Expression {
 
 	public static Expr of(@Nonnull Element element) {
 		switch (element.getTagName()) {
+			case "array": return new ArrayExpr(element);
 			case "call": return new CallExpr(element);
 			case "class": return new ClassExpr(element);
 			case "this": return new ThisExpr(element);

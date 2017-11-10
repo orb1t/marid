@@ -44,10 +44,10 @@ import static org.marid.runtime.context.MaridRuntimeUtils.methodState;
 public final class CallExpr extends Expr implements CallExpression {
 
 	@Nonnull
-	private Expr target;
+	private final Expr target;
 
 	@Nonnull
-	private String method;
+	private final String method;
 
 	@Nonnull
 	private final List<Expr> args;

@@ -38,13 +38,13 @@ import static org.marid.io.Xmls.element;
 public final class SetExpr extends Expr implements SetExpression {
 
 	@Nonnull
-	private Expr target;
+	private final Expr target;
 
 	@Nonnull
-	private String field;
+	private final String field;
 
 	@Nonnull
-	private Expr value;
+	private final Expr value;
 
 	public SetExpr(@Nonnull Expr target, @Nonnull String field, @Nonnull Expr value) {
 		this.target = target;

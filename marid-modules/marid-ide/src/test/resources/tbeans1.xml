@@ -148,4 +148,55 @@
       </call>
     </factory>
   </bean>
+
+  <bean name="b9">
+    <factory>
+      <call method="asList">
+        <target>
+          <class class="java.util.Arrays"/>
+        </target>
+        <args>
+          <array type="java.util.List">
+            <elements>
+              <call method="singletonList">
+                <target>
+                  <class class="java.util.Collections"/>
+                </target>
+                <args>
+                  <const type="INT" value="1"/>
+                </args>
+              </call>
+            </elements>
+          </array>
+        </args>
+      </call>
+    </factory>
+  </bean>
+
+  <bean name="bA">
+    <factory>
+      <array type="java.util.List">
+        <elements>
+          <call method="singletonList">
+            <target>
+              <class class="java.util.Collections"/>
+            </target>
+            <args>
+              <const type="LONG" value="1"/>
+            </args>
+          </call>
+        </elements>
+      </array>
+    </factory>
+  </bean>
+
+  <bean name="bB">
+    <factory>
+      <array type="int">
+        <elements>
+          <const type="INT" value="1"/>
+        </elements>
+      </array>
+    </factory>
+  </bean>
 </bean>

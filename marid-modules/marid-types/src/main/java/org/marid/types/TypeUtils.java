@@ -22,6 +22,7 @@
 package org.marid.types;
 
 import org.marid.misc.Calls;
+import org.marid.runtime.context.MaridRuntimeUtils;
 import org.marid.types.expression.TypedCallExpression;
 import org.marid.types.expression.TypedExpression;
 
@@ -36,9 +37,9 @@ import static java.util.Optional.of;
 
 public interface TypeUtils {
 
-	Type WILDCARD = Calls.call(() -> {
+	WildcardType WILDCARD = Calls.call(() -> {
 		final Type pt = Class.class.getMethod("forName", String.class).getGenericReturnType();
-		return ((ParameterizedType) pt).getActualTypeArguments()[0];
+		return (WildcardType) ((ParameterizedType) pt).getActualTypeArguments()[0];
 	});
 
 	@Nonnull
@@ -90,7 +91,7 @@ public interface TypeUtils {
 	@Nonnull
 	static Optional<Class<?>> getClass(@Nonnull ClassLoader classLoader, @Nonnull String name) {
 		try {
-			return Optional.of(classLoader.loadClass(name));
+			return Optional.of(MaridRuntimeUtils.loadClass(name, classLoader, false));
 		} catch (ClassNotFoundException x) {
 			return Optional.empty();
 		}

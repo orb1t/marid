@@ -26,6 +26,7 @@ import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Comparator;
+import java.util.Optional;
 import java.util.Scanner;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
@@ -163,6 +164,22 @@ public interface MaridRuntimeUtils {
 			case "double": return Double.class;
 			case "void": return Void.class;
 			default: throw new IllegalArgumentException(primitiveType.getName());
+		}
+	}
+
+	@Nonnull
+	static Class<?> loadClass(@Nonnull String name, @Nonnull ClassLoader classLoader, boolean init) throws ClassNotFoundException {
+		switch (name) {
+			case "int": return int.class;
+			case "long": return long.class;
+			case "boolean": return boolean.class;
+			case "short": return short.class;
+			case "byte": return byte.class;
+			case "char": return char.class;
+			case "float": return float.class;
+			case "double": return double.class;
+			case "void": return void.class;
+			default: return Class.forName(name, init, classLoader);
 		}
 	}
 
