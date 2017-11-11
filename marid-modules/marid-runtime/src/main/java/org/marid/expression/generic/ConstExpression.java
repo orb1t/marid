@@ -37,20 +37,8 @@ import java.util.Currency;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 
 public interface ConstExpression extends ValueExpression {
-
-	Pattern ARRAY_ELEMENT_SEPARATOR = Pattern.compile("(\\s*,\\s*)|\\s+", Pattern.MULTILINE);
-
-	byte[] EMPTY_BYTES = new byte[0];
-	short[] EMPTY_SHORTS = new short[0];
-	char[] EMPTY_CHARS = new char[0];
-	int[] EMPTY_INTS = new int[0];
-	long[] EMPTY_LONGS = new long[0];
-	boolean[] EMPTY_BOOLS = new boolean[0];
-	float[] EMPTY_FLOATS = new float[0];
-	double[] EMPTY_DOUBLES = new double[0];
 
 	@Nonnull
 	ConstantType getType();
@@ -88,12 +76,7 @@ public interface ConstExpression extends ValueExpression {
 		MONTH_DAY(MonthDay.class, MonthDay::parse),
 		DAY_OF_WEEK(DayOfWeek.class, DayOfWeek::valueOf),
 		INET_ADDR(InetAddress.class, v -> Calls.call(() -> InetAddress.getByName(v))),
-		UUID(java.util.UUID.class, java.util.UUID::fromString),
-		UBYTES(byte[].class, ConstExpression::ubytes),
-		UINTS(int[].class, ConstExpression::uints),
-		ULONGS(long[].class, ConstExpression::ulongs),
-		FLOATS(float[].class, ConstExpression::floats),
-		DOUBLES(double[].class, ConstExpression::doubles);
+		UUID(java.util.UUID.class, java.util.UUID::fromString);
 
 		public final Class<?> type;
 		public final Function<String, ?> converter;
@@ -101,109 +84,6 @@ public interface ConstExpression extends ValueExpression {
 		<T> ConstantType(Class<T> type, Function<String, T> converter) {
 			this.type = type;
 			this.converter = converter;
-		}
-	}
-
-	@Nonnull
-	private static byte[] ubytes(@Nonnull String value) {
-		if (value.startsWith("[") && value.endsWith("]")) {
-			final String v = value.substring(1, value.length() - 1).trim();
-			if (v.isEmpty()) {
-				return EMPTY_BYTES;
-			} else {
-				final String[] parts = ARRAY_ELEMENT_SEPARATOR.split(v);
-				final byte[] bytes = new byte[parts.length];
-				for (int i = 0; i < parts.length; i++) {
-					bytes[i] = Integer.decode(parts[i]).byteValue();
-				}
-				return bytes;
-			}
-		} else {
-			throw new IllegalArgumentException(value);
-		}
-	}
-
-	@Nonnull
-	private static int[] uints(@Nonnull String value) {
-		if (value.startsWith("[") && value.endsWith("]")) {
-			final String v = value.substring(1, value.length() - 1).trim();
-			if (v.isEmpty()) {
-				return EMPTY_INTS;
-			} else {
-				final String[] parts = ARRAY_ELEMENT_SEPARATOR.split(v);
-				final int[] ints = new int[parts.length];
-				for (int i = 0; i < ints.length; i++) {
-					if (parts[i].startsWith("0x")) {
-						ints[i] = Integer.parseUnsignedInt(parts[i].substring(2), 16);
-					} else {
-						ints[i] = Integer.parseUnsignedInt(parts[i]);
-					}
-				}
-				return ints;
-			}
-		} else {
-			throw new IllegalArgumentException(value);
-		}
-	}
-
-	@Nonnull
-	private static long[] ulongs(@Nonnull String value) {
-		if (value.startsWith("[") && value.endsWith("]")) {
-			final String v = value.substring(1, value.length() - 1).trim();
-			if (v.isEmpty()) {
-				return EMPTY_LONGS;
-			} else {
-				final String[] parts = ARRAY_ELEMENT_SEPARATOR.split(v);
-				final long[] longs = new long[parts.length];
-				for (int i = 0; i < longs.length; i++) {
-					if (parts[i].startsWith("0x")) {
-						longs[i] = Long.parseUnsignedLong(parts[i].substring(2), 16);
-					} else {
-						longs[i] = Long.parseUnsignedLong(parts[i]);
-					}
-				}
-				return longs;
-			}
-		} else {
-			throw new IllegalArgumentException(value);
-		}
-	}
-
-	@Nonnull
-	private static float[] floats(@Nonnull String value) {
-		if (value.startsWith("[") && value.endsWith("]")) {
-			final String v = value.substring(1, value.length() - 1).trim();
-			if (v.isEmpty()) {
-				return EMPTY_FLOATS;
-			} else {
-				final String[] parts = ARRAY_ELEMENT_SEPARATOR.split(v);
-				final float[] floats = new float[parts.length];
-				for (int i = 0; i < floats.length; i++) {
-					floats[i] = Float.parseFloat(parts[i]);
-				}
-				return floats;
-			}
-		} else {
-			throw new IllegalArgumentException(value);
-		}
-	}
-
-	@Nonnull
-	private static double[] doubles(@Nonnull String value) {
-		if (value.startsWith("[") && value.endsWith("]")) {
-			final String v = value.substring(1, value.length() - 1).trim();
-			if (v.isEmpty()) {
-				return EMPTY_DOUBLES;
-			} else {
-				final String[] parts = ARRAY_ELEMENT_SEPARATOR.split(v);
-				final double[] doubles = new double[parts.length];
-				for (int i = 0; i < doubles.length; i++) {
-					doubles[i] = Double.parseDouble(parts[i]);
-				}
-				return doubles;
-			}
-		} else {
-			throw new IllegalArgumentException(value);
 		}
 	}
 }

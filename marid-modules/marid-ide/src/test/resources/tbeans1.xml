@@ -195,4 +195,15 @@
       </call>
     </factory>
   </bean>
+
+  <bean name="b13">
+    <factory>
+      <call method="new">
+        <target><class class="java.util.ArrayList"/></target>
+        <args>
+          <const type="INT" value="1"/>
+        </args>
+      </call>
+    </factory>
+  </bean>
 </bean>
