@@ -20,7 +20,7 @@
 
 package org.marid.ide.maven;
 
-import org.marid.ide.model.MavenArtifact;
+import org.marid.idelib.model.MavenArtifact;
 import org.marid.jfx.action.FxAction;
 import org.marid.idelib.spring.annotation.IdeAction;
 import org.springframework.beans.factory.annotation.Autowired;

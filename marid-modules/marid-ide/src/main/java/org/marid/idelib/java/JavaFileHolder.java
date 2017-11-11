@@ -29,7 +29,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import org.marid.ide.event.TextFileChangedEvent;
 import org.marid.ide.event.TextFileMovedEvent;
-import org.marid.ide.model.TextFile;
+import org.marid.idelib.model.TextFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;

@@ -18,7 +18,7 @@
  * #L%
  */
 
-package org.marid.ide.model;
+package org.marid.idelib.model;
 
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Plugin;

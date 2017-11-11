@@ -18,7 +18,7 @@
  * #L%
  */
 
-package org.marid.ide.model;
+package org.marid.idelib.model;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
