@@ -21,8 +21,6 @@
 
 package org.marid.jfx.action;
 
-import com.google.common.collect.ComputationException;
-import com.google.common.util.concurrent.UncheckedTimeoutException;
 import javafx.application.Platform;
 import javafx.scene.control.Menu;
 import javafx.scene.control.Separator;
@@ -34,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
-import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.TimeUnit;
 
 import static java.util.stream.Collectors.groupingBy;
@@ -76,43 +74,36 @@ public interface MaridActions {
 		return toolBar;
 	}
 
-	static <T> T execute(Callable<T> task, long timeout, TimeUnit timeUnit) throws UncheckedTimeoutException {
+	static <T> T execute(Callable<T> task, long timeout, TimeUnit timeUnit) {
 		if (Platform.isFxApplicationThread()) {
 			try {
 				return task.call();
 			} catch (Exception x) {
-				throw new ComputationException(x);
+				throw new IllegalStateException(x);
 			}
 		} else {
-			final SynchronousQueue<Pair<T, Throwable>> queue = new SynchronousQueue<>();
+			final LinkedTransferQueue<Pair<T, Throwable>> queue = new LinkedTransferQueue<>();
 			Platform.runLater(() -> {
 				try {
-					final T result;
-					try {
-						result = task.call();
-					} catch (Throwable x) {
-						queue.put(new Pair<>(null, x));
-						return;
-					}
-					queue.put(new Pair<>(result, null));
-				} catch (InterruptedException x) {
-					queue.offer(new Pair<>(null, x));
+					queue.add(new Pair<>(task.call(), null));
+				} catch (Throwable x) {
+					queue.add(new Pair<>(null, x));
 				}
 			});
 			final Pair<T, Throwable> pair;
 			try {
 				pair = queue.poll(timeout, timeUnit);
 			} catch (InterruptedException x) {
-				throw new UncheckedTimeoutException("Interrupted", x);
+				throw new IllegalStateException(x);
 			}
 			if (pair == null) {
-				throw new UncheckedTimeoutException("Timeout exceeded");
+				throw new IllegalStateException("Timeout exceeded");
 			} else if (pair.getKey() != null) {
 				return pair.getKey();
 			} else if (pair.getValue() instanceof RuntimeException) {
 				throw (RuntimeException) pair.getValue();
 			} else if (pair.getValue() instanceof Exception) {
-				throw new ComputationException(pair.getValue());
+				throw new IllegalStateException(pair.getValue());
 			} else if (pair.getValue() instanceof Error) {
 				throw (Error) pair.getValue();
 			} else {
