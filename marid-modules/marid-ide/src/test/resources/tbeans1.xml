@@ -23,13 +23,13 @@
     <null/>
   </factory>
 
-  <bean name="b1">
+  <bean name="b01">
     <factory>
       <string>str</string>
     </factory>
   </bean>
 
-  <bean name="b2">
+  <bean name="b02">
     <factory>
       <call method="valueOf">
         <target>
@@ -42,7 +42,7 @@
     </factory>
   </bean>
 
-  <bean name="b3">
+  <bean name="b03">
     <factory>
       <call method="new">
         <target>
@@ -65,7 +65,7 @@
     </factory>
   </bean>
 
-  <bean name="b4">
+  <bean name="b04">
     <factory>
       <call method="size">
         <target>
@@ -82,7 +82,7 @@
     </factory>
   </bean>
 
-  <bean name="b5">
+  <bean name="b05">
     <factory>
       <call method="singletonList">
         <target>
@@ -95,33 +95,33 @@
     </factory>
   </bean>
 
-  <bean name="b6">
+  <bean name="b06">
     <factory>
       <call method="singletonList">
         <target>
           <class class="java.util.Collections"/>
         </target>
         <args>
-          <ref ref="b5"/>
+          <ref ref="b05"/>
         </args>
       </call>
     </factory>
   </bean>
 
-  <bean name="b7">
+  <bean name="b07">
     <factory>
       <call method="singletonList">
         <target>
           <class class="java.util.Collections"/>
         </target>
         <args>
-          <ref ref="b4"/>
+          <ref ref="b04"/>
         </args>
       </call>
     </factory>
   </bean>
 
-  <bean name="b8">
+  <bean name="b08">
     <factory>
       <call method="new">
         <target>
@@ -149,7 +149,7 @@
     </factory>
   </bean>
 
-  <bean name="b9">
+  <bean name="b09">
     <factory>
       <call method="asList">
         <target>
@@ -173,7 +173,7 @@
     </factory>
   </bean>
 
-  <bean name="bA">
+  <bean name="b10">
     <factory>
       <array type="java.util.List">
         <elements>
@@ -190,7 +190,7 @@
     </factory>
   </bean>
 
-  <bean name="bB">
+  <bean name="b11">
     <factory>
       <array type="int">
         <elements>

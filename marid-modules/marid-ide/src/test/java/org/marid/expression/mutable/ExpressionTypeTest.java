@@ -57,17 +57,17 @@ class ExpressionTypeTest {
 
 	private static Stream<Arguments> testData() {
 		return Stream.of(
-				() -> new Object[] {"b1", String.class},
-				() -> new Object[] {"b2", BigInteger.class},
-				() -> new Object[] {"b3", new TypeToken<ArrayList<Integer>>() {}.getType()},
-				() -> new Object[] {"b4", int.class},
-				() -> new Object[] {"b5", new TypeToken<List<Long>>() {}.getType()},
-				() -> new Object[] {"b6", new TypeToken<List<List<Long>>>() {}.getType()},
-				() -> new Object[] {"b7", new TypeToken<List<Integer>>() {}.getType()},
-				() -> new Object[] {"b8", new TypeToken<ArrayList<Number>>() {}.getType()},
-				() -> new Object[] {"b9", new TypeToken<List<List<Integer>>>() {}.getType()},
-				() -> new Object[] {"bA", new TypeToken<List<Long>[]>() {}.getType()},
-				() -> new Object[] {"bB", int[].class}
+				() -> new Object[] {"b01", String.class},
+				() -> new Object[] {"b02", BigInteger.class},
+				() -> new Object[] {"b03", new TypeToken<ArrayList<Integer>>() {}.getType()},
+				() -> new Object[] {"b04", int.class},
+				() -> new Object[] {"b05", new TypeToken<List<Long>>() {}.getType()},
+				() -> new Object[] {"b06", new TypeToken<List<List<Long>>>() {}.getType()},
+				() -> new Object[] {"b07", new TypeToken<List<Integer>>() {}.getType()},
+				() -> new Object[] {"b08", new TypeToken<ArrayList<Number>>() {}.getType()},
+				() -> new Object[] {"b09", new TypeToken<List<List<Integer>>>() {}.getType()},
+				() -> new Object[] {"b10", new TypeToken<List<Long>[]>() {}.getType()},
+				() -> new Object[] {"b11", int[].class}
 		);
 	}
 
