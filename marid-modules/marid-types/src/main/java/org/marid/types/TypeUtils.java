@@ -67,8 +67,7 @@ public interface TypeUtils {
 				for (int i = 0; i < argTypes.length; i++) {
 					e.where(argTypes[i], args.get(i).getType(owner, context));
 				}
-				return e.resolve(returnType);
-			});
+			}, returnType);
 		}
 	}
 
@@ -121,10 +120,7 @@ public interface TypeUtils {
 		if (type instanceof Class<?>) {
 			return type;
 		} else {
-			return context.evaluate(e -> {
-				expression.getInitializers().forEach(i -> i.resolve(type, context, e));
-				return e.resolve(type);
-			});
+			return context.evaluate(e -> expression.getInitializers().forEach(i -> i.resolve(type, context, e)), type);
 		}
 	}
 
@@ -137,6 +133,6 @@ public interface TypeUtils {
 			throw new IllegalStateException(x);
 		}
 		final GenericArrayType t = (GenericArrayType) toArrayMethod.getGenericReturnType();
-		return context.evaluate(e -> e.where(t.getGenericComponentType(), elementType).resolve(t));
+		return context.evaluate(e -> e.where(t.getGenericComponentType(), elementType), t);
 	}
 }

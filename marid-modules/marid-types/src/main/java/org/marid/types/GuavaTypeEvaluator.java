@@ -90,12 +90,7 @@ public class GuavaTypeEvaluator implements TypeEvaluator {
 	@Nonnull
 	@Override
 	public Type resolve(Type type) {
-		try {
-			return typeMappings.entrySet().stream().reduce(new TypeResolver(), this::where, (r1, r2) -> r2).resolveType(type);
-		} finally {
-			typeMappings.clear();
-			passed.clear();
-		}
+		return typeMappings.entrySet().stream().reduce(new TypeResolver(), this::where, (r1, r2) -> r2).resolveType(type);
 	}
 
 	private TypeToken<?> commonAncestor(TypeToken<?> formal, LinkedHashSet<TypeToken<?>> actuals) {

@@ -32,7 +32,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.Arrays;
-import java.util.function.Function;
+import java.util.function.Consumer;
 
 import static java.util.Objects.requireNonNull;
 import static org.marid.runtime.context.MaridRuntimeUtils.compatible;
@@ -116,8 +116,11 @@ public class GuavaTypeContext implements TypeContext {
 		return c.getType();
 	}
 
+	@Nonnull
 	@Override
-	public <T> T evaluate(@Nonnull Function<TypeEvaluator, T> callback) {
-		return callback.apply(new GuavaTypeEvaluator(this));
+	public Type evaluate(@Nonnull Consumer<TypeEvaluator> callback, @Nonnull Type type) {
+		final GuavaTypeEvaluator evaluator = new GuavaTypeEvaluator(this);
+		callback.accept(evaluator);
+		return evaluator.resolve(type);
 	}
 }
