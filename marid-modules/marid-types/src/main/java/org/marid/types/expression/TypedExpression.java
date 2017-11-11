@@ -23,12 +23,12 @@ package org.marid.types.expression;
 
 import org.marid.expression.generic.Expression;
 import org.marid.types.TypeContext;
-import org.marid.types.TypeEvaluator;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 public interface TypedExpression extends Expression {
 
@@ -39,6 +39,6 @@ public interface TypedExpression extends Expression {
 	@Nonnull
 	Type getType(@Nullable Type owner, @Nonnull TypeContext context);
 
-	default void resolve(@Nonnull Type type, @Nonnull TypeContext context, @Nonnull TypeEvaluator evaluator) {
+	default void resolve(@Nonnull Type type, @Nonnull TypeContext context, @Nonnull BiConsumer<Type, Type> evaluator) {
 	}
 }

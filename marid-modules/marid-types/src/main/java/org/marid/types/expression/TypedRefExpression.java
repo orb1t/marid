@@ -23,7 +23,6 @@ package org.marid.types.expression;
 
 import org.marid.expression.generic.RefExpression;
 import org.marid.types.TypeContext;
-import org.marid.types.TypeUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -34,6 +33,6 @@ public interface TypedRefExpression extends RefExpression, TypedExpression {
 	@Nonnull
 	@Override
 	default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
-		return TypeUtils.resolve(this, context.getBeanType(getReference()), context);
+		return context.getBeanType(getReference());
 	}
 }

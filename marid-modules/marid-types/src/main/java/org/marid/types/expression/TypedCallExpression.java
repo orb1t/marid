@@ -25,7 +25,6 @@ import org.marid.expression.generic.CallExpression;
 import org.marid.expression.generic.ClassExpression;
 import org.marid.runtime.context.MaridRuntimeUtils;
 import org.marid.types.TypeContext;
-import org.marid.types.TypeEvaluator;
 import org.marid.types.TypeUtils;
 
 import javax.annotation.Nonnull;
@@ -33,6 +32,7 @@ import javax.annotation.Nullable;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 import static org.marid.types.TypeUtils.WILDCARD;
@@ -82,7 +82,7 @@ public interface TypedCallExpression extends CallExpression, TypedExpression {
 	}
 
 	@Override
-	default void resolve(@Nonnull Type type, @Nonnull TypeContext context, @Nonnull TypeEvaluator evaluator) {
+	default void resolve(@Nonnull Type type, @Nonnull TypeContext context, @Nonnull BiConsumer<Type, Type> evaluator) {
 		final Type[] ats = getArgs().stream().map(a -> a.getType(type, context)).toArray(Type[]::new);
 		final Class<?>[] rts = Stream.of(ats).map(context::getRaw).toArray(Class<?>[]::new);
 		MaridRuntimeUtils.accessibleMethods(context.getRaw(type))
@@ -91,7 +91,7 @@ public interface TypedCallExpression extends CallExpression, TypedExpression {
 				.forEach(m -> {
 					final Type[] ts = m.getGenericParameterTypes();
 					for (int i = 0; i < ts.length; i++) {
-						evaluator.where(context.resolve(type, ts[i]), ats[i]);
+						evaluator.accept(context.resolve(type, ts[i]), ats[i]);
 					}
 				});
 	}

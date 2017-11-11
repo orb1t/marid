@@ -32,6 +32,9 @@ import java.lang.reflect.*;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
@@ -65,7 +68,7 @@ public interface TypeUtils {
 		} else {
 			return context.evaluate(e -> {
 				for (int i = 0; i < argTypes.length; i++) {
-					e.where(argTypes[i], args.get(i).getType(owner, context));
+					e.accept(argTypes[i], args.get(i).getType(owner, context));
 				}
 			}, returnType);
 		}
@@ -133,6 +136,44 @@ public interface TypeUtils {
 			throw new IllegalStateException(x);
 		}
 		final GenericArrayType t = (GenericArrayType) toArrayMethod.getGenericReturnType();
-		return context.evaluate(e -> e.where(t.getGenericComponentType(), elementType), t);
+		return context.evaluate(e -> e.accept(t.getGenericComponentType(), elementType), t);
+	}
+
+	static boolean isGround(@Nonnull Type type) {
+		if (type instanceof TypeVariable<?>) {
+			return false;
+		} else if (type instanceof GenericArrayType) {
+			return isGround(((GenericArrayType) type).getGenericComponentType());
+		} else if (type instanceof WildcardType) {
+			final WildcardType wt = (WildcardType) type;
+			final Predicate<Type[]> ground = ts -> Stream.of(ts).allMatch(TypeUtils::isGround);
+			return ground.test(wt.getUpperBounds()) && ground.test(wt.getLowerBounds());
+		} else if (type instanceof ParameterizedType) {
+			return Stream.of(((ParameterizedType) type).getActualTypeArguments()).allMatch(TypeUtils::isGround);
+		} else {
+			return true;
+		}
+	}
+
+	@Nonnull
+	static Stream<TypeVariable<?>> vars(@Nonnull Type type) {
+		if (type instanceof TypeVariable<?>) {
+			return Stream.of((TypeVariable<?>) type);
+		} else if (type instanceof GenericArrayType) {
+			return vars(((GenericArrayType) type).getGenericComponentType());
+		} else if (type instanceof WildcardType) {
+			final WildcardType wt = (WildcardType) type;
+			final Function<Type[], Stream<TypeVariable<?>>> vars = ts -> Stream.of(ts).flatMap(TypeUtils::vars);
+			return Stream.concat(vars.apply(wt.getUpperBounds()), vars.apply(wt.getLowerBounds()));
+		} else if (type instanceof ParameterizedType) {
+			return Stream.of(((ParameterizedType) type).getActualTypeArguments()).flatMap(TypeUtils::vars);
+		} else {
+			return Stream.empty();
+		}
+	}
+
+	@Nonnull
+	static Type ground(@Nonnull Type type, @Nonnull TypeContext context) {
+		return context.evaluate(e -> vars(type).forEach(t -> e.accept(t, WILDCARD)), type);
 	}
 }

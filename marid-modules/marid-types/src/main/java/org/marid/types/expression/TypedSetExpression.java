@@ -24,11 +24,11 @@ package org.marid.types.expression;
 import org.marid.expression.generic.SetExpression;
 import org.marid.runtime.context.MaridRuntimeUtils;
 import org.marid.types.TypeContext;
-import org.marid.types.TypeEvaluator;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
+import java.util.function.BiConsumer;
 
 public interface TypedSetExpression extends SetExpression, TypedExpression {
 
@@ -47,11 +47,11 @@ public interface TypedSetExpression extends SetExpression, TypedExpression {
 	}
 
 	@Override
-	default void resolve(@Nonnull Type type, @Nonnull TypeContext context, @Nonnull TypeEvaluator evaluator) {
+	default void resolve(@Nonnull Type type, @Nonnull TypeContext context, @Nonnull BiConsumer<Type, Type> evaluator) {
 			MaridRuntimeUtils.accessibleFields(context.getRaw(type))
 					.filter(f -> f.getName().equals(getField()))
 					.findFirst()
 					.map(f -> context.resolve(type, f.getGenericType()))
-					.ifPresent(t -> evaluator.where(t, getValue().getType(type, context)));
+					.ifPresent(t -> evaluator.accept(t, getValue().getType(type, context)));
 	}
 }

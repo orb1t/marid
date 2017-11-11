@@ -24,6 +24,7 @@ package org.marid.types;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public interface TypeContext {
@@ -49,5 +50,5 @@ public interface TypeContext {
 	Type getType(@Nonnull Class<?> type);
 
 	@Nonnull
-	Type evaluate(@Nonnull Consumer<TypeEvaluator> callback, @Nonnull Type type);
+	Type evaluate(@Nonnull Consumer<BiConsumer<Type, Type>> callback, @Nonnull Type type);
 }
