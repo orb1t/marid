@@ -78,7 +78,7 @@ public interface TypedCallExpression extends CallExpression, TypedExpression {
 					.map(type -> context.resolve(targetType, type))
 					.orElse(WILDCARD);
 		}
-		return TypeUtils.resolve(this, result, context);
+		return TypeUtils.ground(TypeUtils.resolve(this, result, context), context);
 	}
 
 	@Override

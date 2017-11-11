@@ -59,6 +59,6 @@ public interface TypedGetExpression extends GetExpression, TypedExpression {
 					.findFirst()
 					.orElse(WILDCARD);
 		}
-		return TypeUtils.resolve(this, result, context);
+		return TypeUtils.ground(TypeUtils.resolve(this, result, context), context);
 	}
 }
