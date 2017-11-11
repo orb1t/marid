@@ -118,6 +118,6 @@ public class GuavaTypeContext implements TypeContext {
 
 	@Override
 	public <T> T evaluate(@Nonnull Function<TypeEvaluator, T> callback) {
-		return callback.apply(new GuavaTypeEvaluator());
+		return callback.apply(new GuavaTypeEvaluator(this));
 	}
 }

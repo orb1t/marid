@@ -26,23 +26,31 @@ import com.google.common.reflect.TypeToken;
 import org.marid.misc.Casts;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
-import java.lang.reflect.WildcardType;
-import java.util.*;
+import java.lang.reflect.*;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map.Entry;
+import java.util.stream.Stream;
 
 import static com.google.common.reflect.TypeToken.of;
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toCollection;
 
 public class GuavaTypeEvaluator implements TypeEvaluator {
 
-	private final Set<TypeToken<?>> passed = new HashSet<>();
-	private final Map<TypeToken<?>, List<TypeToken<?>>> typeMappings = new LinkedHashMap<>();
+	private final GuavaTypeContext context;
+	private final HashSet<TypeToken<?>> passed = new HashSet<>();
+	private final LinkedHashMap<TypeToken<?>, LinkedHashSet<TypeToken<?>>> typeMappings = new LinkedHashMap<>();
+
+	GuavaTypeEvaluator(GuavaTypeContext context) {
+		this.context = context;
+	}
 
 	@Nonnull
 	@Override
 	public GuavaTypeEvaluator where(Type formal, Type actual) {
-		where(TypeToken.of(formal), TypeToken.of(actual));
+		where(of(formal), of(actual));
 		return this;
 	}
 
@@ -57,7 +65,7 @@ public class GuavaTypeEvaluator implements TypeEvaluator {
 			for (final Type bound : typeVariable.getBounds()) {
 				where(of(bound), actual);
 			}
-			typeMappings.computeIfAbsent(formal, k -> new ArrayList<>()).add(actual.wrap());
+			typeMappings.computeIfAbsent(formal, k -> new LinkedHashSet<>()).add(actual.wrap());
 		} else if (formal.getType() instanceof ParameterizedType) {
 			final Class<?> formalRaw = formal.getRawType();
 			final Class<?> actualRaw = actual.getRawType();
@@ -90,15 +98,39 @@ public class GuavaTypeEvaluator implements TypeEvaluator {
 		}
 	}
 
-	private TypeToken<?> commonAncestor(Map.Entry<TypeToken<?>, List<TypeToken<?>>> entry) {
-		final Optional<? extends TypeToken<?>> token = entry.getValue().stream()
-				.flatMap(t -> t.getTypes().stream())
-				.filter(c -> entry.getValue().stream().allMatch(t -> t.isSubtypeOf(c)))
-				.findFirst();
-		return token.isPresent() ? token.get() : entry.getKey();
+	private TypeToken<?> commonAncestor(TypeToken<?> formal, LinkedHashSet<TypeToken<?>> actuals) {
+		if (actuals.stream().allMatch(t -> ofNullable(t.getComponentType()).filter(v -> !v.isPrimitive()).isPresent())) {
+			final LinkedHashSet<TypeToken<?>> elementActuals = actuals.stream()
+					.map(TypeToken::getComponentType)
+					.collect(toCollection(LinkedHashSet::new));
+			final TypeToken<?> elementType = commonAncestor(of(Object.class), elementActuals);
+			if (elementType.getType() instanceof Class<?>) {
+				return TypeToken.of(Array.newInstance((Class<?>) elementType.getType(), 0).getClass());
+			} else {
+				return TypeToken.of(TypeUtils.genericArrayType(elementType.getType(), context));
+			}
+		} else {
+			final TypeToken<?>[][] tokens = actuals.stream()
+					.sorted((t1, t2) -> t1.isSubtypeOf(t2) ? -1 : t2.isSubtypeOf(t1) ? +1 : 0)
+					.map(TypeToken::getTypes)
+					.map(ts -> ts.toArray(new TypeToken<?>[ts.size()]))
+					.toArray(TypeToken<?>[][]::new);
+			final int max = Stream.of(tokens).mapToInt(a -> a.length).max().orElse(0);
+			for (int level = 0; level < max; level++) {
+				for (final TypeToken<?>[] token : tokens) {
+					if (level < token.length) {
+						final TypeToken<?> actual = token[level];
+						if (actuals.stream().allMatch(t -> t.isSubtypeOf(actual))) {
+							return actual;
+						}
+					}
+				}
+			}
+			return formal;
+		}
 	}
 
-	private TypeResolver where(TypeResolver resolver, Map.Entry<TypeToken<?>, List<TypeToken<?>>> entry) {
-		return resolver.where(entry.getKey().getType(), commonAncestor(entry).getType());
+	private TypeResolver where(TypeResolver resolver, Entry<TypeToken<?>, LinkedHashSet<TypeToken<?>>> entry) {
+		return resolver.where(entry.getKey().getType(), commonAncestor(entry.getKey(), entry.getValue()).getType());
 	}
 }

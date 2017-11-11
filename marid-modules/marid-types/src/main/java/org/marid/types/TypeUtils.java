@@ -29,6 +29,7 @@ import org.marid.types.expression.TypedExpression;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.*;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -125,5 +126,17 @@ public interface TypeUtils {
 				return e.resolve(type);
 			});
 		}
+	}
+
+	@Nonnull
+	static Type genericArrayType(@Nonnull Type elementType, @Nonnull TypeContext context) {
+		final Method toArrayMethod;
+		try {
+			toArrayMethod = Collection.class.getMethod("toArray", Object[].class);
+		} catch (NoSuchMethodException x) {
+			throw new IllegalStateException(x);
+		}
+		final GenericArrayType t = (GenericArrayType) toArrayMethod.getGenericReturnType();
+		return context.evaluate(e -> e.where(t.getGenericComponentType(), elementType).resolve(t));
 	}
 }

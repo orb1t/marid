@@ -28,10 +28,7 @@ import org.marid.types.TypeUtils;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Array;
-import java.lang.reflect.GenericArrayType;
-import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.Collection;
 import java.util.List;
 
 public interface TypedArrayExpression extends ArrayExpression, TypedExpression {
@@ -53,14 +50,7 @@ public interface TypedArrayExpression extends ArrayExpression, TypedExpression {
 							getElements().forEach(e -> evaluator.where(type, e.getType(owner, context)));
 							return evaluator.resolve(type);
 						});
-						final Method toArrayMethod;
-						try {
-							toArrayMethod = Collection.class.getMethod("toArray", Object[].class);
-						} catch (NoSuchMethodException x) {
-							throw new IllegalStateException(x);
-						}
-						final GenericArrayType t = (GenericArrayType) toArrayMethod.getGenericReturnType();
-						return context.evaluate(e -> e.where(t.getGenericComponentType(), elementType).resolve(t));
+						return TypeUtils.genericArrayType(elementType, context);
 					}
 				})
 				.orElse(TypeUtils.WILDCARD);
