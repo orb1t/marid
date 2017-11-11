@@ -101,28 +101,6 @@
 
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>default-cli</id>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <workingDirectory>${project.build.directory}</workingDirectory>
-              <toolchain>jdk</toolchain>
-              <executable>${java.home}/bin/java</executable>
-              <arguments>
-                <argument>-jar</argument>
-                <argument>${project.build.finalName}.${project.packaging}</argument>
-              </arguments>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
         <artifactId>license-maven-plugin</artifactId>
         <configuration>
           <licenseName>apache_v2</licenseName>
