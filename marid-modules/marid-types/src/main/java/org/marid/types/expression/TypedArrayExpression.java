@@ -21,15 +21,18 @@
 
 package org.marid.types.expression;
 
+import org.apache.commons.lang3.reflect.TypeUtils;
 import org.marid.expression.generic.ArrayExpression;
 import org.marid.types.TypeContext;
-import org.marid.types.TypeUtils;
+import org.marid.types.TypeUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.util.List;
+
+import static org.apache.commons.lang3.reflect.TypeUtils.WILDCARD_ALL;
 
 public interface TypedArrayExpression extends ArrayExpression, TypedExpression {
 
@@ -40,17 +43,17 @@ public interface TypedArrayExpression extends ArrayExpression, TypedExpression {
   @Nonnull
   @Override
   default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
-    return TypeUtils.getClass(context.getClassLoader(), getElementType())
+    return TypeUtil.getClass(context.getClassLoader(), getElementType())
         .map(elementClass -> {
           if (elementClass.getTypeParameters().length == 0) {
             return Array.newInstance(elementClass, 0).getClass();
           } else {
             final Type t = context.resolve(owner, context.getType(elementClass));
             final Type r = context.evaluate(e -> getElements().forEach(x -> e.accept(t, x.type(owner, context))), t);
-            return TypeUtils.genericArrayType(r, context);
+            return TypeUtils.genericArrayType(r);
           }
         })
-        .orElse(TypeUtils.WILDCARD);
+        .orElse(WILDCARD_ALL);
   }
 
   @Override

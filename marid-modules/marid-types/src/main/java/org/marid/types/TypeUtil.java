@@ -28,7 +28,6 @@ import org.marid.types.expression.TypedExpression;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.*;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -38,15 +37,7 @@ import java.util.stream.Stream;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
-public interface TypeUtils {
-
-  WildcardType WILDCARD = Stream.of(Class.class.getMethods())
-      .filter(m -> "forName".equals(m.getName()) && m.getParameterCount() == 1)
-      .filter(m -> m.getParameterTypes()[0] == String.class)
-      .map(m -> (ParameterizedType) m.getGenericReturnType())
-      .map(pt -> (WildcardType) pt.getActualTypeArguments()[0])
-      .findFirst()
-      .orElseThrow(IllegalStateException::new);
+public interface TypeUtil {
 
   @Nonnull
   static Optional<Type> classType(@Nonnull Type type) {
@@ -129,18 +120,6 @@ public interface TypeUtils {
     }
   }
 
-  @Nonnull
-  static Type genericArrayType(@Nonnull Type elementType, @Nonnull TypeContext context) {
-    final Method toArrayMethod;
-    try {
-      toArrayMethod = Collection.class.getMethod("toArray", Object[].class);
-    } catch (NoSuchMethodException x) {
-      throw new IllegalStateException(x);
-    }
-    final GenericArrayType t = (GenericArrayType) toArrayMethod.getGenericReturnType();
-    return context.evaluate(e -> e.accept(t.getGenericComponentType(), elementType), t);
-  }
-
   static boolean isGround(@Nonnull Type type) {
     if (type instanceof TypeVariable<?>) {
       return false;
@@ -148,10 +127,10 @@ public interface TypeUtils {
       return isGround(((GenericArrayType) type).getGenericComponentType());
     } else if (type instanceof WildcardType) {
       final WildcardType wt = (WildcardType) type;
-      final Predicate<Type[]> ground = ts -> Stream.of(ts).allMatch(TypeUtils::isGround);
+      final Predicate<Type[]> ground = ts -> Stream.of(ts).allMatch(TypeUtil::isGround);
       return ground.test(wt.getUpperBounds()) && ground.test(wt.getLowerBounds());
     } else if (type instanceof ParameterizedType) {
-      return Stream.of(((ParameterizedType) type).getActualTypeArguments()).allMatch(TypeUtils::isGround);
+      return Stream.of(((ParameterizedType) type).getActualTypeArguments()).allMatch(TypeUtil::isGround);
     } else {
       return true;
     }
@@ -165,10 +144,10 @@ public interface TypeUtils {
       return vars(((GenericArrayType) type).getGenericComponentType());
     } else if (type instanceof WildcardType) {
       final WildcardType wt = (WildcardType) type;
-      final Function<Type[], Stream<TypeVariable<?>>> vars = ts -> Stream.of(ts).flatMap(TypeUtils::vars);
+      final Function<Type[], Stream<TypeVariable<?>>> vars = ts -> Stream.of(ts).flatMap(TypeUtil::vars);
       return Stream.concat(vars.apply(wt.getUpperBounds()), vars.apply(wt.getLowerBounds()));
     } else if (type instanceof ParameterizedType) {
-      return Stream.of(((ParameterizedType) type).getActualTypeArguments()).flatMap(TypeUtils::vars);
+      return Stream.of(((ParameterizedType) type).getActualTypeArguments()).flatMap(TypeUtil::vars);
     } else {
       return Stream.empty();
     }
@@ -182,5 +161,29 @@ public interface TypeUtils {
   @Nonnull
   static Type varBound(@Nonnull TypeVariable<?> variable) {
     return Stream.of(variable.getBounds()).findFirst().orElse(Object.class);
+  }
+
+  @Nonnull
+  static Class<?> getRaw(@Nonnull Type type) {
+    if (type instanceof Class<?>) {
+      return (Class<?>) type;
+    } else if (type instanceof ParameterizedType) {
+      return (Class<?>) ((ParameterizedType) type).getRawType();
+    } else if (type instanceof WildcardType) {
+      return getRaw(((WildcardType) type).getUpperBounds()[0]);
+    } else if (type instanceof GenericArrayType) {
+      return Array.newInstance(getRaw(((GenericArrayType) type).getGenericComponentType()), 0).getClass();
+    } else {
+      throw new IllegalArgumentException(type.getTypeName());
+    }
+  }
+
+  @Nonnull
+  static Type boxed(@Nonnull Type type) {
+    if (type instanceof Class<?> && ((Class<?>) type).isPrimitive()) {
+      return MaridRuntimeUtils.wrapper((Class<?>) type);
+    } else {
+      return type;
+    }
   }
 }

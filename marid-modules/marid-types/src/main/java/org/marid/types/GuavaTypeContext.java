@@ -21,25 +21,25 @@
 
 package org.marid.types;
 
-import com.google.common.reflect.TypeResolver;
-import com.google.common.reflect.TypeToken;
-import org.marid.misc.Casts;
+import org.apache.commons.lang3.reflect.TypeUtils;
+import org.marid.runtime.context.MaridRuntimeUtils;
 import org.marid.types.beans.TypedBean;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.google.common.reflect.TypeToken.of;
-import static java.util.Objects.requireNonNull;
-import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toCollection;
+import static org.apache.commons.lang3.reflect.TypeUtils.WILDCARD_ALL;
+import static org.apache.commons.lang3.reflect.TypeUtils.getArrayComponentType;
 import static org.marid.runtime.context.MaridRuntimeUtils.compatible;
-import static org.marid.types.TypeUtils.WILDCARD;
+import static org.marid.types.TypeUtil.boxed;
 
 public class GuavaTypeContext implements TypeContext {
 
@@ -60,19 +60,13 @@ public class GuavaTypeContext implements TypeContext {
         .map(TypedBean.class::cast)
         .findFirst()
         .map(b -> b.getFactory().type(null, new GuavaTypeContext(b, classLoader)))
-        .orElse(WILDCARD);
+        .orElse(WILDCARD_ALL);
   }
 
   @Nonnull
   @Override
   public Type resolve(@Nullable Type owner, @Nonnull Type type) {
-    return owner == null ? type : TypeToken.of(owner).resolveType(type).getType();
-  }
-
-  @Nonnull
-  @Override
-  public Class<?> getRaw(@Nonnull Type type) {
-    return TypeToken.of(type).getRawType();
+    return owner == null ? type : type; // TODO: investifate this
   }
 
   @Override
@@ -84,14 +78,12 @@ public class GuavaTypeContext implements TypeContext {
     } else if (to instanceof TypeVariable<?>) {
       return Arrays.stream(((TypeVariable<?>) to).getBounds()).allMatch(t -> isAssignable(from, t));
     } else {
-      final TypeToken<?> tTo = TypeToken.of(to);
-      final TypeToken<?> tFrom = TypeToken.of(from);
-      if (tTo.isArray() && tFrom.isArray()) {
-        final Type fromCt = requireNonNull(tFrom.getComponentType()).getType();
-        final Type toCt = requireNonNull(tTo.getComponentType()).getType();
+      if (TypeUtils.isArrayType(from) && TypeUtils.isArrayType(to)) {
+        final Type fromCt = getArrayComponentType(from);
+        final Type toCt = getArrayComponentType(to);
         return isAssignable(fromCt, toCt);
       } else {
-        return tFrom.isSubtypeOf(tTo);
+        return TypeUtils.isAssignable(from, to);
       }
     }
   }
@@ -105,24 +97,24 @@ public class GuavaTypeContext implements TypeContext {
   @Nonnull
   @Override
   public Type getClassType(@Nonnull Class<?> type) {
-    final ParameterizedType parameterizedType = (ParameterizedType) getType(Class.class);
-    return new TypeResolver()
-        .where(parameterizedType.getActualTypeArguments()[0], type)
-        .resolveType(parameterizedType);
+    return TypeUtils.parameterize(Class.class, (Type) type);
   }
 
   @Nonnull
   @Override
   public Type getType(@Nonnull Class<?> type) {
-    final TypeToken<?> t = TypeToken.of(type);
-    final TypeToken<?> c = t.getSupertype(Casts.cast(type));
-    return c.getType();
+    final TypeVariable<?>[] vars = type.getTypeParameters();
+    if (vars.length == 0) {
+      return type;
+    } else {
+      return TypeUtils.parameterize(type, Arrays.copyOf(vars, vars.length, Type[].class));
+    }
   }
 
   @Nonnull
   @Override
   public Type evaluate(@Nonnull Consumer<BiConsumer<Type, Type>> callback, @Nonnull Type type) {
-    if (TypeUtils.isGround(type)) {
+    if (TypeUtil.isGround(type)) {
       return type;
     } else {
       final GuavaTypeEvaluator evaluator = new GuavaTypeEvaluator();
@@ -133,75 +125,67 @@ public class GuavaTypeContext implements TypeContext {
 
   private final class GuavaTypeEvaluator implements BiConsumer<Type, Type> {
 
-    private final HashSet<TypeToken<?>> passed = new HashSet<>();
-    private final LinkedHashMap<TypeToken<?>, LinkedHashSet<TypeToken<?>>> typeMappings = new LinkedHashMap<>();
+    private final HashSet<Type> passed = new HashSet<>();
+    private final LinkedHashMap<TypeVariable<?>, LinkedHashSet<Type>> typeMappings = new LinkedHashMap<>();
 
     @Override
     public void accept(Type formal, Type actual) {
-      where(of(formal), of(actual));
-    }
-
-    private void where(TypeToken<?> formal, TypeToken<?> actual) {
-      if (!(formal.getType() instanceof TypeVariable<?>) && !passed.add(formal)) {
+      if (!(formal instanceof TypeVariable<?>) && !passed.add(formal)) {
         return;
       }
-      if (formal.isArray() && actual.isArray()) {
-        where(formal.getComponentType(), actual.getComponentType());
-      } else if (formal.getType() instanceof TypeVariable<?>) {
-        final TypeVariable<?> typeVariable = (TypeVariable<?>) formal.getType();
+      if (TypeUtils.isArrayType(formal) && TypeUtils.isArrayType(actual)) {
+        accept(getArrayComponentType(formal), getArrayComponentType(actual));
+      } else if (formal instanceof TypeVariable<?>) {
+        final TypeVariable<?> typeVariable = (TypeVariable<?>) formal;
         for (final Type bound : typeVariable.getBounds()) {
-          where(of(bound), actual);
+          accept(bound, actual);
         }
-        typeMappings.computeIfAbsent(formal, k -> new LinkedHashSet<>()).add(actual.wrap());
-      } else if (formal.getType() instanceof ParameterizedType) {
-        final Class<?> formalRaw = formal.getRawType();
-        final Class<?> actualRaw = actual.getRawType();
+        typeMappings.computeIfAbsent(typeVariable, k -> new LinkedHashSet<>()).add(boxed(actual));
+      } else if (formal instanceof ParameterizedType) {
+        final Class<?> formalRaw = TypeUtil.getRaw(formal);
+        final Class<?> actualRaw = TypeUtil.getRaw(actual);
         if (formalRaw.isAssignableFrom(actualRaw)) {
-          final TypeToken<?> superType = actual.getSupertype(Casts.cast(formalRaw));
-          final ParameterizedType actualParameterized = (ParameterizedType) superType.getType();
-          final ParameterizedType formalParameterized = (ParameterizedType) formal.getType();
-          final Type[] actualTypeArgs = actualParameterized.getActualTypeArguments();
-          final Type[] formalTypeArgs = formalParameterized.getActualTypeArguments();
-          for (int i = 0; i < actualTypeArgs.length; i++) {
-            where(of(formalTypeArgs[i]), of(actualTypeArgs[i]));
-          }
+          TypeUtils.getTypeArguments(actual, formalRaw).forEach((v, t) -> {
+            typeMappings.computeIfAbsent(v, k -> new LinkedHashSet<>()).add(boxed(t));
+          });
         }
-      } else if (formal.getType() instanceof WildcardType) {
-        final WildcardType wildcardType = (WildcardType) formal.getType();
+      } else if (formal instanceof WildcardType) {
+        final WildcardType wildcardType = (WildcardType) formal;
         for (final Type bound : wildcardType.getUpperBounds()) {
-          where(of(bound), actual);
+          accept(bound, actual);
         }
       }
     }
 
     @Nonnull
-    Type resolve(Type type) {
-      return typeMappings.entrySet().stream().reduce(new TypeResolver(), this::where, (r1, r2) -> r2).resolveType(type);
+    Type resolve(@Nonnull Type type) {
+      final Map<TypeVariable<?>, Type> map = typeMappings.entrySet().stream()
+          .collect(Collectors.toMap(Entry::getKey, e -> commonAncestor(e.getKey(), e.getValue())));
+      return TypeUtils.unrollVariables(map, type);
     }
 
-    private TypeToken<?> commonAncestor(TypeToken<?> formal, LinkedHashSet<TypeToken<?>> actuals) {
-      if (actuals.stream().allMatch(t -> ofNullable(t.getComponentType()).filter(v -> !v.isPrimitive()).isPresent())) {
-        final LinkedHashSet<TypeToken<?>> elementActuals = actuals.stream()
-            .map(TypeToken::getComponentType)
+    private Type commonAncestor(Type formal, LinkedHashSet<Type> actuals) {
+      if (actuals.stream().allMatch(GuavaTypeContext.this::isNonPrimitiveArray)) {
+        final LinkedHashSet<Type> elementActuals = actuals.stream()
+            .map(TypeUtils::getArrayComponentType)
             .collect(toCollection(LinkedHashSet::new));
-        final TypeToken<?> elementType = commonAncestor(of(Object.class), elementActuals);
-        if (elementType.getType() instanceof Class<?>) {
-          return TypeToken.of(Array.newInstance((Class<?>) elementType.getType(), 0).getClass());
+        final Type elementType = commonAncestor(Object.class, elementActuals);
+        if (elementType instanceof Class<?>) {
+          return Array.newInstance((Class<?>) elementType, 0).getClass();
         } else {
-          return TypeToken.of(TypeUtils.genericArrayType(elementType.getType(), GuavaTypeContext.this));
+          return TypeUtils.genericArrayType(elementType);
         }
       } else {
-        final TypeToken<?>[][] tokens = actuals.stream()
-            .sorted((t1, t2) -> t1.isSubtypeOf(t2) ? -1 : t2.isSubtypeOf(t1) ? +1 : 0)
-            .map(TypeToken::getTypes)
-            .map(ts -> ts.toArray(new TypeToken<?>[ts.size()]))
-            .toArray(TypeToken<?>[][]::new);
+        final Type[][] tokens = actuals.stream()
+            .sorted((t1, t2) -> TypeUtils.isAssignable(t1, t2) ? -1 : TypeUtils.isAssignable(t2, t1) ? +1 : 0)
+            .map(t -> types(t).toArray(Type[]::new))
+            .toArray(Type[][]::new);
         final int max = Stream.of(tokens).mapToInt(a -> a.length).max().orElse(0);
         for (int level = 0; level < max; level++) {
-          for (final TypeToken<?>[] token : tokens) {
+          for (final Type[] token : tokens) {
             if (level < token.length) {
-              final TypeToken<?> actual = token[level];
-              if (actuals.stream().allMatch(t -> t.isSubtypeOf(actual))) {
+              final Type actual = token[level];
+              if (actuals.stream().allMatch(t -> TypeUtils.isAssignable(t, actual))) {
                 return actual;
               }
             }
@@ -210,9 +194,32 @@ public class GuavaTypeContext implements TypeContext {
         return formal;
       }
     }
+  }
 
-    private TypeResolver where(TypeResolver resolver, Map.Entry<TypeToken<?>, LinkedHashSet<TypeToken<?>>> entry) {
-      return resolver.where(entry.getKey().getType(), commonAncestor(entry.getKey(), entry.getValue()).getType());
+  private Stream<? extends Type> types(Type type) {
+    final Class<?> raw = TypeUtil.getRaw(type);
+    return Stream.concat(MaridRuntimeUtils.superClasses(raw), Stream.of(raw.getInterfaces()))
+        .map(c -> generic(c, type));
+  }
+
+  private Type generic(Class<?> c, Type type) {
+    final TypeVariable<?>[] vars = c.getTypeParameters();
+    if (vars.length == 0) {
+      return c;
+    } else {
+      final Map<TypeVariable<?>, Type> map = TypeUtils.getTypeArguments(type, c);
+      return TypeUtils.parameterize(c, map);
+    }
+  }
+
+  private boolean isNonPrimitiveArray(Type type) {
+    if (type instanceof GenericArrayType) {
+      return true;
+    } else if (type instanceof Class<?>) {
+      final Class<?> c = (Class<?>) type;
+      return c.isArray() && !c.getComponentType().isPrimitive();
+    } else {
+      return false;
     }
   }
 }

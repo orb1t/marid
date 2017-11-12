@@ -35,9 +35,6 @@ public interface TypeContext {
   @Nonnull
   Type resolve(@Nullable Type owner, @Nonnull Type type);
 
-  @Nonnull
-  Class<?> getRaw(@Nonnull Type type);
-
   boolean isAssignable(@Nonnull Type from, @Nonnull Type to);
 
   @Nonnull

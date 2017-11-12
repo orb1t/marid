@@ -24,14 +24,15 @@ package org.marid.types.expression;
 import org.marid.expression.generic.ClassExpression;
 import org.marid.expression.generic.GetExpression;
 import org.marid.types.TypeContext;
+import org.marid.types.TypeUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
 
+import static org.apache.commons.lang3.reflect.TypeUtils.WILDCARD_ALL;
 import static org.marid.runtime.context.MaridRuntimeUtils.accessibleFields;
-import static org.marid.types.TypeUtils.WILDCARD;
-import static org.marid.types.TypeUtils.classType;
+import static org.marid.types.TypeUtil.classType;
 
 public interface TypedGetExpression extends GetExpression, TypedExpression {
 
@@ -44,18 +45,18 @@ public interface TypedGetExpression extends GetExpression, TypedExpression {
   default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
     final Type targetType = getTarget().type(owner, context);
     if (getTarget() instanceof ClassExpression) {
-      return classType(targetType).stream().flatMap(t -> accessibleFields(context.getRaw(t)))
+      return classType(targetType).stream().flatMap(t -> accessibleFields(TypeUtil.getRaw(t)))
           .filter(f -> f.getName().equals(getField()))
           .map(f -> context.resolve(owner, f.getGenericType()))
           .findFirst()
-          .orElse(WILDCARD);
+          .orElse(WILDCARD_ALL);
     } else {
-      return accessibleFields(context.getRaw(targetType))
+      return accessibleFields(TypeUtil.getRaw(targetType))
           .filter(f -> f.getName().equals(getField()))
           .map(f -> context.resolve(targetType, f.getGenericType()))
           .map(t -> context.resolve(owner, t))
           .findFirst()
-          .orElse(WILDCARD);
+          .orElse(WILDCARD_ALL);
     }
   }
 }

@@ -24,6 +24,7 @@ package org.marid.types.expression;
 import org.marid.expression.generic.SetExpression;
 import org.marid.runtime.context.MaridRuntimeUtils;
 import org.marid.types.TypeContext;
+import org.marid.types.TypeUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -53,7 +54,7 @@ public interface TypedSetExpression extends SetExpression, TypedExpression {
 
   @Override
   default void resolve(@Nonnull Type type, @Nonnull TypeContext context, @Nonnull BiConsumer<Type, Type> evaluator) {
-    MaridRuntimeUtils.accessibleFields(context.getRaw(type))
+    MaridRuntimeUtils.accessibleFields(TypeUtil.getRaw(type))
         .filter(f -> f.getName().equals(getField()))
         .findFirst()
         .map(f -> context.resolve(type, f.getGenericType()))

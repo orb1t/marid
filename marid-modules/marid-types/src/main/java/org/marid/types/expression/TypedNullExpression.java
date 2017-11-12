@@ -21,6 +21,7 @@
 
 package org.marid.types.expression;
 
+import org.apache.commons.lang3.reflect.TypeUtils;
 import org.marid.expression.generic.NullExpression;
 import org.marid.types.TypeContext;
 
@@ -28,14 +29,12 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
 
-import static org.marid.types.TypeUtils.WILDCARD;
-
 public interface TypedNullExpression extends NullExpression, TypedExpression {
 
   @Nonnull
   @Override
   default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
-    return WILDCARD;
+    return TypeUtils.WILDCARD_ALL;
   }
 
   @Override

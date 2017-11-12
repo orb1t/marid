@@ -22,6 +22,7 @@ package org.marid.expression.mutable;
 
 import com.google.common.reflect.TypeToken;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -43,6 +44,7 @@ import java.util.stream.Stream;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("normal")
 class ExpressionTypeTest {
 
   private static ClassLoader classLoader;
