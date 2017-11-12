@@ -10,10 +10,6 @@
 
   <artifactId>marid-ide</artifactId>
 
-  <properties>
-    <marid.debug.opts>transport=dt_socket,server=y,suspend=n,address=5005</marid.debug.opts>
-  </properties>
-
   <licenses>
     <license>
       <name>Apache License 2.0</name>
