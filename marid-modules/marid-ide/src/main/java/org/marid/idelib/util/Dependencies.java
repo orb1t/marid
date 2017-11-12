@@ -30,16 +30,16 @@ import java.util.Objects;
  */
 public interface Dependencies {
 
-	static boolean eq(Dependency d1, Dependency d2) {
-		if (!Objects.equals(d1.getGroupId(), d2.getGroupId())) {
-			return false;
-		}
-		if (!Objects.equals(d1.getArtifactId(), d2.getArtifactId())) {
-			return false;
-		}
-		if (!Objects.equals(d1.getVersion(), d2.getVersion())) {
-			return false;
-		}
-		return true;
-	}
+  static boolean eq(Dependency d1, Dependency d2) {
+    if (!Objects.equals(d1.getGroupId(), d2.getGroupId())) {
+      return false;
+    }
+    if (!Objects.equals(d1.getArtifactId(), d2.getArtifactId())) {
+      return false;
+    }
+    if (!Objects.equals(d1.getVersion(), d2.getVersion())) {
+      return false;
+    }
+    return true;
+  }
 }

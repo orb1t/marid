@@ -31,17 +31,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MaridLambdaFactoryTest {
 
-	@Test
-	public void testRunnableWithoutArguments() throws Exception {
-		final StringWriter stringWriter = new StringWriter();
-		try (final PrintWriter printWriter = new PrintWriter(stringWriter)) {
-			final Runnable runnable = MaridLambdaFactory.lambda(
-					Runnable.class,
-					PrintWriter.class.getMethod("println"),
-					new AtomicStampedReference<>(printWriter, 0)
-			);
-			runnable.run();
-		}
-		assertEquals(System.lineSeparator(), stringWriter.toString());
-	}
+  @Test
+  public void testRunnableWithoutArguments() throws Exception {
+    final StringWriter stringWriter = new StringWriter();
+    try (final PrintWriter printWriter = new PrintWriter(stringWriter)) {
+      final Runnable runnable = MaridLambdaFactory.lambda(
+          Runnable.class,
+          PrintWriter.class.getMethod("println"),
+          new AtomicStampedReference<>(printWriter, 0)
+      );
+      runnable.run();
+    }
+    assertEquals(System.lineSeparator(), stringWriter.toString());
+  }
 }

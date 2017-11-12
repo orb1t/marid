@@ -44,41 +44,41 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ExpressionTypeTest {
 
-	private static ClassLoader classLoader;
-	private static IdeBean root;
+  private static ClassLoader classLoader;
+  private static IdeBean root;
 
-	@BeforeAll
-	static void init() throws IOException {
-		classLoader = Thread.currentThread().getContextClassLoader();
-		try (final Reader reader = new InputStreamReader(classLoader.getResourceAsStream("tbeans1.xml"), UTF_8)) {
-			root = Xmls.read(reader, e -> new IdeBean(null, e));
-		}
-	}
+  @BeforeAll
+  static void init() throws IOException {
+    classLoader = Thread.currentThread().getContextClassLoader();
+    try (final Reader reader = new InputStreamReader(classLoader.getResourceAsStream("tbeans1.xml"), UTF_8)) {
+      root = Xmls.read(reader, e -> new IdeBean(null, e));
+    }
+  }
 
-	private static Stream<Arguments> testData() {
-		return Stream.of(
-				() -> new Object[] {"b01", String.class},
-				() -> new Object[] {"b02", BigInteger.class},
-				() -> new Object[] {"b03", new TypeToken<ArrayList<Integer>>() {}.getType()},
-				() -> new Object[] {"b04", int.class},
-				() -> new Object[] {"b05", new TypeToken<List<Long>>() {}.getType()},
-				() -> new Object[] {"b06", new TypeToken<List<List<Long>>>() {}.getType()},
-				() -> new Object[] {"b07", new TypeToken<List<Integer>>() {}.getType()},
-				() -> new Object[] {"b08", new TypeToken<ArrayList<Number>>() {}.getType()},
-				() -> new Object[] {"b09", new TypeToken<List<List<Integer>>>() {}.getType()},
-				() -> new Object[] {"b10", new TypeToken<List<Long>[]>() {}.getType()},
-				() -> new Object[] {"b11", int[].class},
-				() -> new Object[] {"b12", new TypeToken<ArrayList<Number[]>>() {}.getType()},
-				() -> new Object[] {"b13", new TypeToken<ArrayList<?>>() {}.getType()}
-		);
-	}
+  private static Stream<Arguments> testData() {
+    return Stream.of(
+        () -> new Object[]{"b01", String.class},
+        () -> new Object[]{"b02", BigInteger.class},
+        () -> new Object[]{"b03", new TypeToken<ArrayList<Integer>>() {}.getType()},
+        () -> new Object[]{"b04", int.class},
+        () -> new Object[]{"b05", new TypeToken<List<Long>>() {}.getType()},
+        () -> new Object[]{"b06", new TypeToken<List<List<Long>>>() {}.getType()},
+        () -> new Object[]{"b07", new TypeToken<List<Integer>>() {}.getType()},
+        () -> new Object[]{"b08", new TypeToken<ArrayList<Number>>() {}.getType()},
+        () -> new Object[]{"b09", new TypeToken<List<List<Integer>>>() {}.getType()},
+        () -> new Object[]{"b10", new TypeToken<List<Long>[]>() {}.getType()},
+        () -> new Object[]{"b11", int[].class},
+        () -> new Object[]{"b12", new TypeToken<ArrayList<Number[]>>() {}.getType()},
+        () -> new Object[]{"b13", new TypeToken<ArrayList<?>>() {}.getType()}
+    );
+  }
 
-	@ParameterizedTest
-	@MethodSource("testData")
-	void testBean(String beanName, Type expectedType) {
-		final IdeBean bean = BeanUtils.find(root, beanName);
-		final GuavaTypeContext context = new GuavaTypeContext(bean, classLoader);
-		final Type type = bean.getFactory().getType(null, context);
-		assertEquals(expectedType, type);
-	}
+  @ParameterizedTest
+  @MethodSource("testData")
+  void testBean(String beanName, Type expectedType) {
+    final IdeBean bean = BeanUtils.find(root, beanName);
+    final GuavaTypeContext context = new GuavaTypeContext(bean, classLoader);
+    final Type type = bean.getFactory().getType(null, context);
+    assertEquals(expectedType, type);
+  }
 }

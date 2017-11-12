@@ -49,90 +49,90 @@ import static javafx.scene.paint.CycleMethod.NO_CYCLE;
  */
 public class MaridIconFx {
 
-	private static final double STROKE_WIDTH = 0.15;
-	private static final double SCALE = 2d / (2d + STROKE_WIDTH);
-	private static final LinearGradient VGRAD = new LinearGradient(-1, -1, -1, 1, false, NO_CYCLE,
-			new Stop(-1, web("0x00005fff")),
-			new Stop(1, web("0x9696ffff"))
-	);
-	private static final LinearGradient BGRAD = new LinearGradient(0, 1, 0, -1, false, NO_CYCLE,
-			new Stop(-1, web("0xffffff", 1.0)),
-			new Stop(1, web("0xffffff", 0.1)));
+  private static final double STROKE_WIDTH = 0.15;
+  private static final double SCALE = 2d / (2d + STROKE_WIDTH);
+  private static final LinearGradient VGRAD = new LinearGradient(-1, -1, -1, 1, false, NO_CYCLE,
+      new Stop(-1, web("0x00005fff")),
+      new Stop(1, web("0x9696ffff"))
+  );
+  private static final LinearGradient BGRAD = new LinearGradient(0, 1, 0, -1, false, NO_CYCLE,
+      new Stop(-1, web("0xffffff", 1.0)),
+      new Stop(1, web("0xffffff", 0.1)));
 
-	public static void draw(GraphicsContext context, int size, Color color) {
-		final double s = size / 2d;
-		context.scale(s, -s);
-		context.translate(1d, -1d);
-		context.setFill(VGRAD);
-		context.fillRect(-1, -1, 2, 2);
-		context.scale(SCALE, SCALE);
+  public static void draw(GraphicsContext context, int size, Color color) {
+    final double s = size / 2d;
+    context.scale(s, -s);
+    context.translate(1d, -1d);
+    context.setFill(VGRAD);
+    context.fillRect(-1, -1, 2, 2);
+    context.scale(SCALE, SCALE);
 
-		// wave
-		context.beginPath();
-		context.setStroke(Color.WHITE);
-		context.setLineWidth(STROKE_WIDTH);
-		context.moveTo(-1.1, +0.1);
-		context.quadraticCurveTo(-0.8, +0.3, -0.475, +0.17);
-		context.moveTo(+1.1, +0.1);
-		context.quadraticCurveTo(+0.8, +0.3, +0.475, +0.17);
-		context.stroke();
+    // wave
+    context.beginPath();
+    context.setStroke(Color.WHITE);
+    context.setLineWidth(STROKE_WIDTH);
+    context.moveTo(-1.1, +0.1);
+    context.quadraticCurveTo(-0.8, +0.3, -0.475, +0.17);
+    context.moveTo(+1.1, +0.1);
+    context.quadraticCurveTo(+0.8, +0.3, +0.475, +0.17);
+    context.stroke();
 
-		// bottle
-		context.beginPath();
-		context.setFill(new Color(color.getRed(), color.getGreen(), color.getBlue(), 1));
-		context.moveTo(-0.5f, -1.0f);
-		context.bezierCurveTo(-0.6, +0.0, -0.1, +0.3, -0.1, +1.0);
-		context.lineTo(+0.1, +1.0);
-		context.bezierCurveTo(+0.1, +0.3, +0.6, +0.0, +0.5, -1.0);
-		context.closePath();
-		context.fill();
-		context.stroke();
-		context.setFill(BGRAD);
-		context.fill();
-	}
+    // bottle
+    context.beginPath();
+    context.setFill(new Color(color.getRed(), color.getGreen(), color.getBlue(), 1));
+    context.moveTo(-0.5f, -1.0f);
+    context.bezierCurveTo(-0.6, +0.0, -0.1, +0.3, -0.1, +1.0);
+    context.lineTo(+0.1, +1.0);
+    context.bezierCurveTo(+0.1, +0.3, +0.6, +0.0, +0.5, -1.0);
+    context.closePath();
+    context.fill();
+    context.stroke();
+    context.setFill(BGRAD);
+    context.fill();
+  }
 
-	public static WritableImage getImage(int size, Color color) {
-		return getImage(null, size, color);
-	}
+  public static WritableImage getImage(int size, Color color) {
+    return getImage(null, size, color);
+  }
 
-	public static WritableImage getImage(SnapshotParameters parameters, int size, Color color) {
-		final Canvas canvas = new Canvas(size, size);
-		draw(canvas.getGraphicsContext2D(), size, color);
-		return canvas.snapshot(parameters, null);
-	}
+  public static WritableImage getImage(SnapshotParameters parameters, int size, Color color) {
+    final Canvas canvas = new Canvas(size, size);
+    draw(canvas.getGraphicsContext2D(), size, color);
+    return canvas.snapshot(parameters, null);
+  }
 
-	public static WritableImage getIcon(SnapshotParameters parameters, int size, Color color) {
-		final WritableImage image = getImage(parameters, size, color);
-		return new WritableImage(image.getPixelReader(), size, size);
-	}
+  public static WritableImage getIcon(SnapshotParameters parameters, int size, Color color) {
+    final WritableImage image = getImage(parameters, size, color);
+    return new WritableImage(image.getPixelReader(), size, size);
+  }
 
-	public static WritableImage getIcon(int size, Color color) {
-		return getIcon(null, size, color);
-	}
+  public static WritableImage getIcon(int size, Color color) {
+    return getIcon(null, size, color);
+  }
 
-	public static WritableImage getIcon(int size) {
-		return getIcon(null, size, GREEN);
-	}
+  public static WritableImage getIcon(int size) {
+    return getIcon(null, size, GREEN);
+  }
 
-	public static WritableImage[] getIcons(int... sizes) {
-		return IntStream.of(sizes).mapToObj(MaridIconFx::getIcon).toArray(WritableImage[]::new);
-	}
+  public static WritableImage[] getIcons(int... sizes) {
+    return IntStream.of(sizes).mapToObj(MaridIconFx::getIcon).toArray(WritableImage[]::new);
+  }
 
-	public static void main(String... args) throws Exception {
-		System.out.println(new Color(150d / 255d, 150d / 255d, 1.0, 1.0));
-		final int size = args.length < 1 ? 128 : Integer.parseInt(args[0]);
-		final Color color = args.length < 2 ? Color.GREEN : Color.valueOf(args[1]);
-		final AtomicReference<WritableImage> imageRef = new AtomicReference<>();
-		final JFXPanel panel = new JFXPanel();
-		final CountDownLatch latch = new CountDownLatch(1);
-		Platform.runLater(() -> {
-			imageRef.set(getImage(size, color));
-			latch.countDown();
-		});
-		latch.await();
-		final File file = new File("marid.png");
-		ImageIO.write(SwingFXUtils.fromFXImage(imageRef.get(), null), "PNG", file);
-		Desktop.getDesktop().open(file);
-		Platform.exit();
-	}
+  public static void main(String... args) throws Exception {
+    System.out.println(new Color(150d / 255d, 150d / 255d, 1.0, 1.0));
+    final int size = args.length < 1 ? 128 : Integer.parseInt(args[0]);
+    final Color color = args.length < 2 ? Color.GREEN : Color.valueOf(args[1]);
+    final AtomicReference<WritableImage> imageRef = new AtomicReference<>();
+    final JFXPanel panel = new JFXPanel();
+    final CountDownLatch latch = new CountDownLatch(1);
+    Platform.runLater(() -> {
+      imageRef.set(getImage(size, color));
+      latch.countDown();
+    });
+    latch.await();
+    final File file = new File("marid.png");
+    ImageIO.write(SwingFXUtils.fromFXImage(imageRef.get(), null), "PNG", file);
+    Desktop.getDesktop().open(file);
+    Platform.exit();
+  }
 }

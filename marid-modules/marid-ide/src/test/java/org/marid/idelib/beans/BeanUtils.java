@@ -25,10 +25,10 @@ import java.util.NoSuchElementException;
 
 public interface BeanUtils {
 
-	static IdeBean find(@Nonnull IdeBean root, @Nonnull String name) {
-		return (IdeBean) root.descendants()
-				.filter(b -> name.equals(b.getName()))
-				.findFirst()
-				.orElseThrow(() -> new NoSuchElementException(name));
-	}
+  static IdeBean find(@Nonnull IdeBean root, @Nonnull String name) {
+    return (IdeBean) root.descendants()
+        .filter(b -> name.equals(b.getName()))
+        .findFirst()
+        .orElseThrow(() -> new NoSuchElementException(name));
+  }
 }

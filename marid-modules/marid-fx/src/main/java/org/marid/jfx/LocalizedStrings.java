@@ -44,39 +44,39 @@ import static org.marid.l10n.L10n.s;
  */
 public class LocalizedStrings {
 
-	public static final ObjectProperty<Locale> LOCALE = new SimpleObjectProperty<>(null, "locale", getDefault());
+  public static final ObjectProperty<Locale> LOCALE = new SimpleObjectProperty<>(null, "locale", getDefault());
 
-	public static ObservableStringValue ls(String text, Object... args) {
-		final Observable[] observables = Stream.of(args)
-				.filter(Observable.class::isInstance)
-				.map(Observable.class::cast)
-				.toArray(Observable[]::new);
-		return value(() -> {
-			final Object[] params = Stream.of(args)
-					.map(o -> o instanceof ObservableValue<?> ? ((ObservableValue<?>) o).getValue() : o)
-					.toArray();
-			return s(LOCALE.get(), text, params);
-		}, observables);
-	}
+  public static ObservableStringValue ls(String text, Object... args) {
+    final Observable[] observables = Stream.of(args)
+        .filter(Observable.class::isInstance)
+        .map(Observable.class::cast)
+        .toArray(Observable[]::new);
+    return value(() -> {
+      final Object[] params = Stream.of(args)
+          .map(o -> o instanceof ObservableValue<?> ? ((ObservableValue<?>) o).getValue() : o)
+          .toArray();
+      return s(LOCALE.get(), text, params);
+    }, observables);
+  }
 
-	public static ObservableStringValue fls(String format, String text, Object... args) {
-		return Bindings.createStringBinding(() -> String.format(format, s(LOCALE.get(), text, args)), LOCALE);
-	}
+  public static ObservableStringValue fls(String format, String text, Object... args) {
+    return Bindings.createStringBinding(() -> String.format(format, s(LOCALE.get(), text, args)), LOCALE);
+  }
 
-	private static ObservableStringValue value(Supplier<String> supplier, Observable... observables) {
-		final SimpleStringProperty property = new SimpleStringProperty(supplier.get());
-		final InvalidationListener listener = o -> property.set(supplier.get());
-		LOCALE.addListener(listener);
-		for (final Observable observable : observables) {
-			observable.addListener(listener);
-		}
-		Tracks.CLEANER.register(property, () -> Platform.runLater(() -> {
-			LOCALE.removeListener(listener);
+  private static ObservableStringValue value(Supplier<String> supplier, Observable... observables) {
+    final SimpleStringProperty property = new SimpleStringProperty(supplier.get());
+    final InvalidationListener listener = o -> property.set(supplier.get());
+    LOCALE.addListener(listener);
+    for (final Observable observable : observables) {
+      observable.addListener(listener);
+    }
+    Tracks.CLEANER.register(property, () -> Platform.runLater(() -> {
+      LOCALE.removeListener(listener);
 
-			for (final Observable observable : observables) {
-				observable.removeListener(listener);
-			}
-		}));
-		return property;
-	}
+      for (final Observable observable : observables) {
+        observable.removeListener(listener);
+      }
+    }));
+    return property;
+  }
 }

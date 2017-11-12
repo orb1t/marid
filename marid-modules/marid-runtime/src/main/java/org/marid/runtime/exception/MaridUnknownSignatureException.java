@@ -23,7 +23,7 @@ package org.marid.runtime.exception;
 
 public class MaridUnknownSignatureException extends RuntimeException {
 
-	public MaridUnknownSignatureException(String signature, Throwable cause) {
-		super(signature, cause);
-	}
+  public MaridUnknownSignatureException(String signature, Throwable cause) {
+    super(signature, cause);
+  }
 }

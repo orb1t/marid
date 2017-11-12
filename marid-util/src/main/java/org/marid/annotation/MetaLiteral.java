@@ -36,98 +36,98 @@ import static java.util.stream.Stream.of;
  */
 public class MetaLiteral {
 
-	public final String group;
-	public final String name;
-	public final String icon;
-	public final String description;
+  public final String group;
+  public final String name;
+  public final String icon;
+  public final String description;
 
-	public MetaLiteral(String group, String name, String icon, String description) {
-		this.group = group;
-		this.name = name;
-		this.icon = icon;
-		this.description = description;
-	}
+  public MetaLiteral(String group, String name, String icon, String description) {
+    this.group = group;
+    this.name = name;
+    this.icon = icon;
+    this.description = description;
+  }
 
-	public MetaLiteral(@Nonnull MetaInfo metaInfo) {
-		this(metaInfo.group(), metaInfo.name(), metaInfo.icon(), metaInfo.description());
-	}
+  public MetaLiteral(@Nonnull MetaInfo metaInfo) {
+    this(metaInfo.group(), metaInfo.name(), metaInfo.icon(), metaInfo.description());
+  }
 
-	public MetaLiteral(@Nonnull Annotation annotation) {
-		final Class<? extends Annotation> type = annotation.annotationType();
-		try {
-			group = type.getMethod("group").invoke(annotation).toString();
-			name = type.getMethod("name").invoke(annotation).toString();
-			icon = type.getMethod("icon").invoke(annotation).toString();
-			description = type.getMethod("description").invoke(annotation).toString();
-		} catch (ReflectiveOperationException x) {
-			throw new IllegalStateException(x);
-		}
-	}
+  public MetaLiteral(@Nonnull Annotation annotation) {
+    final Class<? extends Annotation> type = annotation.annotationType();
+    try {
+      group = type.getMethod("group").invoke(annotation).toString();
+      name = type.getMethod("name").invoke(annotation).toString();
+      icon = type.getMethod("icon").invoke(annotation).toString();
+      description = type.getMethod("description").invoke(annotation).toString();
+    } catch (ReflectiveOperationException x) {
+      throw new IllegalStateException(x);
+    }
+  }
 
-	public static MetaLiteral l(String group, String name, String icon, String description) {
-		return new MetaLiteral(group, name, icon, description);
-	}
+  public static MetaLiteral l(String group, String name, String icon, String description) {
+    return new MetaLiteral(group, name, icon, description);
+  }
 
-	@SafeVarargs
-	public static <E extends AnnotatedElement & Member> MetaLiteral l(@Nonnull String metaType,
-																																		@Nonnull String group,
-																																		@Nonnull String name,
-																																		@Nonnull String icon,
-																																		@Nonnull E... elements) {
-		final MetaLiteral[] v = of(elements)
-				.flatMap(MetaLiteral::aeStream)
-				.flatMap(Stream::of)
-				.flatMap(e -> of(e.getAnnotations()))
-				.filter(a -> a.annotationType().isAnnotationPresent(MetaInfoType.class))
-				.filter(a -> a.annotationType().getAnnotation(MetaInfoType.class).value().equals(metaType))
-				.map(MetaLiteral::new)
-				.toArray(MetaLiteral[]::new);
-		return new MetaLiteral(
-				of(v).map(e -> e.group).filter(e -> !e.isEmpty()).reduce((a, b) -> b).orElse(group),
-				of(v).map(e -> e.name).filter(e -> !e.isEmpty()).reduce((a, b) -> b).orElse(name),
-				of(v).map(e -> e.icon).filter(e -> !e.isEmpty()).reduce((a, b) -> b).orElse(icon),
-				of(v).map(e -> e.description).filter(e -> !e.isEmpty()).reduce((a, b) -> b).orElse("")
-		);
-	}
+  @SafeVarargs
+  public static <E extends AnnotatedElement & Member> MetaLiteral l(@Nonnull String metaType,
+                                                                    @Nonnull String group,
+                                                                    @Nonnull String name,
+                                                                    @Nonnull String icon,
+                                                                    @Nonnull E... elements) {
+    final MetaLiteral[] v = of(elements)
+        .flatMap(MetaLiteral::aeStream)
+        .flatMap(Stream::of)
+        .flatMap(e -> of(e.getAnnotations()))
+        .filter(a -> a.annotationType().isAnnotationPresent(MetaInfoType.class))
+        .filter(a -> a.annotationType().getAnnotation(MetaInfoType.class).value().equals(metaType))
+        .map(MetaLiteral::new)
+        .toArray(MetaLiteral[]::new);
+    return new MetaLiteral(
+        of(v).map(e -> e.group).filter(e -> !e.isEmpty()).reduce((a, b) -> b).orElse(group),
+        of(v).map(e -> e.name).filter(e -> !e.isEmpty()).reduce((a, b) -> b).orElse(name),
+        of(v).map(e -> e.icon).filter(e -> !e.isEmpty()).reduce((a, b) -> b).orElse(icon),
+        of(v).map(e -> e.description).filter(e -> !e.isEmpty()).reduce((a, b) -> b).orElse("")
+    );
+  }
 
-	@SafeVarargs
-	public static <E extends AnnotatedElement & Member> MetaLiteral l(@Nonnull String metaType,
-																																		@Nonnull String group,
-																																		@Nonnull Class<?> type,
-																																		@Nonnull String icon,
-																																		@Nonnull E... elements) {
-		return l(metaType, group, type.getSimpleName(), icon, elements);
-	}
+  @SafeVarargs
+  public static <E extends AnnotatedElement & Member> MetaLiteral l(@Nonnull String metaType,
+                                                                    @Nonnull String group,
+                                                                    @Nonnull Class<?> type,
+                                                                    @Nonnull String icon,
+                                                                    @Nonnull E... elements) {
+    return l(metaType, group, type.getSimpleName(), icon, elements);
+  }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		} else if (o == null || getClass() != o.getClass()) {
-			return false;
-		} else {
-			final MetaLiteral that = (MetaLiteral) o;
-			return Objects.equals(name, that.name) &&
-					Objects.equals(icon, that.icon) &&
-					Objects.equals(description, that.description);
-		}
-	}
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    } else if (o == null || getClass() != o.getClass()) {
+      return false;
+    } else {
+      final MetaLiteral that = (MetaLiteral) o;
+      return Objects.equals(name, that.name) &&
+          Objects.equals(icon, that.icon) &&
+          Objects.equals(description, that.description);
+    }
+  }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(name, icon, description);
-	}
+  @Override
+  public int hashCode() {
+    return Objects.hash(name, icon, description);
+  }
 
-	@Override
-	public String toString() {
-		return String.format("Meta(%s,%s,%s,%s)", group, name, icon, description);
-	}
+  @Override
+  public String toString() {
+    return String.format("Meta(%s,%s,%s,%s)", group, name, icon, description);
+  }
 
-	private static <E extends AnnotatedElement & Member> Stream<AnnotatedElement> aeStream(E e) {
-		final Stream.Builder<AnnotatedElement> builder = Stream.builder();
-		builder.accept(e);
-		builder.accept(e.getDeclaringClass());
-		ofNullable(e.getDeclaringClass().getPackage()).ifPresent(builder::accept);
-		return builder.build();
-	}
+  private static <E extends AnnotatedElement & Member> Stream<AnnotatedElement> aeStream(E e) {
+    final Stream.Builder<AnnotatedElement> builder = Stream.builder();
+    builder.accept(e);
+    builder.accept(e.getDeclaringClass());
+    ofNullable(e.getDeclaringClass().getPackage()).ifPresent(builder::accept);
+    return builder.build();
+  }
 }

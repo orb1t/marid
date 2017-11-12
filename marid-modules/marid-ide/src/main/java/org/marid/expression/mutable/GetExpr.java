@@ -32,40 +32,40 @@ import static org.marid.io.Xmls.*;
 
 public class GetExpr extends Expr implements TypedGetExpression {
 
-	public final FxObject<Expr> target;
-	public final StringProperty field;
+  public final FxObject<Expr> target;
+  public final StringProperty field;
 
-	public GetExpr(@Nonnull Expr target, @Nonnull String field) {
-		this.target = new FxObject<>(Expr::getObservables, target);
-		this.field = new SimpleStringProperty(field);
-	}
+  public GetExpr(@Nonnull Expr target, @Nonnull String field) {
+    this.target = new FxObject<>(Expr::getObservables, target);
+    this.field = new SimpleStringProperty(field);
+  }
 
-	GetExpr(@Nonnull Element element) {
-		this.target = new FxObject<>(
-				Expr::getObservables,
-				element("target", element).map(Expr::of).orElseThrow(() -> new NullPointerException("target"))
-		);
-		this.field = new SimpleStringProperty(
-				attribute(element, "field").orElseThrow(() -> new NullPointerException("field"))
-		);
-	}
+  GetExpr(@Nonnull Element element) {
+    this.target = new FxObject<>(
+        Expr::getObservables,
+        element("target", element).map(Expr::of).orElseThrow(() -> new NullPointerException("target"))
+    );
+    this.field = new SimpleStringProperty(
+        attribute(element, "field").orElseThrow(() -> new NullPointerException("field"))
+    );
+  }
 
-	@Nonnull
-	@Override
-	public Expr getTarget() {
-		return target.get();
-	}
+  @Nonnull
+  @Override
+  public Expr getTarget() {
+    return target.get();
+  }
 
-	@Nonnull
-	@Override
-	public String getField() {
-		return field.get();
-	}
+  @Nonnull
+  @Override
+  public String getField() {
+    return field.get();
+  }
 
-	@Override
-	public void writeTo(@Nonnull Element element) {
-		super.writeTo(element);
-		create(element, "target", t -> create(t, getTarget().getTag(), getTarget()::writeTo));
-		element.setAttribute("field", getField());
-	}
+  @Override
+  public void writeTo(@Nonnull Element element) {
+    super.writeTo(element);
+    create(element, "target", t -> create(t, getTarget().getTag(), getTarget()::writeTo));
+    element.setAttribute("field", getField());
+  }
 }

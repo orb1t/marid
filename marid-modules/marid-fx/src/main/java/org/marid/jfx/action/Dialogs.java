@@ -29,11 +29,11 @@ import java.io.File;
  */
 public interface Dialogs {
 
-	static File overrideExt(File original, String ext) {
-		return original == null
-				? null
-				: original.getName().endsWith(ext)
-				? original
-				: new File(original.getParentFile(), original.getName() + ext);
-	}
+  static File overrideExt(File original, String ext) {
+    return original == null
+        ? null
+        : original.getName().endsWith(ext)
+        ? original
+        : new File(original.getParentFile(), original.getName() + ext);
+  }
 }

@@ -40,50 +40,50 @@ import java.util.function.Function;
 
 public interface ConstExpression extends ValueExpression {
 
-	@Nonnull
-	ConstantType getType();
+  @Nonnull
+  ConstantType getType();
 
-	enum ConstantType {
+  enum ConstantType {
 
-		BOOL(Boolean.class, Boolean::valueOf),
-		BYTE(Byte.class, Byte::decode),
-		SHORT(Short.class, Short::decode),
-		INT(Integer.class, Integer::decode),
-		LONG(Long.class, Long::decode),
-		CHAR(Character.class, v -> (char) (int) Integer.decode(v)),
-		FLOAT(Float.class, Float::valueOf),
-		DOUBLE(Double.class, Double::valueOf),
-		BIGDECIMAL(BigDecimal.class, BigDecimal::new),
-		BIGINT(BigInteger.class, BigInteger::new),
-		FILE(File.class, File::new),
-		PATH(Path.class, Paths::get),
-		DATE(Date.class, Date::valueOf),
-		TIMESTAMP(Timestamp.class, Timestamp::valueOf),
-		INSTANT(Instant.class, Instant::parse),
-		DURATION(Duration.class, Duration::parse),
-		TIME_ZONE(TimeZone.class, TimeZone::getTimeZone),
-		ZONE_ID(ZoneId.class, ZoneId::of),
-		CURRENCY(Currency.class, Currency::getInstance),
-		LOCALE(Locale.class, Locale::forLanguageTag),
-		ZONED_DATE_TIME(ZonedDateTime.class, ZonedDateTime::parse),
-		LOCAL_DATE_TIME(LocalDateTime.class, LocalDateTime::parse),
-		OFFSET_TIME(OffsetTime.class, OffsetTime::parse),
-		PERIOD(Period.class, Period::parse),
-		YEAR_MONTH(YearMonth.class, YearMonth::parse),
-		ZONE_OFFSET(ZoneOffset.class, ZoneOffset::of),
-		YEAR(Year.class, Year::parse),
-		MONTH(Month.class, Month::valueOf),
-		MONTH_DAY(MonthDay.class, MonthDay::parse),
-		DAY_OF_WEEK(DayOfWeek.class, DayOfWeek::valueOf),
-		INET_ADDR(InetAddress.class, v -> Calls.call(() -> InetAddress.getByName(v))),
-		UUID(java.util.UUID.class, java.util.UUID::fromString);
+    BOOL(Boolean.class, Boolean::valueOf),
+    BYTE(Byte.class, Byte::decode),
+    SHORT(Short.class, Short::decode),
+    INT(Integer.class, Integer::decode),
+    LONG(Long.class, Long::decode),
+    CHAR(Character.class, v -> (char) (int) Integer.decode(v)),
+    FLOAT(Float.class, Float::valueOf),
+    DOUBLE(Double.class, Double::valueOf),
+    BIGDECIMAL(BigDecimal.class, BigDecimal::new),
+    BIGINT(BigInteger.class, BigInteger::new),
+    FILE(File.class, File::new),
+    PATH(Path.class, Paths::get),
+    DATE(Date.class, Date::valueOf),
+    TIMESTAMP(Timestamp.class, Timestamp::valueOf),
+    INSTANT(Instant.class, Instant::parse),
+    DURATION(Duration.class, Duration::parse),
+    TIME_ZONE(TimeZone.class, TimeZone::getTimeZone),
+    ZONE_ID(ZoneId.class, ZoneId::of),
+    CURRENCY(Currency.class, Currency::getInstance),
+    LOCALE(Locale.class, Locale::forLanguageTag),
+    ZONED_DATE_TIME(ZonedDateTime.class, ZonedDateTime::parse),
+    LOCAL_DATE_TIME(LocalDateTime.class, LocalDateTime::parse),
+    OFFSET_TIME(OffsetTime.class, OffsetTime::parse),
+    PERIOD(Period.class, Period::parse),
+    YEAR_MONTH(YearMonth.class, YearMonth::parse),
+    ZONE_OFFSET(ZoneOffset.class, ZoneOffset::of),
+    YEAR(Year.class, Year::parse),
+    MONTH(Month.class, Month::valueOf),
+    MONTH_DAY(MonthDay.class, MonthDay::parse),
+    DAY_OF_WEEK(DayOfWeek.class, DayOfWeek::valueOf),
+    INET_ADDR(InetAddress.class, v -> Calls.call(() -> InetAddress.getByName(v))),
+    UUID(java.util.UUID.class, java.util.UUID::fromString);
 
-		public final Class<?> type;
-		public final Function<String, ?> converter;
+    public final Class<?> type;
+    public final Function<String, ?> converter;
 
-		<T> ConstantType(Class<T> type, Function<String, T> converter) {
-			this.type = type;
-			this.converter = converter;
-		}
-	}
+    <T> ConstantType(Class<T> type, Function<String, T> converter) {
+      this.type = type;
+      this.converter = converter;
+    }
+  }
 }

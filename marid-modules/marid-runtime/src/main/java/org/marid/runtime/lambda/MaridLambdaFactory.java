@@ -35,49 +35,49 @@ import static java.lang.invoke.MethodHandles.publicLookup;
 
 public interface MaridLambdaFactory {
 
-	@SafeVarargs
-	static <T> T lambda(Class<T> functionalInterface, Field field, AtomicStampedReference<Object>... pos) {
-		try {
-			return lambda(functionalInterface, publicLookup().unreflectGetter(field), pos);
-		} catch (Throwable x) {
-			throw new IllegalStateException(x);
-		}
-	}
+  @SafeVarargs
+  static <T> T lambda(Class<T> functionalInterface, Field field, AtomicStampedReference<Object>... pos) {
+    try {
+      return lambda(functionalInterface, publicLookup().unreflectGetter(field), pos);
+    } catch (Throwable x) {
+      throw new IllegalStateException(x);
+    }
+  }
 
-	@SafeVarargs
-	static <T> T lambda(Class<T> functionalInterface, Method method, AtomicStampedReference<Object>... pos) {
-		try {
-			return lambda(functionalInterface, publicLookup().unreflect(method), pos);
-		} catch (Throwable x) {
-			throw new IllegalStateException(x);
-		}
-	}
+  @SafeVarargs
+  static <T> T lambda(Class<T> functionalInterface, Method method, AtomicStampedReference<Object>... pos) {
+    try {
+      return lambda(functionalInterface, publicLookup().unreflect(method), pos);
+    } catch (Throwable x) {
+      throw new IllegalStateException(x);
+    }
+  }
 
-	@SafeVarargs
-	static <T> T lambda(Class<T> functionalInterface, Constructor<?> method, AtomicStampedReference<Object>... pos) {
-		try {
-			return lambda(functionalInterface, publicLookup().unreflectConstructor(method), pos);
-		} catch (Throwable x) {
-			throw new IllegalStateException(x);
-		}
-	}
+  @SafeVarargs
+  static <T> T lambda(Class<T> functionalInterface, Constructor<?> method, AtomicStampedReference<Object>... pos) {
+    try {
+      return lambda(functionalInterface, publicLookup().unreflectConstructor(method), pos);
+    } catch (Throwable x) {
+      throw new IllegalStateException(x);
+    }
+  }
 
-	@SafeVarargs
-	static <T> T lambda(Class<T> functionalInterface, MethodHandle handle, AtomicStampedReference<Object>... pos) {
-		final MethodHandle h = Stream.of(pos).reduce(
-				handle,
-				(a, r) -> insertArguments(a, r.getStamp(), r.getReference()),
-				(h1, h2) -> h2
-		);
-		// TODO: use LambdaMetafactory here
-		return MethodHandleProxies.asInterfaceInstance(functionalInterface, h);
-	}
+  @SafeVarargs
+  static <T> T lambda(Class<T> functionalInterface, MethodHandle handle, AtomicStampedReference<Object>... pos) {
+    final MethodHandle h = Stream.of(pos).reduce(
+        handle,
+        (a, r) -> insertArguments(a, r.getStamp(), r.getReference()),
+        (h1, h2) -> h2
+    );
+    // TODO: use LambdaMetafactory here
+    return MethodHandleProxies.asInterfaceInstance(functionalInterface, h);
+  }
 
-	static Method samMethod(Class<?> functionalInterface) {
-		return Stream.of(functionalInterface.getMethods())
-				.filter(m -> Modifier.isAbstract(m.getModifiers()))
-				.filter(m -> !m.isDefault())
-				.findFirst()
-				.orElseThrow(() -> new IllegalStateException(functionalInterface + " is not a functional"));
-	}
+  static Method samMethod(Class<?> functionalInterface) {
+    return Stream.of(functionalInterface.getMethods())
+        .filter(m -> Modifier.isAbstract(m.getModifiers()))
+        .filter(m -> !m.isDefault())
+        .findFirst()
+        .orElseThrow(() -> new IllegalStateException(functionalInterface + " is not a functional"));
+  }
 }

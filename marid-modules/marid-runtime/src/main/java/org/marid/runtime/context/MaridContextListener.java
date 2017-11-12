@@ -31,24 +31,24 @@ import java.util.EventListener;
  */
 public interface MaridContextListener extends EventListener, Comparable<MaridContextListener> {
 
-	void bootstrap(@Nonnull ContextBootstrapEvent contextBootstrapEvent);
+  void bootstrap(@Nonnull ContextBootstrapEvent contextBootstrapEvent);
 
-	void onEvent(@Nonnull BeanEvent event);
+  void onEvent(@Nonnull BeanEvent event);
 
-	void onPostConstruct(@Nonnull BeanPostConstructEvent postConstructEvent);
+  void onPostConstruct(@Nonnull BeanPostConstructEvent postConstructEvent);
 
-	void onPreDestroy(@Nonnull BeanPreDestroyEvent preDestroyEvent);
+  void onPreDestroy(@Nonnull BeanPreDestroyEvent preDestroyEvent);
 
-	void onStart(@Nonnull ContextStartEvent contextStartEvent);
+  void onStart(@Nonnull ContextStartEvent contextStartEvent);
 
-	void onStop(@Nonnull ContextStopEvent contextStopEvent);
+  void onStop(@Nonnull ContextStopEvent contextStopEvent);
 
-	void onFail(@Nonnull ContextFailEvent contextFailEvent);
+  void onFail(@Nonnull ContextFailEvent contextFailEvent);
 
-	int getOrder();
+  int getOrder();
 
-	@Override
-	default int compareTo(@Nonnull MaridContextListener o) {
-		return Integer.compare(getOrder(), o.getOrder());
-	}
+  @Override
+  default int compareTo(@Nonnull MaridContextListener o) {
+    return Integer.compare(getOrder(), o.getOrder());
+  }
 }

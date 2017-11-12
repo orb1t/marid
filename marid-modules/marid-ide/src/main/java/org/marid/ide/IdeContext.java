@@ -49,43 +49,43 @@ import static org.springframework.beans.factory.config.ConfigurableBeanFactory.S
 @Configuration
 public class IdeContext {
 
-	@Bean(destroyMethod = "shutdown")
-	public static ScheduledThreadPoolExecutor scheduledExecutorService() {
-		return new ScheduledThreadPoolExecutor(1);
-	}
+  @Bean(destroyMethod = "shutdown")
+  public static ScheduledThreadPoolExecutor scheduledExecutorService() {
+    return new ScheduledThreadPoolExecutor(1);
+  }
 
-	@Bean
-	@Scope(SCOPE_PROTOTYPE)
-	public Preferences preferences(InjectionPoint injectionPoint, IdeValues ideValues) {
-		final Class<?> type = injectionPoint.getMember().getDeclaringClass();
-		return Preferences.userNodeForPackage(type).node(type.getName()).node(ideValues.implementationVersion);
-	}
+  @Bean
+  @Scope(SCOPE_PROTOTYPE)
+  public Preferences preferences(InjectionPoint injectionPoint, IdeValues ideValues) {
+    final Class<?> type = injectionPoint.getMember().getDeclaringClass();
+    return Preferences.userNodeForPackage(type).node(type.getName()).node(ideValues.implementationVersion);
+  }
 
-	@Bean
-	public MaridDirectories directories() {
-		return new MaridDirectories();
-	}
+  @Bean
+  public MaridDirectories directories() {
+    return new MaridDirectories();
+  }
 
-	@Bean
-	public IdeLogHandler ideLogHandler() {
-		return Stream.of(Logger.getLogger("").getHandlers())
-				.filter(IdeLogHandler.class::isInstance)
-				.map(IdeLogHandler.class::cast)
-				.findAny()
-				.orElseThrow(IllegalStateException::new);
-	}
+  @Bean
+  public IdeLogHandler ideLogHandler() {
+    return Stream.of(Logger.getLogger("").getHandlers())
+        .filter(IdeLogHandler.class::isInstance)
+        .map(IdeLogHandler.class::cast)
+        .findAny()
+        .orElseThrow(IllegalStateException::new);
+  }
 
-	@Bean
-	public IdeLogConsoleHandler ideLogConsoleHandler() {
-		return Stream.of(Logger.getLogger("").getHandlers())
-				.filter(IdeLogConsoleHandler.class::isInstance)
-				.map(IdeLogConsoleHandler.class::cast)
-				.findAny()
-				.orElseThrow(IllegalStateException::new);
-	}
+  @Bean
+  public IdeLogConsoleHandler ideLogConsoleHandler() {
+    return Stream.of(Logger.getLogger("").getHandlers())
+        .filter(IdeLogConsoleHandler.class::isInstance)
+        .map(IdeLogConsoleHandler.class::cast)
+        .findAny()
+        .orElseThrow(IllegalStateException::new);
+  }
 
-	@Bean(name = AbstractApplicationContext.APPLICATION_EVENT_MULTICASTER_BEAN_NAME)
-	public static ApplicationEventMulticaster multicaster(GenericApplicationContext context) {
-		return new SimpleApplicationEventMulticaster(context.getBeanFactory());
-	}
+  @Bean(name = AbstractApplicationContext.APPLICATION_EVENT_MULTICASTER_BEAN_NAME)
+  public static ApplicationEventMulticaster multicaster(GenericApplicationContext context) {
+    return new SimpleApplicationEventMulticaster(context.getBeanFactory());
+  }
 }

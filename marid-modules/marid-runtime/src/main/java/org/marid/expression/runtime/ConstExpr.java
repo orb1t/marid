@@ -32,31 +32,31 @@ import static org.marid.io.Xmls.attribute;
 
 public final class ConstExpr extends ValueExpr implements ConstExpression {
 
-	private final ConstantType type;
+  private final ConstantType type;
 
-	public ConstExpr(@Nonnull ConstantType type, @Nonnull String value) {
-		super(value);
-		this.type = type;
-	}
+  public ConstExpr(@Nonnull ConstantType type, @Nonnull String value) {
+    super(value);
+    this.type = type;
+  }
 
-	ConstExpr(@Nonnull Element element) {
-		super(element);
-		type = attribute(element, "type").map(ConstantType::valueOf).orElseThrow(() -> new NullPointerException("type"));
-	}
+  ConstExpr(@Nonnull Element element) {
+    super(element);
+    type = attribute(element, "type").map(ConstantType::valueOf).orElseThrow(() -> new NullPointerException("type"));
+  }
 
-	@Override
-	protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
-		final String v = context.resolvePlaceholders(getValue()).trim();
-		if (v.isEmpty()) {
-			return null;
-		} else {
-			return getType().converter.apply(v);
-		}
-	}
+  @Override
+  protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
+    final String v = context.resolvePlaceholders(getValue()).trim();
+    if (v.isEmpty()) {
+      return null;
+    } else {
+      return getType().converter.apply(v);
+    }
+  }
 
-	@Nonnull
-	@Override
-	public ConstantType getType() {
-		return type;
-	}
+  @Nonnull
+  @Override
+  public ConstantType getType() {
+    return type;
+  }
 }

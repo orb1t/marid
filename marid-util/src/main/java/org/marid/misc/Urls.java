@@ -46,125 +46,125 @@ import static org.marid.misc.StringUtils.pathEndsWith;
  */
 public interface Urls {
 
-	@Nonnull
-	static URL url(@Nonnull String url) {
-		try {
-			return new URL(url);
-		} catch (MalformedURLException x) {
-			throw new IllegalArgumentException(url, x);
-		}
-	}
+  @Nonnull
+  static URL url(@Nonnull String url) {
+    try {
+      return new URL(url);
+    } catch (MalformedURLException x) {
+      throw new IllegalArgumentException(url, x);
+    }
+  }
 
-	@Nonnull
-	static URL url(@Nonnull Path path) {
-		try {
-			return path.toUri().toURL();
-		} catch (MalformedURLException x) {
-			throw new IllegalArgumentException(path.toString(), x);
-		}
-	}
+  @Nonnull
+  static URL url(@Nonnull Path path) {
+    try {
+      return path.toUri().toURL();
+    } catch (MalformedURLException x) {
+      throw new IllegalArgumentException(path.toString(), x);
+    }
+  }
 
-	@Nonnull
-	static URI uri(@Nonnull String uri) {
-		try {
-			return new URI(uri);
-		} catch (URISyntaxException x) {
-			throw new IllegalArgumentException(uri, x);
-		}
-	}
+  @Nonnull
+  static URI uri(@Nonnull String uri) {
+    try {
+      return new URI(uri);
+    } catch (URISyntaxException x) {
+      throw new IllegalArgumentException(uri, x);
+    }
+  }
 
-	@Nonnull
-	static String urlEncode(@Nonnull String text) {
-		try {
-			return URLEncoder.encode(text, UTF_8.name());
-		} catch (UnsupportedEncodingException x) {
-			throw new IllegalArgumentException(UTF_8.name(), x);
-		}
-	}
+  @Nonnull
+  static String urlEncode(@Nonnull String text) {
+    try {
+      return URLEncoder.encode(text, UTF_8.name());
+    } catch (UnsupportedEncodingException x) {
+      throw new IllegalArgumentException(UTF_8.name(), x);
+    }
+  }
 
-	@Nonnull
-	static String urlDecode(@Nonnull String text) {
-		try {
-			return URLDecoder.decode(text, UTF_8.name());
-		} catch (UnsupportedEncodingException x) {
-			throw new IllegalArgumentException(UTF_8.name(), x);
-		}
-	}
+  @Nonnull
+  static String urlDecode(@Nonnull String text) {
+    try {
+      return URLDecoder.decode(text, UTF_8.name());
+    } catch (UnsupportedEncodingException x) {
+      throw new IllegalArgumentException(UTF_8.name(), x);
+    }
+  }
 
-	@Nonnull
-	static URL[] classpath(@Nonnull Path path, @Nonnull Path... paths) {
-		final Stream<URL> pathUrls = Stream.of(paths).filter(Files::isDirectory).map(Urls::url);
-		try {
-			return concat(Files.list(path).filter(pathEndsWith(".jar")).map(Urls::url), pathUrls)
-					.distinct()
-					.toArray(URL[]::new);
-		} catch (NotDirectoryException | NoSuchFileException x) {
-			return new URL[0];
-		} catch (IOException x) {
-			throw new UncheckedIOException(x);
-		}
-	}
+  @Nonnull
+  static URL[] classpath(@Nonnull Path path, @Nonnull Path... paths) {
+    final Stream<URL> pathUrls = Stream.of(paths).filter(Files::isDirectory).map(Urls::url);
+    try {
+      return concat(Files.list(path).filter(pathEndsWith(".jar")).map(Urls::url), pathUrls)
+          .distinct()
+          .toArray(URL[]::new);
+    } catch (NotDirectoryException | NoSuchFileException x) {
+      return new URL[0];
+    } catch (IOException x) {
+      throw new UncheckedIOException(x);
+    }
+  }
 
-	@Nonnull
-	static SortedSet<Path> jars(@Nonnull Path path) {
-		try {
-			try (final Stream<Path> stream = Files.list(path).filter(pathEndsWith(".jar"))) {
-				return stream.collect(Collectors.toCollection(TreeSet::new));
-			}
-		} catch (NotDirectoryException | NoSuchFileException x) {
-			return Collections.emptySortedSet();
-		} catch (IOException x) {
-			throw new UncheckedIOException(x);
-		}
-	}
+  @Nonnull
+  static SortedSet<Path> jars(@Nonnull Path path) {
+    try {
+      try (final Stream<Path> stream = Files.list(path).filter(pathEndsWith(".jar"))) {
+        return stream.collect(Collectors.toCollection(TreeSet::new));
+      }
+    } catch (NotDirectoryException | NoSuchFileException x) {
+      return Collections.emptySortedSet();
+    } catch (IOException x) {
+      throw new UncheckedIOException(x);
+    }
+  }
 
-	@Nonnull
-	static SortedSet<Path> files(@Nonnull Path path, @Nonnull String ext) {
-		try {
-			return Files.find(path, 255, (p, a) -> p.getFileName().toString().endsWith("." + ext))
-					.collect(Collectors.toCollection(TreeSet::new));
-		} catch (NotDirectoryException | NoSuchFileException x) {
-			return Collections.emptySortedSet();
-		} catch (IOException x) {
-			throw new UncheckedIOException(x);
-		}
-	}
+  @Nonnull
+  static SortedSet<Path> files(@Nonnull Path path, @Nonnull String ext) {
+    try {
+      return Files.find(path, 255, (p, a) -> p.getFileName().toString().endsWith("." + ext))
+          .collect(Collectors.toCollection(TreeSet::new));
+    } catch (NotDirectoryException | NoSuchFileException x) {
+      return Collections.emptySortedSet();
+    } catch (IOException x) {
+      throw new UncheckedIOException(x);
+    }
+  }
 
-	@Nonnull
-	static Stream<URL> urls(@Nonnull ClassLoader classLoader, @Nonnull String resource) {
-		final Stream.Builder<URL> urls = Stream.builder();
-		try {
-			for (final Enumeration<URL> e = classLoader.getResources(resource); e.hasMoreElements(); ) {
-				urls.accept(e.nextElement());
-			}
-		} catch (IOException x) {
-			throw new UncheckedIOException(x);
-		}
-		return urls.build();
-	}
+  @Nonnull
+  static Stream<URL> urls(@Nonnull ClassLoader classLoader, @Nonnull String resource) {
+    final Stream.Builder<URL> urls = Stream.builder();
+    try {
+      for (final Enumeration<URL> e = classLoader.getResources(resource); e.hasMoreElements(); ) {
+        urls.accept(e.nextElement());
+      }
+    } catch (IOException x) {
+      throw new UncheckedIOException(x);
+    }
+    return urls.build();
+  }
 
-	@Nonnull
-	static <E> Stream<E> urls(@Nonnull ClassLoader loader,
-														@Nonnull String resource,
-														@Nonnull Function<Scanner, E> scannerExtractor) {
-		return urls(loader, resource)
-				.map((IOFunction<URL, E>) url -> {
-					try (final Scanner scanner = new Scanner(url.openStream(), "UTF-8")) {
-						return scannerExtractor.apply(scanner);
-					}
-				});
-	}
+  @Nonnull
+  static <E> Stream<E> urls(@Nonnull ClassLoader loader,
+                            @Nonnull String resource,
+                            @Nonnull Function<Scanner, E> scannerExtractor) {
+    return urls(loader, resource)
+        .map((IOFunction<URL, E>) url -> {
+          try (final Scanner scanner = new Scanner(url.openStream(), "UTF-8")) {
+            return scannerExtractor.apply(scanner);
+          }
+        });
+  }
 
-	@Nonnull
-	static <E> Stream<E> lines(@Nonnull ClassLoader classLoader,
-														 @Nonnull String resource,
-														 @Nonnull Function<String, E> lineExtractor) {
-		return urls(classLoader, resource, scanner -> {
-			final Stream.Builder<String> builder = Stream.builder();
-			while (scanner.hasNextLine()) {
-				builder.accept(scanner.nextLine().trim());
-			}
-			return builder.build();
-		}).flatMap(Function.identity()).map(lineExtractor);
-	}
+  @Nonnull
+  static <E> Stream<E> lines(@Nonnull ClassLoader classLoader,
+                             @Nonnull String resource,
+                             @Nonnull Function<String, E> lineExtractor) {
+    return urls(classLoader, resource, scanner -> {
+      final Stream.Builder<String> builder = Stream.builder();
+      while (scanner.hasNextLine()) {
+        builder.accept(scanner.nextLine().trim());
+      }
+      return builder.build();
+    }).flatMap(Function.identity()).map(lineExtractor);
+  }
 }

@@ -31,26 +31,26 @@ import static org.marid.io.Xmls.content;
 
 public class StringExpr extends Expr implements TypedStringExpression {
 
-	public final StringProperty value;
+  public final StringProperty value;
 
-	public StringExpr(@Nonnull String value) {
-		this.value = new SimpleStringProperty(value);
-	}
+  public StringExpr(@Nonnull String value) {
+    this.value = new SimpleStringProperty(value);
+  }
 
-	StringExpr(@Nonnull Element element) {
-		super(element);
-		this.value = new SimpleStringProperty(content(element).orElseThrow(() -> new NullPointerException("content")));
-	}
+  StringExpr(@Nonnull Element element) {
+    super(element);
+    this.value = new SimpleStringProperty(content(element).orElseThrow(() -> new NullPointerException("content")));
+  }
 
-	@Nonnull
-	@Override
-	public String getValue() {
-		return value.get();
-	}
+  @Nonnull
+  @Override
+  public String getValue() {
+    return value.get();
+  }
 
-	@Override
-	public void writeTo(@Nonnull Element element) {
-		super.writeTo(element);
-		element.setTextContent(getValue());
-	}
+  @Override
+  public void writeTo(@Nonnull Element element) {
+    super.writeTo(element);
+    element.setTextContent(getValue());
+  }
 }

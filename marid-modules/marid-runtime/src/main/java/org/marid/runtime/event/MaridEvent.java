@@ -27,17 +27,17 @@ import java.util.EventObject;
 
 public abstract class MaridEvent extends EventObject {
 
-	public MaridEvent(MaridRuntime context) {
-		super(context);
-	}
+  public MaridEvent(MaridRuntime context) {
+    super(context);
+  }
 
-	@Override
-	public MaridRuntime getSource() {
-		return (MaridRuntime) super.getSource();
-	}
+  @Override
+  public MaridRuntime getSource() {
+    return (MaridRuntime) super.getSource();
+  }
 
-	@Override
-	public String toString() {
-		return getClass().getSimpleName() + "[" + getSource() + "]";
-	}
+  @Override
+  public String toString() {
+    return getClass().getSimpleName() + "[" + getSource() + "]";
+  }
 }

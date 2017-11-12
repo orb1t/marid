@@ -31,51 +31,51 @@ import java.nio.file.Paths;
  */
 public class MaridDirectories implements Directories {
 
-	private final Path userHome;
-	private final Path marid;
-	private final Path profiles;
-	private final Path repo;
-	private final Path maven;
+  private final Path userHome;
+  private final Path marid;
+  private final Path profiles;
+  private final Path repo;
+  private final Path maven;
 
-	public MaridDirectories() {
-		userHome = Paths.get(System.getProperty("user.home"));
-		marid = userHome.resolve("marid");
-		profiles = marid.resolve("profiles");
-		repo = marid.resolve("repo");
-		maven = marid.resolve("maven");
-	}
+  public MaridDirectories() {
+    userHome = Paths.get(System.getProperty("user.home"));
+    marid = userHome.resolve("marid");
+    profiles = marid.resolve("profiles");
+    repo = marid.resolve("repo");
+    maven = marid.resolve("maven");
+  }
 
-	@PostConstruct
-	private void init() throws IOException {
-		Files.createDirectories(profiles);
-		Files.createDirectories(repo);
-		Files.createDirectories(maven);
+  @PostConstruct
+  private void init() throws IOException {
+    Files.createDirectories(profiles);
+    Files.createDirectories(repo);
+    Files.createDirectories(maven);
 
-		System.setProperty("maven.repo.local", repo.toAbsolutePath().toString());
-	}
+    System.setProperty("maven.repo.local", repo.toAbsolutePath().toString());
+  }
 
-	@Override
-	public Path getUserHome() {
-		return userHome;
-	}
+  @Override
+  public Path getUserHome() {
+    return userHome;
+  }
 
-	@Override
-	public Path getMarid() {
-		return marid;
-	}
+  @Override
+  public Path getMarid() {
+    return marid;
+  }
 
-	@Override
-	public Path getProfiles() {
-		return profiles;
-	}
+  @Override
+  public Path getProfiles() {
+    return profiles;
+  }
 
-	@Override
-	public Path getRepo() {
-		return repo;
-	}
+  @Override
+  public Path getRepo() {
+    return repo;
+  }
 
-	@Override
-	public Path getMaven() {
-		return maven;
-	}
+  @Override
+  public Path getMaven() {
+    return maven;
+  }
 }

@@ -43,59 +43,59 @@ import static java.util.Objects.requireNonNull;
  */
 public class FontIcons {
 
-	private static final Map<String, String> SYMBOLS = new HashMap<>();
+  private static final Map<String, String> SYMBOLS = new HashMap<>();
 
-	static {
-		final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		final URL url = requireNonNull(classLoader.getResource("fonts/meta.properties"));
-		try (final BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream(), UTF_8))) {
-			while (true) {
-				final String line = r.readLine();
-				if (line == null || line.isEmpty()) {
-					break;
-				}
-				final int index = line.indexOf('=');
-				final String name = line.substring(0, index);
-				final String value = String.valueOf((char) Integer.parseInt(line.substring(index + 3), 16));
-				SYMBOLS.put(name, value);
-			}
-		} catch (IOException x) {
-			throw new UncheckedIOException(x);
-		}
-	}
+  static {
+    final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+    final URL url = requireNonNull(classLoader.getResource("fonts/meta.properties"));
+    try (final BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream(), UTF_8))) {
+      while (true) {
+        final String line = r.readLine();
+        if (line == null || line.isEmpty()) {
+          break;
+        }
+        final int index = line.indexOf('=');
+        final String name = line.substring(0, index);
+        final String value = String.valueOf((char) Integer.parseInt(line.substring(index + 3), 16));
+        SYMBOLS.put(name, value);
+      }
+    } catch (IOException x) {
+      throw new UncheckedIOException(x);
+    }
+  }
 
-	public static Text glyphIcon(@Nonnull @PropertyKey(resourceBundle = "fonts.meta") String type,
-															 double size) {
-		if (type.length() < 3) {
-			return glyphIcon("F_SMILE_ALT", size);
-		} else {
-			final Text label = new Text();
-			label.setFont(new Font(family(type), size));
-			label.setText(SYMBOLS.getOrDefault(type, ""));
-			return label;
-		}
-	}
+  public static Text glyphIcon(@Nonnull @PropertyKey(resourceBundle = "fonts.meta") String type,
+                               double size) {
+    if (type.length() < 3) {
+      return glyphIcon("F_SMILE_ALT", size);
+    } else {
+      final Text label = new Text();
+      label.setFont(new Font(family(type), size));
+      label.setText(SYMBOLS.getOrDefault(type, ""));
+      return label;
+    }
+  }
 
-	public static Text glyph(@Nonnull @PropertyKey(resourceBundle = "fonts.meta") String type,
-													 double size,
-													 @Nonnull Color color) {
-		final Text text = glyphIcon(type, size);
-		text.setStroke(color);
-		return text;
-	}
+  public static Text glyph(@Nonnull @PropertyKey(resourceBundle = "fonts.meta") String type,
+                           double size,
+                           @Nonnull Color color) {
+    final Text text = glyphIcon(type, size);
+    text.setStroke(color);
+    return text;
+  }
 
-	private static String family(String type) {
-		switch (type.charAt(0)) {
-			case 'O': return "Octicons";
-			case 'D': return "MaterialDesignIcons";
-			case 'M': return "Material Icons";
-			case 'F': return "FontAwesome";
-			case 'W': return "Weather Icons";
-			default: throw new IllegalArgumentException("Unsupported font symbol: " + type);
-		}
-	}
+  private static String family(String type) {
+    switch (type.charAt(0)) {
+      case 'O': return "Octicons";
+      case 'D': return "MaterialDesignIcons";
+      case 'M': return "Material Icons";
+      case 'F': return "FontAwesome";
+      case 'W': return "Weather Icons";
+      default: throw new IllegalArgumentException("Unsupported font symbol: " + type);
+    }
+  }
 
-	public static Text glyphIcon(@PropertyKey(resourceBundle = "fonts.meta") String type) {
-		return glyphIcon(type, 16);
-	}
+  public static Text glyphIcon(@PropertyKey(resourceBundle = "fonts.meta") String type) {
+    return glyphIcon(type, 16);
+  }
 }

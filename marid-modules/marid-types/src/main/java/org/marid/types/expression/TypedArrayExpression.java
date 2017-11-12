@@ -33,23 +33,23 @@ import java.util.List;
 
 public interface TypedArrayExpression extends ArrayExpression, TypedExpression {
 
-	@Nonnull
-	@Override
-	List<? extends TypedExpression> getElements();
+  @Nonnull
+  @Override
+  List<? extends TypedExpression> getElements();
 
-	@Nonnull
-	@Override
-	default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
-		return TypeUtils.getClass(context.getClassLoader(), getElementType())
-				.map(elementClass -> {
-					if (elementClass.getTypeParameters().length == 0) {
-						return Array.newInstance(elementClass, 0).getClass();
-					} else {
-						final Type t = context.resolve(owner, context.getType(elementClass));
-						final Type r = context.evaluate(e -> getElements().forEach(x -> e.accept(t, x.getType(owner, context))), t);
-						return TypeUtils.genericArrayType(r, context);
-					}
-				})
-				.orElse(TypeUtils.WILDCARD);
-	}
+  @Nonnull
+  @Override
+  default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
+    return TypeUtils.getClass(context.getClassLoader(), getElementType())
+        .map(elementClass -> {
+          if (elementClass.getTypeParameters().length == 0) {
+            return Array.newInstance(elementClass, 0).getClass();
+          } else {
+            final Type t = context.resolve(owner, context.getType(elementClass));
+            final Type r = context.evaluate(e -> getElements().forEach(x -> e.accept(t, x.getType(owner, context))), t);
+            return TypeUtils.genericArrayType(r, context);
+          }
+        })
+        .orElse(TypeUtils.WILDCARD);
+  }
 }

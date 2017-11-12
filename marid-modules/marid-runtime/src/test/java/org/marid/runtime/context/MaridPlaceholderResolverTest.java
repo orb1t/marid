@@ -34,43 +34,43 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  */
 public class MaridPlaceholderResolverTest {
 
-	@Test
-	public void circular1() {
-		assertThrows(MaridCircularPlaceholderException.class, () -> {
-			final Properties properties = new Properties();
-			properties.setProperty("x1", "2");
-			properties.setProperty("x2", "${x3}");
-			properties.setProperty("x3", "${x2}");
-			final MaridPlaceholderResolver resolver = new MaridPlaceholderResolver(properties);
-			resolver.resolvePlaceholders("abc ${x2}");
-		});
-	}
+  @Test
+  public void circular1() {
+    assertThrows(MaridCircularPlaceholderException.class, () -> {
+      final Properties properties = new Properties();
+      properties.setProperty("x1", "2");
+      properties.setProperty("x2", "${x3}");
+      properties.setProperty("x3", "${x2}");
+      final MaridPlaceholderResolver resolver = new MaridPlaceholderResolver(properties);
+      resolver.resolvePlaceholders("abc ${x2}");
+    });
+  }
 
-	@Test
-	public void circular2() {
-		assertThrows(MaridCircularPlaceholderException.class, () -> {
-			final Properties properties = new Properties();
-			properties.setProperty("x1", "2");
-			properties.setProperty("x2", "${x2}");
-			final MaridPlaceholderResolver resolver = new MaridPlaceholderResolver(properties);
-			resolver.resolvePlaceholders("abc ${x2}");
-		});
-	}
+  @Test
+  public void circular2() {
+    assertThrows(MaridCircularPlaceholderException.class, () -> {
+      final Properties properties = new Properties();
+      properties.setProperty("x1", "2");
+      properties.setProperty("x2", "${x2}");
+      final MaridPlaceholderResolver resolver = new MaridPlaceholderResolver(properties);
+      resolver.resolvePlaceholders("abc ${x2}");
+    });
+  }
 
-	@Test
-	public void defValue() {
-		final Properties properties = new Properties();
-		properties.setProperty("x1", "2");
-		final MaridPlaceholderResolver resolver = new MaridPlaceholderResolver(properties);
-		assertEquals("abc zz 2", resolver.resolvePlaceholders("abc ${x2:zz} ${x1}"));
-	}
+  @Test
+  public void defValue() {
+    final Properties properties = new Properties();
+    properties.setProperty("x1", "2");
+    final MaridPlaceholderResolver resolver = new MaridPlaceholderResolver(properties);
+    assertEquals("abc zz 2", resolver.resolvePlaceholders("abc ${x2:zz} ${x1}"));
+  }
 
-	@Test
-	public void unterminated() {
-		final Properties properties = new Properties();
-		properties.setProperty("x1", "2");
-		final MaridPlaceholderResolver resolver = new MaridPlaceholderResolver(properties);
-		assertEquals("abc zz ${x1", resolver.resolvePlaceholders("abc ${x2:zz} ${x1"));
-		assertEquals("abc  ${x1", resolver.resolvePlaceholders("abc ${x2} ${x1"));
-	}
+  @Test
+  public void unterminated() {
+    final Properties properties = new Properties();
+    properties.setProperty("x1", "2");
+    final MaridPlaceholderResolver resolver = new MaridPlaceholderResolver(properties);
+    assertEquals("abc zz ${x1", resolver.resolvePlaceholders("abc ${x2:zz} ${x1"));
+    assertEquals("abc  ${x1", resolver.resolvePlaceholders("abc ${x2} ${x1"));
+  }
 }

@@ -27,12 +27,12 @@ import java.nio.file.Path;
  */
 public class TextFileAddedEvent extends PropagatedEvent {
 
-	public TextFileAddedEvent(Path source) {
-		super(source);
-	}
+  public TextFileAddedEvent(Path source) {
+    super(source);
+  }
 
-	@Override
-	public Path getSource() {
-		return (Path) super.getSource();
-	}
+  @Override
+  public Path getSource() {
+    return (Path) super.getSource();
+  }
 }

@@ -48,71 +48,71 @@ import static org.marid.jfx.action.FxAction.grouped;
  */
 public interface MaridActions {
 
-	static Menu[] menus(Collection<FxAction> actions) {
-		return actions.stream().collect(groupingBy(a -> a.menu, TreeMap::new, toList())).entrySet().stream()
-				.map(e -> {
-					final Menu menu = new Menu();
-					menu.textProperty().bind(ls(e.getKey()));
-					menu.getItems().setAll(grouped(menu.getItems(), e.getValue()));
-					return menu;
-				})
-				.toArray(Menu[]::new);
-	}
+  static Menu[] menus(Collection<FxAction> actions) {
+    return actions.stream().collect(groupingBy(a -> a.menu, TreeMap::new, toList())).entrySet().stream()
+        .map(e -> {
+          final Menu menu = new Menu();
+          menu.textProperty().bind(ls(e.getKey()));
+          menu.getItems().setAll(grouped(menu.getItems(), e.getValue()));
+          return menu;
+        })
+        .toArray(Menu[]::new);
+  }
 
-	static void initToolbar(Collection<FxAction> actions, ToolBar toolBar) {
-		final Map<String, List<FxAction>> sorted = actions.stream()
-				.filter(e -> e.toolbarGroup != null)
-				.collect(groupingBy(a -> a.toolbarGroup, TreeMap::new, toList()));
-		sorted.values().stream()
-				.flatMap(v -> concat(v.stream().map(FxAction::button), of(new Separator())))
-				.forEach(toolBar.getItems()::add);
-	}
+  static void initToolbar(Collection<FxAction> actions, ToolBar toolBar) {
+    final Map<String, List<FxAction>> sorted = actions.stream()
+        .filter(e -> e.toolbarGroup != null)
+        .collect(groupingBy(a -> a.toolbarGroup, TreeMap::new, toList()));
+    sorted.values().stream()
+        .flatMap(v -> concat(v.stream().map(FxAction::button), of(new Separator())))
+        .forEach(toolBar.getItems()::add);
+  }
 
-	static ToolBar toolbar(Collection<FxAction> actions) {
-		final ToolBar toolBar = new ToolBar();
-		initToolbar(actions, toolBar);
-		return toolBar;
-	}
+  static ToolBar toolbar(Collection<FxAction> actions) {
+    final ToolBar toolBar = new ToolBar();
+    initToolbar(actions, toolBar);
+    return toolBar;
+  }
 
-	static <T> T execute(Callable<T> task, long timeout, TimeUnit timeUnit) {
-		if (Platform.isFxApplicationThread()) {
-			try {
-				return task.call();
-			} catch (Exception x) {
-				throw new IllegalStateException(x);
-			}
-		} else {
-			final LinkedTransferQueue<Pair<T, Throwable>> queue = new LinkedTransferQueue<>();
-			Platform.runLater(() -> {
-				try {
-					queue.add(new Pair<>(task.call(), null));
-				} catch (Throwable x) {
-					queue.add(new Pair<>(null, x));
-				}
-			});
-			final Pair<T, Throwable> pair;
-			try {
-				pair = queue.poll(timeout, timeUnit);
-			} catch (InterruptedException x) {
-				throw new IllegalStateException(x);
-			}
-			if (pair == null) {
-				throw new IllegalStateException("Timeout exceeded");
-			} else if (pair.getKey() != null) {
-				return pair.getKey();
-			} else if (pair.getValue() instanceof RuntimeException) {
-				throw (RuntimeException) pair.getValue();
-			} else if (pair.getValue() instanceof Exception) {
-				throw new IllegalStateException(pair.getValue());
-			} else if (pair.getValue() instanceof Error) {
-				throw (Error) pair.getValue();
-			} else {
-				throw new IllegalStateException("Unknown error", pair.getValue());
-			}
-		}
-	}
+  static <T> T execute(Callable<T> task, long timeout, TimeUnit timeUnit) {
+    if (Platform.isFxApplicationThread()) {
+      try {
+        return task.call();
+      } catch (Exception x) {
+        throw new IllegalStateException(x);
+      }
+    } else {
+      final LinkedTransferQueue<Pair<T, Throwable>> queue = new LinkedTransferQueue<>();
+      Platform.runLater(() -> {
+        try {
+          queue.add(new Pair<>(task.call(), null));
+        } catch (Throwable x) {
+          queue.add(new Pair<>(null, x));
+        }
+      });
+      final Pair<T, Throwable> pair;
+      try {
+        pair = queue.poll(timeout, timeUnit);
+      } catch (InterruptedException x) {
+        throw new IllegalStateException(x);
+      }
+      if (pair == null) {
+        throw new IllegalStateException("Timeout exceeded");
+      } else if (pair.getKey() != null) {
+        return pair.getKey();
+      } else if (pair.getValue() instanceof RuntimeException) {
+        throw (RuntimeException) pair.getValue();
+      } else if (pair.getValue() instanceof Exception) {
+        throw new IllegalStateException(pair.getValue());
+      } else if (pair.getValue() instanceof Error) {
+        throw (Error) pair.getValue();
+      } else {
+        throw new IllegalStateException("Unknown error", pair.getValue());
+      }
+    }
+  }
 
-	static <T> T execute(Callable<T> task) {
-		return execute(task, 1L, TimeUnit.MINUTES);
-	}
+  static <T> T execute(Callable<T> task) {
+    return execute(task, 1L, TimeUnit.MINUTES);
+  }
 }

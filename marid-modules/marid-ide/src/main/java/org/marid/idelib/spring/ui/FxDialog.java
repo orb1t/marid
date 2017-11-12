@@ -28,33 +28,33 @@ import static org.marid.Ide.FX_SCOPE;
 
 public abstract class FxDialog<R> extends Dialog<R> {
 
-	private final String conversationId;
+  private final String conversationId;
 
-	public FxDialog() {
-		this.conversationId = FX_SCOPE.nextConversationId();
-		FX_SCOPE.setConversationId(conversationId);
-		setOnShowing(event -> FX_SCOPE.setConversationId(conversationId));
-		setOnHidden(event -> FX_SCOPE.destroy(conversationId));
-		getDialogPane().focusedProperty().addListener((o, oV, nV) -> {
-			if (nV) {
-				FX_SCOPE.setConversationId(conversationId);
-			}
-		});
-	}
+  public FxDialog() {
+    this.conversationId = FX_SCOPE.nextConversationId();
+    FX_SCOPE.setConversationId(conversationId);
+    setOnShowing(event -> FX_SCOPE.setConversationId(conversationId));
+    setOnHidden(event -> FX_SCOPE.destroy(conversationId));
+    getDialogPane().focusedProperty().addListener((o, oV, nV) -> {
+      if (nV) {
+        FX_SCOPE.setConversationId(conversationId);
+      }
+    });
+  }
 
-	public void addOnShowing(EventHandler<DialogEvent> eventHandler) {
-		final EventHandler<DialogEvent> old = getOnShowing();
-		setOnShowing(event -> {
-			old.handle(event);
-			eventHandler.handle(event);
-		});
-	}
+  public void addOnShowing(EventHandler<DialogEvent> eventHandler) {
+    final EventHandler<DialogEvent> old = getOnShowing();
+    setOnShowing(event -> {
+      old.handle(event);
+      eventHandler.handle(event);
+    });
+  }
 
-	public void addOnHidden(EventHandler<DialogEvent> eventHandler) {
-		final EventHandler<DialogEvent> old = getOnHidden();
-		setOnHidden(event -> {
-			old.handle(event);
-			eventHandler.handle(event);
-		});
-	}
+  public void addOnHidden(EventHandler<DialogEvent> eventHandler) {
+    final EventHandler<DialogEvent> old = getOnHidden();
+    setOnHidden(event -> {
+      old.handle(event);
+      eventHandler.handle(event);
+    });
+  }
 }

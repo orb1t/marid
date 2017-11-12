@@ -27,10 +27,10 @@ import javax.annotation.Nonnull;
 
 public class ThisExpr extends Expr implements TypedThisExpression {
 
-	public ThisExpr() {
-	}
+  public ThisExpr() {
+  }
 
-	ThisExpr(@Nonnull Element element) {
-		super(element);
-	}
+  ThisExpr(@Nonnull Element element) {
+    super(element);
+  }
 }

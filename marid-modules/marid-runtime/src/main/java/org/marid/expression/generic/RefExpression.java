@@ -25,6 +25,6 @@ import javax.annotation.Nonnull;
 
 public interface RefExpression extends Expression {
 
-	@Nonnull
-	String getReference();
+  @Nonnull
+  String getReference();
 }

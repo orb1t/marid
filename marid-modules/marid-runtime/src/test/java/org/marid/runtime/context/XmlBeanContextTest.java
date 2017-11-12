@@ -41,53 +41,53 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class XmlBeanContextTest {
 
-	private static Properties properties;
-	private static ClassLoader classLoader;
-	private static BeanConfiguration beanConfiguration;
-	private static BeanContext context;
+  private static Properties properties;
+  private static ClassLoader classLoader;
+  private static BeanConfiguration beanConfiguration;
+  private static BeanContext context;
 
-	@BeforeAll
-	static void init() throws IOException {
-		properties = PropertiesLoaderUtils.loadAllProperties("classpath:beans.properties");
-		classLoader = Thread.currentThread().getContextClassLoader();
-		beanConfiguration = new BeanConfiguration(classLoader, properties);
+  @BeforeAll
+  static void init() throws IOException {
+    properties = PropertiesLoaderUtils.loadAllProperties("classpath:beans.properties");
+    classLoader = Thread.currentThread().getContextClassLoader();
+    beanConfiguration = new BeanConfiguration(classLoader, properties);
 
-		try (final Reader reader = new InputStreamReader(classLoader.getResourceAsStream("beans1.xml"), UTF_8)) {
-			context = new BeanContext(beanConfiguration, Xmls.read(reader, e -> new RuntimeBean(null, e)));
-		}
-	}
+    try (final Reader reader = new InputStreamReader(classLoader.getResourceAsStream("beans1.xml"), UTF_8)) {
+      context = new BeanContext(beanConfiguration, Xmls.read(reader, e -> new RuntimeBean(null, e)));
+    }
+  }
 
-	@AfterAll
-	static void destroy() {
-		if (context != null) {
-			context.close();
-		}
-	}
+  @AfterAll
+  static void destroy() {
+    if (context != null) {
+      context.close();
+    }
+  }
 
-	@Test
-	void testB1() {
-		final BeanContext b = context.children()
-				.filter(c -> c.getBean().getName().equals("b1"))
-				.findFirst()
-				.orElseThrow(() -> new NoSuchElementException("b1"));
-		assertEquals("str", b.getInstance());
-	}
+  @Test
+  void testB1() {
+    final BeanContext b = context.children()
+        .filter(c -> c.getBean().getName().equals("b1"))
+        .findFirst()
+        .orElseThrow(() -> new NoSuchElementException("b1"));
+    assertEquals("str", b.getInstance());
+  }
 
-	@Test
-	void testB2() {
-		final BeanContext b = context.children()
-				.filter(c -> c.getBean().getName().equals("b2"))
-				.findFirst()
-				.orElseThrow(() -> new NoSuchElementException("b2"));
-		assertEquals(BigInteger.valueOf(1L), b.getInstance());
-	}
+  @Test
+  void testB2() {
+    final BeanContext b = context.children()
+        .filter(c -> c.getBean().getName().equals("b2"))
+        .findFirst()
+        .orElseThrow(() -> new NoSuchElementException("b2"));
+    assertEquals(BigInteger.valueOf(1L), b.getInstance());
+  }
 
-	@Test
-	void testB3() {
-		final BeanContext b = context.children()
-				.filter(c -> c.getBean().getName().equals("b3"))
-				.findFirst()
-				.orElseThrow(() -> new NoSuchElementException("b3"));
-		assertEquals(singletonList(BigInteger.valueOf(1L)), b.getInstance());
-	}
+  @Test
+  void testB3() {
+    final BeanContext b = context.children()
+        .filter(c -> c.getBean().getName().equals("b3"))
+        .findFirst()
+        .orElseThrow(() -> new NoSuchElementException("b3"));
+    assertEquals(singletonList(BigInteger.valueOf(1L)), b.getInstance());
+  }
 }

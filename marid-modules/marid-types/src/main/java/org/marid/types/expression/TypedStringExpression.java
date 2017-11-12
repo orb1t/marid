@@ -30,9 +30,9 @@ import java.lang.reflect.Type;
 
 public interface TypedStringExpression extends StringExpression, TypedExpression {
 
-	@Nonnull
-	@Override
-	default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
-		return String.class;
-	}
+  @Nonnull
+  @Override
+  default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
+    return String.class;
+  }
 }

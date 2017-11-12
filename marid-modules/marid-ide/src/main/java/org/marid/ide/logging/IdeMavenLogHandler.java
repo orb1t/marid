@@ -32,24 +32,24 @@ import java.util.logging.LogRecord;
  */
 public class IdeMavenLogHandler extends Handler {
 
-	public final ObservableList<LogRecord> records = FXCollections.observableArrayList();
+  public final ObservableList<LogRecord> records = FXCollections.observableArrayList();
 
-	public IdeMavenLogHandler(int threadId) {
-		setFilter(r -> r.getThreadID() == threadId);
-	}
+  public IdeMavenLogHandler(int threadId) {
+    setFilter(r -> r.getThreadID() == threadId);
+  }
 
-	@Override
-	public void publish(LogRecord record) {
-		if (isLoggable(record)) {
-			Platform.runLater(() -> records.add(record));
-		}
-	}
+  @Override
+  public void publish(LogRecord record) {
+    if (isLoggable(record)) {
+      Platform.runLater(() -> records.add(record));
+    }
+  }
 
-	@Override
-	public void flush() {
-	}
+  @Override
+  public void flush() {
+  }
 
-	@Override
-	public void close() {
-	}
+  @Override
+  public void close() {
+  }
 }

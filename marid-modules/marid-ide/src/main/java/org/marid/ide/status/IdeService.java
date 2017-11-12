@@ -20,7 +20,6 @@
 
 package org.marid.ide.status;
 
-import com.google.common.collect.ImmutableSet;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -60,160 +59,160 @@ import static org.marid.l10n.L10n.s;
  */
 public abstract class IdeService<V extends Node> extends Service<Duration> {
 
-	protected static final Set<EventType<?>> DONE_EVENT_TYPES = ImmutableSet.of(
-			WORKER_STATE_SUCCEEDED,
-			WORKER_STATE_FAILED,
-			WORKER_STATE_CANCELLED
-	);
+  protected static final Set<EventType<?>> DONE_EVENT_TYPES = Set.of(
+      WORKER_STATE_SUCCEEDED,
+      WORKER_STATE_FAILED,
+      WORKER_STATE_CANCELLED
+  );
 
-	private final SimpleObjectProperty<V> graphic = new SimpleObjectProperty<>();
-	protected final SimpleObjectProperty<Parent> details = new SimpleObjectProperty<>();
-	private final ProgressBar progressBar = new ProgressBar();
-	protected final IdeServiceButton button = new IdeServiceButton();
+  private final SimpleObjectProperty<V> graphic = new SimpleObjectProperty<>();
+  protected final SimpleObjectProperty<Parent> details = new SimpleObjectProperty<>();
+  private final ProgressBar progressBar = new ProgressBar();
+  protected final IdeServiceButton button = new IdeServiceButton();
 
-	private IdeStatusBar statusBar;
-	private PopOver popOver;
+  private IdeStatusBar statusBar;
+  private PopOver popOver;
 
-	public IdeService() {
-		button.setAlignment(Pos.CENTER_LEFT);
-		button.setFocusTraversable(true);
-		button.setOnMouseClicked(event -> onDetail());
-		button.label.textProperty().bind(titleProperty());
-		button.label.graphicProperty().bind(graphic);
+  public IdeService() {
+    button.setAlignment(Pos.CENTER_LEFT);
+    button.setFocusTraversable(true);
+    button.setOnMouseClicked(event -> onDetail());
+    button.label.textProperty().bind(titleProperty());
+    button.label.graphicProperty().bind(graphic);
 
-		progressBar.setVisible(false);
-		progressBar.setPrefWidth(50);
-		progressBar.setPrefHeight(24);
+    progressBar.setVisible(false);
+    progressBar.setPrefWidth(50);
+    progressBar.setPrefHeight(24);
 
-		progressProperty().addListener((o, oV, nV) -> {
-			if (!progressBar.isVisible()) {
-				button.box.getChildren().add(button.box.getChildren().size() - 1, progressBar);
-				progressBar.setVisible(true);
-			}
-			if (nV.doubleValue() <= oV.doubleValue() || nV.doubleValue() < 0.01) {
-				progressBar.setProgress(INDETERMINATE_PROGRESS);
-			} else {
-				progressBar.setProgress(nV.doubleValue());
-			}
-		});
+    progressProperty().addListener((o, oV, nV) -> {
+      if (!progressBar.isVisible()) {
+        button.box.getChildren().add(button.box.getChildren().size() - 1, progressBar);
+        progressBar.setVisible(true);
+      }
+      if (nV.doubleValue() <= oV.doubleValue() || nV.doubleValue() < 0.01) {
+        progressBar.setProgress(INDETERMINATE_PROGRESS);
+      } else {
+        progressBar.setProgress(nV.doubleValue());
+      }
+    });
 
-		messageProperty().addListener((o, oV, nV) -> {
-			if (nV != null) {
-				if (button.label.getTooltip() == null) {
-					button.label.setTooltip(new Tooltip());
-				}
-				button.label.getTooltip().setText(nV);
-			} else {
-				button.label.setTooltip(null);
-			}
-		});
-	}
+    messageProperty().addListener((o, oV, nV) -> {
+      if (nV != null) {
+        if (button.label.getTooltip() == null) {
+          button.label.setTooltip(new Tooltip());
+        }
+        button.label.getTooltip().setText(nV);
+      } else {
+        button.label.setTooltip(null);
+      }
+    });
+  }
 
-	private void onDetail() {
-		final Parent detailNode = details.get();
-		if (detailNode != null && popOver == null) {
-			final BorderPane pane = new BorderPane(detailNode);
-			popOver = new PopOver(pane);
-			popOver.setHideOnEscape(true);
-			popOver.setCloseButtonEnabled(true);
-			popOver.setHeaderAlwaysVisible(true);
-			popOver.setAutoHide(false);
-			popOver.titleProperty().bind(titleProperty());
-			popOver.setArrowLocation(ArrowLocation.BOTTOM_LEFT);
+  private void onDetail() {
+    final Parent detailNode = details.get();
+    if (detailNode != null && popOver == null) {
+      final BorderPane pane = new BorderPane(detailNode);
+      popOver = new PopOver(pane);
+      popOver.setHideOnEscape(true);
+      popOver.setCloseButtonEnabled(true);
+      popOver.setHeaderAlwaysVisible(true);
+      popOver.setAutoHide(false);
+      popOver.titleProperty().bind(titleProperty());
+      popOver.setArrowLocation(ArrowLocation.BOTTOM_LEFT);
 
-			final ChangeListener<Boolean> runningListener = (o, oV, nV) -> {
-				if (!nV) {
-					popOver.setContentNode(null);
-					popOver.hide();
-				}
-			};
-			popOver.setOnHiding(event -> {
-				pane.setCenter(null);
-				popOver.setContentNode(null);
-				runningProperty().removeListener(runningListener);
-				popOver = null;
-			});
-			runningProperty().addListener(runningListener);
+      final ChangeListener<Boolean> runningListener = (o, oV, nV) -> {
+        if (!nV) {
+          popOver.setContentNode(null);
+          popOver.hide();
+        }
+      };
+      popOver.setOnHiding(event -> {
+        pane.setCenter(null);
+        popOver.setContentNode(null);
+        runningProperty().removeListener(runningListener);
+        popOver = null;
+      });
+      runningProperty().addListener(runningListener);
 
-			popOver.show(button);
-		} else if (popOver != null) {
-			popOver.hide();
-		}
-	}
+      popOver.show(button);
+    } else if (popOver != null) {
+      popOver.hide();
+    }
+  }
 
-	@Autowired
-	private void init(IdeStatusBar statusBar) {
-		this.statusBar = statusBar;
-		addEventHandler(WORKER_STATE_RUNNING, event -> statusBar.add(button));
-		addEventHandler(WORKER_STATE_SUCCEEDED, event -> {
-			statusBar.remove(button);
-			final Duration duration = (Duration) event.getSource().getValue();
-			final String durationText = DurationFormatUtils.formatDurationHMS(duration.toMillis());
-			n(INFO, "{0} succeeded in {1}", details.get(), event.getSource().getTitle(), durationText);
-		});
-		addEventHandler(WORKER_STATE_FAILED, event -> {
-			statusBar.remove(button);
-			n(WARNING, "{0} failed", details.get(), event.getSource().getException(), event.getSource().getTitle());
-		});
-		addEventHandler(WORKER_STATE_CANCELLED, event -> button.setEffect(new SepiaTone(0.5)));
-	}
+  @Autowired
+  private void init(IdeStatusBar statusBar) {
+    this.statusBar = statusBar;
+    addEventHandler(WORKER_STATE_RUNNING, event -> statusBar.add(button));
+    addEventHandler(WORKER_STATE_SUCCEEDED, event -> {
+      statusBar.remove(button);
+      final Duration duration = (Duration) event.getSource().getValue();
+      final String durationText = DurationFormatUtils.formatDurationHMS(duration.toMillis());
+      n(INFO, "{0} succeeded in {1}", details.get(), event.getSource().getTitle(), durationText);
+    });
+    addEventHandler(WORKER_STATE_FAILED, event -> {
+      statusBar.remove(button);
+      n(WARNING, "{0} failed", details.get(), event.getSource().getException(), event.getSource().getTitle());
+    });
+    addEventHandler(WORKER_STATE_CANCELLED, event -> button.setEffect(new SepiaTone(0.5)));
+  }
 
-	@Override
-	protected abstract IdeTask createTask();
+  @Override
+  protected abstract IdeTask createTask();
 
-	protected abstract class IdeTask extends Task<Duration> {
+  protected abstract class IdeTask extends Task<Duration> {
 
-		protected abstract void execute() throws Exception;
+    protected abstract void execute() throws Exception;
 
-		@Nonnull
-		protected abstract V createGraphic();
+    @Nonnull
+    protected abstract V createGraphic();
 
-		protected ContextMenu contextMenu() {
-			return null;
-		}
+    protected ContextMenu contextMenu() {
+      return null;
+    }
 
-		protected void updateGraphic(Consumer<V> consumer) {
-			if (Platform.isFxApplicationThread()) {
-				consumer.accept(graphic.get());
-			} else {
-				Platform.runLater(() -> consumer.accept(graphic.get()));
-			}
-		}
+    protected void updateGraphic(Consumer<V> consumer) {
+      if (Platform.isFxApplicationThread()) {
+        consumer.accept(graphic.get());
+      } else {
+        Platform.runLater(() -> consumer.accept(graphic.get()));
+      }
+    }
 
-		@Override
-		protected final Duration call() throws Exception {
-			updateTitle(s(IdeService.this.getClass().getSimpleName()));
-			try {
-				final long startTime = System.nanoTime();
-				{
-					final V node = createGraphic();
-					Platform.runLater(() -> {
-						graphic.set(node);
-						button.label.setContextMenu(contextMenu());
+    @Override
+    protected final Duration call() throws Exception {
+      updateTitle(s(IdeService.this.getClass().getSimpleName()));
+      try {
+        final long startTime = System.nanoTime();
+        {
+          final V node = createGraphic();
+          Platform.runLater(() -> {
+            graphic.set(node);
+            button.label.setContextMenu(contextMenu());
 
-						final Button cancel = new Button();
-						cancel.setOnAction(event -> {
-							cancel();
-							button.box.getChildren().remove(cancel);
-						});
-						final Tooltip tooltip = new Tooltip();
-						tooltip.textProperty().bind(ls("Cancel"));
-						cancel.setTooltip(tooltip);
-						cancel.setGraphic(FontIcons.glyphIcon("D_CLOSE_CIRCLE", 16));
-						button.box.getChildren().add(cancel);
-					});
-				}
-				execute();
-				return Duration.ofNanos(System.nanoTime() - startTime);
-			} finally {
-				Platform.runLater(() -> {
-					if (popOver != null) {
-						popOver.hide();
-					}
-					graphic.set(null);
-					statusBar.remove(button);
-				});
-			}
-		}
-	}
+            final Button cancel = new Button();
+            cancel.setOnAction(event -> {
+              cancel();
+              button.box.getChildren().remove(cancel);
+            });
+            final Tooltip tooltip = new Tooltip();
+            tooltip.textProperty().bind(ls("Cancel"));
+            cancel.setTooltip(tooltip);
+            cancel.setGraphic(FontIcons.glyphIcon("D_CLOSE_CIRCLE", 16));
+            button.box.getChildren().add(cancel);
+          });
+        }
+        execute();
+        return Duration.ofNanos(System.nanoTime() - startTime);
+      } finally {
+        Platform.runLater(() -> {
+          if (popOver != null) {
+            popOver.hide();
+          }
+          graphic.set(null);
+          statusBar.remove(button);
+        });
+      }
+    }
+  }
 }

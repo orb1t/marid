@@ -36,114 +36,114 @@ import org.springframework.stereotype.Component;
 @Component
 public class SpecialActionConfiguration {
 
-	@Bean
-	public SpecialActions specialActions() {
-		return new SpecialActions();
-	}
+  @Bean
+  public SpecialActions specialActions() {
+    return new SpecialActions();
+  }
 
-	@IdeAction
-	public SpecialAction editAction() {
-		return new SpecialAction("edit", "ed", "Edit")
-				.bindText("Edit")
-				.setAccelerator(KeyCombination.valueOf("F4"))
-				.setIcon("M_EDIT")
-				.setDisabled(true);
-	}
+  @IdeAction
+  public SpecialAction editAction() {
+    return new SpecialAction("edit", "ed", "Edit")
+        .bindText("Edit")
+        .setAccelerator(KeyCombination.valueOf("F4"))
+        .setIcon("M_EDIT")
+        .setDisabled(true);
+  }
 
-	@IdeAction
-	public SpecialAction addAction() {
-		return new SpecialAction("mod", "mod", "Edit")
-				.bindText("Add")
-				.setAccelerator(KeyCombination.valueOf("Ctrl+I"))
-				.setIcon("M_ADD_BOX")
-				.setDisabled(true);
-	}
+  @IdeAction
+  public SpecialAction addAction() {
+    return new SpecialAction("mod", "mod", "Edit")
+        .bindText("Add")
+        .setAccelerator(KeyCombination.valueOf("Ctrl+I"))
+        .setIcon("M_ADD_BOX")
+        .setDisabled(true);
+  }
 
-	@IdeAction
-	public SpecialAction removeAction() {
-		return new SpecialAction("mod", "mod", "Edit")
-				.bindText("Remove")
-				.setAccelerator(KeyCombination.valueOf("F8"))
-				.setIcon("D_MINUS_BOX")
-				.setDisabled(true);
-	}
+  @IdeAction
+  public SpecialAction removeAction() {
+    return new SpecialAction("mod", "mod", "Edit")
+        .bindText("Remove")
+        .setAccelerator(KeyCombination.valueOf("F8"))
+        .setIcon("D_MINUS_BOX")
+        .setDisabled(true);
+  }
 
-	@IdeAction
-	public SpecialAction cutAction() {
-		return new SpecialAction("cp", "cp", "Edit")
-				.bindText("Cut")
-				.setAccelerator(KeyCombination.valueOf("Ctrl+X"))
-				.setIcon("M_CONTENT_CUT")
-				.setDisabled(true);
-	}
+  @IdeAction
+  public SpecialAction cutAction() {
+    return new SpecialAction("cp", "cp", "Edit")
+        .bindText("Cut")
+        .setAccelerator(KeyCombination.valueOf("Ctrl+X"))
+        .setIcon("M_CONTENT_CUT")
+        .setDisabled(true);
+  }
 
-	@IdeAction
-	public SpecialAction copyAction() {
-		return new SpecialAction("cp", "cp", "Edit")
-				.bindText("Copy")
-				.setAccelerator(KeyCombination.valueOf("Ctrl+C"))
-				.setIcon("M_CONTENT_COPY")
-				.setDisabled(true);
-	}
+  @IdeAction
+  public SpecialAction copyAction() {
+    return new SpecialAction("cp", "cp", "Edit")
+        .bindText("Copy")
+        .setAccelerator(KeyCombination.valueOf("Ctrl+C"))
+        .setIcon("M_CONTENT_COPY")
+        .setDisabled(true);
+  }
 
-	@IdeAction
-	public SpecialAction pasteAction() {
-		return new SpecialAction("cp", "cp", "Edit")
-				.bindText("Paste")
-				.setAccelerator(KeyCombination.valueOf("Ctrl+V"))
-				.setIcon("M_CONTENT_PASTE")
-				.setDisabled(true);
-	}
+  @IdeAction
+  public SpecialAction pasteAction() {
+    return new SpecialAction("cp", "cp", "Edit")
+        .bindText("Paste")
+        .setAccelerator(KeyCombination.valueOf("Ctrl+V"))
+        .setIcon("M_CONTENT_PASTE")
+        .setDisabled(true);
+  }
 
-	@IdeAction
-	public SpecialAction clearAllAction() {
-		return new SpecialAction("mod", "mod", "Edit")
-				.bindText("Clear All")
-				.setIcon("M_CLEAR_ALL")
-				.setDisabled(true);
-	}
+  @IdeAction
+  public SpecialAction clearAllAction() {
+    return new SpecialAction("mod", "mod", "Edit")
+        .bindText("Clear All")
+        .setIcon("M_CLEAR_ALL")
+        .setDisabled(true);
+  }
 
-	@IdeAction
-	public SpecialAction renameAction() {
-		return new SpecialAction("edit", "ed", "Edit")
-				.bindText("Rename")
-				.setAccelerator(KeyCombination.valueOf("Ctrl+R"))
-				.setIcon("D_RENAME_BOX")
-				.setDisabled(true);
-	}
+  @IdeAction
+  public SpecialAction renameAction() {
+    return new SpecialAction("edit", "ed", "Edit")
+        .bindText("Rename")
+        .setAccelerator(KeyCombination.valueOf("Ctrl+R"))
+        .setIcon("D_RENAME_BOX")
+        .setDisabled(true);
+  }
 
-	@IdeAction
-	public SpecialAction selectAllAction() {
-		return new SpecialAction("sel", "sel", "Edit")
-				.bindText("Select All")
-				.setAccelerator(KeyCombination.valueOf("Ctrl+A"))
-				.setIcon("D_SELECT_ALL")
-				.setDisabled(true);
-	}
+  @IdeAction
+  public SpecialAction selectAllAction() {
+    return new SpecialAction("sel", "sel", "Edit")
+        .bindText("Select All")
+        .setAccelerator(KeyCombination.valueOf("Ctrl+A"))
+        .setIcon("D_SELECT_ALL")
+        .setDisabled(true);
+  }
 
-	@IdeAction
-	public SpecialAction upAction() {
-		return new SpecialAction("ed1", "ed1", "Edit")
-				.bindText("Up")
-				.setAccelerator(new KeyCodeCombination(KeyCode.UP, KeyCombination.CONTROL_DOWN))
-				.setIcon("D_ARROW_UP")
-				.setDisabled(true);
-	}
+  @IdeAction
+  public SpecialAction upAction() {
+    return new SpecialAction("ed1", "ed1", "Edit")
+        .bindText("Up")
+        .setAccelerator(new KeyCodeCombination(KeyCode.UP, KeyCombination.CONTROL_DOWN))
+        .setIcon("D_ARROW_UP")
+        .setDisabled(true);
+  }
 
-	@IdeAction
-	public SpecialAction downAction() {
-		return new SpecialAction("ed1", "ed1", "Edit")
-				.bindText("Down")
-				.setAccelerator(new KeyCodeCombination(KeyCode.DOWN, KeyCombination.CONTROL_DOWN))
-				.setIcon("D_ARROW_DOWN")
-				.setDisabled(true);
-	}
+  @IdeAction
+  public SpecialAction downAction() {
+    return new SpecialAction("ed1", "ed1", "Edit")
+        .bindText("Down")
+        .setAccelerator(new KeyCodeCombination(KeyCode.DOWN, KeyCombination.CONTROL_DOWN))
+        .setIcon("D_ARROW_DOWN")
+        .setDisabled(true);
+  }
 
-	@IdeAction
-	public SpecialAction miscAction() {
-		return new SpecialAction("misc", "misc", "Edit")
-				.bindText("Item action")
-				.setIcon("D_MARTINI")
-				.setDisabled(true);
-	}
+  @IdeAction
+  public SpecialAction miscAction() {
+    return new SpecialAction("misc", "misc", "Edit")
+        .bindText("Item action")
+        .setIcon("D_MARTINI")
+        .setDisabled(true);
+  }
 }

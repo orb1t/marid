@@ -30,7 +30,7 @@ import org.marid.idelib.spring.annotation.PrototypeComponent;
 @PrototypeComponent
 public class ThermometerEditor extends AbstractDeviceEditor<Float, Thermometer> {
 
-	public ThermometerEditor(Thermometer device, Stage stage) {
-		super(device, stage);
-	}
+  public ThermometerEditor(Thermometer device, Stage stage) {
+    super(device, stage);
+  }
 }

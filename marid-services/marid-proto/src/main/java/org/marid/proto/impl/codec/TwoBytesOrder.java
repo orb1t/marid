@@ -30,39 +30,39 @@ import org.marid.runtime.annotation.MaridBeanFactory;
 @MaridBean(description = "Transforms a four-byte array")
 public enum TwoBytesOrder implements Codec<byte[]> {
 
-	@MaridBeanFactory
-	ABCD(0, 1, 2, 3),
+  @MaridBeanFactory
+  ABCD(0, 1, 2, 3),
 
-	@MaridBeanFactory
-	BADC(1, 0, 3, 2),
+  @MaridBeanFactory
+  BADC(1, 0, 3, 2),
 
-	@MaridBeanFactory
-	DCBA(3, 2, 1, 0),
+  @MaridBeanFactory
+  DCBA(3, 2, 1, 0),
 
-	@MaridBeanFactory
-	CDAB(2, 3, 0, 1);
+  @MaridBeanFactory
+  CDAB(2, 3, 0, 1);
 
-	private final int[] indices;
+  private final int[] indices;
 
-	TwoBytesOrder(int... indices) {
-		this.indices = indices;
-	}
+  TwoBytesOrder(int... indices) {
+    this.indices = indices;
+  }
 
-	@Override
-	public byte[] decode(byte[] data) {
-		final byte[] res = new byte[4];
-		for (int i = 0; i < indices.length; i++) {
-			res[i] = data[indices[i]];
-		}
-		return res;
-	}
+  @Override
+  public byte[] decode(byte[] data) {
+    final byte[] res = new byte[4];
+    for (int i = 0; i < indices.length; i++) {
+      res[i] = data[indices[i]];
+    }
+    return res;
+  }
 
-	@Override
-	public byte[] encode(byte[] data) {
-		final byte[] res = new byte[4];
-		for (int i = 0; i < indices.length; i++) {
-			res[indices[i]] = data[i];
-		}
-		return res;
-	}
+  @Override
+  public byte[] encode(byte[] data) {
+    final byte[] res = new byte[4];
+    for (int i = 0; i < indices.length; i++) {
+      res[indices[i]] = data[i];
+    }
+    return res;
+  }
 }

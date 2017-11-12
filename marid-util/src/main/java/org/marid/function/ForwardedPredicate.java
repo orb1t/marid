@@ -28,14 +28,14 @@ import java.util.function.Predicate;
  */
 public class ForwardedPredicate<T> implements Predicate<T> {
 
-	private final Predicate<T> delegate;
+  private final Predicate<T> delegate;
 
-	public ForwardedPredicate(Predicate<T> delegate) {
-		this.delegate = delegate;
-	}
+  public ForwardedPredicate(Predicate<T> delegate) {
+    this.delegate = delegate;
+  }
 
-	@Override
-	public boolean test(T t) {
-		return delegate.test(t);
-	}
+  @Override
+  public boolean test(T t) {
+    return delegate.test(t);
+  }
 }

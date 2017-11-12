@@ -29,13 +29,13 @@ import java.util.function.Function;
 
 public interface BeanActionProvider extends Function<TreeItem<IdeBean>, FxAction> {
 
-	@Override
-	default FxAction apply(TreeItem<IdeBean> ideBeanTreeItem) {
-		return Optional.ofNullable(ideBeanTreeItem)
-				.flatMap(e -> Optional.ofNullable(e.getValue()))
-				.map(this::apply)
-				.orElse(null);
-	}
+  @Override
+  default FxAction apply(TreeItem<IdeBean> ideBeanTreeItem) {
+    return Optional.ofNullable(ideBeanTreeItem)
+        .flatMap(e -> Optional.ofNullable(e.getValue()))
+        .map(this::apply)
+        .orElse(null);
+  }
 
-	FxAction apply(IdeBean bean);
+  FxAction apply(IdeBean bean);
 }

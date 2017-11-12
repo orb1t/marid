@@ -27,10 +27,10 @@ import javax.annotation.Nonnull;
 
 public class NullExpr extends Expr implements TypedNullExpression {
 
-	public NullExpr() {
-	}
+  public NullExpr() {
+  }
 
-	NullExpr(@Nonnull Element element) {
-		super(element);
-	}
+  NullExpr(@Nonnull Element element) {
+    super(element);
+  }
 }

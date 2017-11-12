@@ -31,26 +31,26 @@ import static org.marid.io.Xmls.attribute;
 
 public class RefExpr extends Expr implements TypedRefExpression {
 
-	public final StringProperty ref;
+  public final StringProperty ref;
 
-	public RefExpr(@Nonnull String ref) {
-		this.ref = new SimpleStringProperty(ref);
-	}
+  public RefExpr(@Nonnull String ref) {
+    this.ref = new SimpleStringProperty(ref);
+  }
 
-	public RefExpr(@Nonnull Element element) {
-		super(element);
-		this.ref = new SimpleStringProperty(attribute(element, "ref").orElseThrow(() -> new NullPointerException("ref")));
-	}
+  public RefExpr(@Nonnull Element element) {
+    super(element);
+    this.ref = new SimpleStringProperty(attribute(element, "ref").orElseThrow(() -> new NullPointerException("ref")));
+  }
 
-	@Nonnull
-	@Override
-	public String getReference() {
-		return ref.get();
-	}
+  @Nonnull
+  @Override
+  public String getReference() {
+    return ref.get();
+  }
 
-	@Override
-	public void writeTo(@Nonnull Element element) {
-		super.writeTo(element);
-		element.setAttribute("ref", getReference());
-	}
+  @Override
+  public void writeTo(@Nonnull Element element) {
+    super.writeTo(element);
+    element.setAttribute("ref", getReference());
+  }
 }

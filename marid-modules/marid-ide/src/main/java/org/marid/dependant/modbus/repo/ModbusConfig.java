@@ -33,6 +33,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ModbusConfig {
 
-	public final StringProperty host = new SimpleStringProperty("0.0.0.0");
-	public final IntegerProperty port = new SimpleIntegerProperty(10502);
+  public final StringProperty host = new SimpleStringProperty("0.0.0.0");
+  public final IntegerProperty port = new SimpleIntegerProperty(10502);
 }

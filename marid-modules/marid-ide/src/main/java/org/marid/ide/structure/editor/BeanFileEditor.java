@@ -40,49 +40,49 @@ import static org.marid.ide.project.ProjectFileType.BEANS_XML;
 @Component
 public class BeanFileEditor extends AbstractFileEditor<ProjectProfile> {
 
-	private final ProjectManager projectManager;
-	private final IdeDependants dependants;
-	private final SpecialAction editAction;
+  private final ProjectManager projectManager;
+  private final IdeDependants dependants;
+  private final SpecialAction editAction;
 
-	@Autowired
-	public BeanFileEditor(ProjectManager projectManager, IdeDependants dependants, SpecialAction editAction) {
-		super(p -> projectManager.getProfile(p).map(e -> e.get(BEANS_XML).equals(p)).orElse(false));
-		this.projectManager = projectManager;
-		this.dependants = dependants;
-		this.editAction = editAction;
-	}
+  @Autowired
+  public BeanFileEditor(ProjectManager projectManager, IdeDependants dependants, SpecialAction editAction) {
+    super(p -> projectManager.getProfile(p).map(e -> e.get(BEANS_XML).equals(p)).orElse(false));
+    this.projectManager = projectManager;
+    this.dependants = dependants;
+    this.editAction = editAction;
+  }
 
-	@Nonnull
-	@Override
-	public String getName() {
-		return "Bean File Editor";
-	}
+  @Nonnull
+  @Override
+  public String getName() {
+    return "Bean File Editor";
+  }
 
-	@Nonnull
-	@Override
-	public String getIcon() {
-		return icon("M_APPS");
-	}
+  @Nonnull
+  @Override
+  public String getIcon() {
+    return icon("M_APPS");
+  }
 
-	@Nonnull
-	@Override
-	public String getGroup() {
-		return "bean";
-	}
+  @Nonnull
+  @Override
+  public String getGroup() {
+    return "bean";
+  }
 
-	@Override
-	protected ProjectProfile editorContext(@Nonnull Path path) {
-		return projectManager.getProfile(path).orElse(null);
-	}
+  @Override
+  protected ProjectProfile editorContext(@Nonnull Path path) {
+    return projectManager.getProfile(path).orElse(null);
+  }
 
-	@Override
-	protected void edit(@Nonnull Path file, @Nonnull ProjectProfile context) {
-		dependants.start(new BeanConfiguration(context));
-	}
+  @Override
+  protected void edit(@Nonnull Path file, @Nonnull ProjectProfile context) {
+    dependants.start(new BeanConfiguration(context));
+  }
 
-	@Nullable
-	@Override
-	public SpecialAction getSpecialAction() {
-		return editAction;
-	}
+  @Nullable
+  @Override
+  public SpecialAction getSpecialAction() {
+    return editAction;
+  }
 }

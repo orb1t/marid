@@ -31,39 +31,39 @@ import javax.annotation.Nullable;
  */
 public final class BeanEvent extends MaridEvent {
 
-	@Nonnull
-	private final String name;
+  @Nonnull
+  private final String name;
 
-	@Nullable
-	private final Object bean;
+  @Nullable
+  private final Object bean;
 
-	@Nonnull
-	private final String type;
+  @Nonnull
+  private final String type;
 
-	public BeanEvent(@Nullable MaridRuntime source, @Nonnull String name, @Nullable Object bean, @Nonnull String type) {
-		super(source);
-		this.name = name;
-		this.bean = bean;
-		this.type = type;
-	}
+  public BeanEvent(@Nullable MaridRuntime source, @Nonnull String name, @Nullable Object bean, @Nonnull String type) {
+    super(source);
+    this.name = name;
+    this.bean = bean;
+    this.type = type;
+  }
 
-	@Nullable
-	public Object getBean() {
-		return bean;
-	}
+  @Nullable
+  public Object getBean() {
+    return bean;
+  }
 
-	@Nonnull
-	public String getName() {
-		return name;
-	}
+  @Nonnull
+  public String getName() {
+    return name;
+  }
 
-	@Nonnull
-	public String getType() {
-		return type;
-	}
+  @Nonnull
+  public String getType() {
+    return type;
+  }
 
-	@Override
-	public String toString() {
-		return String.format("%s[%s,%s]", super.toString(), type, name);
-	}
+  @Override
+  public String toString() {
+    return String.format("%s[%s,%s]", super.toString(), type, name);
+  }
 }

@@ -30,15 +30,15 @@ import javafx.scene.layout.Priority;
  */
 public class IdeServiceButton extends Button {
 
-	final Label label = new Label();
-	final HBox box = new HBox(5, label);
+  final Label label = new Label();
+  final HBox box = new HBox(5, label);
 
-	public IdeServiceButton() {
-		setGraphic(box);
+  public IdeServiceButton() {
+    setGraphic(box);
 
-		HBox.setHgrow(label, Priority.ALWAYS);
+    HBox.setHgrow(label, Priority.ALWAYS);
 
-		label.setMaxHeight(Double.MAX_VALUE);
-		box.setMaxHeight(Double.MAX_VALUE);
-	}
+    label.setMaxHeight(Double.MAX_VALUE);
+    box.setMaxHeight(Double.MAX_VALUE);
+  }
 }

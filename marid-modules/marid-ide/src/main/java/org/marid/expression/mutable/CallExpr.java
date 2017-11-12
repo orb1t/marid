@@ -36,56 +36,56 @@ import static org.marid.io.Xmls.*;
 
 public class CallExpr extends Expr implements TypedCallExpression {
 
-	public final FxObject<Expr> target;
-	public final StringProperty method;
-	public final ObservableList<Expr> args;
+  public final FxObject<Expr> target;
+  public final StringProperty method;
+  public final ObservableList<Expr> args;
 
-	public CallExpr(@Nonnull Expr target, @Nonnull String method, @Nonnull Expr... args) {
-		this.target = new FxObject<>(Expr::getObservables, target);
-		this.method = new SimpleStringProperty(method);
-		this.args = observableArrayList(Expr::getObservables);
-		this.args.setAll(args);
-	}
+  public CallExpr(@Nonnull Expr target, @Nonnull String method, @Nonnull Expr... args) {
+    this.target = new FxObject<>(Expr::getObservables, target);
+    this.method = new SimpleStringProperty(method);
+    this.args = observableArrayList(Expr::getObservables);
+    this.args.setAll(args);
+  }
 
-	CallExpr(@Nonnull Element element) {
-		super(element);
-		target = new FxObject<>(
-				Expr::getObservables,
-				element("target", element).map(Expr::of).orElseThrow(() -> new NullPointerException("target"))
-		);
-		method = new SimpleStringProperty(
-				attribute(element, "method").orElseThrow(() -> new NullPointerException("method"))
-		);
-		args = elements("args", element)
-				.map(Expr::of)
-				.collect(toCollection(() -> observableArrayList(Expr::getObservables)));
-	}
+  CallExpr(@Nonnull Element element) {
+    super(element);
+    target = new FxObject<>(
+        Expr::getObservables,
+        element("target", element).map(Expr::of).orElseThrow(() -> new NullPointerException("target"))
+    );
+    method = new SimpleStringProperty(
+        attribute(element, "method").orElseThrow(() -> new NullPointerException("method"))
+    );
+    args = elements("args", element)
+        .map(Expr::of)
+        .collect(toCollection(() -> observableArrayList(Expr::getObservables)));
+  }
 
-	@Nonnull
-	@Override
-	public Expr getTarget() {
-		return target.get();
-	}
+  @Nonnull
+  @Override
+  public Expr getTarget() {
+    return target.get();
+  }
 
-	@Nonnull
-	@Override
-	public String getMethod() {
-		return method.get();
-	}
+  @Nonnull
+  @Override
+  public String getMethod() {
+    return method.get();
+  }
 
-	@Nonnull
-	@Override
-	public List<Expr> getArgs() {
-		return args;
-	}
+  @Nonnull
+  @Override
+  public List<Expr> getArgs() {
+    return args;
+  }
 
-	@Override
-	public void writeTo(@Nonnull Element element) {
-		super.writeTo(element);
-		create(element, "target", t -> create(t, getTarget().getTag(), getTarget()::writeTo));
-		element.setAttribute("method", getMethod());
-		if (!args.isEmpty()) {
-			create(element, "args", as -> getArgs().forEach(a -> create(as, a.getTag(), a::writeTo)));
-		}
-	}
+  @Override
+  public void writeTo(@Nonnull Element element) {
+    super.writeTo(element);
+    create(element, "target", t -> create(t, getTarget().getTag(), getTarget()::writeTo));
+    element.setAttribute("method", getMethod());
+    if (!args.isEmpty()) {
+      create(element, "args", as -> getArgs().forEach(a -> create(as, a.getTag(), a::writeTo)));
+    }
+  }
 }

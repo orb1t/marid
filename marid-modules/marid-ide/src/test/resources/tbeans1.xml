@@ -32,7 +32,9 @@
   <bean name="b02">
     <factory>
       <call method="valueOf">
-        <target><class class="java.math.BigInteger"/></target>
+        <target>
+          <class class="java.math.BigInteger"/>
+        </target>
         <args>
           <const type="LONG" value="1"/>
         </args>
@@ -43,13 +45,17 @@
   <bean name="b03">
     <factory>
       <call method="new">
-        <target><class class="java.util.ArrayList"/></target>
+        <target>
+          <class class="java.util.ArrayList"/>
+        </target>
         <args>
           <const type="INT" value="10"/>
         </args>
         <initializers>
           <call method="add">
-            <target><this/></target>
+            <target>
+              <this/>
+            </target>
             <args>
               <const type="INT" value="2"/>
             </args>
@@ -64,7 +70,9 @@
       <call method="size">
         <target>
           <call method="singletonList">
-            <target><class class="java.util.Collections"/></target>
+            <target>
+              <class class="java.util.Collections"/>
+            </target>
             <args>
               <const type="LONG" value="12"/>
             </args>
@@ -77,7 +85,9 @@
   <bean name="b05">
     <factory>
       <call method="singletonList">
-        <target><class class="java.util.Collections"/></target>
+        <target>
+          <class class="java.util.Collections"/>
+        </target>
         <args>
           <const type="LONG" value="12"/>
         </args>
@@ -88,7 +98,9 @@
   <bean name="b06">
     <factory>
       <call method="singletonList">
-        <target><class class="java.util.Collections"/></target>
+        <target>
+          <class class="java.util.Collections"/>
+        </target>
         <args>
           <ref ref="b05"/>
         </args>
@@ -99,7 +111,9 @@
   <bean name="b07">
     <factory>
       <call method="singletonList">
-        <target><class class="java.util.Collections"/></target>
+        <target>
+          <class class="java.util.Collections"/>
+        </target>
         <args>
           <ref ref="b04"/>
         </args>
@@ -110,16 +124,22 @@
   <bean name="b08">
     <factory>
       <call method="new">
-        <target><class class="java.util.ArrayList"/></target>
+        <target>
+          <class class="java.util.ArrayList"/>
+        </target>
         <initializers>
           <call method="add">
-            <target><this/></target>
+            <target>
+              <this/>
+            </target>
             <args>
               <const type="INT" value="2"/>
             </args>
           </call>
           <call method="add">
-            <target><this/></target>
+            <target>
+              <this/>
+            </target>
             <args>
               <const type="LONG" value="2"/>
             </args>
@@ -132,12 +152,16 @@
   <bean name="b09">
     <factory>
       <call method="asList">
-        <target><class class="java.util.Arrays"/></target>
+        <target>
+          <class class="java.util.Arrays"/>
+        </target>
         <args>
           <array type="java.util.List">
             <elements>
               <call method="singletonList">
-                <target><class class="java.util.Collections"/></target>
+                <target>
+                  <class class="java.util.Collections"/>
+                </target>
                 <args>
                   <const type="INT" value="1"/>
                 </args>
@@ -154,7 +178,9 @@
       <array type="java.util.List">
         <elements>
           <call method="singletonList">
-            <target><class class="java.util.Collections"/></target>
+            <target>
+              <class class="java.util.Collections"/>
+            </target>
             <args>
               <const type="LONG" value="1"/>
             </args>
@@ -177,16 +203,22 @@
   <bean name="b12">
     <factory>
       <call method="new">
-        <target><class class="java.util.ArrayList"/></target>
+        <target>
+          <class class="java.util.ArrayList"/>
+        </target>
         <initializers>
           <call method="add">
-            <target><this/></target>
+            <target>
+              <this/>
+            </target>
             <args>
               <array type="java.lang.Integer"/>
             </args>
           </call>
           <call method="add">
-            <target><this/></target>
+            <target>
+              <this/>
+            </target>
             <args>
               <array type="java.lang.Long"/>
             </args>
@@ -199,7 +231,9 @@
   <bean name="b13">
     <factory>
       <call method="new">
-        <target><class class="java.util.ArrayList"/></target>
+        <target>
+          <class class="java.util.ArrayList"/>
+        </target>
         <args>
           <const type="INT" value="1"/>
         </args>

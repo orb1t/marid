@@ -30,9 +30,9 @@ import java.lang.reflect.Type;
 
 public interface TypedConstExpression extends ConstExpression, TypedValueExpression {
 
-	@Nonnull
-	@Override
-	default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
-		return getType().type;
-	}
+  @Nonnull
+  @Override
+  default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
+    return getType().type;
+  }
 }

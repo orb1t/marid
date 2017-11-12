@@ -30,7 +30,7 @@ import org.marid.idelib.spring.annotation.PrototypeComponent;
 @PrototypeComponent
 public class BarometerEditor extends AbstractDeviceEditor<Float, Barometer> {
 
-	public BarometerEditor(Barometer device, Stage stage) {
-		super(device, stage);
-	}
+  public BarometerEditor(Barometer device, Stage stage) {
+    super(device, stage);
+  }
 }

@@ -33,34 +33,34 @@ import static java.lang.Boolean.parseBoolean;
 @Component
 public class AppearanceSettings extends AbstractSettings {
 
-	private final BooleanProperty showFullNames = new SimpleBooleanProperty(isShowFullNames());
+  private final BooleanProperty showFullNames = new SimpleBooleanProperty(isShowFullNames());
 
-	public AppearanceSettings() {
-		preferences.addPreferenceChangeListener(evt -> {
-			if (evt.getKey() != null) {
-				switch (evt.getKey()) {
-					case "showFullNames":
-						Platform.runLater(() -> showFullNames.set(parseBoolean(evt.getNewValue())));
-						break;
-				}
-			}
-		});
-	}
+  public AppearanceSettings() {
+    preferences.addPreferenceChangeListener(evt -> {
+      if (evt.getKey() != null) {
+        switch (evt.getKey()) {
+          case "showFullNames":
+            Platform.runLater(() -> showFullNames.set(parseBoolean(evt.getNewValue())));
+            break;
+        }
+      }
+    });
+  }
 
-	@Override
-	public String getName() {
-		return "Appearance";
-	}
+  @Override
+  public String getName() {
+    return "Appearance";
+  }
 
-	public boolean isShowFullNames() {
-		return preferences.getBoolean("showFullNames", false);
-	}
+  public boolean isShowFullNames() {
+    return preferences.getBoolean("showFullNames", false);
+  }
 
-	public void setShowFullNames(boolean value) {
-		preferences.putBoolean("showFullNames", value);
-	}
+  public void setShowFullNames(boolean value) {
+    preferences.putBoolean("showFullNames", value);
+  }
 
-	public BooleanProperty showFullNamesProperty() {
-		return showFullNames;
-	}
+  public BooleanProperty showFullNamesProperty() {
+    return showFullNames;
+  }
 }

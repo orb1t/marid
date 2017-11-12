@@ -28,13 +28,13 @@ import java.util.Date;
  */
 public interface ProtoHealth {
 
-	long getSuccessfulTransactionCount();
+  long getSuccessfulTransactionCount();
 
-	long getFailedTransactionCount();
+  long getFailedTransactionCount();
 
-	Date getLastSuccessfulTransactionTimestamp();
+  Date getLastSuccessfulTransactionTimestamp();
 
-	Date getLastFailedTransactionTimestamp();
+  Date getLastFailedTransactionTimestamp();
 
-	void reset();
+  void reset();
 }

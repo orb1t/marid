@@ -29,12 +29,12 @@ import org.springframework.context.ApplicationEvent;
  */
 public class PropagatedEvent extends ApplicationEvent {
 
-	public PropagatedEvent(Object source) {
-		super(source);
-	}
+  public PropagatedEvent(Object source) {
+    super(source);
+  }
 
-	@Override
-	public String toString() {
-		return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE, true);
-	}
+  @Override
+  public String toString() {
+    return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE, true);
+  }
 }

@@ -37,20 +37,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 @PrototypeComponent
 public class IconViewer extends FxStage {
 
-	public IconViewer() {
-		super(StageStyle.DECORATED);
-	}
+  public IconViewer() {
+    super(StageStyle.DECORATED);
+  }
 
-	@Autowired
-	private void configure(IdePane idePane, IconViewerTable table) {
-		initOwner(idePane.getScene().getWindow());
-		setTitle(L10n.s("Icon viewer"));
-		final BorderPane pane = new BorderPane(table);
-		pane.setPrefSize(800, 600);
-		final Label countLabel = new Label(L10n.s("Icon count: %d", table.getItems().size()));
-		pane.setBottom(countLabel);
-		BorderPane.setMargin(table, new Insets(10, 10, 5, 10));
-		BorderPane.setMargin(countLabel, new Insets(5, 10, 10, 10));
-		setScene(new Scene(pane));
-	}
+  @Autowired
+  private void configure(IdePane idePane, IconViewerTable table) {
+    initOwner(idePane.getScene().getWindow());
+    setTitle(L10n.s("Icon viewer"));
+    final BorderPane pane = new BorderPane(table);
+    pane.setPrefSize(800, 600);
+    final Label countLabel = new Label(L10n.s("Icon count: %d", table.getItems().size()));
+    pane.setBottom(countLabel);
+    BorderPane.setMargin(table, new Insets(10, 10, 5, 10));
+    BorderPane.setMargin(countLabel, new Insets(5, 10, 10, 10));
+    setScene(new Scene(pane));
+  }
 }

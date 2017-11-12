@@ -29,10 +29,10 @@ import java.io.IOException;
 
 public class IdeTypeFilter implements TypeFilter {
 
-	@Override
-	public boolean match(@Nonnull MetadataReader metadataReader,
-											 @Nonnull MetadataReaderFactory metadataReaderFactory) throws IOException {
-		System.out.println(metadataReader.getClassMetadata().getClassName());
-		return metadataReader.getClassMetadata().getClassName().startsWith("org.marid.ide");
-	}
+  @Override
+  public boolean match(@Nonnull MetadataReader metadataReader,
+                       @Nonnull MetadataReaderFactory metadataReaderFactory) throws IOException {
+    System.out.println(metadataReader.getClassMetadata().getClassName());
+    return metadataReader.getClassMetadata().getClassName().startsWith("org.marid.ide");
+  }
 }

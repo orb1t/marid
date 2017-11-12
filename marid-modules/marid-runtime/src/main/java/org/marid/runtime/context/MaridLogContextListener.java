@@ -33,43 +33,43 @@ import static org.marid.logging.Log.log;
  */
 public class MaridLogContextListener implements MaridContextListener {
 
-	@Override
-	public void bootstrap(@Nonnull ContextBootstrapEvent contextBootstrapEvent) {
-		log(INFO, "{0}", contextBootstrapEvent);
-	}
+  @Override
+  public void bootstrap(@Nonnull ContextBootstrapEvent contextBootstrapEvent) {
+    log(INFO, "{0}", contextBootstrapEvent);
+  }
 
-	@Override
-	public void onEvent(@Nonnull BeanEvent event) {
-		log(INFO, "{0}", event);
-	}
+  @Override
+  public void onEvent(@Nonnull BeanEvent event) {
+    log(INFO, "{0}", event);
+  }
 
-	@Override
-	public void onPostConstruct(@Nonnull BeanPostConstructEvent postConstructEvent) {
-		log(INFO, "{0}", postConstructEvent);
-	}
+  @Override
+  public void onPostConstruct(@Nonnull BeanPostConstructEvent postConstructEvent) {
+    log(INFO, "{0}", postConstructEvent);
+  }
 
-	@Override
-	public void onPreDestroy(@Nonnull BeanPreDestroyEvent preDestroyEvent) {
-		log(INFO, "{0}", preDestroyEvent);
-	}
+  @Override
+  public void onPreDestroy(@Nonnull BeanPreDestroyEvent preDestroyEvent) {
+    log(INFO, "{0}", preDestroyEvent);
+  }
 
-	@Override
-	public void onStart(@Nonnull ContextStartEvent contextStartEvent) {
-		log(INFO, "{0}", contextStartEvent);
-	}
+  @Override
+  public void onStart(@Nonnull ContextStartEvent contextStartEvent) {
+    log(INFO, "{0}", contextStartEvent);
+  }
 
-	@Override
-	public void onStop(@Nonnull ContextStopEvent contextStopEvent) {
-		log(INFO, "{0}", contextStopEvent);
-	}
+  @Override
+  public void onStop(@Nonnull ContextStopEvent contextStopEvent) {
+    log(INFO, "{0}", contextStopEvent);
+  }
 
-	@Override
-	public void onFail(@Nonnull ContextFailEvent contextFailEvent) {
-		log(INFO, "{0}", contextFailEvent);
-	}
+  @Override
+  public void onFail(@Nonnull ContextFailEvent contextFailEvent) {
+    log(INFO, "{0}", contextFailEvent);
+  }
 
-	@Override
-	public int getOrder() {
-		return Integer.MAX_VALUE;
-	}
+  @Override
+  public int getOrder() {
+    return Integer.MAX_VALUE;
+  }
 }

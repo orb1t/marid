@@ -37,41 +37,41 @@ import static org.marid.jfx.LocalizedStrings.ls;
 @Component
 public class ToolsConfiguration {
 
-	@IdeAction
-	public FxAction iconViewerAction(ObjectFactory<IconViewer> iconViewerFactory) {
-		return new FxAction("icons", "Tools")
-				.setIcon("M_OPEN_IN_BROWSER")
-				.bindText(ls("Icon viewer"))
-				.setEventHandler(event -> iconViewerFactory.getObject().show());
-	}
+  @IdeAction
+  public FxAction iconViewerAction(ObjectFactory<IconViewer> iconViewerFactory) {
+    return new FxAction("icons", "Tools")
+        .setIcon("M_OPEN_IN_BROWSER")
+        .bindText(ls("Icon viewer"))
+        .setEventHandler(event -> iconViewerFactory.getObject().show());
+  }
 
-	@IdeAction
-	public FxAction monitorAction(IdeDependants dependants) {
-		return new FxAction("monitor", "Tools")
-				.setIcon("M_GRAPHIC_EQ")
-				.bindText(ls("System monitor"))
-				.setEventHandler(event -> dependants.run(c -> {
-					c.register(MonitorConfiguration.class);
-					c.setDisplayName("Monitor");
-				}));
-	}
+  @IdeAction
+  public FxAction monitorAction(IdeDependants dependants) {
+    return new FxAction("monitor", "Tools")
+        .setIcon("M_GRAPHIC_EQ")
+        .bindText(ls("System monitor"))
+        .setEventHandler(event -> dependants.run(c -> {
+          c.register(MonitorConfiguration.class);
+          c.setDisplayName("Monitor");
+        }));
+  }
 
-	@IdeAction
-	public FxAction garbageCollectAction() {
-		return new FxAction("monitor", "Tools")
-				.setIcon("M_CHEVRON_LEFT")
-				.bindText(ls("Run garbage collection"))
-				.setEventHandler(event -> {
-					System.gc();
-					System.runFinalization();
-				});
-	}
+  @IdeAction
+  public FxAction garbageCollectAction() {
+    return new FxAction("monitor", "Tools")
+        .setIcon("M_CHEVRON_LEFT")
+        .bindText(ls("Run garbage collection"))
+        .setEventHandler(event -> {
+          System.gc();
+          System.runFinalization();
+        });
+  }
 
-	@IdeAction
-	public FxAction showLogsAction(ObjectFactory<LogStage> logStageFactory) {
-		return new FxAction("log", "log", "Tools")
-				.setIcon("M_VIEW_LIST")
-				.bindText(ls("Show logs"))
-				.setEventHandler(event -> logStageFactory.getObject().show());
-	}
+  @IdeAction
+  public FxAction showLogsAction(ObjectFactory<LogStage> logStageFactory) {
+    return new FxAction("log", "log", "Tools")
+        .setIcon("M_VIEW_LIST")
+        .bindText(ls("Show logs"))
+        .setEventHandler(event -> logStageFactory.getObject().show());
+  }
 }

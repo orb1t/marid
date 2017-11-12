@@ -26,7 +26,7 @@ package org.marid.runtime.exception;
  */
 public class MaridBeanNotFoundException extends RuntimeException {
 
-	public MaridBeanNotFoundException(String beanName) {
-		super(beanName);
-	}
+  public MaridBeanNotFoundException(String beanName) {
+    super(beanName);
+  }
 }

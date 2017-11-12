@@ -26,16 +26,16 @@ package org.marid.jfx.action;
  */
 public enum SpecialActionType {
 
-	ADD,
-	REMOVE,
-	CLEAR_ALL,
-	SELECT_ALL,
-	CUT,
-	COPY,
-	PASTE,
-	EDIT,
-	MISC,
-	RENAME,
-	UP,
-	DOWN
+  ADD,
+  REMOVE,
+  CLEAR_ALL,
+  SELECT_ALL,
+  CUT,
+  COPY,
+  PASTE,
+  EDIT,
+  MISC,
+  RENAME,
+  UP,
+  DOWN
 }

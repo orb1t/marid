@@ -25,6 +25,6 @@ import javax.annotation.Nonnull;
 
 public interface ClassExpression extends Expression {
 
-	@Nonnull
-	String getClassName();
+  @Nonnull
+  String getClassName();
 }

@@ -30,9 +30,9 @@ import java.lang.reflect.Type;
 
 public interface TypedRefExpression extends RefExpression, TypedExpression {
 
-	@Nonnull
-	@Override
-	default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
-		return context.getBeanType(getReference());
-	}
+  @Nonnull
+  @Override
+  default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
+    return context.getBeanType(getReference());
+  }
 }

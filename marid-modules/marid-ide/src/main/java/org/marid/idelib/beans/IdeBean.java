@@ -46,93 +46,93 @@ import static org.marid.io.Xmls.*;
 
 public class IdeBean implements TypedBean {
 
-	public final IdeBean parent;
-	public final StringProperty name;
-	public final FxObject<Expr> factory;
-	public final ObservableList<IdeBean> children;
+  public final IdeBean parent;
+  public final StringProperty name;
+  public final FxObject<Expr> factory;
+  public final ObservableList<IdeBean> children;
 
-	public IdeBean(@Nullable IdeBean parent, @Nonnull String name, @Nonnull Expr factory) {
-		this.parent = parent;
-		this.name = new SimpleStringProperty(name);
-		this.factory = new FxObject<>(Expr::getObservables, factory);
-		this.children = observableArrayList(IdeBean::observables);
-	}
+  public IdeBean(@Nullable IdeBean parent, @Nonnull String name, @Nonnull Expr factory) {
+    this.parent = parent;
+    this.name = new SimpleStringProperty(name);
+    this.factory = new FxObject<>(Expr::getObservables, factory);
+    this.children = observableArrayList(IdeBean::observables);
+  }
 
-	public IdeBean() {
-		this(null, "beans", new NullExpr());
-	}
+  public IdeBean() {
+    this(null, "beans", new NullExpr());
+  }
 
-	public IdeBean(@Nullable IdeBean parent, @Nonnull Element element) {
-		this.parent = parent;
-		this.name = new SimpleStringProperty(
-				attribute(element, "name").orElseThrow(() -> new NullPointerException("name"))
-		);
-		this.factory = new FxObject<>(
-				Expr::getObservables,
-				element("factory", element).map(Expr::of).orElseThrow(() -> new NullPointerException("factory"))
-		);
-		this.children = elements(element, "bean")
-				.map(e -> new IdeBean(this, e))
-				.collect(Collectors.toCollection(() -> observableArrayList(IdeBean::observables)));
-	}
+  public IdeBean(@Nullable IdeBean parent, @Nonnull Element element) {
+    this.parent = parent;
+    this.name = new SimpleStringProperty(
+        attribute(element, "name").orElseThrow(() -> new NullPointerException("name"))
+    );
+    this.factory = new FxObject<>(
+        Expr::getObservables,
+        element("factory", element).map(Expr::of).orElseThrow(() -> new NullPointerException("factory"))
+    );
+    this.children = elements(element, "bean")
+        .map(e -> new IdeBean(this, e))
+        .collect(Collectors.toCollection(() -> observableArrayList(IdeBean::observables)));
+  }
 
-	public IdeBean(@Nonnull Element element) {
-		this(null, element);
-	}
+  public IdeBean(@Nonnull Element element) {
+    this(null, element);
+  }
 
-	@Override
-	public IdeBean getParent() {
-		return parent;
-	}
+  @Override
+  public IdeBean getParent() {
+    return parent;
+  }
 
-	@Nonnull
-	@Override
-	public String getName() {
-		return name.get();
-	}
+  @Nonnull
+  @Override
+  public String getName() {
+    return name.get();
+  }
 
-	@Nonnull
-	@Override
-	public Expr getFactory() {
-		return factory.get();
-	}
+  @Nonnull
+  @Override
+  public Expr getFactory() {
+    return factory.get();
+  }
 
-	@Nonnull
-	@Override
-	public List<IdeBean> getChildren() {
-		return children;
-	}
+  @Nonnull
+  @Override
+  public List<IdeBean> getChildren() {
+    return children;
+  }
 
-	@SafeVarargs
-	public final IdeBean add(@Nonnull String name, @Nonnull Expr factory, @Nonnull Consumer<IdeBean>... consumers) {
-		final IdeBean child = new IdeBean(this, name, factory);
-		children.add(child);
-		for (final Consumer<IdeBean> consumer : consumers) {
-			consumer.accept(child);
-		}
-		return this;
-	}
+  @SafeVarargs
+  public final IdeBean add(@Nonnull String name, @Nonnull Expr factory, @Nonnull Consumer<IdeBean>... consumers) {
+    final IdeBean child = new IdeBean(this, name, factory);
+    children.add(child);
+    for (final Consumer<IdeBean> consumer : consumers) {
+      consumer.accept(child);
+    }
+    return this;
+  }
 
-	public void writeTo(@Nonnull Element element) {
-		element.setAttribute("name", getName());
-		create(element, "factory", f -> create(f, getFactory().getTag(), getFactory()::writeTo));
-		children.forEach(c -> create(element, "bean", c::writeTo));
-	}
+  public void writeTo(@Nonnull Element element) {
+    element.setAttribute("name", getName());
+    create(element, "factory", f -> create(f, getFactory().getTag(), getFactory()::writeTo));
+    children.forEach(c -> create(element, "bean", c::writeTo));
+  }
 
-	public void save(@Nonnull Writer writer) {
-		writeFormatted("bean", this::writeTo, new StreamResult(writer));
-	}
+  public void save(@Nonnull Writer writer) {
+    writeFormatted("bean", this::writeTo, new StreamResult(writer));
+  }
 
-	public void save(@Nonnull Path file) {
-		writeFormatted("bean", this::writeTo, file);
-	}
+  public void save(@Nonnull Path file) {
+    writeFormatted("bean", this::writeTo, file);
+  }
 
-	private Observable[] observables() {
-		return new Observable[]{name, factory, children};
-	}
+  private Observable[] observables() {
+    return new Observable[]{name, factory, children};
+  }
 
-	@Override
-	public String toString() {
-		return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
-	}
+  @Override
+  public String toString() {
+    return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+  }
 }

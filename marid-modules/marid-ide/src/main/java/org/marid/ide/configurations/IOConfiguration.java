@@ -35,14 +35,14 @@ import static org.marid.jfx.LocalizedStrings.ls;
 @Component
 public class IOConfiguration {
 
-	@IdeAction
-	public FxAction modbusAction(IdeDependants dependants) {
-		return new FxAction("modbus", "I/O")
-				.setIcon("M_DEVICES")
-				.bindText(ls("MODBUS devices"))
-				.setEventHandler(event -> dependants.run(c -> {
-					c.register(ModbusSourceConfiguration.class);
-					c.setDisplayName("MODBUS devices");
-				}));
-	}
+  @IdeAction
+  public FxAction modbusAction(IdeDependants dependants) {
+    return new FxAction("modbus", "I/O")
+        .setIcon("M_DEVICES")
+        .bindText(ls("MODBUS devices"))
+        .setEventHandler(event -> dependants.run(c -> {
+          c.register(ModbusSourceConfiguration.class);
+          c.setDisplayName("MODBUS devices");
+        }));
+  }
 }

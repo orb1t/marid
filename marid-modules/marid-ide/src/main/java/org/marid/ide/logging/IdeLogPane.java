@@ -20,7 +20,6 @@
 
 package org.marid.ide.logging;
 
-import com.google.common.util.concurrent.AtomicDouble;
 import javafx.geometry.Orientation;
 import javafx.scene.Cursor;
 import javafx.scene.control.Separator;
@@ -30,8 +29,10 @@ import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import static java.lang.Math.max;
-import static java.lang.Math.min;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static java.lang.Double.max;
+import static java.lang.Double.min;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -40,32 +41,32 @@ import static java.lang.Math.min;
 @Component
 public class IdeLogPane extends BorderPane {
 
-	private final Separator divider;
-	private final LogComponent component = new LogComponent(IdeLogHandler.LOG_RECORDS);
+  private final Separator divider;
+  private final LogComponent component = new LogComponent(IdeLogHandler.LOG_RECORDS);
 
-	public IdeLogPane() {
-		setTop(divider = new Separator(Orientation.HORIZONTAL));
-		setMinHeight(100);
-		setPrefHeight(250);
+  public IdeLogPane() {
+    setTop(divider = new Separator(Orientation.HORIZONTAL));
+    setMinHeight(100);
+    setPrefHeight(250);
 
-		final AtomicDouble lastPos = new AtomicDouble();
-		final AtomicDouble lastHeight = new AtomicDouble();
-		divider.setOnMouseEntered(event -> {
-			divider.getScene().setCursor(Cursor.V_RESIZE);
-			lastPos.set(event.getScreenY());
-			lastHeight.set(getHeight());
-		});
-		divider.setOnMouseExited(event -> divider.getScene().setCursor(Cursor.DEFAULT));
-		divider.setOnMouseDragged(event -> {
-			final double delta = event.getScreenY() - lastPos.get();
-			setPrefHeight(min(getMaxHeight(), max(getMinHeight(), lastHeight.get() - delta)));
-			getParent().requestLayout();
-		});
-	}
+    final AtomicReference<Double> lastPos = new AtomicReference<>(0.0);
+    final AtomicReference<Double> lastHeight = new AtomicReference<>(0.0);
+    divider.setOnMouseEntered(event -> {
+      divider.getScene().setCursor(Cursor.V_RESIZE);
+      lastPos.set(event.getScreenY());
+      lastHeight.set(getHeight());
+    });
+    divider.setOnMouseExited(event -> divider.getScene().setCursor(Cursor.DEFAULT));
+    divider.setOnMouseDragged(event -> {
+      final double delta = event.getScreenY() - lastPos.get();
+      setPrefHeight(min(getMaxHeight(), max(getMinHeight(), lastHeight.get() - delta)));
+      getParent().requestLayout();
+    });
+  }
 
-	@EventListener
-	public void onContextStart(ContextStartedEvent event) {
-		setCenter(component);
-		component.scrollTo(component.getItems().size() - 1);
-	}
+  @EventListener
+  public void onContextStart(ContextStartedEvent event) {
+    setCenter(component);
+    component.scrollTo(component.getItems().size() - 1);
+  }
 }

@@ -65,101 +65,101 @@ import static org.marid.jfx.icons.IconFactory.icon;
 @Component
 public class IdeStatusBar extends BorderPane {
 
-	private final HBox right;
-	private final HBox taskBox;
-	private final IdeTaskBar taskBar;
+  private final HBox right;
+  private final HBox taskBox;
+  private final IdeTaskBar taskBar;
 
-	public IdeStatusBar() {
-		taskBar = new IdeTaskBar(taskBox = new HBox(5));
-		setCenter(taskBar);
-		setRight(right = new HBox(10));
-		setMargin(taskBox, new Insets(0, 5, 0, 5));
-		setMargin(right, new Insets(0, 5, 0, 5));
-		right.setAlignment(Pos.CENTER_RIGHT);
-	}
+  public IdeStatusBar() {
+    taskBar = new IdeTaskBar(taskBox = new HBox(5));
+    setCenter(taskBar);
+    setRight(right = new HBox(10));
+    setMargin(taskBox, new Insets(0, 5, 0, 5));
+    setMargin(right, new Insets(0, 5, 0, 5));
+    right.setAlignment(Pos.CENTER_RIGHT);
+  }
 
-	@Autowired
-	public void healthInitializer(IdeMainPane pane) {
-		final ObjectProperty<Level> lastLevel = new SimpleObjectProperty<>(LOG_RECORDS.stream()
-				.map(LogRecord::getLevel)
-				.max(comparingInt(Level::intValue))
-				.orElse(Level.INFO));
-		final ToggleButton button = new ToggleButton();
-		button.graphicProperty().bind(createObjectBinding(() -> icon(lastLevel.get(), 20), lastLevel));
-		LOG_RECORDS.addListener((ListChangeListener<LogRecord>) c -> {
-			while (c.next()) {
-				for (final LogRecord record : c.getAddedSubList()) {
-					if (record.getLevel().intValue() > lastLevel.get().intValue()) {
-						lastLevel.set(record.getLevel());
-					}
-				}
-			}
-		});
-		button.setFocusTraversable(false);
-		button.selectedProperty().addListener((o, oV, nV) -> {
-			if (nV) {
-				lastLevel.set(Level.INFO);
-				pane.setPinnedSide(Side.BOTTOM);
-			} else {
-				pane.setPinnedSide(null);
-			}
-		});
-		setLeft(button);
-		BorderPane.setAlignment(button, Pos.CENTER_LEFT);
-		BorderPane.setMargin(button, new Insets(0, 5, 0, 5));
-	}
+  @Autowired
+  public void healthInitializer(IdeMainPane pane) {
+    final ObjectProperty<Level> lastLevel = new SimpleObjectProperty<>(LOG_RECORDS.stream()
+        .map(LogRecord::getLevel)
+        .max(comparingInt(Level::intValue))
+        .orElse(Level.INFO));
+    final ToggleButton button = new ToggleButton();
+    button.graphicProperty().bind(createObjectBinding(() -> icon(lastLevel.get(), 20), lastLevel));
+    LOG_RECORDS.addListener((ListChangeListener<LogRecord>) c -> {
+      while (c.next()) {
+        for (final LogRecord record : c.getAddedSubList()) {
+          if (record.getLevel().intValue() > lastLevel.get().intValue()) {
+            lastLevel.set(record.getLevel());
+          }
+        }
+      }
+    });
+    button.setFocusTraversable(false);
+    button.selectedProperty().addListener((o, oV, nV) -> {
+      if (nV) {
+        lastLevel.set(Level.INFO);
+        pane.setPinnedSide(Side.BOTTOM);
+      } else {
+        pane.setPinnedSide(null);
+      }
+    });
+    setLeft(button);
+    BorderPane.setAlignment(button, Pos.CENTER_LEFT);
+    BorderPane.setMargin(button, new Insets(0, 5, 0, 5));
+  }
 
-	@Order(2)
-	@Bean(initMethod = "run")
-	public Runnable profileInitializer(ProjectManager manager) {
-		return () -> {
-			final ComboBox<ProjectProfile> combo = new ComboBox<>(manager.getProfiles());
-			combo.setMinHeight(30);
-			final SelectionModel<ProjectProfile> selection = combo.getSelectionModel();
-			selection.select(manager.getProfile());
-			final ObjectProperty<ProjectProfile> profile = manager.profileProperty();
-			profile.addListener((observable, oldValue, newValue) -> selection.select(newValue));
-			selection.selectedItemProperty().addListener((observable, oldValue, newValue) -> profile.set(newValue));
-			right.getChildren().add(combo);
-			HBox.setMargin(combo, new Insets(5));
-		};
-	}
+  @Order(2)
+  @Bean(initMethod = "run")
+  public Runnable profileInitializer(ProjectManager manager) {
+    return () -> {
+      final ComboBox<ProjectProfile> combo = new ComboBox<>(manager.getProfiles());
+      combo.setMinHeight(30);
+      final SelectionModel<ProjectProfile> selection = combo.getSelectionModel();
+      selection.select(manager.getProfile());
+      final ObjectProperty<ProjectProfile> profile = manager.profileProperty();
+      profile.addListener((observable, oldValue, newValue) -> selection.select(newValue));
+      selection.selectedItemProperty().addListener((observable, oldValue, newValue) -> profile.set(newValue));
+      right.getChildren().add(combo);
+      HBox.setMargin(combo, new Insets(5));
+    };
+  }
 
-	@Order(3)
-	@Bean(initMethod = "run")
-	public Runnable dateTimeInitializer(ScheduledExecutorService timer) {
-		return () -> {
-			final Label timeLabel = new Label("", glyphIcon("O_CLOCK", 18));
-			final DateTimeFormatter timeFormatter = new DateTimeFormatterBuilder()
-					.appendValue(ChronoField.YEAR, 4)
-					.appendLiteral('-')
-					.appendValue(ChronoField.MONTH_OF_YEAR, 2)
-					.appendLiteral('-')
-					.appendValue(ChronoField.DAY_OF_MONTH)
-					.appendLiteral(' ')
-					.appendValue(ChronoField.HOUR_OF_DAY, 2)
-					.appendLiteral(':')
-					.appendValue(ChronoField.MINUTE_OF_HOUR, 2)
-					.appendLiteral(':')
-					.appendValue(ChronoField.SECOND_OF_MINUTE, 2)
-					.toFormatter();
-			timeLabel.setMaxHeight(Double.MAX_VALUE);
-			timer.scheduleWithFixedDelay(() -> {
-				final ZonedDateTime now = Instant.now().atZone(ZoneId.systemDefault());
-				final String time = now.format(timeFormatter);
-				Platform.runLater(() -> timeLabel.setText(time));
-			}, 1_000L, 1_000L, TimeUnit.MILLISECONDS);
-			right.getChildren().add(timeLabel);
-			HBox.setMargin(timeLabel, new Insets(5));
-		};
-	}
+  @Order(3)
+  @Bean(initMethod = "run")
+  public Runnable dateTimeInitializer(ScheduledExecutorService timer) {
+    return () -> {
+      final Label timeLabel = new Label("", glyphIcon("O_CLOCK", 18));
+      final DateTimeFormatter timeFormatter = new DateTimeFormatterBuilder()
+          .appendValue(ChronoField.YEAR, 4)
+          .appendLiteral('-')
+          .appendValue(ChronoField.MONTH_OF_YEAR, 2)
+          .appendLiteral('-')
+          .appendValue(ChronoField.DAY_OF_MONTH)
+          .appendLiteral(' ')
+          .appendValue(ChronoField.HOUR_OF_DAY, 2)
+          .appendLiteral(':')
+          .appendValue(ChronoField.MINUTE_OF_HOUR, 2)
+          .appendLiteral(':')
+          .appendValue(ChronoField.SECOND_OF_MINUTE, 2)
+          .toFormatter();
+      timeLabel.setMaxHeight(Double.MAX_VALUE);
+      timer.scheduleWithFixedDelay(() -> {
+        final ZonedDateTime now = Instant.now().atZone(ZoneId.systemDefault());
+        final String time = now.format(timeFormatter);
+        Platform.runLater(() -> timeLabel.setText(time));
+      }, 1_000L, 1_000L, TimeUnit.MILLISECONDS);
+      right.getChildren().add(timeLabel);
+      HBox.setMargin(timeLabel, new Insets(5));
+    };
+  }
 
-	public void add(Node button) {
-		taskBox.getChildren().add(button);
-		HBox.setMargin(button, new Insets(2));
-	}
+  public void add(Node button) {
+    taskBox.getChildren().add(button);
+    HBox.setMargin(button, new Insets(2));
+  }
 
-	public void remove(Node button) {
-		taskBox.getChildren().remove(button);
-	}
+  public void remove(Node button) {
+    taskBox.getChildren().remove(button);
+  }
 }

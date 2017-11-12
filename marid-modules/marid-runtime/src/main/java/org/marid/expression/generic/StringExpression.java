@@ -25,6 +25,6 @@ import javax.annotation.Nonnull;
 
 public interface StringExpression extends Expression {
 
-	@Nonnull
-	String getValue();
+  @Nonnull
+  String getValue();
 }

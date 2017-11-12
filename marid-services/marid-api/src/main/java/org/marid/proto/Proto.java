@@ -32,39 +32,39 @@ import java.util.Map;
  */
 public interface Proto {
 
-	String getName();
+  String getName();
 
-	String getId();
+  String getId();
 
-	Proto getParent();
+  Proto getParent();
 
-	Map<String, ? extends Proto> getItems();
+  Map<String, ? extends Proto> getItems();
 
-	static LinkedList<String> path(Proto proto) {
-		final LinkedList<String> path = new LinkedList<>();
-		for (Proto p = proto; p != null; p = p.getParent()) {
-			path.addFirst(p.getId());
-		}
-		return path;
-	}
+  static LinkedList<String> path(Proto proto) {
+    final LinkedList<String> path = new LinkedList<>();
+    for (Proto p = proto; p != null; p = p.getParent()) {
+      path.addFirst(p.getId());
+    }
+    return path;
+  }
 
-	static String label(Proto proto) {
-		return proto.getName() + ": " + path(proto);
-	}
+  static String label(Proto proto) {
+    return proto.getName() + ": " + path(proto);
+  }
 
-	static IOException close(Map<String, ? extends Closeable> closeableMap) {
-		final IOException exception = new IOException();
-		for (final Map.Entry<String, ? extends Closeable> e : closeableMap.entrySet()) {
-			final String id = e.getKey();
-			final Closeable closeable = e.getValue();
-			try {
-				closeable.close();
-			} catch (IOException x) {
-				exception.addSuppressed(new UncheckedIOException(id, x));
-			} catch (Exception x) {
-				exception.addSuppressed(x);
-			}
-		}
-		return exception;
-	}
+  static IOException close(Map<String, ? extends Closeable> closeableMap) {
+    final IOException exception = new IOException();
+    for (final Map.Entry<String, ? extends Closeable> e : closeableMap.entrySet()) {
+      final String id = e.getKey();
+      final Closeable closeable = e.getValue();
+      try {
+        closeable.close();
+      } catch (IOException x) {
+        exception.addSuppressed(new UncheckedIOException(id, x));
+      } catch (Exception x) {
+        exception.addSuppressed(x);
+      }
+    }
+    return exception;
+  }
 }

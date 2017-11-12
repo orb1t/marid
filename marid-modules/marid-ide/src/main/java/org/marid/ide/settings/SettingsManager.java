@@ -34,14 +34,14 @@ import static org.marid.jfx.LocalizedStrings.ls;
 @Component
 public class SettingsManager {
 
-	@IdeAction
-	public FxAction settingsAction(IdeDependants dependants) {
-		return new FxAction("settings", "settings", "Tools")
-				.setIcon("O_SETTINGS")
-				.bindText(ls("Settings..."))
-				.setEventHandler(event -> dependants.run(c -> {
-					c.register(SettingsConfiguration.class);
-					c.setDisplayName("Settings Editor");
-				}));
-	}
+  @IdeAction
+  public FxAction settingsAction(IdeDependants dependants) {
+    return new FxAction("settings", "settings", "Tools")
+        .setIcon("O_SETTINGS")
+        .bindText(ls("Settings..."))
+        .setEventHandler(event -> dependants.run(c -> {
+          c.register(SettingsConfiguration.class);
+          c.setDisplayName("Settings Editor");
+        }));
+  }
 }

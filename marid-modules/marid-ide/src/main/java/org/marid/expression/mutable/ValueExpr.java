@@ -31,28 +31,28 @@ import static org.marid.io.Xmls.attribute;
 
 public abstract class ValueExpr extends Expr implements TypedValueExpression {
 
-	public final StringProperty value;
+  public final StringProperty value;
 
-	public ValueExpr(@Nonnull String value) {
-		this.value = new SimpleStringProperty(value);
-	}
+  public ValueExpr(@Nonnull String value) {
+    this.value = new SimpleStringProperty(value);
+  }
 
-	ValueExpr(@Nonnull Element element) {
-		super(element);
-		this.value = new SimpleStringProperty(
-				attribute(element, "value").orElseThrow(() -> new NullPointerException("value"))
-		);
-	}
+  ValueExpr(@Nonnull Element element) {
+    super(element);
+    this.value = new SimpleStringProperty(
+        attribute(element, "value").orElseThrow(() -> new NullPointerException("value"))
+    );
+  }
 
-	@Nonnull
-	@Override
-	public String getValue() {
-		return value.get();
-	}
+  @Nonnull
+  @Override
+  public String getValue() {
+    return value.get();
+  }
 
-	@Override
-	public void writeTo(@Nonnull Element element) {
-		super.writeTo(element);
-		element.setAttribute("value", getValue());
-	}
+  @Override
+  public void writeTo(@Nonnull Element element) {
+    super.writeTo(element);
+    element.setAttribute("value", getValue());
+  }
 }

@@ -36,19 +36,19 @@ import static org.marid.logging.Log.log;
 @Component
 public class BeanProjectListener {
 
-	private final ProjectProfile profile;
-	private final IdeBean root;
+  private final ProjectProfile profile;
+  private final IdeBean root;
 
-	@Autowired
-	public BeanProjectListener(ProjectProfile profile, IdeBean root) {
-		this.profile = profile;
-		this.root = root;
-	}
+  @Autowired
+  public BeanProjectListener(ProjectProfile profile, IdeBean root) {
+    this.profile = profile;
+    this.root = root;
+  }
 
-	@EventListener
-	public void onProjectSave(ProjectSaveEvent event) {
-		final Path path = profile.get(ProjectFileType.BEANS_XML);
-		root.save(path);
-		log(INFO, "Saved {0}", path);
-	}
+  @EventListener
+  public void onProjectSave(ProjectSaveEvent event) {
+    final Path path = profile.get(ProjectFileType.BEANS_XML);
+    root.save(path);
+    log(INFO, "Saved {0}", path);
+  }
 }

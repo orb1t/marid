@@ -35,43 +35,43 @@ import static org.marid.io.Xmls.*;
 
 public class ArrayExpr extends Expr implements TypedArrayExpression {
 
-	public final StringProperty elementType;
-	public final ObservableList<Expr> elements;
+  public final StringProperty elementType;
+  public final ObservableList<Expr> elements;
 
-	public ArrayExpr(@Nonnull String elementType, @Nonnull Expr... elements) {
-		this.elementType = new SimpleStringProperty(elementType);
-		this.elements = observableArrayList(Expr::getObservables);
-		this.elements.setAll(elements);
-	}
+  public ArrayExpr(@Nonnull String elementType, @Nonnull Expr... elements) {
+    this.elementType = new SimpleStringProperty(elementType);
+    this.elements = observableArrayList(Expr::getObservables);
+    this.elements.setAll(elements);
+  }
 
-	ArrayExpr(@Nonnull Element element) {
-		super(element);
-		this.elementType = new SimpleStringProperty(
-				attribute(element, "type").orElseThrow(() -> new NullPointerException("type"))
-		);
-		this.elements = elements("elements", element)
-				.map(Expr::of)
-				.collect(toCollection(() -> observableArrayList(Expr::getObservables)));
-	}
+  ArrayExpr(@Nonnull Element element) {
+    super(element);
+    this.elementType = new SimpleStringProperty(
+        attribute(element, "type").orElseThrow(() -> new NullPointerException("type"))
+    );
+    this.elements = elements("elements", element)
+        .map(Expr::of)
+        .collect(toCollection(() -> observableArrayList(Expr::getObservables)));
+  }
 
-	@Nonnull
-	@Override
-	public String getElementType() {
-		return elementType.get();
-	}
+  @Nonnull
+  @Override
+  public String getElementType() {
+    return elementType.get();
+  }
 
-	@Nonnull
-	@Override
-	public List<Expr> getElements() {
-		return elements;
-	}
+  @Nonnull
+  @Override
+  public List<Expr> getElements() {
+    return elements;
+  }
 
-	@Override
-	public void writeTo(@Nonnull Element element) {
-		super.writeTo(element);
-		element.setAttribute("type", getElementType());
-		if (!elements.isEmpty()) {
-			create(element, "elements", es -> getElements().forEach(e -> create(es, e.getTag(), e::writeTo)));
-		}
-	}
+  @Override
+  public void writeTo(@Nonnull Element element) {
+    super.writeTo(element);
+    element.setAttribute("type", getElementType());
+    if (!elements.isEmpty()) {
+      create(element, "elements", es -> getElements().forEach(e -> create(es, e.getTag(), e::writeTo)));
+    }
+  }
 }

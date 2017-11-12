@@ -30,10 +30,10 @@ import static org.marid.ide.common.IdeShapes.circle;
 @Component
 public class BeanTab extends IdeTab {
 
-	@Autowired
-	public BeanTab(BeanHierarchyTable table, ProjectProfile profile) {
-		setContent(table);
-		setText(profile.getName());
-		setGraphic(circle(profile.hashCode(), 16));
-	}
+  @Autowired
+  public BeanTab(BeanHierarchyTable table, ProjectProfile profile) {
+    setContent(table);
+    setText(profile.getName());
+    setGraphic(circle(profile.hashCode(), 16));
+  }
 }

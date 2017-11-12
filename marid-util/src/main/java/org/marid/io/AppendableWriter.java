@@ -32,30 +32,30 @@ import java.io.Writer;
  */
 public class AppendableWriter extends Writer {
 
-	private final Appendable appendable;
+  private final Appendable appendable;
 
-	public AppendableWriter(@Nonnull Appendable appendable) {
-		this.appendable = appendable;
-	}
+  public AppendableWriter(@Nonnull Appendable appendable) {
+    this.appendable = appendable;
+  }
 
-	@Override
-	public void write(@Nonnull char[] cbuf, int off, int len) throws IOException {
-		for (int i = 0; i < len; i++) {
-			appendable.append(cbuf[i + off]);
-		}
-	}
+  @Override
+  public void write(@Nonnull char[] cbuf, int off, int len) throws IOException {
+    for (int i = 0; i < len; i++) {
+      appendable.append(cbuf[i + off]);
+    }
+  }
 
-	@Override
-	public void flush() throws IOException {
-		if (appendable instanceof Flushable) {
-			((Flushable) appendable).flush();
-		}
-	}
+  @Override
+  public void flush() throws IOException {
+    if (appendable instanceof Flushable) {
+      ((Flushable) appendable).flush();
+    }
+  }
 
-	@Override
-	public void close() throws IOException {
-		if (appendable instanceof Closeable) {
-			((Closeable) appendable).close();
-		}
-	}
+  @Override
+  public void close() throws IOException {
+    if (appendable instanceof Closeable) {
+      ((Closeable) appendable).close();
+    }
+  }
 }

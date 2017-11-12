@@ -27,5 +27,5 @@ import java.util.prefs.Preferences;
  */
 public class IdePrefs {
 
-	public static final Preferences PREFERENCES = Preferences.userNodeForPackage(IdePrefs.class).node("Ide");
+  public static final Preferences PREFERENCES = Preferences.userNodeForPackage(IdePrefs.class).node("Ide");
 }

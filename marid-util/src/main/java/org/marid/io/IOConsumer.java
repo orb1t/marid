@@ -31,14 +31,14 @@ import java.util.function.Consumer;
 @FunctionalInterface
 public interface IOConsumer<T> extends Consumer<T> {
 
-	@Override
-	default void accept(T t) throws UncheckedIOException {
-		try {
-			ioAccept(t);
-		} catch (IOException x) {
-			throw new UncheckedIOException(x);
-		}
-	}
+  @Override
+  default void accept(T t) throws UncheckedIOException {
+    try {
+      ioAccept(t);
+    } catch (IOException x) {
+      throw new UncheckedIOException(x);
+    }
+  }
 
-	void ioAccept(T t) throws IOException;
+  void ioAccept(T t) throws IOException;
 }

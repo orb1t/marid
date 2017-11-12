@@ -35,11 +35,11 @@ import static org.marid.jfx.icons.FontIcons.glyphIcon;
 @Lazy(false)
 public class ProjectStructureTab extends IdeTab {
 
-	@Autowired
-	public ProjectStructureTab(ProjectStructurePane projectStructurePane) {
-		setContent(projectStructurePane);
-		textProperty().bind(ls("Profiles"));
-		setGraphic(glyphIcon("O_BOOK", 16));
-		setClosable(false);
-	}
+  @Autowired
+  public ProjectStructureTab(ProjectStructurePane projectStructurePane) {
+    setContent(projectStructurePane);
+    textProperty().bind(ls("Profiles"));
+    setGraphic(glyphIcon("O_BOOK", 16));
+    setClosable(false);
+  }
 }

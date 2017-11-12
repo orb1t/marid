@@ -30,26 +30,26 @@ import static org.marid.io.Xmls.attribute;
 
 public abstract class ValueExpr extends Expr implements ValueExpression {
 
-	@Nonnull
-	private final String value;
+  @Nonnull
+  private final String value;
 
-	ValueExpr(@Nonnull String value) {
-		this.value = value;
-	}
+  ValueExpr(@Nonnull String value) {
+    this.value = value;
+  }
 
-	ValueExpr(@Nonnull Element element) {
-		super(element);
-		value = attribute(element, "value").orElseThrow(() -> new NullPointerException("value"));
-	}
+  ValueExpr(@Nonnull Element element) {
+    super(element);
+    value = attribute(element, "value").orElseThrow(() -> new NullPointerException("value"));
+  }
 
-	@Override
-	@Nonnull
-	public String getValue() {
-		return value;
-	}
+  @Override
+  @Nonnull
+  public String getValue() {
+    return value;
+  }
 
-	@Override
-	public String toString() {
-		return value;
-	}
+  @Override
+  public String toString() {
+    return value;
+  }
 }

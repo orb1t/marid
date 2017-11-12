@@ -32,26 +32,26 @@ import java.util.function.BiConsumer;
 
 public interface TypedSetExpression extends SetExpression, TypedExpression {
 
-	@Nonnull
-	@Override
-	TypedExpression getTarget();
+  @Nonnull
+  @Override
+  TypedExpression getTarget();
 
-	@Nonnull
-	@Override
-	TypedExpression getValue();
+  @Nonnull
+  @Override
+  TypedExpression getValue();
 
-	@Nonnull
-	@Override
-	default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
-		return getTarget().getType(owner, context);
-	}
+  @Nonnull
+  @Override
+  default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
+    return getTarget().getType(owner, context);
+  }
 
-	@Override
-	default void resolve(@Nonnull Type type, @Nonnull TypeContext context, @Nonnull BiConsumer<Type, Type> evaluator) {
-			MaridRuntimeUtils.accessibleFields(context.getRaw(type))
-					.filter(f -> f.getName().equals(getField()))
-					.findFirst()
-					.map(f -> context.resolve(type, f.getGenericType()))
-					.ifPresent(t -> evaluator.accept(t, getValue().getType(type, context)));
-	}
+  @Override
+  default void resolve(@Nonnull Type type, @Nonnull TypeContext context, @Nonnull BiConsumer<Type, Type> evaluator) {
+    MaridRuntimeUtils.accessibleFields(context.getRaw(type))
+        .filter(f -> f.getName().equals(getField()))
+        .findFirst()
+        .map(f -> context.resolve(type, f.getGenericType()))
+        .ifPresent(t -> evaluator.accept(t, getValue().getType(type, context)));
+  }
 }

@@ -34,35 +34,35 @@ import java.util.function.Consumer;
 @MaridBean
 public interface DaqConsumers {
 
-	@MaridBeanFactory
-	static Consumer<Float> floatWriter(NumericWriter numericWriter, long tag) {
-		return val -> {
-			final DataRecord<Double> record = new DataRecord<>(tag, System.currentTimeMillis(), val.doubleValue());
-			numericWriter.merge(Collections.singletonList(record), true);
-		};
-	}
+  @MaridBeanFactory
+  static Consumer<Float> floatWriter(NumericWriter numericWriter, long tag) {
+    return val -> {
+      final DataRecord<Double> record = new DataRecord<>(tag, System.currentTimeMillis(), val.doubleValue());
+      numericWriter.merge(Collections.singletonList(record), true);
+    };
+  }
 
-	@MaridBeanFactory
-	static Consumer<Double> doubleWriter(NumericWriter numericWriter, long tag) {
-		return val -> {
-			final DataRecord<Double> record = new DataRecord<>(tag, System.currentTimeMillis(), val);
-			numericWriter.merge(Collections.singletonList(record), true);
-		};
-	}
+  @MaridBeanFactory
+  static Consumer<Double> doubleWriter(NumericWriter numericWriter, long tag) {
+    return val -> {
+      final DataRecord<Double> record = new DataRecord<>(tag, System.currentTimeMillis(), val);
+      numericWriter.merge(Collections.singletonList(record), true);
+    };
+  }
 
-	@MaridBeanFactory
-	static Consumer<Integer> intWriter(NumericWriter numericWriter, long tag) {
-		return val -> {
-			final DataRecord<Double> record = new DataRecord<>(tag, System.currentTimeMillis(), val.doubleValue());
-			numericWriter.merge(Collections.singletonList(record), true);
-		};
-	}
+  @MaridBeanFactory
+  static Consumer<Integer> intWriter(NumericWriter numericWriter, long tag) {
+    return val -> {
+      final DataRecord<Double> record = new DataRecord<>(tag, System.currentTimeMillis(), val.doubleValue());
+      numericWriter.merge(Collections.singletonList(record), true);
+    };
+  }
 
-	@MaridBeanFactory
-	static Consumer<Long> longWriter(NumericWriter numericWriter, long tag) {
-		return val -> {
-			final DataRecord<Double> record = new DataRecord<>(tag, System.currentTimeMillis(), val.doubleValue());
-			numericWriter.merge(Collections.singletonList(record), true);
-		};
-	}
+  @MaridBeanFactory
+  static Consumer<Long> longWriter(NumericWriter numericWriter, long tag) {
+    return val -> {
+      final DataRecord<Double> record = new DataRecord<>(tag, System.currentTimeMillis(), val.doubleValue());
+      numericWriter.merge(Collections.singletonList(record), true);
+    };
+  }
 }

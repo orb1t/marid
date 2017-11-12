@@ -37,20 +37,20 @@ import static org.marid.logging.Log.log;
 @MaridBean
 public class JDBCSessionConnection extends JDBCConnection {
 
-	@MaridBeanFactory
-	public JDBCSessionConnection(@Nonnull Database database, @Nonnull String schema) throws SQLException {
-		super(database.getSessionManager().newSysSession());
-		setSchema(schema);
-	}
+  @MaridBeanFactory
+  public JDBCSessionConnection(@Nonnull Database database, @Nonnull String schema) throws SQLException {
+    super(database.getSessionManager().newSysSession());
+    setSchema(schema);
+  }
 
-	@Override
-	public synchronized void close() throws SQLException {
-		try {
-			sessionProxy.close();
-		} catch (Throwable x) {
-			log(SEVERE, "Unable to close session id={0}", x, sessionProxy.getId());
-		} finally {
-			sessionProxy = null;
-		}
-	}
+  @Override
+  public synchronized void close() throws SQLException {
+    try {
+      sessionProxy.close();
+    } catch (Throwable x) {
+      log(SEVERE, "Unable to close session id={0}", x, sessionProxy.getId());
+    } finally {
+      sessionProxy = null;
+    }
+  }
 }

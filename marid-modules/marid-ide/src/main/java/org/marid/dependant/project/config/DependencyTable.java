@@ -34,49 +34,49 @@ import static org.marid.jfx.props.Props.stringProp;
  */
 public class DependencyTable extends TableView<Dependency> {
 
-	public DependencyTable(ObservableList<Dependency> dependencies) {
-		super(dependencies);
-		setEditable(true);
-		getColumns().add(idColumn());
-		getColumns().add(groupIdColumn());
-		getColumns().add(artifactIdColumn());
-		getColumns().add(versionColumn());
-	}
+  public DependencyTable(ObservableList<Dependency> dependencies) {
+    super(dependencies);
+    setEditable(true);
+    getColumns().add(idColumn());
+    getColumns().add(groupIdColumn());
+    getColumns().add(artifactIdColumn());
+    getColumns().add(versionColumn());
+  }
 
-	private TableColumn<Dependency, Integer> idColumn() {
-		final TableColumn<Dependency, Integer> col = new TableColumn<>("#");
-		col.setCellValueFactory(param -> new SimpleObjectProperty<>(param.getTableView().getItems().indexOf(param.getValue()) + 1));
-		col.setEditable(false);
-		col.setStyle("-fx-alignment: center-right");
-		return col;
-	}
+  private TableColumn<Dependency, Integer> idColumn() {
+    final TableColumn<Dependency, Integer> col = new TableColumn<>("#");
+    col.setCellValueFactory(param -> new SimpleObjectProperty<>(param.getTableView().getItems().indexOf(param.getValue()) + 1));
+    col.setEditable(false);
+    col.setStyle("-fx-alignment: center-right");
+    return col;
+  }
 
-	private TableColumn<Dependency, String> groupIdColumn() {
-		final TableColumn<Dependency, String> col = new TableColumn<>("groupId");
-		col.setCellValueFactory(param -> stringProp(param.getValue()::getGroupId, param.getValue()::setGroupId));
-		col.setCellFactory(param -> new TextFieldTableCell<>());
-		col.setPrefWidth(150);
-		col.setEditable(true);
-		return col;
-	}
+  private TableColumn<Dependency, String> groupIdColumn() {
+    final TableColumn<Dependency, String> col = new TableColumn<>("groupId");
+    col.setCellValueFactory(param -> stringProp(param.getValue()::getGroupId, param.getValue()::setGroupId));
+    col.setCellFactory(param -> new TextFieldTableCell<>());
+    col.setPrefWidth(150);
+    col.setEditable(true);
+    return col;
+  }
 
-	private TableColumn<Dependency, String> artifactIdColumn() {
-		final TableColumn<Dependency, String> col = new TableColumn<>("artifactId");
-		col.setCellValueFactory(param -> stringProp(param.getValue()::getArtifactId, param.getValue()::setArtifactId));
-		col.setCellFactory(param -> new TextFieldTableCell<>());
-		col.setPrefWidth(150);
-		col.setEditable(true);
-		return col;
-	}
+  private TableColumn<Dependency, String> artifactIdColumn() {
+    final TableColumn<Dependency, String> col = new TableColumn<>("artifactId");
+    col.setCellValueFactory(param -> stringProp(param.getValue()::getArtifactId, param.getValue()::setArtifactId));
+    col.setCellFactory(param -> new TextFieldTableCell<>());
+    col.setPrefWidth(150);
+    col.setEditable(true);
+    return col;
+  }
 
-	private TableColumn<Dependency, String> versionColumn() {
-		final TableColumn<Dependency, String> col = new TableColumn<>("version");
-		col.setCellValueFactory(param -> stringProp(param.getValue()::getVersion, param.getValue()::setVersion));
-		col.setCellFactory(param -> new TextFieldTableCell<>());
-		col.setPrefWidth(200);
-		col.setStyle("-fx-alignment: center-right");
-		col.setSortable(false);
-		col.setEditable(true);
-		return col;
-	}
+  private TableColumn<Dependency, String> versionColumn() {
+    final TableColumn<Dependency, String> col = new TableColumn<>("version");
+    col.setCellValueFactory(param -> stringProp(param.getValue()::getVersion, param.getValue()::setVersion));
+    col.setCellFactory(param -> new TextFieldTableCell<>());
+    col.setPrefWidth(200);
+    col.setStyle("-fx-alignment: center-right");
+    col.setSortable(false);
+    col.setEditable(true);
+    return col;
+  }
 }

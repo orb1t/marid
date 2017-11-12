@@ -29,14 +29,14 @@ import java.util.List;
 
 public interface TypedBean extends MaridBean {
 
-	@Override
-	TypedBean getParent();
+  @Override
+  TypedBean getParent();
 
-	@Nonnull
-	@Override
-	TypedExpression getFactory();
+  @Nonnull
+  @Override
+  TypedExpression getFactory();
 
-	@Nonnull
-	@Override
-	List<? extends TypedBean> getChildren();
+  @Nonnull
+  @Override
+  List<? extends TypedBean> getChildren();
 }

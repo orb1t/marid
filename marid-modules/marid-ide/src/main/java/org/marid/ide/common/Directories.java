@@ -27,13 +27,13 @@ import java.nio.file.Path;
  */
 public interface Directories {
 
-	Path getUserHome();
+  Path getUserHome();
 
-	Path getMarid();
+  Path getMarid();
 
-	Path getProfiles();
+  Path getProfiles();
 
-	Path getRepo();
+  Path getRepo();
 
-	Path getMaven();
+  Path getMaven();
 }

@@ -44,59 +44,59 @@ import static org.marid.logging.Log.log;
 @MaridBean
 public class StdProtoBusTaskRunner implements ProtoBusTaskRunner<StdProtoBus> {
 
-	private final StdProtoBus bus;
+  private final StdProtoBus bus;
 
-	@MaridBeanFactory(name = "Proto Task Runner")
-	public StdProtoBusTaskRunner(StdProtoBus bus) {
-		this.bus = bus;
-	}
+  @MaridBeanFactory(name = "Proto Task Runner")
+  public StdProtoBusTaskRunner(StdProtoBus bus) {
+    this.bus = bus;
+  }
 
-	@Override
-	public Future<?> runAsync(IOBiConsumer<StdProtoBus, ProtoIO> consumer) {
-		return bus.scheduler.submit(() -> run(consumer));
-	}
+  @Override
+  public Future<?> runAsync(IOBiConsumer<StdProtoBus, ProtoIO> consumer) {
+    return bus.scheduler.submit(() -> run(consumer));
+  }
 
-	@Override
-	public <R> Future<R> callAsync(IOBiFunction<StdProtoBus, ProtoIO, R> function) {
-		return bus.scheduler.submit(() -> call(function));
-	}
+  @Override
+  public <R> Future<R> callAsync(IOBiFunction<StdProtoBus, ProtoIO, R> function) {
+    return bus.scheduler.submit(() -> call(function));
+  }
 
-	@Override
-	public ScheduledFuture<?> schedule(IOBiConsumer<StdProtoBus, ProtoIO> task, long delay, long period, TimeUnit unit, boolean fair) {
-		if (period == 0) {
-			return bus.scheduler.schedule(() -> run(task), delay, unit);
-		} else {
-			return fair
-					? bus.scheduler.scheduleAtFixedRate(() -> run(task), delay, period, unit)
-					: bus.scheduler.scheduleWithFixedDelay(() -> run(task), delay, period, unit);
-		}
-	}
+  @Override
+  public ScheduledFuture<?> schedule(IOBiConsumer<StdProtoBus, ProtoIO> task, long delay, long period, TimeUnit unit, boolean fair) {
+    if (period == 0) {
+      return bus.scheduler.schedule(() -> run(task), delay, unit);
+    } else {
+      return fair
+          ? bus.scheduler.scheduleAtFixedRate(() -> run(task), delay, period, unit)
+          : bus.scheduler.scheduleWithFixedDelay(() -> run(task), delay, period, unit);
+    }
+  }
 
-	@Override
-	public void run(IOBiConsumer<StdProtoBus, ProtoIO> consumer) {
-		doWithChannel(ch -> consumer.accept(bus, ch));
-	}
+  @Override
+  public void run(IOBiConsumer<StdProtoBus, ProtoIO> consumer) {
+    doWithChannel(ch -> consumer.accept(bus, ch));
+  }
 
-	@Override
-	public <R> R call(IOBiFunction<StdProtoBus, ProtoIO, R> function) {
-		final AtomicReference<R> ref = new AtomicReference<>();
-		doWithChannel(ch -> ref.set(function.apply(bus, ch)));
-		return ref.get();
-	}
+  @Override
+  public <R> R call(IOBiFunction<StdProtoBus, ProtoIO, R> function) {
+    final AtomicReference<R> ref = new AtomicReference<>();
+    doWithChannel(ch -> ref.set(function.apply(bus, ch)));
+    return ref.get();
+  }
 
-	private void doWithChannel(IOConsumer<ProtoIO> consumer) {
-		synchronized (bus.scheduler) {
-			try {
-				bus.init();
-				consumer.accept(bus.io);
-				bus.health.successfulTransactionCount.incrementAndGet();
-				bus.health.lastSuccessfulTransactionTimestamp.set(System.currentTimeMillis());
-			} catch (Exception x) {
-				bus.health.failedTransactionCount.incrementAndGet();
-				bus.health.lastFailedTransactionTimestamp.set(System.currentTimeMillis());
-				final Logger logger = Logger.getLogger(bus.toString());
-				log(logger, WARNING, "Error", x);
-			}
-		}
-	}
+  private void doWithChannel(IOConsumer<ProtoIO> consumer) {
+    synchronized (bus.scheduler) {
+      try {
+        bus.init();
+        consumer.accept(bus.io);
+        bus.health.successfulTransactionCount.incrementAndGet();
+        bus.health.lastSuccessfulTransactionTimestamp.set(System.currentTimeMillis());
+      } catch (Exception x) {
+        bus.health.failedTransactionCount.incrementAndGet();
+        bus.health.lastFailedTransactionTimestamp.set(System.currentTimeMillis());
+        final Logger logger = Logger.getLogger(bus.toString());
+        log(logger, WARNING, "Error", x);
+      }
+    }
+  }
 }

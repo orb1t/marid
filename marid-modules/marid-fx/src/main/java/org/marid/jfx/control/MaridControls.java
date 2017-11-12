@@ -29,11 +29,11 @@ import javafx.scene.control.ScrollPane;
  */
 public interface MaridControls {
 
-	static ScrollPane createMaridScrollPane(Node node) {
-		final ScrollPane scrollPane = new ScrollPane(node);
-		scrollPane.setFitToHeight(true);
-		scrollPane.setFitToWidth(true);
-		scrollPane.setStyle("-fx-background-color: transparent");
-		return scrollPane;
-	}
+  static ScrollPane createMaridScrollPane(Node node) {
+    final ScrollPane scrollPane = new ScrollPane(node);
+    scrollPane.setFitToHeight(true);
+    scrollPane.setFitToWidth(true);
+    scrollPane.setStyle("-fx-background-color: transparent");
+    return scrollPane;
+  }
 }

@@ -25,41 +25,41 @@ import org.apache.maven.model.Plugin;
 
 public class MavenArtifact {
 
-	private final String groupId;
-	private final String artifactId;
-	private final String version;
+  private final String groupId;
+  private final String artifactId;
+  private final String version;
 
-	public MavenArtifact(String groupId, String artifactId, String version) {
-		this.groupId = groupId;
-		this.artifactId = artifactId;
-		this.version = version;
-	}
+  public MavenArtifact(String groupId, String artifactId, String version) {
+    this.groupId = groupId;
+    this.artifactId = artifactId;
+    this.version = version;
+  }
 
-	public String getGroupId() {
-		return groupId;
-	}
+  public String getGroupId() {
+    return groupId;
+  }
 
-	public String getArtifactId() {
-		return artifactId;
-	}
+  public String getArtifactId() {
+    return artifactId;
+  }
 
-	public String getVersion() {
-		return version;
-	}
+  public String getVersion() {
+    return version;
+  }
 
-	public Dependency toDependency() {
-		final Dependency dependency = new Dependency();
-		dependency.setGroupId(groupId);
-		dependency.setArtifactId(artifactId);
-		dependency.setVersion(version);
-		return dependency;
-	}
+  public Dependency toDependency() {
+    final Dependency dependency = new Dependency();
+    dependency.setGroupId(groupId);
+    dependency.setArtifactId(artifactId);
+    dependency.setVersion(version);
+    return dependency;
+  }
 
-	public Plugin toPlugin() {
-		final Plugin plugin = new Plugin();
-		plugin.setGroupId(groupId);
-		plugin.setArtifactId(artifactId);
-		plugin.setVersion(version);
-		return plugin;
-	}
+  public Plugin toPlugin() {
+    final Plugin plugin = new Plugin();
+    plugin.setGroupId(groupId);
+    plugin.setArtifactId(artifactId);
+    plugin.setVersion(version);
+    return plugin;
+  }
 }

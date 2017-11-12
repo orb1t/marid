@@ -36,19 +36,19 @@ import java.sql.SQLException;
 @MaridBean
 public class JDBCSessionPool extends JDBCPool {
 
-	private final Database database;
-	private final String schema;
+  private final Database database;
+  private final String schema;
 
-	@MaridBeanFactory
-	public JDBCSessionPool(int size, Database database, String schema) {
-		super(size);
-		this.database = database;
-		this.schema = schema;
-		this.source = new JDBCPooledDataSource() {
-			@Override
-			public PooledConnection getPooledConnection() throws SQLException {
-				return new JDBCPooledConnection(new JDBCSessionConnection(database, schema));
-			}
-		};
-	}
+  @MaridBeanFactory
+  public JDBCSessionPool(int size, Database database, String schema) {
+    super(size);
+    this.database = database;
+    this.schema = schema;
+    this.source = new JDBCPooledDataSource() {
+      @Override
+      public PooledConnection getPooledConnection() throws SQLException {
+        return new JDBCPooledConnection(new JDBCSessionConnection(database, schema));
+      }
+    };
+  }
 }

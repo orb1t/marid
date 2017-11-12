@@ -44,45 +44,45 @@ import static org.marid.logging.Log.log;
 @Component
 public class AppearanceTab extends GenericGridPane implements SettingsEditor {
 
-	private final AppearanceSettings appearanceSettings;
+  private final AppearanceSettings appearanceSettings;
 
-	@Autowired
-	public AppearanceTab(AppearanceSettings appearanceSettings, IdeLogHandler logHandler) {
-		this.appearanceSettings = appearanceSettings;
-		addControl("Locale", this::localeCombo);
-		addIntField("Max log records", logHandler::getMaxRecords, logHandler::setMaxRecords, 100, 100_000, 100);
-		addSeparator();
-		addControl("System stylesheet", this::styleSheetCombo);
-		addSeparator();
-		addBooleanField("Show full names", appearanceSettings::isShowFullNames, appearanceSettings::setShowFullNames);
-	}
+  @Autowired
+  public AppearanceTab(AppearanceSettings appearanceSettings, IdeLogHandler logHandler) {
+    this.appearanceSettings = appearanceSettings;
+    addControl("Locale", this::localeCombo);
+    addIntField("Max log records", logHandler::getMaxRecords, logHandler::setMaxRecords, 100, 100_000, 100);
+    addSeparator();
+    addControl("System stylesheet", this::styleSheetCombo);
+    addSeparator();
+    addBooleanField("Show full names", appearanceSettings::isShowFullNames, appearanceSettings::setShowFullNames);
+  }
 
-	private ComboBox<String> styleSheetCombo() {
-		final ComboBox<String> stylesheetCombo = new ComboBox<>(observableArrayList(STYLESHEET_CASPIAN, STYLESHEET_MODENA));
-		stylesheetCombo.getSelectionModel().select(Application.getUserAgentStylesheet());
-		stylesheetCombo.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-			log(INFO, "Applying stylesheet {0}", newValue);
-			Application.setUserAgentStylesheet(newValue);
-			IdePrefs.PREFERENCES.put("style", newValue);
-		});
-		return stylesheetCombo;
-	}
+  private ComboBox<String> styleSheetCombo() {
+    final ComboBox<String> stylesheetCombo = new ComboBox<>(observableArrayList(STYLESHEET_CASPIAN, STYLESHEET_MODENA));
+    stylesheetCombo.getSelectionModel().select(Application.getUserAgentStylesheet());
+    stylesheetCombo.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+      log(INFO, "Applying stylesheet {0}", newValue);
+      Application.setUserAgentStylesheet(newValue);
+      IdePrefs.PREFERENCES.put("style", newValue);
+    });
+    return stylesheetCombo;
+  }
 
-	private ComboBox<String> localeCombo() {
-		final ComboBox<String> localeCombo = new ComboBox<>(observableArrayList("en", "fr", "es", "it", "ru"));
-		localeCombo.setEditable(true);
-		localeCombo.getSelectionModel().select(LocalizedStrings.LOCALE.get().toLanguageTag());
-		localeCombo.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-			final Locale locale = Locale.forLanguageTag(newValue);
-			if (locale != null && !Locale.ROOT.equals(locale)) {
-				IdePrefs.PREFERENCES.put("locale", locale.toLanguageTag());
-			}
-		});
-		return localeCombo;
-	}
+  private ComboBox<String> localeCombo() {
+    final ComboBox<String> localeCombo = new ComboBox<>(observableArrayList("en", "fr", "es", "it", "ru"));
+    localeCombo.setEditable(true);
+    localeCombo.getSelectionModel().select(LocalizedStrings.LOCALE.get().toLanguageTag());
+    localeCombo.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+      final Locale locale = Locale.forLanguageTag(newValue);
+      if (locale != null && !Locale.ROOT.equals(locale)) {
+        IdePrefs.PREFERENCES.put("locale", locale.toLanguageTag());
+      }
+    });
+    return localeCombo;
+  }
 
-	@Override
-	public AppearanceSettings getSettings() {
-		return appearanceSettings;
-	}
+  @Override
+  public AppearanceSettings getSettings() {
+    return appearanceSettings;
+  }
 }

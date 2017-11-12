@@ -35,75 +35,75 @@ import static org.marid.io.Xmls.*;
 
 public class RuntimeBean implements MaridBean {
 
-	private final RuntimeBean parent;
-	private final String name;
-	private final Expr factory;
-	private final List<RuntimeBean> children;
+  private final RuntimeBean parent;
+  private final String name;
+  private final Expr factory;
+  private final List<RuntimeBean> children;
 
-	public RuntimeBean(RuntimeBean parent, @Nonnull String name, @Nonnull Expr factory) {
-		this.parent = parent;
-		this.name = name;
-		this.factory = factory;
-		this.children = new ArrayList<>();
-	}
+  public RuntimeBean(RuntimeBean parent, @Nonnull String name, @Nonnull Expr factory) {
+    this.parent = parent;
+    this.name = name;
+    this.factory = factory;
+    this.children = new ArrayList<>();
+  }
 
-	public RuntimeBean(RuntimeBean parent, @Nonnull Element element) {
-		this.parent = parent;
-		this.name = attribute(element, "name").orElseThrow(() -> new NullPointerException("name"));
-		this.factory = element("factory", element).map(Expr::of).orElseThrow(() -> new NullPointerException("factory"));
-		this.children = elements(element, "bean").map(e -> new RuntimeBean(this, e)).collect(toList());
-	}
+  public RuntimeBean(RuntimeBean parent, @Nonnull Element element) {
+    this.parent = parent;
+    this.name = attribute(element, "name").orElseThrow(() -> new NullPointerException("name"));
+    this.factory = element("factory", element).map(Expr::of).orElseThrow(() -> new NullPointerException("factory"));
+    this.children = elements(element, "bean").map(e -> new RuntimeBean(this, e)).collect(toList());
+  }
 
-	public RuntimeBean() {
-		this(null, "beans", new NullExpr());
-	}
+  public RuntimeBean() {
+    this(null, "beans", new NullExpr());
+  }
 
-	@Override
-	public RuntimeBean getParent() {
-		return parent;
-	}
+  @Override
+  public RuntimeBean getParent() {
+    return parent;
+  }
 
-	@Nonnull
-	@Override
-	public String getName() {
-		return name;
-	}
+  @Nonnull
+  @Override
+  public String getName() {
+    return name;
+  }
 
-	@Nonnull
-	@Override
-	public Expr getFactory() {
-		return factory;
-	}
+  @Nonnull
+  @Override
+  public Expr getFactory() {
+    return factory;
+  }
 
-	@Nonnull
-	@Override
-	public List<RuntimeBean> getChildren() {
-		return children;
-	}
+  @Nonnull
+  @Override
+  public List<RuntimeBean> getChildren() {
+    return children;
+  }
 
-	@SafeVarargs
-	@Nonnull
-	public final RuntimeBean add(@Nonnull String name, @Nonnull Expr factory, @Nonnull Consumer<RuntimeBean>... consumers) {
-		final RuntimeBean bean = new RuntimeBean(this, name, factory);
-		children.add(bean);
-		for (final Consumer<RuntimeBean> consumer : consumers) {
-			consumer.accept(bean);
-		}
-		return this;
-	}
+  @SafeVarargs
+  @Nonnull
+  public final RuntimeBean add(@Nonnull String name, @Nonnull Expr factory, @Nonnull Consumer<RuntimeBean>... consumers) {
+    final RuntimeBean bean = new RuntimeBean(this, name, factory);
+    children.add(bean);
+    for (final Consumer<RuntimeBean> consumer : consumers) {
+      consumer.accept(bean);
+    }
+    return this;
+  }
 
-	@SafeVarargs
-	@Nonnull
-	public final RuntimeBean add(@Nonnull String name, @Nonnull Consumer<RuntimeBean>... consumers) {
-		return add(name, new NullExpr(), consumers);
-	}
+  @SafeVarargs
+  @Nonnull
+  public final RuntimeBean add(@Nonnull String name, @Nonnull Consumer<RuntimeBean>... consumers) {
+    return add(name, new NullExpr(), consumers);
+  }
 
-	@Override
-	public String toString() {
-		if (children.isEmpty()) {
-			return name + "(" + factory + ")";
-		} else {
-			return name + "(" + factory + ")" + children;
-		}
-	}
+  @Override
+  public String toString() {
+    if (children.isEmpty()) {
+      return name + "(" + factory + ")";
+    } else {
+      return name + "(" + factory + ")" + children;
+    }
+  }
 }

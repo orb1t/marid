@@ -52,113 +52,113 @@ import java.util.function.Supplier;
 @Component("dependants")
 public class IdeDependants {
 
-	private static final Collection<DependantContext> CONTEXTS = new ConcurrentLinkedQueue<>();
+  private static final Collection<DependantContext> CONTEXTS = new ConcurrentLinkedQueue<>();
 
-	private final GenericApplicationContext parent;
+  private final GenericApplicationContext parent;
 
-	@Autowired
-	public IdeDependants(GenericApplicationContext parent) {
-		this.parent = parent;
-	}
+  @Autowired
+  public IdeDependants(GenericApplicationContext parent) {
+    this.parent = parent;
+  }
 
-	public GenericApplicationContext run(Consumer<AnnotationConfigApplicationContext> consumer) {
-		final AnnotationConfigApplicationContext context = new DependantContext(parent);
-		consumer.accept(context);
-		context.refresh();
-		context.start();
-		return context;
-	}
+  public GenericApplicationContext run(Consumer<AnnotationConfigApplicationContext> consumer) {
+    final AnnotationConfigApplicationContext context = new DependantContext(parent);
+    consumer.accept(context);
+    context.refresh();
+    context.start();
+    return context;
+  }
 
-	@SafeVarargs
-	public final GenericApplicationContext start(Object conf, Consumer<AnnotationConfigApplicationContext>... consumers) {
-		return CONTEXTS.stream()
-				.filter(c -> c.containsBean("$conf") && c.getBean("$conf").equals(conf))
-				.findFirst()
-				.map(IdeDependants::activate)
-				.orElseGet(() -> run(context -> {
-					final Supplier<Object> supplier = () -> conf;
-					final Class<Object> type = Casts.cast(conf.getClass());
-					context.registerBean("$conf", type, supplier);
-					for (final Consumer<AnnotationConfigApplicationContext> c : consumers) {
-						c.accept(context);
-					}
-				}));
-	}
+  @SafeVarargs
+  public final GenericApplicationContext start(Object conf, Consumer<AnnotationConfigApplicationContext>... consumers) {
+    return CONTEXTS.stream()
+        .filter(c -> c.containsBean("$conf") && c.getBean("$conf").equals(conf))
+        .findFirst()
+        .map(IdeDependants::activate)
+        .orElseGet(() -> run(context -> {
+          final Supplier<Object> supplier = () -> conf;
+          final Class<Object> type = Casts.cast(conf.getClass());
+          context.registerBean("$conf", type, supplier);
+          for (final Consumer<AnnotationConfigApplicationContext> c : consumers) {
+            c.accept(context);
+          }
+        }));
+  }
 
-	public GenericApplicationContext start(Object conf, String displayName) {
-		return start(conf, c -> c.setDisplayName(displayName));
-	}
+  public GenericApplicationContext start(Object conf, String displayName) {
+    return start(conf, c -> c.setDisplayName(displayName));
+  }
 
-	private static GenericApplicationContext activate(GenericApplicationContext context) {
-		context.getBeansOfType(IdeTab.class, false, false).forEach((name, tab) -> {
-			final SelectionModel<Tab> selectionModel = tab.getTabPane().getSelectionModel();
-			selectionModel.select(tab);
-		});
-		context.getBeansOfType(Window.class, false, false).forEach((name, win) -> win.requestFocus());
-		context.getBeansOfType(Dialog.class, false, false).forEach((name, win) -> win.show());
-		return context;
-	}
+  private static GenericApplicationContext activate(GenericApplicationContext context) {
+    context.getBeansOfType(IdeTab.class, false, false).forEach((name, tab) -> {
+      final SelectionModel<Tab> selectionModel = tab.getTabPane().getSelectionModel();
+      selectionModel.select(tab);
+    });
+    context.getBeansOfType(Window.class, false, false).forEach((name, win) -> win.requestFocus());
+    context.getBeansOfType(Dialog.class, false, false).forEach((name, win) -> win.show());
+    return context;
+  }
 
-	@Override
-	public String toString() {
-		return parent.toString();
-	}
+  @Override
+  public String toString() {
+    return parent.toString();
+  }
 
-	private static class DependantContext extends AnnotationConfigApplicationContext {
+  private static class DependantContext extends AnnotationConfigApplicationContext {
 
-		private final Listener parentListener;
+    private final Listener parentListener;
 
-		private DependantContext(GenericApplicationContext parent) {
-			parent.addApplicationListener(parentListener = new Listener(this, parent));
-			setAllowBeanDefinitionOverriding(false);
-			setAllowCircularReferences(false);
-			getBeanFactory().addBeanPostProcessor(new WindowAndDialogPostProcessor(this));
-			getBeanFactory().addBeanPostProcessor(new MaridCommonPostProcessor());
-			getBeanFactory().setParentBeanFactory(parent.getDefaultListableBeanFactory());
-			register(IdeDependants.class);
-		}
+    private DependantContext(GenericApplicationContext parent) {
+      parent.addApplicationListener(parentListener = new Listener(this, parent));
+      setAllowBeanDefinitionOverriding(false);
+      setAllowCircularReferences(false);
+      getBeanFactory().addBeanPostProcessor(new WindowAndDialogPostProcessor(this));
+      getBeanFactory().addBeanPostProcessor(new MaridCommonPostProcessor());
+      getBeanFactory().setParentBeanFactory(parent.getDefaultListableBeanFactory());
+      register(IdeDependants.class);
+    }
 
-		@Override
-		protected void onRefresh() throws BeansException {
-			parentListener.close();
-			CONTEXTS.add(this);
-		}
+    @Override
+    protected void onRefresh() throws BeansException {
+      parentListener.close();
+      CONTEXTS.add(this);
+    }
 
-		@Override
-		protected void onClose() {
-			CONTEXTS.removeIf(c -> c == this);
-			CONTEXTS.stream()
-					.filter(c -> c.getBeanFactory().getParentBeanFactory() == getBeanFactory())
-					.findFirst()
-					.ifPresent(AbstractApplicationContext::close);
-		}
-	}
+    @Override
+    protected void onClose() {
+      CONTEXTS.removeIf(c -> c == this);
+      CONTEXTS.stream()
+          .filter(c -> c.getBeanFactory().getParentBeanFactory() == getBeanFactory())
+          .findFirst()
+          .ifPresent(AbstractApplicationContext::close);
+    }
+  }
 }
 
 class Listener extends WeakReference<GenericApplicationContext> implements ApplicationListener<ApplicationEvent> {
 
-	private final GenericApplicationContext parent;
+  private final GenericApplicationContext parent;
 
-	Listener(GenericApplicationContext referent, GenericApplicationContext parent) {
-		super(referent);
-		this.parent = parent;
-	}
+  Listener(GenericApplicationContext referent, GenericApplicationContext parent) {
+    super(referent);
+    this.parent = parent;
+  }
 
-	@Override
-	public void onApplicationEvent(@Nonnull ApplicationEvent event) {
-		final GenericApplicationContext context = get();
-		if (context == null || !context.isActive()) {
-			close();
-		} else {
-			if (event instanceof ContextClosedEvent) {
-				context.close();
-			} else if (event instanceof PropagatedEvent) {
-				context.publishEvent(event);
-			}
-		}
-	}
+  @Override
+  public void onApplicationEvent(@Nonnull ApplicationEvent event) {
+    final GenericApplicationContext context = get();
+    if (context == null || !context.isActive()) {
+      close();
+    } else {
+      if (event instanceof ContextClosedEvent) {
+        context.close();
+      } else if (event instanceof PropagatedEvent) {
+        context.publishEvent(event);
+      }
+    }
+  }
 
-	void close() {
-		parent.getApplicationListeners().remove(this);
-	}
+  void close() {
+    parent.getApplicationListeners().remove(this);
+  }
 }

@@ -32,9 +32,9 @@ import static org.marid.types.TypeUtils.WILDCARD;
 
 public interface TypedNullExpression extends NullExpression, TypedExpression {
 
-	@Nonnull
-	@Override
-	default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
-		return WILDCARD;
-	}
+  @Nonnull
+  @Override
+  default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
+    return WILDCARD;
+  }
 }

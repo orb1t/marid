@@ -48,67 +48,67 @@ import static org.marid.l10n.L10n.s;
 @PrototypeComponent
 public class ProjectBuilderService extends IdeService<HBox> {
 
-	private final ObjectFactory<ProjectMavenBuilder> builder;
-	private final TextArea out = new TextArea();
-	private final TextArea err = new TextArea();
+  private final ObjectFactory<ProjectMavenBuilder> builder;
+  private final TextArea out = new TextArea();
+  private final TextArea err = new TextArea();
 
-	private ProjectProfile profile;
+  private ProjectProfile profile;
 
-	@Autowired
-	public ProjectBuilderService(ObjectFactory<ProjectMavenBuilder> builder) {
-		this.builder = builder;
+  @Autowired
+  public ProjectBuilderService(ObjectFactory<ProjectMavenBuilder> builder) {
+    this.builder = builder;
 
-		out.setFont(Font.font("Monospaced"));
-		err.setFont(Font.font("Monospaced"));
-	}
+    out.setFont(Font.font("Monospaced"));
+    err.setFont(Font.font("Monospaced"));
+  }
 
-	public ProjectBuilderService setProfile(ProjectProfile profile) {
-		this.profile = profile;
-		setOnRunning(event -> profile.enabledProperty().set(false));
-		setOnFailed(event -> profile.enabledProperty().set(true));
-		setOnSucceeded(event -> profile.enabledProperty().set(true));
-		return this;
-	}
+  public ProjectBuilderService setProfile(ProjectProfile profile) {
+    this.profile = profile;
+    setOnRunning(event -> profile.enabledProperty().set(false));
+    setOnFailed(event -> profile.enabledProperty().set(true));
+    setOnSucceeded(event -> profile.enabledProperty().set(true));
+    return this;
+  }
 
-	@Override
-	protected IdeTask createTask() {
-		return new BuilderTask();
-	}
+  @Override
+  protected IdeTask createTask() {
+    return new BuilderTask();
+  }
 
-	private class BuilderTask extends IdeTask {
+  private class BuilderTask extends IdeTask {
 
-		private BuilderTask() {
-			updateTitle(profile.getName() + ": " + s("Maven Build"));
-		}
+    private BuilderTask() {
+      updateTitle(profile.getName() + ": " + s("Maven Build"));
+    }
 
-		@Override
-		protected void execute() throws Exception {
-			final ProjectMavenBuilder projectBuilder = builder.getObject()
-					.profile(profile)
-					.goals("clean", "install");
-			updateGraphic(box -> {
-				final Tab outTab = new Tab("Out", out);
-				final Tab errTab = new Tab("Err", err);
-				final TabPane tabPane = new TabPane(outTab, errTab);
-				tabPane.setPrefSize(800, 800);
-				details.set(tabPane);
-			});
-			final Consumer<String> o = l -> runLater(() -> out.appendText(l + lineSeparator()));
-			final Consumer<String> e = l -> runLater(() -> err.appendText(l + lineSeparator()));
-			final ProcessManager manager = projectBuilder.build(o, e);
+    @Override
+    protected void execute() throws Exception {
+      final ProjectMavenBuilder projectBuilder = builder.getObject()
+          .profile(profile)
+          .goals("clean", "install");
+      updateGraphic(box -> {
+        final Tab outTab = new Tab("Out", out);
+        final Tab errTab = new Tab("Err", err);
+        final TabPane tabPane = new TabPane(outTab, errTab);
+        tabPane.setPrefSize(800, 800);
+        details.set(tabPane);
+      });
+      final Consumer<String> o = l -> runLater(() -> out.appendText(l + lineSeparator()));
+      final Consumer<String> e = l -> runLater(() -> err.appendText(l + lineSeparator()));
+      final ProcessManager manager = projectBuilder.build(o, e);
 
-			manager.waitFor();
-		}
+      manager.waitFor();
+    }
 
-		@Nonnull
-		@Override
-		protected HBox createGraphic() {
-			return new HBox(IdeShapes.circle(profile.hashCode(), 16));
-		}
+    @Nonnull
+    @Override
+    protected HBox createGraphic() {
+      return new HBox(IdeShapes.circle(profile.hashCode(), 16));
+    }
 
-		@Override
-		protected ContextMenu contextMenu() {
-			return new ContextMenu();
-		}
-	}
+    @Override
+    protected ContextMenu contextMenu() {
+      return new ContextMenu();
+    }
+  }
 }

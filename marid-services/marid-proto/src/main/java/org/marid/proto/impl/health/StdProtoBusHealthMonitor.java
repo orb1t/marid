@@ -37,37 +37,37 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 @MaridBean
 public class StdProtoBusHealthMonitor implements AutoCloseable {
 
-	private final ScheduledFuture<?> task;
-	private final ScheduledExecutorService scheduler;
+  private final ScheduledFuture<?> task;
+  private final ScheduledExecutorService scheduler;
 
-	@MaridBeanFactory(name = "Bus Health Monitor", icon = "F_HEART")
-	public StdProtoBusHealthMonitor(ProtoBus bus, StdProtoBusHealthMonitorProps props) {
-		final long timeout = props.getMaxRecencySeconds() * 1000L;
-		final Runnable resetStrategy = () -> {
-			final long timestamp = bus.getHealth().getLastSuccessfulTransactionTimestamp().getTime();
-			final long now = System.currentTimeMillis();
-			if (now - timestamp > timeout) {
-				bus.getHealth().reset();
-				bus.reset();
-			}
-		};
-		final ScheduledExecutorService scheduler;
-		if (props.getScheduler() == null) {
-			scheduler = this.scheduler = new ScheduledThreadPoolExecutor(1);
-		} else {
-			scheduler = props.getScheduler();
-			this.scheduler = null;
-		}
-		task = scheduler.scheduleWithFixedDelay(resetStrategy, props.getDelaySeconds(), props.getPeriodSeconds(), SECONDS);
-	}
+  @MaridBeanFactory(name = "Bus Health Monitor", icon = "F_HEART")
+  public StdProtoBusHealthMonitor(ProtoBus bus, StdProtoBusHealthMonitorProps props) {
+    final long timeout = props.getMaxRecencySeconds() * 1000L;
+    final Runnable resetStrategy = () -> {
+      final long timestamp = bus.getHealth().getLastSuccessfulTransactionTimestamp().getTime();
+      final long now = System.currentTimeMillis();
+      if (now - timestamp > timeout) {
+        bus.getHealth().reset();
+        bus.reset();
+      }
+    };
+    final ScheduledExecutorService scheduler;
+    if (props.getScheduler() == null) {
+      scheduler = this.scheduler = new ScheduledThreadPoolExecutor(1);
+    } else {
+      scheduler = props.getScheduler();
+      this.scheduler = null;
+    }
+    task = scheduler.scheduleWithFixedDelay(resetStrategy, props.getDelaySeconds(), props.getPeriodSeconds(), SECONDS);
+  }
 
-	@Override
-	public void close() throws Exception {
-		if (task != null) {
-			task.cancel(false);
-		}
-		if (scheduler != null) {
-			scheduler.shutdown();
-		}
-	}
+  @Override
+  public void close() throws Exception {
+    if (task != null) {
+      task.cancel(false);
+    }
+    if (scheduler != null) {
+      scheduler.shutdown();
+    }
+  }
 }

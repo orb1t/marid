@@ -32,13 +32,13 @@ import java.util.function.BiConsumer;
 
 public interface TypedExpression extends Expression {
 
-	@Nonnull
-	@Override
-	List<? extends TypedExpression> getInitializers();
+  @Nonnull
+  @Override
+  List<? extends TypedExpression> getInitializers();
 
-	@Nonnull
-	Type getType(@Nullable Type owner, @Nonnull TypeContext context);
+  @Nonnull
+  Type getType(@Nullable Type owner, @Nonnull TypeContext context);
 
-	default void resolve(@Nonnull Type type, @Nonnull TypeContext context, @Nonnull BiConsumer<Type, Type> evaluator) {
-	}
+  default void resolve(@Nonnull Type type, @Nonnull TypeContext context, @Nonnull BiConsumer<Type, Type> evaluator) {
+  }
 }

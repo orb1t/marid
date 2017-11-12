@@ -45,52 +45,52 @@ import static org.marid.l10n.L10n.s;
 @FxComponent
 public class LogConfiguration {
 
-	@Qualifier("log")
-	@FxBean
-	@Order(1)
-	public Menu filterMenu(LoggingFilter loggingFilter) {
-		final Menu menu = new Menu(s("Filter"));
-		Stream.of(
-				Level.ALL,
-				Level.CONFIG,
-				Level.FINE,
-				Level.FINER,
-				Level.FINEST,
-				Level.INFO,
-				Level.SEVERE,
-				Level.WARNING,
-				Level.OFF
-		).sorted(Comparator.comparingInt(Level::intValue)).forEach(level -> {
-			final String name = level.getLocalizedName();
-			final CheckMenuItem menuItem = new CheckMenuItem(name, glyphIcon(icon(level).icon, 16));
-			menuItem.selectedProperty().bindBidirectional(loggingFilter.getProperty(level));
-			menu.getItems().add(menuItem);
-		});
-		return menu;
-	}
+  @Qualifier("log")
+  @FxBean
+  @Order(1)
+  public Menu filterMenu(LoggingFilter loggingFilter) {
+    final Menu menu = new Menu(s("Filter"));
+    Stream.of(
+        Level.ALL,
+        Level.CONFIG,
+        Level.FINE,
+        Level.FINER,
+        Level.FINEST,
+        Level.INFO,
+        Level.SEVERE,
+        Level.WARNING,
+        Level.OFF
+    ).sorted(Comparator.comparingInt(Level::intValue)).forEach(level -> {
+      final String name = level.getLocalizedName();
+      final CheckMenuItem menuItem = new CheckMenuItem(name, glyphIcon(icon(level).icon, 16));
+      menuItem.selectedProperty().bindBidirectional(loggingFilter.getProperty(level));
+      menu.getItems().add(menuItem);
+    });
+    return menu;
+  }
 
-	@Qualifier("log")
-	@FxBean
-	@Order(2)
-	public Menu actionsMenu(LoggingFilter loggingFilter) {
-		final Menu menu = new Menu(s("Actions"));
-		{
-			final MenuItem menuItem = new MenuItem(s("Clear"), glyphIcon("M_CLEAR_ALL", 16));
-			menuItem.setOnAction(event -> loggingFilter.clear());
-			menu.getItems().add(menuItem);
-		}
-		return menu;
-	}
+  @Qualifier("log")
+  @FxBean
+  @Order(2)
+  public Menu actionsMenu(LoggingFilter loggingFilter) {
+    final Menu menu = new Menu(s("Actions"));
+    {
+      final MenuItem menuItem = new MenuItem(s("Clear"), glyphIcon("M_CLEAR_ALL", 16));
+      menuItem.setOnAction(event -> loggingFilter.clear());
+      menu.getItems().add(menuItem);
+    }
+    return menu;
+  }
 
-	@Qualifier("log")
-	@FxBean
-	public MenuBar logMenuBar(@Qualifier("log") List<Menu> menus) {
-		return new MenuBar(menus.toArray(new Menu[menus.size()]));
-	}
+  @Qualifier("log")
+  @FxBean
+  public MenuBar logMenuBar(@Qualifier("log") List<Menu> menus) {
+    return new MenuBar(menus.toArray(new Menu[menus.size()]));
+  }
 
-	@Qualifier("log")
-	@FxBean
-	public BorderPane logPane(@Qualifier("log") MenuBar menuBar, LoggingTable table) {
-		return new BorderPane(table, menuBar, null, null, null);
-	}
+  @Qualifier("log")
+  @FxBean
+  public BorderPane logPane(@Qualifier("log") MenuBar menuBar, LoggingTable table) {
+    return new BorderPane(table, menuBar, null, null, null);
+  }
 }

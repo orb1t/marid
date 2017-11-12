@@ -45,59 +45,59 @@ import static org.marid.jfx.LocalizedStrings.ls;
 @Order(1)
 public class ClassLoadingWidget extends LineChart<Number, Number> {
 
-	private final int count = 60;
-	private final ClassLoadingMXBean classLoadingMXBean = ManagementFactory.getClassLoadingMXBean();
+  private final int count = 60;
+  private final ClassLoadingMXBean classLoadingMXBean = ManagementFactory.getClassLoadingMXBean();
 
-	public ClassLoadingWidget() {
-		super(new NumberAxis(), new NumberAxis());
-		getData().addAll(Arrays.asList(
-				loadedClasses(),
-				unloadedClasses()
-		));
-		setAnimated(false);
-	}
+  public ClassLoadingWidget() {
+    super(new NumberAxis(), new NumberAxis());
+    getData().addAll(Arrays.asList(
+        loadedClasses(),
+        unloadedClasses()
+    ));
+    setAnimated(false);
+  }
 
-	@Autowired
-	private void init(GridPane monitorGridPane) {
-		monitorGridPane.add(this, 1, 1);
-	}
+  @Autowired
+  private void init(GridPane monitorGridPane) {
+    monitorGridPane.add(this, 1, 1);
+  }
 
-	private Series<Number, Number> loadedClasses() {
-		final Series<Number, Number> series = new Series<>();
-		series.nameProperty().bind(ls("Loaded classes"));
-		series.getData().addAll(range(0, count).mapToObj(i -> new Data<Number, Number>(i, 0.0)).collect(toList()));
-		return series;
-	}
+  private Series<Number, Number> loadedClasses() {
+    final Series<Number, Number> series = new Series<>();
+    series.nameProperty().bind(ls("Loaded classes"));
+    series.getData().addAll(range(0, count).mapToObj(i -> new Data<Number, Number>(i, 0.0)).collect(toList()));
+    return series;
+  }
 
-	private Series<Number, Number> unloadedClasses() {
-		final Series<Number, Number> series = new Series<>();
-		series.nameProperty().bind(ls("Unloaded classes"));
-		series.getData().addAll(range(0, count).mapToObj(i -> new Data<Number, Number>(i, 0.0)).collect(toList()));
-		return series;
-	}
+  private Series<Number, Number> unloadedClasses() {
+    final Series<Number, Number> series = new Series<>();
+    series.nameProperty().bind(ls("Unloaded classes"));
+    series.getData().addAll(range(0, count).mapToObj(i -> new Data<Number, Number>(i, 0.0)).collect(toList()));
+    return series;
+  }
 
-	@Override
-	public NumberAxis getXAxis() {
-		return (NumberAxis) super.getXAxis();
-	}
+  @Override
+  public NumberAxis getXAxis() {
+    return (NumberAxis) super.getXAxis();
+  }
 
-	@Override
-	public NumberAxis getYAxis() {
-		return (NumberAxis) super.getYAxis();
-	}
+  @Override
+  public NumberAxis getYAxis() {
+    return (NumberAxis) super.getYAxis();
+  }
 
-	@Scheduled(fixedRate = 250L)
-	private void tick() {
-		final Long[] values = {classLoadingMXBean.getTotalLoadedClassCount(), classLoadingMXBean.getUnloadedClassCount()};
-		Platform.runLater(() -> {
-			for (int i = 0; i < getData().size(); i++) {
-				final Series<Number, Number> series = getData().get(i);
-				final ObservableList<Data<Number, Number>> data = series.getData();
-				for (int j = 1; j < count; j++) {
-					data.get(j - 1).setYValue(data.get(j).getYValue());
-				}
-				data.get(count - 1).setYValue(values[i]);
-			}
-		});
-	}
+  @Scheduled(fixedRate = 250L)
+  private void tick() {
+    final Long[] values = {classLoadingMXBean.getTotalLoadedClassCount(), classLoadingMXBean.getUnloadedClassCount()};
+    Platform.runLater(() -> {
+      for (int i = 0; i < getData().size(); i++) {
+        final Series<Number, Number> series = getData().get(i);
+        final ObservableList<Data<Number, Number>> data = series.getData();
+        for (int j = 1; j < count; j++) {
+          data.get(j - 1).setYValue(data.get(j).getYValue());
+        }
+        data.get(count - 1).setYValue(values[i]);
+      }
+    });
+  }
 }

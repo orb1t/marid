@@ -39,60 +39,60 @@ import static org.marid.types.TypeUtils.WILDCARD;
 
 public interface TypedCallExpression extends CallExpression, TypedExpression {
 
-	@Nonnull
-	@Override
-	TypedExpression getTarget();
+  @Nonnull
+  @Override
+  TypedExpression getTarget();
 
-	@Nonnull
-	@Override
-	List<? extends TypedExpression> getArgs();
+  @Nonnull
+  @Override
+  List<? extends TypedExpression> getArgs();
 
-	@Nonnull
-	@Override
-	default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
-		final Type targetType = getTarget().getType(owner, context);
-		final Type result;
-		if (getTarget() instanceof ClassExpression) { // static call
-			if ("new".equals(getMethod())) { // constructor
-				result = TypeUtils.classType(targetType)
-						.flatMap(tc -> Stream.of(context.getRaw(tc).getConstructors())
-								.filter(e -> TypeUtils.matches(this, e, owner, context))
-								.findFirst()
-								.map(m -> TypeUtils.type(m, getArgs(), owner, context)))
-						.orElse(WILDCARD);
-			} else { // static method
-				result = TypeUtils.classType(targetType)
-						.flatMap(t -> Stream.of(context.getRaw(t).getMethods())
-								.filter(m -> m.getName().equals(getMethod()) && Modifier.isStatic(m.getModifiers()))
-								.filter(e -> TypeUtils.matches(this, e, owner, context))
-								.findFirst()
-								.map(m -> TypeUtils.type(m, getArgs(), owner, context)))
-						.orElse(WILDCARD);
-			}
-		} else { // virtual method
-			result = Stream.of(context.getRaw(targetType).getMethods())
-					.filter(m -> m.getName().equals(getMethod()) && !Modifier.isStatic(m.getModifiers()))
-					.filter(e -> TypeUtils.matches(this, e, owner, context))
-					.findFirst()
-					.map(m -> TypeUtils.type(m, getArgs(), targetType, context))
-					.map(type -> context.resolve(targetType, type))
-					.orElse(WILDCARD);
-		}
-		return TypeUtils.ground(TypeUtils.resolve(this, result, context), context);
-	}
+  @Nonnull
+  @Override
+  default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
+    final Type targetType = getTarget().getType(owner, context);
+    final Type result;
+    if (getTarget() instanceof ClassExpression) { // static call
+      if ("new".equals(getMethod())) { // constructor
+        result = TypeUtils.classType(targetType)
+            .flatMap(tc -> Stream.of(context.getRaw(tc).getConstructors())
+                .filter(e -> TypeUtils.matches(this, e, owner, context))
+                .findFirst()
+                .map(m -> TypeUtils.type(m, getArgs(), owner, context)))
+            .orElse(WILDCARD);
+      } else { // static method
+        result = TypeUtils.classType(targetType)
+            .flatMap(t -> Stream.of(context.getRaw(t).getMethods())
+                .filter(m -> m.getName().equals(getMethod()) && Modifier.isStatic(m.getModifiers()))
+                .filter(e -> TypeUtils.matches(this, e, owner, context))
+                .findFirst()
+                .map(m -> TypeUtils.type(m, getArgs(), owner, context)))
+            .orElse(WILDCARD);
+      }
+    } else { // virtual method
+      result = Stream.of(context.getRaw(targetType).getMethods())
+          .filter(m -> m.getName().equals(getMethod()) && !Modifier.isStatic(m.getModifiers()))
+          .filter(e -> TypeUtils.matches(this, e, owner, context))
+          .findFirst()
+          .map(m -> TypeUtils.type(m, getArgs(), targetType, context))
+          .map(type -> context.resolve(targetType, type))
+          .orElse(WILDCARD);
+    }
+    return TypeUtils.ground(TypeUtils.resolve(this, result, context), context);
+  }
 
-	@Override
-	default void resolve(@Nonnull Type type, @Nonnull TypeContext context, @Nonnull BiConsumer<Type, Type> evaluator) {
-		final Type[] ats = getArgs().stream().map(a -> a.getType(type, context)).toArray(Type[]::new);
-		final Class<?>[] rts = Stream.of(ats).map(context::getRaw).toArray(Class<?>[]::new);
-		MaridRuntimeUtils.accessibleMethods(context.getRaw(type))
-				.filter(m -> m.getName().equals(getMethod()))
-				.filter(m -> MaridRuntimeUtils.compatible(m, rts))
-				.forEach(m -> {
-					final Type[] ts = m.getGenericParameterTypes();
-					for (int i = 0; i < ts.length; i++) {
-						evaluator.accept(context.resolve(type, ts[i]), ats[i]);
-					}
-				});
-	}
+  @Override
+  default void resolve(@Nonnull Type type, @Nonnull TypeContext context, @Nonnull BiConsumer<Type, Type> evaluator) {
+    final Type[] ats = getArgs().stream().map(a -> a.getType(type, context)).toArray(Type[]::new);
+    final Class<?>[] rts = Stream.of(ats).map(context::getRaw).toArray(Class<?>[]::new);
+    MaridRuntimeUtils.accessibleMethods(context.getRaw(type))
+        .filter(m -> m.getName().equals(getMethod()))
+        .filter(m -> MaridRuntimeUtils.compatible(m, rts))
+        .forEach(m -> {
+          final Type[] ts = m.getGenericParameterTypes();
+          for (int i = 0; i < ts.length; i++) {
+            evaluator.accept(context.resolve(type, ts[i]), ats[i]);
+          }
+        });
+  }
 }

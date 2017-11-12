@@ -31,36 +31,36 @@ import static java.util.stream.Stream.*;
 
 public interface MaridBean {
 
-	MaridBean getParent();
+  MaridBean getParent();
 
-	@Nonnull
-	String getName();
+  @Nonnull
+  String getName();
 
-	@Nonnull
-	Expression getFactory();
+  @Nonnull
+  Expression getFactory();
 
-	@Nonnull
-	List<? extends MaridBean> getChildren();
+  @Nonnull
+  List<? extends MaridBean> getChildren();
 
-	@Nonnull
-	default Stream<? extends MaridBean> ancestors() {
-		return ofNullable(getParent()).flatMap(p -> concat(of(p), p.ancestors()));
-	}
+  @Nonnull
+  default Stream<? extends MaridBean> ancestors() {
+    return ofNullable(getParent()).flatMap(p -> concat(of(p), p.ancestors()));
+  }
 
-	@Nonnull
-	default Stream<? extends MaridBean> descendants() {
-		return getChildren().stream().flatMap(b -> concat(of(b), b.descendants()));
-	}
+  @Nonnull
+  default Stream<? extends MaridBean> descendants() {
+    return getChildren().stream().flatMap(b -> concat(of(b), b.descendants()));
+  }
 
-	@Nonnull
-	default Stream<? extends MaridBean> siblings() {
-		return ofNullable(getParent()).flatMap(p -> p.getChildren().stream().filter(c -> c != this));
-	}
+  @Nonnull
+  default Stream<? extends MaridBean> siblings() {
+    return ofNullable(getParent()).flatMap(p -> p.getChildren().stream().filter(c -> c != this));
+  }
 
-	@Nonnull
-	default Stream<? extends MaridBean> matchingCandidates() {
-		return concat(siblings(), ancestors()
-				.filter(p -> p.getParent() != null)
-				.flatMap(p -> concat(of(p), p.siblings())));
-	}
+  @Nonnull
+  default Stream<? extends MaridBean> matchingCandidates() {
+    return concat(siblings(), ancestors()
+        .filter(p -> p.getParent() != null)
+        .flatMap(p -> concat(of(p), p.siblings())));
+  }
 }

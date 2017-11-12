@@ -31,14 +31,14 @@ import java.util.function.Function;
 @FunctionalInterface
 public interface IOFunction<T, R> extends Function<T, R> {
 
-	R ioApply(T arg1) throws IOException;
+  R ioApply(T arg1) throws IOException;
 
-	@Override
-	default R apply(T t) throws UncheckedIOException {
-		try {
-			return ioApply(t);
-		} catch (IOException x) {
-			throw new UncheckedIOException(x);
-		}
-	}
+  @Override
+  default R apply(T t) throws UncheckedIOException {
+    try {
+      return ioApply(t);
+    } catch (IOException x) {
+      throw new UncheckedIOException(x);
+    }
+  }
 }

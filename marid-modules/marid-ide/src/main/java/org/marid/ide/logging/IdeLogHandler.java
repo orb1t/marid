@@ -37,57 +37,57 @@ import static org.marid.ide.IdePrefs.PREFERENCES;
  */
 public class IdeLogHandler extends Handler {
 
-	public static final ObservableList<LogRecord> LOG_RECORDS = FXCollections.observableArrayList();
+  public static final ObservableList<LogRecord> LOG_RECORDS = FXCollections.observableArrayList();
 
-	private volatile int maxRecords;
-	private final Set<Integer> blockedThreadIds = new ConcurrentSkipListSet<>();
+  private volatile int maxRecords;
+  private final Set<Integer> blockedThreadIds = new ConcurrentSkipListSet<>();
 
-	public IdeLogHandler() {
-		maxRecords = PREFERENCES.getInt("maxLogRecords", 10_000);
-	}
+  public IdeLogHandler() {
+    maxRecords = PREFERENCES.getInt("maxLogRecords", 10_000);
+  }
 
-	public int getMaxRecords() {
-		return maxRecords;
-	}
+  public int getMaxRecords() {
+    return maxRecords;
+  }
 
-	public void setMaxRecords(int maxRecords) {
-		this.maxRecords = maxRecords;
-	}
+  public void setMaxRecords(int maxRecords) {
+    this.maxRecords = maxRecords;
+  }
 
-	@Override
-	public void publish(LogRecord record) {
-		if (isLoggable(record)) {
-			Platform.runLater(() -> {
-				LOG_RECORDS.add(record);
-				final int maxRecords = this.maxRecords;
-				while (LOG_RECORDS.size() - maxRecords > 0) {
-					LOG_RECORDS.remove(0, LOG_RECORDS.size() - maxRecords);
-				}
-			});
-		}
-	}
+  @Override
+  public void publish(LogRecord record) {
+    if (isLoggable(record)) {
+      Platform.runLater(() -> {
+        LOG_RECORDS.add(record);
+        final int maxRecords = this.maxRecords;
+        while (LOG_RECORDS.size() - maxRecords > 0) {
+          LOG_RECORDS.remove(0, LOG_RECORDS.size() - maxRecords);
+        }
+      });
+    }
+  }
 
-	@Override
-	public boolean isLoggable(LogRecord record) {
-		return super.isLoggable(record) && !blockedThreadIds.contains(record.getThreadID());
-	}
+  @Override
+  public boolean isLoggable(LogRecord record) {
+    return super.isLoggable(record) && !blockedThreadIds.contains(record.getThreadID());
+  }
 
-	@Override
-	public void flush() {
-	}
+  @Override
+  public void flush() {
+  }
 
-	@Override
-	public void close() {
-		PREFERENCES.putInt("maxLogRecords", maxRecords);
-	}
+  @Override
+  public void close() {
+    PREFERENCES.putInt("maxLogRecords", maxRecords);
+  }
 
-	public int registerBlockedThreadId() {
-		final LogRecord record = new LogRecord(INFO, null);
-		blockedThreadIds.add(record.getThreadID());
-		return record.getThreadID();
-	}
+  public int registerBlockedThreadId() {
+    final LogRecord record = new LogRecord(INFO, null);
+    blockedThreadIds.add(record.getThreadID());
+    return record.getThreadID();
+  }
 
-	public void unregisterBlockedThreadId(int threadId) {
-		blockedThreadIds.remove(threadId);
-	}
+  public void unregisterBlockedThreadId(int threadId) {
+    blockedThreadIds.remove(threadId);
+  }
 }

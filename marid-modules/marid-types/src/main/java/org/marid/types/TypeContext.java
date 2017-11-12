@@ -29,26 +29,26 @@ import java.util.function.Consumer;
 
 public interface TypeContext {
 
-	@Nonnull
-	Type getBeanType(@Nonnull String name);
+  @Nonnull
+  Type getBeanType(@Nonnull String name);
 
-	@Nonnull
-	Type resolve(@Nullable Type owner, @Nonnull Type type);
+  @Nonnull
+  Type resolve(@Nullable Type owner, @Nonnull Type type);
 
-	@Nonnull
-	Class<?> getRaw(@Nonnull Type type);
+  @Nonnull
+  Class<?> getRaw(@Nonnull Type type);
 
-	boolean isAssignable(@Nonnull Type from, @Nonnull Type to);
+  boolean isAssignable(@Nonnull Type from, @Nonnull Type to);
 
-	@Nonnull
-	ClassLoader getClassLoader();
+  @Nonnull
+  ClassLoader getClassLoader();
 
-	@Nonnull
-	Type getClassType(@Nonnull Class<?> type);
+  @Nonnull
+  Type getClassType(@Nonnull Class<?> type);
 
-	@Nonnull
-	Type getType(@Nonnull Class<?> type);
+  @Nonnull
+  Type getType(@Nonnull Class<?> type);
 
-	@Nonnull
-	Type evaluate(@Nonnull Consumer<BiConsumer<Type, Type>> callback, @Nonnull Type type);
+  @Nonnull
+  Type evaluate(@Nonnull Consumer<BiConsumer<Type, Type>> callback, @Nonnull Type type);
 }

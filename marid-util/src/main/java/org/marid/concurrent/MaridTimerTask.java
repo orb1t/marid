@@ -33,18 +33,18 @@ import static org.marid.logging.Log.log;
  */
 public final class MaridTimerTask extends TimerTask {
 
-	private final Consumer<MaridTimerTask> task;
+  private final Consumer<MaridTimerTask> task;
 
-	public MaridTimerTask(@Nonnull Consumer<MaridTimerTask> task) {
-		this.task = task;
-	}
+  public MaridTimerTask(@Nonnull Consumer<MaridTimerTask> task) {
+    this.task = task;
+  }
 
-	@Override
-	public void run() {
-		try {
-			task.accept(this);
-		} catch (RuntimeException x) {
-			log(WARNING, "Timer task error", x);
-		}
-	}
+  @Override
+  public void run() {
+    try {
+      task.accept(this);
+    } catch (RuntimeException x) {
+      log(WARNING, "Timer task error", x);
+    }
+  }
 }

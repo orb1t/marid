@@ -36,29 +36,29 @@ import static org.marid.logging.Log.log;
 @MaridBean
 public class StdProtoIO implements ProtoIO, Closeable {
 
-	private final InputStream inputStream;
-	private final OutputStream outputStream;
+  private final InputStream inputStream;
+  private final OutputStream outputStream;
 
-	@MaridBeanFactory(name = "Standard Proto I/O")
-	public StdProtoIO(InputStream inputStream, OutputStream outputStream) throws IOException {
-		this.inputStream = inputStream;
-		this.outputStream = outputStream;
-	}
+  @MaridBeanFactory(name = "Standard Proto I/O")
+  public StdProtoIO(InputStream inputStream, OutputStream outputStream) throws IOException {
+    this.inputStream = inputStream;
+    this.outputStream = outputStream;
+  }
 
-	@Override
-	public void close() throws IOException {
-		try (final InputStream is = inputStream; final OutputStream os = outputStream) {
-			log(Level.CONFIG, "Closing {0} and {1}", is, os);
-		}
-	}
+  @Override
+  public void close() throws IOException {
+    try (final InputStream is = inputStream; final OutputStream os = outputStream) {
+      log(Level.CONFIG, "Closing {0} and {1}", is, os);
+    }
+  }
 
-	@Override
-	public InputStream getInputStream() {
-		return inputStream;
-	}
+  @Override
+  public InputStream getInputStream() {
+    return inputStream;
+  }
 
-	@Override
-	public OutputStream getOutputStream() {
-		return outputStream;
-	}
+  @Override
+  public OutputStream getOutputStream() {
+    return outputStream;
+  }
 }

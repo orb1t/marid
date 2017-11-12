@@ -36,42 +36,42 @@ import java.util.stream.Collectors;
  */
 public class ChainedPropertyResourceBundle extends ResourceBundle {
 
-	private final ArrayList<Properties> propertiesList = new ArrayList<>();
+  private final ArrayList<Properties> propertiesList = new ArrayList<>();
 
-	public void load(URL url, boolean useCaches) throws IOException {
-		final URLConnection connection = url.openConnection();
-		connection.setUseCaches(useCaches);
-		try (final Reader reader = new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8)) {
-			final Properties properties = new Properties();
-			properties.load(reader);
-			propertiesList.add(properties);
-		}
-		propertiesList.trimToSize();
-	}
+  public void load(URL url, boolean useCaches) throws IOException {
+    final URLConnection connection = url.openConnection();
+    connection.setUseCaches(useCaches);
+    try (final Reader reader = new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8)) {
+      final Properties properties = new Properties();
+      properties.load(reader);
+      propertiesList.add(properties);
+    }
+    propertiesList.trimToSize();
+  }
 
-	@Override
-	public boolean containsKey(@Nonnull String key) {
-		return propertiesList.stream().anyMatch(p -> p.containsKey(key)) || parent != null && parent.containsKey(key);
-	}
+  @Override
+  public boolean containsKey(@Nonnull String key) {
+    return propertiesList.stream().anyMatch(p -> p.containsKey(key)) || parent != null && parent.containsKey(key);
+  }
 
-	@Override
-	protected String handleGetObject(@Nonnull String key) {
-		return propertiesList.stream()
-				.map(p -> p.getProperty(key))
-				.filter(Objects::nonNull)
-				.findAny()
-				.orElse(null);
-	}
+  @Override
+  protected String handleGetObject(@Nonnull String key) {
+    return propertiesList.stream()
+        .map(p -> p.getProperty(key))
+        .filter(Objects::nonNull)
+        .findAny()
+        .orElse(null);
+  }
 
-	@Nonnull
-	@Override
-	protected Set<String> handleKeySet() {
-		return propertiesList.stream().flatMap(p -> p.stringPropertyNames().stream()).collect(Collectors.toSet());
-	}
+  @Nonnull
+  @Override
+  protected Set<String> handleKeySet() {
+    return propertiesList.stream().flatMap(p -> p.stringPropertyNames().stream()).collect(Collectors.toSet());
+  }
 
-	@Nonnull
-	@Override
-	public Enumeration<String> getKeys() {
-		return Collections.enumeration(keySet());
-	}
+  @Nonnull
+  @Override
+  public Enumeration<String> getKeys() {
+    return Collections.enumeration(keySet());
+  }
 }

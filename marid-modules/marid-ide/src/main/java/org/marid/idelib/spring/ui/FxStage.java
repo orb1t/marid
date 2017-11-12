@@ -28,18 +28,18 @@ import static org.marid.Ide.FX_SCOPE;
 
 public abstract class FxStage extends Stage {
 
-	private final String conversationId;
+  private final String conversationId;
 
-	public FxStage(StageStyle style) {
-		super(style);
-		conversationId = FX_SCOPE.nextConversationId();
-		FX_SCOPE.setConversationId(conversationId);
-		focusedProperty().addListener((o, oV, nV) -> {
-			if (nV) {
-				FX_SCOPE.setConversationId(conversationId);
-			}
-		});
-		addEventHandler(WindowEvent.WINDOW_SHOWING, event -> FX_SCOPE.setConversationId(conversationId));
-		addEventHandler(WindowEvent.WINDOW_HIDDEN, event -> FX_SCOPE.destroy(conversationId));
-	}
+  public FxStage(StageStyle style) {
+    super(style);
+    conversationId = FX_SCOPE.nextConversationId();
+    FX_SCOPE.setConversationId(conversationId);
+    focusedProperty().addListener((o, oV, nV) -> {
+      if (nV) {
+        FX_SCOPE.setConversationId(conversationId);
+      }
+    });
+    addEventHandler(WindowEvent.WINDOW_SHOWING, event -> FX_SCOPE.setConversationId(conversationId));
+    addEventHandler(WindowEvent.WINDOW_HIDDEN, event -> FX_SCOPE.destroy(conversationId));
+  }
 }

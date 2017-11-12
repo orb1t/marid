@@ -31,84 +31,84 @@ import java.util.Properties;
  */
 public class MaridPlaceholderResolver {
 
-	private final ClassLoader classLoader;
-	private final Properties properties;
+  private final ClassLoader classLoader;
+  private final Properties properties;
 
-	public MaridPlaceholderResolver(ClassLoader classLoader, Properties properties) {
-		this.classLoader = classLoader;
-		this.properties = properties;
-	}
+  public MaridPlaceholderResolver(ClassLoader classLoader, Properties properties) {
+    this.classLoader = classLoader;
+    this.properties = properties;
+  }
 
-	public MaridPlaceholderResolver(Properties properties) {
-		this(Thread.currentThread().getContextClassLoader(), properties);
-	}
+  public MaridPlaceholderResolver(Properties properties) {
+    this(Thread.currentThread().getContextClassLoader(), properties);
+  }
 
-	public ClassLoader getClassLoader() {
-		return classLoader;
-	}
+  public ClassLoader getClassLoader() {
+    return classLoader;
+  }
 
-	public Properties getProperties() {
-		return properties;
-	}
+  public Properties getProperties() {
+    return properties;
+  }
 
-	public String resolvePlaceholders(String value) {
-		if (value == null || value.isEmpty() || value.indexOf('$') < 0) {
-			return value;
-		} else {
-			return resolvePlaceholders(new LinkedHashSet<>(), value);
-		}
-	}
+  public String resolvePlaceholders(String value) {
+    if (value == null || value.isEmpty() || value.indexOf('$') < 0) {
+      return value;
+    } else {
+      return resolvePlaceholders(new LinkedHashSet<>(), value);
+    }
+  }
 
-	private String resolvePlaceholders(LinkedHashSet<String> passed, String value) {
-		if (value == null || value.isEmpty() || value.indexOf('$') < 0) {
-			return value;
-		} else {
-			final StringBuilder builder = new StringBuilder(value);
-			for (int i = 0; i < builder.length(); ) {
-				if (builder.charAt(i) == '$') {
-					if (i < builder.length() - 1) {
-						if (builder.charAt(i + 1) == '{') {
-							final int closeIndex = builder.indexOf("}", i + 1);
-							if (closeIndex < 0) {
-								return builder.toString();
-							} else {
-								final String placeholder = builder.substring(i + 2, closeIndex);
-								final int defIndex = placeholder.lastIndexOf(':');
-								final String name;
-								final String defValue;
-								if (defIndex < 0) {
-									name = placeholder;
-									defValue = "";
-								} else {
-									name = placeholder.substring(0, defIndex);
-									defValue = placeholder.substring(defIndex + 1);
-								}
-								final String toReplace = String.valueOf(resolvePlaceholder(passed, name, defValue));
-								builder.replace(i, closeIndex + 1, toReplace);
-								i += toReplace.length();
-							}
-						} else {
-							i++;
-						}
-					} else {
-						i++;
-					}
-				} else {
-					i++;
-				}
-			}
-			return builder.toString();
-		}
-	}
+  private String resolvePlaceholders(LinkedHashSet<String> passed, String value) {
+    if (value == null || value.isEmpty() || value.indexOf('$') < 0) {
+      return value;
+    } else {
+      final StringBuilder builder = new StringBuilder(value);
+      for (int i = 0; i < builder.length(); ) {
+        if (builder.charAt(i) == '$') {
+          if (i < builder.length() - 1) {
+            if (builder.charAt(i + 1) == '{') {
+              final int closeIndex = builder.indexOf("}", i + 1);
+              if (closeIndex < 0) {
+                return builder.toString();
+              } else {
+                final String placeholder = builder.substring(i + 2, closeIndex);
+                final int defIndex = placeholder.lastIndexOf(':');
+                final String name;
+                final String defValue;
+                if (defIndex < 0) {
+                  name = placeholder;
+                  defValue = "";
+                } else {
+                  name = placeholder.substring(0, defIndex);
+                  defValue = placeholder.substring(defIndex + 1);
+                }
+                final String toReplace = String.valueOf(resolvePlaceholder(passed, name, defValue));
+                builder.replace(i, closeIndex + 1, toReplace);
+                i += toReplace.length();
+              }
+            } else {
+              i++;
+            }
+          } else {
+            i++;
+          }
+        } else {
+          i++;
+        }
+      }
+      return builder.toString();
+    }
+  }
 
-	private String resolvePlaceholder(LinkedHashSet<String> passed, String name, String defValue) {
-		if (passed.add(name)) {
-			final String result = resolvePlaceholders(passed, properties.getProperty(name, defValue));
-			passed.remove(name);
-			return result;
-		} else {
-			throw new MaridCircularPlaceholderException(passed, name);
-		}
-	}
+  private String resolvePlaceholder(LinkedHashSet<String> passed, String name, String defValue) {
+    if (passed.add(name)) {
+      final String result = resolvePlaceholders(passed, properties.getProperty(name, defValue));
+      passed.remove(name);
+      return result;
+    } else {
+      throw new MaridCircularPlaceholderException(passed, name);
+    }
+  }
 
 }

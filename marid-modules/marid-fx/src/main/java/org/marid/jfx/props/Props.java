@@ -35,53 +35,53 @@ import java.util.prefs.Preferences;
  */
 public interface Props {
 
-	static StringProperty stringProp(Supplier<String> supplier, Consumer<String> consumer) {
-		final StringProperty property = new SimpleStringProperty(supplier.get());
-		property.addListener((observable, oldValue, newValue) -> consumer.accept(newValue));
-		return property;
-	}
+  static StringProperty stringProp(Supplier<String> supplier, Consumer<String> consumer) {
+    final StringProperty property = new SimpleStringProperty(supplier.get());
+    property.addListener((observable, oldValue, newValue) -> consumer.accept(newValue));
+    return property;
+  }
 
-	static BooleanProperty boolProp(BooleanSupplier supplier, Consumer<Boolean> consumer) {
-		final BooleanProperty property = new SimpleBooleanProperty(supplier.getAsBoolean());
-		property.addListener((observable, oldValue, newValue) -> consumer.accept(newValue));
-		return property;
-	}
+  static BooleanProperty boolProp(BooleanSupplier supplier, Consumer<Boolean> consumer) {
+    final BooleanProperty property = new SimpleBooleanProperty(supplier.getAsBoolean());
+    property.addListener((observable, oldValue, newValue) -> consumer.accept(newValue));
+    return property;
+  }
 
-	static IntegerProperty intProp(IntSupplier supplier, IntConsumer consumer) {
-		final IntegerProperty property = new SimpleIntegerProperty(supplier.getAsInt());
-		property.addListener((observable, oldValue, newValue) -> consumer.accept(newValue.intValue()));
-		return property;
-	}
+  static IntegerProperty intProp(IntSupplier supplier, IntConsumer consumer) {
+    final IntegerProperty property = new SimpleIntegerProperty(supplier.getAsInt());
+    property.addListener((observable, oldValue, newValue) -> consumer.accept(newValue.intValue()));
+    return property;
+  }
 
-	static <T> ObjectProperty<T> prop(Supplier<T> supplier, Consumer<T> consumer) {
-		final ObjectProperty<T> property = new SimpleObjectProperty<>(supplier.get());
-		property.addListener((observable, oldValue, newValue) -> consumer.accept(newValue));
-		return property;
-	}
+  static <T> ObjectProperty<T> prop(Supplier<T> supplier, Consumer<T> consumer) {
+    final ObjectProperty<T> property = new SimpleObjectProperty<>(supplier.get());
+    property.addListener((observable, oldValue, newValue) -> consumer.accept(newValue));
+    return property;
+  }
 
-	static <T> WritableObjectValue<T> value(Supplier<T> supplier, Consumer<T> consumer) {
-		return new WritableValueImpl<>(consumer, supplier);
-	}
+  static <T> WritableObjectValue<T> value(Supplier<T> supplier, Consumer<T> consumer) {
+    return new WritableValueImpl<>(consumer, supplier);
+  }
 
-	static WritableObjectValue<String> string(@Nonnull Preferences node, @Nonnull String key, String defaultValue) {
-		return value(() -> node.get(key, defaultValue), v -> {
-			if (v == null || v.isEmpty()) {
-				node.remove(key);
-			} else {
-				node.put(key, v);
-			}
-		});
-	}
+  static WritableObjectValue<String> string(@Nonnull Preferences node, @Nonnull String key, String defaultValue) {
+    return value(() -> node.get(key, defaultValue), v -> {
+      if (v == null || v.isEmpty()) {
+        node.remove(key);
+      } else {
+        node.put(key, v);
+      }
+    });
+  }
 
-	static <E extends Event> void addHandler(Property<EventHandler<E>> property, EventHandler<E> handler) {
-		final EventHandler<E> old = property.getValue();
-		if (old == null) {
-			property.setValue(handler);
-		} else {
-			property.setValue(event -> {
-				old.handle(event);
-				handler.handle(event);
-			});
-		}
-	}
+  static <E extends Event> void addHandler(Property<EventHandler<E>> property, EventHandler<E> handler) {
+    final EventHandler<E> old = property.getValue();
+    if (old == null) {
+      property.setValue(handler);
+    } else {
+      property.setValue(event -> {
+        old.handle(event);
+        handler.handle(event);
+      });
+    }
+  }
 }
