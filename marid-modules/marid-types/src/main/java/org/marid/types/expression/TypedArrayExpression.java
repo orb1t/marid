@@ -46,7 +46,7 @@ public interface TypedArrayExpression extends ArrayExpression, TypedExpression {
             return Array.newInstance(elementClass, 0).getClass();
           } else {
             final Type t = context.resolve(owner, context.getType(elementClass));
-            final Type r = context.evaluate(e -> getElements().forEach(x -> e.accept(t, x.getType(owner, context))), t);
+            final Type r = context.evaluate(e -> getElements().forEach(x -> e.accept(t, x.type(owner, context))), t);
             return TypeUtils.genericArrayType(r, context);
           }
         })

@@ -50,7 +50,7 @@ public interface TypedCallExpression extends CallExpression, TypedExpression {
   @Nonnull
   @Override
   default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
-    final Type targetType = getTarget().getType(owner, context);
+    final Type targetType = getTarget().type(owner, context);
     final Type result;
     if (getTarget() instanceof ClassExpression) { // static call
       if ("new".equals(getMethod())) { // constructor
@@ -83,7 +83,7 @@ public interface TypedCallExpression extends CallExpression, TypedExpression {
 
   @Override
   default void resolve(@Nonnull Type type, @Nonnull TypeContext context, @Nonnull BiConsumer<Type, Type> evaluator) {
-    final Type[] ats = getArgs().stream().map(a -> a.getType(type, context)).toArray(Type[]::new);
+    final Type[] ats = getArgs().stream().map(a -> a.type(type, context)).toArray(Type[]::new);
     final Class<?>[] rts = Stream.of(ats).map(context::getRaw).toArray(Class<?>[]::new);
     MaridRuntimeUtils.accessibleMethods(context.getRaw(type))
         .filter(m -> m.getName().equals(getMethod()))

@@ -68,7 +68,7 @@ public interface TypeUtils {
     } else {
       return context.evaluate(e -> {
         for (int i = 0; i < argTypes.length; i++) {
-          e.accept(argTypes[i], args.get(i).getType(owner, context));
+          e.accept(argTypes[i], args.get(i).type(owner, context));
         }
       }, returnType);
     }
@@ -107,7 +107,7 @@ public interface TypeUtils {
     if (e.getParameterCount() == expr.getArgs().size()) {
       final Type[] pt = e.getGenericParameterTypes();
       for (int i = 0; i < pt.length; i++) {
-        final Type at = expr.getArgs().get(i).getType(owner, context);
+        final Type at = expr.getArgs().get(i).type(owner, context);
         if (!context.isAssignable(at, pt[i])) {
           return false;
         }

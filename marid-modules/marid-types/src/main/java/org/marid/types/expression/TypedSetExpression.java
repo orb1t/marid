@@ -43,7 +43,7 @@ public interface TypedSetExpression extends SetExpression, TypedExpression {
   @Nonnull
   @Override
   default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
-    return getTarget().getType(owner, context);
+    return getTarget().type(owner, context);
   }
 
   @Override
@@ -52,6 +52,6 @@ public interface TypedSetExpression extends SetExpression, TypedExpression {
         .filter(f -> f.getName().equals(getField()))
         .findFirst()
         .map(f -> context.resolve(type, f.getGenericType()))
-        .ifPresent(t -> evaluator.accept(t, getValue().getType(type, context)));
+        .ifPresent(t -> evaluator.accept(t, getValue().type(type, context)));
   }
 }
