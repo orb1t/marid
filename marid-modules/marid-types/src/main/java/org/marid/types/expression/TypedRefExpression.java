@@ -35,4 +35,9 @@ public interface TypedRefExpression extends RefExpression, TypedExpression {
   default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
     return context.getBeanType(getReference());
   }
+
+  @Override
+  default Type type(@Nullable Type owner, @Nonnull TypeContext context) {
+    return getType(owner, context);
+  }
 }

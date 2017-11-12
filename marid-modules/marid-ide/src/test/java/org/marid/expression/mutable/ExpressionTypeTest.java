@@ -25,6 +25,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.marid.expression.mutable.testclasses.MyList;
 import org.marid.idelib.beans.BeanUtils;
 import org.marid.idelib.beans.IdeBean;
 import org.marid.io.Xmls;
@@ -69,7 +70,7 @@ class ExpressionTypeTest {
         () -> new Object[]{"b10", new TypeToken<List<Long>[]>() {}.getType()},
         () -> new Object[]{"b11", int[].class},
         () -> new Object[]{"b12", new TypeToken<ArrayList<Number[]>>() {}.getType()},
-        () -> new Object[]{"b13", new TypeToken<ArrayList<Object>>() {}.getType()}
+        () -> new Object[]{"b13", new TypeToken<MyList<AutoCloseable>>() {}.getType()}
     );
   }
 

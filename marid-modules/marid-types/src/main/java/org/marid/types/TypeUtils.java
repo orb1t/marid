@@ -21,7 +21,6 @@
 
 package org.marid.types;
 
-import org.marid.misc.Calls;
 import org.marid.runtime.context.MaridRuntimeUtils;
 import org.marid.types.expression.TypedCallExpression;
 import org.marid.types.expression.TypedExpression;
@@ -41,10 +40,13 @@ import static java.util.Optional.of;
 
 public interface TypeUtils {
 
-  WildcardType WILDCARD = Calls.call(() -> {
-    final Type pt = Class.class.getMethod("forName", String.class).getGenericReturnType();
-    return (WildcardType) ((ParameterizedType) pt).getActualTypeArguments()[0];
-  });
+  WildcardType WILDCARD = Stream.of(Class.class.getMethods())
+      .filter(m -> "forName".equals(m.getName()) && m.getParameterCount() == 1)
+      .filter(m -> m.getParameterTypes()[0] == String.class)
+      .map(m -> (ParameterizedType) m.getGenericReturnType())
+      .map(pt -> (WildcardType) pt.getActualTypeArguments()[0])
+      .findFirst()
+      .orElseThrow(IllegalStateException::new);
 
   @Nonnull
   static Optional<Type> classType(@Nonnull Type type) {
@@ -174,6 +176,11 @@ public interface TypeUtils {
 
   @Nonnull
   static Type ground(@Nonnull Type type, @Nonnull TypeContext context) {
-    return context.evaluate(e -> vars(type).forEach(t -> e.accept(t, WILDCARD)), type);
+    return context.evaluate(e -> vars(type).forEach(t -> e.accept(t, varBound(t))), type);
+  }
+
+  @Nonnull
+  static Type varBound(@Nonnull TypeVariable<?> variable) {
+    return Stream.of(variable.getBounds()).findFirst().orElse(Object.class);
   }
 }

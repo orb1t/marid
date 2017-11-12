@@ -232,11 +232,8 @@
     <factory>
       <call method="new">
         <target>
-          <class class="java.util.ArrayList"/>
+          <class class="org.marid.expression.mutable.testclasses.MyList"/>
         </target>
-        <args>
-          <const type="INT" value="1"/>
-        </args>
       </call>
     </factory>
   </bean>

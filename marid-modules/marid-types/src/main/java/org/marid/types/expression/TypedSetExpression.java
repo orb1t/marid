@@ -47,6 +47,11 @@ public interface TypedSetExpression extends SetExpression, TypedExpression {
   }
 
   @Override
+  default Type type(@Nullable Type owner, @Nonnull TypeContext context) {
+    return getType(owner, context);
+  }
+
+  @Override
   default void resolve(@Nonnull Type type, @Nonnull TypeContext context, @Nonnull BiConsumer<Type, Type> evaluator) {
     MaridRuntimeUtils.accessibleFields(context.getRaw(type))
         .filter(f -> f.getName().equals(getField()))

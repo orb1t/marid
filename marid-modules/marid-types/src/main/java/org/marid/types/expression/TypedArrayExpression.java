@@ -52,4 +52,9 @@ public interface TypedArrayExpression extends ArrayExpression, TypedExpression {
         })
         .orElse(TypeUtils.WILDCARD);
   }
+
+  @Override
+  default Type type(@Nullable Type owner, @Nonnull TypeContext context) {
+    return getType(owner, context);
+  }
 }

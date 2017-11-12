@@ -40,4 +40,9 @@ public interface TypedClassExpression extends ClassExpression, TypedExpression {
         .map(context::getClassType)
         .orElse(WILDCARD);
   }
+
+  @Override
+  default Type type(@Nullable Type owner, @Nonnull TypeContext context) {
+    return getType(owner, context);
+  }
 }
