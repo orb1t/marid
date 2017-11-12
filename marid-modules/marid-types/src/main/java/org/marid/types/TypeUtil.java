@@ -21,6 +21,7 @@
 
 package org.marid.types;
 
+import org.apache.commons.lang3.reflect.TypeUtils;
 import org.marid.runtime.context.MaridRuntimeUtils;
 import org.marid.types.expression.TypedCallExpression;
 import org.marid.types.expression.TypedExpression;
@@ -28,6 +29,7 @@ import org.marid.types.expression.TypedExpression;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.*;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -185,5 +187,10 @@ public interface TypeUtil {
     } else {
       return type;
     }
+  }
+
+  @Nonnull
+  static ParameterizedType parameterize(@Nonnull Class<?> type, @Nonnull Type... parameters) {
+    return TypeUtils.parameterize(type, Arrays.copyOf(parameters, parameters.length, Type[].class));
   }
 }

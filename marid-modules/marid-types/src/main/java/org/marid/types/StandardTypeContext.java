@@ -41,12 +41,12 @@ import static org.apache.commons.lang3.reflect.TypeUtils.getArrayComponentType;
 import static org.marid.runtime.context.MaridRuntimeUtils.compatible;
 import static org.marid.types.TypeUtil.boxed;
 
-public class GuavaTypeContext implements TypeContext {
+public class StandardTypeContext implements TypeContext {
 
   private final TypedBean bean;
   private final ClassLoader classLoader;
 
-  public GuavaTypeContext(TypedBean bean, ClassLoader classLoader) {
+  public StandardTypeContext(TypedBean bean, ClassLoader classLoader) {
     this.bean = bean;
     this.classLoader = classLoader;
   }
@@ -59,14 +59,22 @@ public class GuavaTypeContext implements TypeContext {
         .filter(TypedBean.class::isInstance)
         .map(TypedBean.class::cast)
         .findFirst()
-        .map(b -> b.getFactory().type(null, new GuavaTypeContext(b, classLoader)))
+        .map(b -> b.getFactory().type(null, new StandardTypeContext(b, classLoader)))
         .orElse(WILDCARD_ALL);
   }
 
   @Nonnull
   @Override
   public Type resolve(@Nullable Type owner, @Nonnull Type type) {
-    return owner == null ? type : type; // TODO: investifate this
+    if (owner == null) {
+      return type;
+    } else {
+      if (owner instanceof ParameterizedType) {
+        return type; // replace vars here
+      } else {
+        return type;
+      }
+    }
   }
 
   @Override
@@ -165,7 +173,7 @@ public class GuavaTypeContext implements TypeContext {
     }
 
     private Type commonAncestor(Type formal, LinkedHashSet<Type> actuals) {
-      if (actuals.stream().allMatch(GuavaTypeContext.this::isNonPrimitiveArray)) {
+      if (actuals.stream().allMatch(StandardTypeContext.this::isNonPrimitiveArray)) {
         final LinkedHashSet<Type> elementActuals = actuals.stream()
             .map(TypeUtils::getArrayComponentType)
             .collect(toCollection(LinkedHashSet::new));
