@@ -72,7 +72,8 @@ class ExpressionTypeTest {
         () -> new Object[]{"b10", new TypeToken<List<Long>[]>() {}.getType()},
         () -> new Object[]{"b11", int[].class},
         () -> new Object[]{"b12", new TypeToken<ArrayList<Number[]>>() {}.getType()},
-        () -> new Object[]{"b13", new TypeToken<MyList<AutoCloseable>>() {}.getType()}
+        () -> new Object[]{"b13", new TypeToken<MyList<AutoCloseable>>() {}.getType()},
+        () -> new Object[]{"b14", new TypeToken<MyList<AutoCloseable>>() {}.getType()}
     );
   }
 

@@ -175,6 +175,8 @@ public interface TypeUtil {
       return getRaw(((WildcardType) type).getUpperBounds()[0]);
     } else if (type instanceof GenericArrayType) {
       return Array.newInstance(getRaw(((GenericArrayType) type).getGenericComponentType()), 0).getClass();
+    } else if (type instanceof TypeVariable<?>) {
+      return getRaw(((TypeVariable<?>) type).getBounds()[0]);
     } else {
       throw new IllegalArgumentException(type.getTypeName());
     }

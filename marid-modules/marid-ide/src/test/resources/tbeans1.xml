@@ -237,4 +237,17 @@
       </call>
     </factory>
   </bean>
+
+  <bean name="b14">
+    <factory>
+      <call method="new">
+        <target>
+          <class class="org.marid.expression.mutable.testclasses.MyComplexBean"/>
+        </target>
+        <args>
+          <const type="INT" value="1"/>
+        </args>
+      </call>
+    </factory>
+  </bean>
 </bean>
