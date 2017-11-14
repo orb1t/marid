@@ -122,11 +122,6 @@ public interface TypeUtil {
   }
 
   @Nonnull
-  static Type varBound(@Nonnull TypeVariable<?> variable) {
-    return Stream.of(variable.getBounds()).findFirst().orElse(Object.class);
-  }
-
-  @Nonnull
   static Class<?> getRaw(@Nonnull Type type) {
     if (type instanceof Class<?>) {
       return (Class<?>) type;
