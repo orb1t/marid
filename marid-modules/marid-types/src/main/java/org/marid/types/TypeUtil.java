@@ -31,6 +31,7 @@ import javax.annotation.Nullable;
 import java.lang.reflect.*;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -156,11 +157,6 @@ public interface TypeUtil {
   }
 
   @Nonnull
-  static Type ground(@Nonnull Type type, @Nonnull TypeContext context) {
-    return context.evaluate(e -> vars(type).forEach(t -> e.accept(t, varBound(t))), type);
-  }
-
-  @Nonnull
   static Type varBound(@Nonnull TypeVariable<?> variable) {
     return Stream.of(variable.getBounds()).findFirst().orElse(Object.class);
   }
@@ -177,6 +173,26 @@ public interface TypeUtil {
       return Array.newInstance(getRaw(((GenericArrayType) type).getGenericComponentType()), 0).getClass();
     } else if (type instanceof TypeVariable<?>) {
       return getRaw(((TypeVariable<?>) type).getBounds()[0]);
+    } else {
+      throw new IllegalArgumentException(type.getTypeName());
+    }
+  }
+
+  @Nonnull
+  static Class<?> getRaw(@Nonnull Type type, @Nonnull Map<? extends Type, Type> mapping) {
+    if (type instanceof Class<?>) {
+      return (Class<?>) type;
+    } else if (type instanceof ParameterizedType) {
+      return (Class<?>) ((ParameterizedType) type).getRawType();
+    } else if (type instanceof WildcardType) {
+      final Type bound = ((WildcardType) type).getUpperBounds()[0];
+      return getRaw(mapping.getOrDefault(bound, bound), mapping);
+    } else if (type instanceof GenericArrayType) {
+      final Type bound = ((GenericArrayType) type).getGenericComponentType();
+      return Array.newInstance(getRaw(mapping.getOrDefault(bound, bound)), 0).getClass();
+    } else if (type instanceof TypeVariable<?>) {
+      final Type bound = ((TypeVariable) type).getBounds()[0];
+      return getRaw(mapping.getOrDefault(bound, bound));
     } else {
       throw new IllegalArgumentException(type.getTypeName());
     }

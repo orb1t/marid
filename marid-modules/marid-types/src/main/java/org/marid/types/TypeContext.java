@@ -29,17 +29,14 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.*;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toCollection;
-import static org.apache.commons.lang3.reflect.TypeUtils.WILDCARD_ALL;
-import static org.apache.commons.lang3.reflect.TypeUtils.getArrayComponentType;
+import static org.apache.commons.lang3.reflect.TypeUtils.*;
 import static org.marid.runtime.context.MaridRuntimeUtils.compatible;
-import static org.marid.types.TypeUtil.boxed;
+import static org.marid.types.TypeUtil.*;
 
 public class TypeContext {
 
@@ -49,6 +46,11 @@ public class TypeContext {
   public TypeContext(TypedBean bean, ClassLoader classLoader) {
     this.bean = bean;
     this.classLoader = classLoader;
+  }
+
+  @Nonnull
+  public Type ground(@Nonnull Type type) {
+    return evaluate(e -> vars(type).forEach(t -> e.accept(t, varBound(t))), type);
   }
 
   @Nonnull
@@ -160,9 +162,10 @@ public class TypeContext {
 
     @Nonnull
     Type resolve(@Nonnull Type type) {
-      final Map<TypeVariable<?>, Type> map = typeMappings.entrySet().stream()
-          .collect(Collectors.toMap(Entry::getKey, e -> commonAncestor(e.getKey(), e.getValue())));
-      return TypeUtils.unrollVariables(map, type);
+      final LinkedHashMap<TypeVariable<?>, Type> mapping = new LinkedHashMap<>(typeMappings.size());
+      typeMappings.forEach((k, v) -> mapping.put(k, commonAncestor(k, v)));
+      vars(type).filter(v -> !mapping.containsKey(v)).forEach(v -> mapping.put(v, TypeUtil.getRaw(v, mapping)));
+      return unrollVariables(mapping, type);
     }
 
     private Type commonAncestor(Type formal, LinkedHashSet<Type> actuals) {

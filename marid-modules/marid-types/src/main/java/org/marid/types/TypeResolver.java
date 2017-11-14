@@ -19,33 +19,28 @@
  * #L%
  */
 
-package org.marid.types.expression;
-
-import org.marid.expression.generic.Expression;
-import org.marid.types.TypeContext;
-import org.marid.types.TypeUtil;
+package org.marid.types;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.lang.reflect.Type;
-import java.util.List;
-import java.util.function.BiConsumer;
+import java.lang.reflect.TypeVariable;
+import java.util.HashMap;
+import java.util.stream.Stream;
 
-public interface TypedExpression extends Expression {
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Stream.concat;
+import static java.util.stream.Stream.of;
 
-  @Nonnull
-  @Override
-  List<? extends TypedExpression> getInitializers();
+public class TypeResolver {
 
-  @Nonnull
-  Type getType(@Nullable Type owner, @Nonnull TypeContext context);
+  private final Class<?> type;
+  private final HashMap<TypeVariable<?>, Type> mapping;
 
-  default Type type(@Nullable Type owner, @Nonnull TypeContext context) {
-    final Type type = getType(owner, context);
-    final Type resolvedType = TypeUtil.resolve(this, type, context);
-    return context.ground(resolvedType);
-  }
-
-  default void resolve(@Nonnull Type type, @Nonnull TypeContext context, @Nonnull BiConsumer<Type, Type> evaluator) {
+  public TypeResolver(@Nonnull Class<?> type) {
+    this.type = type;
+    this.mapping = concat(of(type), concat(of(type.getMethods()), of(type.getConstructors())))
+        .flatMap(d -> Stream.of(d.getTypeParameters()))
+        .collect(toMap(identity(), identity(), (v1, v2) -> v2, HashMap::new));
   }
 }
