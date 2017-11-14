@@ -21,7 +21,6 @@
 
 package org.marid.types;
 
-import org.apache.commons.lang3.reflect.TypeUtils;
 import org.marid.runtime.context.MaridRuntimeUtils;
 import org.marid.types.expression.TypedCallExpression;
 import org.marid.types.expression.TypedExpression;
@@ -29,9 +28,6 @@ import org.marid.types.expression.TypedExpression;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.*;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -51,40 +47,6 @@ public interface TypeUtil {
     } else {
       return empty();
     }
-  }
-
-  @Nonnull
-  static Type type(@Nonnull Type returnType,
-                   @Nonnull Type[] argTypes,
-                   @Nonnull List<? extends TypedExpression> args,
-                   @Nullable Type owner,
-                   @Nonnull TypeContext context) {
-    if (returnType instanceof Class<?>) {
-      return returnType;
-    } else {
-      return context.evaluate(e -> {
-        for (int i = 0; i < argTypes.length; i++) {
-          e.accept(argTypes[i], args.get(i).type(owner, context));
-        }
-      }, returnType);
-    }
-  }
-
-  @Nonnull
-  static Type type(@Nonnull Method method,
-                   @Nonnull List<? extends TypedExpression> args,
-                   @Nullable Type owner,
-                   @Nonnull TypeContext context) {
-    return type(method.getGenericReturnType(), method.getGenericParameterTypes(), args, owner, context);
-  }
-
-  @Nonnull
-  static Type type(@Nonnull Constructor<?> constructor,
-                   @Nonnull List<? extends TypedExpression> args,
-                   @Nullable Type owner,
-                   @Nonnull TypeContext context) {
-    final Class<?> decl = constructor.getDeclaringClass();
-    return type(context.getType(decl), constructor.getGenericParameterTypes(), args, owner, context);
   }
 
   @Nonnull
@@ -179,36 +141,11 @@ public interface TypeUtil {
   }
 
   @Nonnull
-  static Class<?> getRaw(@Nonnull Type type, @Nonnull Map<? extends Type, Type> mapping) {
-    if (type instanceof Class<?>) {
-      return (Class<?>) type;
-    } else if (type instanceof ParameterizedType) {
-      return (Class<?>) ((ParameterizedType) type).getRawType();
-    } else if (type instanceof WildcardType) {
-      final Type bound = ((WildcardType) type).getUpperBounds()[0];
-      return getRaw(mapping.getOrDefault(bound, bound), mapping);
-    } else if (type instanceof GenericArrayType) {
-      final Type bound = ((GenericArrayType) type).getGenericComponentType();
-      return Array.newInstance(getRaw(mapping.getOrDefault(bound, bound)), 0).getClass();
-    } else if (type instanceof TypeVariable<?>) {
-      final Type bound = ((TypeVariable) type).getBounds()[0];
-      return getRaw(mapping.getOrDefault(bound, bound));
-    } else {
-      throw new IllegalArgumentException(type.getTypeName());
-    }
-  }
-
-  @Nonnull
   static Type boxed(@Nonnull Type type) {
     if (type instanceof Class<?> && ((Class<?>) type).isPrimitive()) {
       return MaridRuntimeUtils.wrapper((Class<?>) type);
     } else {
       return type;
     }
-  }
-
-  @Nonnull
-  static ParameterizedType parameterize(@Nonnull Class<?> type, @Nonnull Type... parameters) {
-    return TypeUtils.parameterize(type, Arrays.copyOf(parameters, parameters.length, Type[].class));
   }
 }

@@ -39,7 +39,7 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.marid.io.Xmls.*;
-import static org.marid.runtime.context.MaridRuntimeUtils.methodState;
+import static org.marid.runtime.context.MaridRuntimeUtils.*;
 
 public final class CallExpr extends Expr implements CallExpression {
 
@@ -72,22 +72,22 @@ public final class CallExpr extends Expr implements CallExpression {
     final Object[] args = getArgs().stream().map(a -> a.evaluate(self, context)).toArray();
     if ("new".equals(getMethod())) {
       final Constructor<?> constructor = Stream.of(targetClass.getConstructors())
-          .filter(c -> MaridRuntimeUtils.compatible(c, args))
+          .filter(c -> compatible(c, args))
           .findFirst()
           .orElseThrow(() -> methodState(getMethod(), args, new NoSuchElementException()));
       try {
-        return constructor.newInstance(args);
+        return constructor.newInstance(args(constructor, args));
       } catch (ReflectiveOperationException x) {
         throw methodState(getMethod(), args, x);
       }
     } else {
       final Method method = MaridRuntimeUtils.accessibleMethods(targetClass)
           .filter(m -> m.getName().equals(getMethod()))
-          .filter(m -> MaridRuntimeUtils.compatible(m, args))
+          .filter(m -> compatible(m, args))
           .findFirst()
           .orElseThrow(() -> methodState(getMethod(), args, new NoSuchElementException()));
       try {
-        return method.invoke(target, args);
+        return method.invoke(target, args(method, args));
       } catch (ReflectiveOperationException x) {
         throw methodState(getMethod(), args, x);
       }

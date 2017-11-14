@@ -58,7 +58,20 @@ public interface TypedCallExpression extends CallExpression, TypedExpression {
             .flatMap(tc -> Stream.of(TypeUtil.getRaw(tc).getConstructors())
                 .filter(e -> TypeUtil.matches(this, e, owner, context))
                 .findFirst()
-                .map(m -> TypeUtil.type(m, getArgs(), owner, context)))
+                .map(m -> {
+                  final Class<?> decl = m.getDeclaringClass();
+                  Type returnType = context.getType(decl);
+                  Type[] argTypes = m.getGenericParameterTypes();
+                  if (returnType instanceof Class<?>) {
+                    return returnType;
+                  } else {
+                    return context.evaluate(e -> {
+                      for (int i = 0; i < argTypes.length; i++) {
+                        e.accept(argTypes[i], getArgs().get(i).type(owner, context));
+                      }
+                    }, returnType);
+                  }
+                }))
             .orElse(WILDCARD_ALL);
       } else { // static method
         return TypeUtil.classType(targetType)
@@ -66,7 +79,19 @@ public interface TypedCallExpression extends CallExpression, TypedExpression {
                 .filter(m -> m.getName().equals(getMethod()) && Modifier.isStatic(m.getModifiers()))
                 .filter(e -> TypeUtil.matches(this, e, owner, context))
                 .findFirst()
-                .map(m -> TypeUtil.type(m, getArgs(), owner, context)))
+                .map(m -> {
+                  Type returnType = m.getGenericReturnType();
+                  Type[] argTypes = m.getGenericParameterTypes();
+                  if (returnType instanceof Class<?>) {
+                    return returnType;
+                  } else {
+                    return context.evaluate(e -> {
+                      for (int i = 0; i < argTypes.length; i++) {
+                        e.accept(argTypes[i], getArgs().get(i).type(owner, context));
+                      }
+                    }, returnType);
+                  }
+                }))
             .orElse(WILDCARD_ALL);
       }
     } else { // virtual method
@@ -74,7 +99,19 @@ public interface TypedCallExpression extends CallExpression, TypedExpression {
           .filter(m -> m.getName().equals(getMethod()) && !Modifier.isStatic(m.getModifiers()))
           .filter(e -> TypeUtil.matches(this, e, owner, context))
           .findFirst()
-          .map(m -> TypeUtil.type(m, getArgs(), targetType, context))
+          .map(m -> {
+            Type returnType = m.getGenericReturnType();
+            Type[] argTypes = m.getGenericParameterTypes();
+            if (returnType instanceof Class<?>) {
+              return returnType;
+            } else {
+              return context.evaluate(e -> {
+                for (int i = 0; i < argTypes.length; i++) {
+                  e.accept(argTypes[i], getArgs().get(i).type(targetType, context));
+                }
+              }, returnType);
+            }
+          })
           .map(type -> context.resolve(targetType, type))
           .orElse(WILDCARD_ALL);
     }

@@ -69,7 +69,7 @@ public final class SetExpr extends Expr implements SetExpression {
         .orElseThrow(() -> new NoSuchElementException(getField()));
     try {
       final Object v = getValue().evaluate(self, context);
-      field.set(target, v);
+      field.set(target, MaridRuntimeUtils.value(field.getType(), v));
       return target;
     } catch (IllegalAccessException x) {
       throw new IllegalStateException(x);

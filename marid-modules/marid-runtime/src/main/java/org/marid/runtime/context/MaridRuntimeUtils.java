@@ -22,11 +22,12 @@
 package org.marid.runtime.context;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.lang.reflect.Array;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Comparator;
-import java.util.Optional;
 import java.util.Scanner;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
@@ -165,6 +166,46 @@ public interface MaridRuntimeUtils {
       case "void": return Void.class;
       default: throw new IllegalArgumentException(primitiveType.getName());
     }
+  }
+
+  static Object value(@Nonnull Class<?> type, @Nullable Object value) {
+    if (type.isPrimitive()) {
+      if (value == null) {
+        switch (type.getName()) {
+          case "int": return 0;
+          case "long": return 0L;
+          case "boolean": return false;
+          case "short": return (short) 0;
+          case "byte": return (byte) 0;
+          case "char": return (char) 0;
+          case "float": return 0f;
+          case "double": return 0d;
+          default: throw new IllegalArgumentException(type.getName());
+        }
+      } else {
+        return value;
+      }
+    } else if (value == null) {
+      return null;
+    } else if (type.isArray()) {
+      final int len = Array.getLength(value);
+      final Object array = Array.newInstance(type.getComponentType(), len);
+      for (int i = 0; i < len; i++) {
+        Array.set(array, i, value(type.getComponentType(), Array.get(value, i)));
+      }
+      return array;
+    } else {
+      return value;
+    }
+  }
+
+  static Object[] args(@Nonnull Executable executable, @Nonnull Object[] args) {
+    final Class<?>[] types = executable.getParameterTypes();
+    final Object[] result = new Object[args.length];
+    for (int i = 0; i < types.length; i++) {
+      result[i] = value(types[i], args[i]);
+    }
+    return result;
   }
 
   @Nonnull
