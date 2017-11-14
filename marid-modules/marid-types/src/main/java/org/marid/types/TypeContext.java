@@ -38,7 +38,7 @@ import static java.util.stream.Collectors.toCollection;
 import static org.apache.commons.lang3.reflect.TypeUtils.WILDCARD_ALL;
 import static org.apache.commons.lang3.reflect.TypeUtils.getArrayComponentType;
 import static org.marid.runtime.context.MaridRuntimeUtils.compatible;
-import static org.marid.types.TypeUtil.*;
+import static org.marid.types.TypeUtil.boxed;
 
 public class TypeContext {
 
@@ -48,11 +48,6 @@ public class TypeContext {
   public TypeContext(TypedBean bean, ClassLoader classLoader) {
     this.bean = bean;
     this.classLoader = classLoader;
-  }
-
-  @Nonnull
-  public Type ground(@Nonnull Type type) {
-    return evaluate(e -> vars(type).forEach(t -> e.accept(t, varBound(t))), type);
   }
 
   @Nonnull
