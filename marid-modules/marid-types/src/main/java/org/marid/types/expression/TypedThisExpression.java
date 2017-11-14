@@ -35,9 +35,4 @@ public interface TypedThisExpression extends ThisExpression, TypedExpression {
   default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
     return owner == null ? void.class : owner;
   }
-
-  @Override
-  default Type type(@Nullable Type owner, @Nonnull TypeContext context) {
-    return getType(owner, context);
-  }
 }

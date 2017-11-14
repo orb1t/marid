@@ -24,6 +24,7 @@ package org.marid.types;
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.marid.runtime.context.MaridRuntimeUtils;
 import org.marid.types.beans.TypedBean;
+import org.marid.types.expression.TypedExpression;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -34,7 +35,8 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toCollection;
-import static org.apache.commons.lang3.reflect.TypeUtils.*;
+import static org.apache.commons.lang3.reflect.TypeUtils.WILDCARD_ALL;
+import static org.apache.commons.lang3.reflect.TypeUtils.getArrayComponentType;
 import static org.marid.runtime.context.MaridRuntimeUtils.compatible;
 import static org.marid.types.TypeUtil.*;
 
@@ -60,7 +62,7 @@ public class TypeContext {
         .filter(TypedBean.class::isInstance)
         .map(TypedBean.class::cast)
         .findFirst()
-        .map(b -> b.getFactory().type(null, new TypeContext(b, classLoader)))
+        .map(b -> b.getFactory().getType(null, new TypeContext(b, classLoader)))
         .orElse(WILDCARD_ALL);
   }
 
@@ -126,6 +128,20 @@ public class TypeContext {
     }
   }
 
+  @Nonnull
+  public Type resolve(@Nonnull Type[] formals, @Nonnull Type[] actuals, @Nonnull TypedExpression expression, @Nonnull Type type) {
+    if (type instanceof Class<?>) {
+      return type;
+    } else {
+      return evaluate(e -> {
+        for (int i = 0; i < formals.length; i++) {
+          e.accept(formals[i], actuals[i]);
+        }
+        expression.getInitializers().forEach(i -> i.resolve(type, this, e));
+      }, type);
+    }
+  }
+
   private final class GuavaTypeEvaluator implements BiConsumer<Type, Type> {
 
     private final HashSet<Type> passed = new HashSet<>();
@@ -164,7 +180,7 @@ public class TypeContext {
     Type resolve(@Nonnull Type type) {
       final LinkedHashMap<TypeVariable<?>, Type> mapping = new LinkedHashMap<>(typeMappings.size());
       typeMappings.forEach((k, v) -> mapping.put(k, commonAncestor(k, v)));
-      return unrollVariables(mapping, type);
+      return TypeUtil.ground(type, mapping);
     }
 
     private Type commonAncestor(Type formal, LinkedHashSet<Type> actuals) {

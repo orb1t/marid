@@ -83,7 +83,7 @@ class ExpressionTypeTest {
   void testBean(String beanName, Type expectedType) {
     final IdeBean bean = BeanUtils.find(root, beanName);
     final TypeContext context = new TypeContext(bean, classLoader);
-    final Type type = bean.getFactory().type(null, context);
+    final Type type = bean.getFactory().getType(null, context);
     assertEquals(expectedType, type);
   }
 }

@@ -21,6 +21,7 @@
 
 package org.marid.types;
 
+import org.apache.commons.lang3.reflect.TypeUtils;
 import org.marid.runtime.context.MaridRuntimeUtils;
 import org.marid.types.expression.TypedCallExpression;
 import org.marid.types.expression.TypedExpression;
@@ -28,6 +29,8 @@ import org.marid.types.expression.TypedExpression;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.*;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -65,7 +68,7 @@ public interface TypeUtil {
     if (e.getParameterCount() == expr.getArgs().size()) {
       final Type[] pt = e.getGenericParameterTypes();
       for (int i = 0; i < pt.length; i++) {
-        final Type at = expr.getArgs().get(i).type(owner, context);
+        final Type at = expr.getArgs().get(i).getType(owner, context);
         if (!context.isAssignable(at, pt[i])) {
           return false;
         }
@@ -144,6 +147,40 @@ public interface TypeUtil {
   static Type boxed(@Nonnull Type type) {
     if (type instanceof Class<?> && ((Class<?>) type).isPrimitive()) {
       return MaridRuntimeUtils.wrapper((Class<?>) type);
+    } else {
+      return type;
+    }
+  }
+
+  @Nonnull
+  static Type ground(@Nonnull Type type, @Nonnull Map<TypeVariable<?>, Type> map) {
+    return ground(type, map, new HashSet<>());
+  }
+
+  @Nonnull
+  private static Type ground(@Nonnull Type type, @Nonnull Map<TypeVariable<?>, Type> map, @Nonnull HashSet<TypeVariable<?>> passed) {
+    if (isGround(type)) {
+      return type;
+    } else if (type instanceof GenericArrayType) {
+      final GenericArrayType t = (GenericArrayType) type;
+      return TypeUtils.genericArrayType(ground(t.getGenericComponentType(), map));
+    } else if (type instanceof ParameterizedType) {
+      final ParameterizedType t = (ParameterizedType) type;
+      final Type[] types = Stream.of(t.getActualTypeArguments()).map(e -> ground(e, map)).toArray(Type[]::new);
+      return TypeUtils.parameterizeWithOwner(t.getOwnerType(), (Class<?>) t.getRawType(), types);
+    } else if (type instanceof WildcardType) {
+      return ground(((WildcardType) type).getUpperBounds()[0], map);
+    } else if (type instanceof TypeVariable<?>) {
+      final TypeVariable<?> v = (TypeVariable<?>) type;
+      if (passed.add(v)) {
+        return ground(map.getOrDefault(v, v), map, passed);
+      } else {
+        return Stream.of(v.getBounds())
+            .map(e -> ground(e, map, passed))
+            .filter(e -> !(e instanceof TypeVariable))
+            .findFirst()
+            .orElse(Object.class);
+      }
     } else {
       return type;
     }

@@ -51,7 +51,7 @@ public interface TypedCallExpression extends CallExpression, TypedExpression {
   @Nonnull
   @Override
   default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
-    final Type targetType = getTarget().type(owner, context);
+    final Type targetType = getTarget().getType(owner, context);
     if (getTarget() instanceof ClassExpression) { // static call
       if ("new".equals(getMethod())) { // constructor
         return TypeUtil.classType(targetType)
@@ -60,17 +60,10 @@ public interface TypedCallExpression extends CallExpression, TypedExpression {
                 .findFirst()
                 .map(m -> {
                   final Class<?> decl = m.getDeclaringClass();
-                  Type returnType = context.getType(decl);
-                  Type[] argTypes = m.getGenericParameterTypes();
-                  if (returnType instanceof Class<?>) {
-                    return returnType;
-                  } else {
-                    return context.evaluate(e -> {
-                      for (int i = 0; i < argTypes.length; i++) {
-                        e.accept(argTypes[i], getArgs().get(i).type(owner, context));
-                      }
-                    }, returnType);
-                  }
+                  final Type[] formals = m.getGenericParameterTypes();
+                  final Type[] actuals = getArgs().stream().map(a -> a.getType(owner, context)).toArray(Type[]::new);
+                  final Type type = context.resolve(formals, actuals, this, context.getType(decl));
+                  return context.resolve(owner, type);
                 }))
             .orElse(WILDCARD_ALL);
       } else { // static method
@@ -80,17 +73,10 @@ public interface TypedCallExpression extends CallExpression, TypedExpression {
                 .filter(e -> TypeUtil.matches(this, e, owner, context))
                 .findFirst()
                 .map(m -> {
-                  Type returnType = m.getGenericReturnType();
-                  Type[] argTypes = m.getGenericParameterTypes();
-                  if (returnType instanceof Class<?>) {
-                    return returnType;
-                  } else {
-                    return context.evaluate(e -> {
-                      for (int i = 0; i < argTypes.length; i++) {
-                        e.accept(argTypes[i], getArgs().get(i).type(owner, context));
-                      }
-                    }, returnType);
-                  }
+                  final Type[] formals = m.getGenericParameterTypes();
+                  final Type[] actuals = getArgs().stream().map(a -> a.getType(owner, context)).toArray(Type[]::new);
+                  final Type type = context.resolve(formals, actuals, this, m.getGenericReturnType());
+                  return context.resolve(owner, type);
                 }))
             .orElse(WILDCARD_ALL);
       }
@@ -100,17 +86,10 @@ public interface TypedCallExpression extends CallExpression, TypedExpression {
           .filter(e -> TypeUtil.matches(this, e, owner, context))
           .findFirst()
           .map(m -> {
-            Type returnType = m.getGenericReturnType();
-            Type[] argTypes = m.getGenericParameterTypes();
-            if (returnType instanceof Class<?>) {
-              return returnType;
-            } else {
-              return context.evaluate(e -> {
-                for (int i = 0; i < argTypes.length; i++) {
-                  e.accept(argTypes[i], getArgs().get(i).type(targetType, context));
-                }
-              }, returnType);
-            }
+            final Type[] formals = m.getGenericParameterTypes();
+            final Type[] actuals = getArgs().stream().map(a -> a.getType(owner, context)).toArray(Type[]::new);
+            final Type type = context.resolve(formals, actuals, this, m.getGenericReturnType());
+            return context.resolve(owner, type);
           })
           .map(type -> context.resolve(targetType, type))
           .orElse(WILDCARD_ALL);
@@ -119,7 +98,7 @@ public interface TypedCallExpression extends CallExpression, TypedExpression {
 
   @Override
   default void resolve(@Nonnull Type type, @Nonnull TypeContext context, @Nonnull BiConsumer<Type, Type> evaluator) {
-    final Type[] ats = getArgs().stream().map(a -> a.type(type, context)).toArray(Type[]::new);
+    final Type[] ats = getArgs().stream().map(a -> a.getType(type, context)).toArray(Type[]::new);
     final Class<?>[] rts = Stream.of(ats).map(TypeUtil::getRaw).toArray(Class<?>[]::new);
     MaridRuntimeUtils.accessibleMethods(TypeUtil.getRaw(type))
         .filter(m -> m.getName().equals(getMethod()))

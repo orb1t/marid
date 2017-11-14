@@ -35,9 +35,4 @@ public interface TypedStringExpression extends StringExpression, TypedExpression
   default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
     return String.class;
   }
-
-  @Override
-  default Type type(@Nullable Type owner, @Nonnull TypeContext context) {
-    return getType(owner, context);
-  }
 }

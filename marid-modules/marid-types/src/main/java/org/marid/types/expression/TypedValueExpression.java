@@ -22,16 +22,7 @@
 package org.marid.types.expression;
 
 import org.marid.expression.generic.ValueExpression;
-import org.marid.types.TypeContext;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.lang.reflect.Type;
 
 public interface TypedValueExpression extends ValueExpression, TypedExpression {
 
-  @Override
-  default Type type(@Nullable Type owner, @Nonnull TypeContext context) {
-    return getType(owner, context);
-  }
 }

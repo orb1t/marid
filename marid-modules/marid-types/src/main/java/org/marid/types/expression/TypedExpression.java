@@ -23,7 +23,6 @@ package org.marid.types.expression;
 
 import org.marid.expression.generic.Expression;
 import org.marid.types.TypeContext;
-import org.marid.types.TypeUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -39,12 +38,6 @@ public interface TypedExpression extends Expression {
 
   @Nonnull
   Type getType(@Nullable Type owner, @Nonnull TypeContext context);
-
-  default Type type(@Nullable Type owner, @Nonnull TypeContext context) {
-    final Type type = getType(owner, context);
-    final Type resolvedType = TypeUtil.resolve(this, type, context);
-    return context.ground(resolvedType);
-  }
 
   default void resolve(@Nonnull Type type, @Nonnull TypeContext context, @Nonnull BiConsumer<Type, Type> evaluator) {
   }

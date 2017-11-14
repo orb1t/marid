@@ -43,7 +43,7 @@ public interface TypedGetExpression extends GetExpression, TypedExpression {
   @Nonnull
   @Override
   default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
-    final Type targetType = getTarget().type(owner, context);
+    final Type targetType = getTarget().getType(owner, context);
     if (getTarget() instanceof ClassExpression) {
       return classType(targetType).stream().flatMap(t -> accessibleFields(TypeUtil.getRaw(t)))
           .filter(f -> f.getName().equals(getField()))
