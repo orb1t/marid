@@ -164,7 +164,6 @@ public class TypeContext {
     Type resolve(@Nonnull Type type) {
       final LinkedHashMap<TypeVariable<?>, Type> mapping = new LinkedHashMap<>(typeMappings.size());
       typeMappings.forEach((k, v) -> mapping.put(k, commonAncestor(k, v)));
-      vars(type).filter(v -> !mapping.containsKey(v)).forEach(v -> mapping.put(v, TypeUtil.getRaw(v, mapping)));
       return unrollVariables(mapping, type);
     }
 
