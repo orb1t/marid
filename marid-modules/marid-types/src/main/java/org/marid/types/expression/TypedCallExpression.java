@@ -29,13 +29,16 @@ import org.marid.types.TypeUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
+import static java.lang.reflect.Modifier.isStatic;
 import static org.apache.commons.lang3.reflect.TypeUtils.WILDCARD_ALL;
+import static org.marid.types.TypeUtil.*;
 
 
 public interface TypedCallExpression extends CallExpression, TypedExpression {
@@ -53,46 +56,39 @@ public interface TypedCallExpression extends CallExpression, TypedExpression {
   default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
     final Type targetType = getTarget().getType(owner, context);
     if (getTarget() instanceof ClassExpression) { // static call
+      final Class<?> targetRaw = classType(targetType).map(t -> (Class) getRaw(t)).orElse(void.class);
       if ("new".equals(getMethod())) { // constructor
-        return TypeUtil.classType(targetType)
-            .flatMap(tc -> Stream.of(TypeUtil.getRaw(tc).getConstructors())
-                .filter(e -> TypeUtil.matches(this, e, owner, context))
-                .findFirst()
-                .map(m -> {
-                  final Class<?> decl = m.getDeclaringClass();
-                  final Type[] formals = m.getGenericParameterTypes();
-                  final Type[] actuals = getArgs().stream().map(a -> a.getType(owner, context)).toArray(Type[]::new);
-                  final Type type = context.resolve(formals, actuals, this, context.getType(decl));
-                  return context.resolve(owner, type);
-                }))
-            .orElse(WILDCARD_ALL);
+        for (final Constructor c : targetRaw.getConstructors()) {
+          if (matches(this, c, owner, context)) {
+            final Class<?> decl = c.getDeclaringClass();
+            final Type[] formals = c.getGenericParameterTypes();
+            final Type[] actuals = getArgs().stream().map(a -> a.getType(owner, context)).toArray(Type[]::new);
+            final Type type = context.resolve(formals, actuals, this, context.getType(decl));
+            return context.resolve(owner, type);
+          }
+        }
+        return WILDCARD_ALL;
       } else { // static method
-        return TypeUtil.classType(targetType)
-            .flatMap(t -> Stream.of(TypeUtil.getRaw(t).getMethods())
-                .filter(m -> m.getName().equals(getMethod()) && Modifier.isStatic(m.getModifiers()))
-                .filter(e -> TypeUtil.matches(this, e, owner, context))
-                .findFirst()
-                .map(m -> {
-                  final Type[] formals = m.getGenericParameterTypes();
-                  final Type[] actuals = getArgs().stream().map(a -> a.getType(owner, context)).toArray(Type[]::new);
-                  final Type type = context.resolve(formals, actuals, this, m.getGenericReturnType());
-                  return context.resolve(owner, type);
-                }))
-            .orElse(WILDCARD_ALL);
-      }
-    } else { // virtual method
-      return Stream.of(TypeUtil.getRaw(targetType).getMethods())
-          .filter(m -> m.getName().equals(getMethod()) && !Modifier.isStatic(m.getModifiers()))
-          .filter(e -> TypeUtil.matches(this, e, owner, context))
-          .findFirst()
-          .map(m -> {
+        for (final Method m : targetRaw.getMethods()) {
+          if (m.getName().equals(getMethod()) && isStatic(m.getModifiers()) && matches(this, m, owner, context)) {
             final Type[] formals = m.getGenericParameterTypes();
             final Type[] actuals = getArgs().stream().map(a -> a.getType(owner, context)).toArray(Type[]::new);
             final Type type = context.resolve(formals, actuals, this, m.getGenericReturnType());
             return context.resolve(owner, type);
-          })
-          .map(type -> context.resolve(targetType, type))
-          .orElse(WILDCARD_ALL);
+          }
+        }
+        return WILDCARD_ALL;
+      }
+    } else { // virtual method
+      for (final Method m : TypeUtil.getRaw(targetType).getMethods()) {
+        if (m.getName().equals(getMethod()) && !isStatic(m.getModifiers()) && matches(this, m, owner, context)) {
+          final Type[] formals = m.getGenericParameterTypes();
+          final Type[] actuals = getArgs().stream().map(a -> a.getType(owner, context)).toArray(Type[]::new);
+          final Type type = context.resolve(formals, actuals, this, m.getGenericReturnType());
+          return context.resolve(owner, type);
+        }
+      }
+      return WILDCARD_ALL;
     }
   }
 
@@ -100,14 +96,13 @@ public interface TypedCallExpression extends CallExpression, TypedExpression {
   default void resolve(@Nonnull Type type, @Nonnull TypeContext context, @Nonnull BiConsumer<Type, Type> evaluator) {
     final Type[] ats = getArgs().stream().map(a -> a.getType(type, context)).toArray(Type[]::new);
     final Class<?>[] rts = Stream.of(ats).map(TypeUtil::getRaw).toArray(Class<?>[]::new);
-    MaridRuntimeUtils.accessibleMethods(TypeUtil.getRaw(type))
-        .filter(m -> m.getName().equals(getMethod()))
-        .filter(m -> MaridRuntimeUtils.compatible(m, rts))
-        .forEach(m -> {
-          final Type[] ts = m.getGenericParameterTypes();
-          for (int i = 0; i < ts.length; i++) {
-            evaluator.accept(context.resolve(type, ts[i]), ats[i]);
-          }
-        });
+    for (final Method method : TypeUtil.getRaw(type).getMethods()) {
+      if (method.getName().equals(getMethod()) && MaridRuntimeUtils.compatible(method, rts)) {
+        final Type[] ts = method.getGenericParameterTypes();
+        for (int i = 0; i < ts.length; i++) {
+          evaluator.accept(context.resolve(type, ts[i]), ats[i]);
+        }
+      }
+    }
   }
 }
