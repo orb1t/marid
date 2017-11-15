@@ -218,7 +218,8 @@ public class TypeContext {
         final Class<?> actualRaw = TypeUtil.getRaw(actual);
         if (formalRaw.isAssignableFrom(actualRaw)) {
           TypeUtils.getTypeArguments(actual, formalRaw).forEach((v, t) -> {
-            typeMappings.computeIfAbsent(v, k -> new LinkedHashSet<>()).add(boxed(t));
+            final LinkedHashSet<Type> set = typeMappings.computeIfAbsent(v, k -> new LinkedHashSet<>());
+            set.add(boxed(t));
           });
         }
       } else if (formal instanceof WildcardType) {
