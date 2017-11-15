@@ -31,8 +31,10 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 import static org.apache.commons.lang3.reflect.TypeUtils.WILDCARD_ALL;
@@ -139,27 +141,24 @@ public class TypeContext {
   }
 
   @Nonnull
-  public Type commonAncestor(@Nonnull Type formal, @Nonnull Type... actuals) {
-    if (of(actuals).allMatch(TypeContext.this::isNonPrimitiveArray)) {
-      final Type[] elementActuals = of(actuals).map(TypeUtils::getArrayComponentType).toArray(Type[]::new);
-      final Type elementType = commonAncestor(Object.class, elementActuals);
+  public Type commonAncestor(@Nonnull Type formal, @Nonnull Set<Type> actuals) {
+    final Supplier<Stream<Type>> as = () -> actuals.stream().filter(t -> !WILDCARD_ALL.equals(t));
+    if (as.get().allMatch(TypeContext.this::isNonPrimitiveArray)) {
+      final Set<Type> aes = as.get().map(TypeUtils::getArrayComponentType).collect(toCollection(LinkedHashSet::new));
+      final Type elementType = commonAncestor(Object.class, aes);
       if (elementType instanceof Class<?>) {
         return Array.newInstance((Class<?>) elementType, 0).getClass();
       } else {
         return TypeUtils.genericArrayType(elementType);
       }
     } else {
-      Arrays.sort(actuals, (t1, t2) -> TypeUtils.isAssignable(t1, t2) ? -1 : TypeUtils.isAssignable(t2, t1) ? +1 : 0);
-      final Type[][] tokens = new Type[actuals.length][];
-      for (int i = 0; i < actuals.length; i++) {
-        tokens[i] = types(actuals[i]).toArray(Type[]::new);
-      }
-      final int max = of(tokens).mapToInt(a -> a.length).max().orElse(0);
+      final Type[][] tss = as.get().sorted(this::cmp).map(t -> types(t).toArray(Type[]::new)).toArray(Type[][]::new);
+      final int max = of(tss).mapToInt(a -> a.length).max().orElse(0);
       for (int level = 0; level < max; level++) {
-        for (final Type[] token : tokens) {
-          if (level < token.length) {
-            final Type actual = token[level];
-            if (of(actuals).allMatch(t -> TypeUtils.isAssignable(t, actual))) {
+        for (final Type[] ts : tss) {
+          if (level < ts.length) {
+            final Type actual = ts[level];
+            if (actuals.stream().allMatch(t -> TypeUtils.isAssignable(t, actual))) {
               return actual;
             }
           }
@@ -167,6 +166,10 @@ public class TypeContext {
       }
       return formal;
     }
+  }
+
+  private int cmp(Type t1, Type t2) {
+    return TypeUtils.isAssignable(t1, t2) ? -1 : TypeUtils.isAssignable(t2, t1) ? +1 : 0;
   }
 
   private Stream<? extends Type> types(Type type) {
@@ -207,7 +210,7 @@ public class TypeContext {
         for (final Type bound : typeVariable.getBounds()) {
           accept(bound, actual);
         }
-        typeMappings.computeIfAbsent(typeVariable, k -> new LinkedHashSet<>()).add(boxed(actual));
+        put(typeVariable, actual);
       } else if (passed.add(formal)) {
         if (TypeUtils.isArrayType(formal) && TypeUtils.isArrayType(actual)) {
           accept(getArrayComponentType(formal), getArrayComponentType(actual));
@@ -215,10 +218,7 @@ public class TypeContext {
           final Class<?> formalRaw = TypeUtil.getRaw(formal);
           final Class<?> actualRaw = TypeUtil.getRaw(actual);
           if (formalRaw.isAssignableFrom(actualRaw)) {
-            TypeUtils.getTypeArguments(actual, formalRaw).forEach((v, t) -> {
-              final LinkedHashSet<Type> set = typeMappings.computeIfAbsent(v, k -> new LinkedHashSet<>());
-              set.add(boxed(t));
-            });
+            TypeUtils.getTypeArguments(actual, formalRaw).forEach(this::put);
           }
         } else if (formal instanceof WildcardType) {
           final WildcardType wildcardType = (WildcardType) formal;
@@ -232,8 +232,12 @@ public class TypeContext {
     @Nonnull
     private Type resolve(@Nonnull Type type) {
       final LinkedHashMap<TypeVariable<?>, Type> mapping = new LinkedHashMap<>(typeMappings.size());
-      typeMappings.forEach((k, v) -> mapping.put(k, commonAncestor(k, v.toArray(new Type[v.size()]))));
+      typeMappings.forEach((k, v) -> mapping.put(k, commonAncestor(k, v)));
       return TypeUtil.ground(type, mapping);
+    }
+
+    private void put(TypeVariable<?> variable, Type type) {
+      typeMappings.computeIfAbsent(variable, k -> new LinkedHashSet<>()).add(boxed(type));
     }
   }
 }
