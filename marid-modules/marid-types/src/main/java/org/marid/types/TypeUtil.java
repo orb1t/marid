@@ -61,24 +61,6 @@ public interface TypeUtil {
     }
   }
 
-  static boolean matches(@Nonnull TypedCallExpression expr,
-                         @Nonnull Executable e,
-                         @Nullable Type owner,
-                         @Nonnull TypeContext context) {
-    if (e.getParameterCount() == expr.getArgs().size()) {
-      final Type[] pt = e.getGenericParameterTypes();
-      for (int i = 0; i < pt.length; i++) {
-        final Type at = expr.getArgs().get(i).getType(owner, context);
-        if (!context.isAssignable(at, pt[i])) {
-          return false;
-        }
-      }
-      return true;
-    } else {
-      return false;
-    }
-  }
-
   @Nonnull
   static Type resolve(@Nonnull TypedExpression expression, @Nonnull Type type, @Nonnull TypeContext context) {
     if (type instanceof Class<?>) {

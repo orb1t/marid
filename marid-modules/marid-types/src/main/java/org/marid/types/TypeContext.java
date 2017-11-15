@@ -24,6 +24,7 @@ package org.marid.types;
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.marid.runtime.context.MaridRuntimeUtils;
 import org.marid.types.beans.TypedBean;
+import org.marid.types.expression.TypedCallExpression;
 import org.marid.types.expression.TypedExpression;
 
 import javax.annotation.Nonnull;
