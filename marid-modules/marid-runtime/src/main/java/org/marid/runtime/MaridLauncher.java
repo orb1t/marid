@@ -22,10 +22,10 @@
 package org.marid.runtime;
 
 
+import org.marid.beans.RuntimeBean;
 import org.marid.runtime.context.BeanConfiguration;
 import org.marid.runtime.context.BeanContext;
 import org.marid.runtime.context.MaridRuntimeUtils;
-import org.marid.beans.RuntimeBean;
 
 import java.io.InputStreamReader;
 import java.io.Reader;

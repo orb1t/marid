@@ -76,7 +76,7 @@ public final class CallExpr extends Expr implements CallExpression {
           .findFirst()
           .orElseThrow(() -> methodState(getMethod(), args, new NoSuchElementException()));
       try {
-        return constructor.newInstance(args(constructor, args));
+        return constructor.newInstance(args(constructor, values(constructor.getParameterTypes(), args)));
       } catch (ReflectiveOperationException x) {
         throw methodState(getMethod(), args, x);
       }
@@ -87,7 +87,7 @@ public final class CallExpr extends Expr implements CallExpression {
           .findFirst()
           .orElseThrow(() -> methodState(getMethod(), args, new NoSuchElementException()));
       try {
-        return method.invoke(target, args(method, args));
+        return method.invoke(target, args(method, values(method.getParameterTypes(), args)));
       } catch (ReflectiveOperationException x) {
         throw methodState(getMethod(), args, x);
       }

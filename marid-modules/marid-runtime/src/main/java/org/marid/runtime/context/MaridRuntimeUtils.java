@@ -199,6 +199,15 @@ public interface MaridRuntimeUtils {
     }
   }
 
+  @Nonnull
+  static Object[] values(@Nonnull Class<?>[] types, @Nonnull Object[] values) {
+    final Object[] result = new Object[values.length];
+    for (int i = 0; i < result.length; i++) {
+      result[i] = value(types[i], values[i]);
+    }
+    return result;
+  }
+
   static Object[] args(@Nonnull Executable executable, @Nonnull Object[] args) {
     final Class<?>[] types = executable.getParameterTypes();
     final Object[] result = new Object[args.length];
