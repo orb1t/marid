@@ -95,13 +95,15 @@ public interface TypedCallExpression extends CallExpression, TypedExpression {
 
   @Override
   default void resolve(@Nonnull Type type, @Nonnull TypeContext context, @Nonnull BiConsumer<Type, Type> evaluator) {
-    final Type[] ats = getArgs().stream().map(a -> a.getType(type, context)).toArray(Type[]::new);
-    final Class<?>[] rts = Stream.of(ats).map(TypeUtil::getRaw).toArray(Class<?>[]::new);
-    for (final Method method : TypeUtil.getRaw(type).getMethods()) {
-      if (method.getName().equals(getMethod()) && MaridRuntimeUtils.compatible(method, rts)) {
-        final Type[] ts = method.getGenericParameterTypes();
-        for (int i = 0; i < ts.length; i++) {
-          evaluator.accept(context.resolve(type, ts[i]), ats[i]);
+    if (getTarget() instanceof TypedThisExpression) {
+      final Type[] ats = getArgs().stream().map(a -> a.getType(type, context)).toArray(Type[]::new);
+      final Class<?>[] rts = Stream.of(ats).map(TypeUtil::getRaw).toArray(Class<?>[]::new);
+      for (final Method method : TypeUtil.getRaw(type).getMethods()) {
+        if (method.getName().equals(getMethod()) && MaridRuntimeUtils.compatible(method, rts)) {
+          final Type[] ts = method.getGenericParameterTypes();
+          for (int i = 0; i < ts.length; i++) {
+            evaluator.accept(context.resolve(type, ts[i]), ats[i]);
+          }
         }
       }
     }

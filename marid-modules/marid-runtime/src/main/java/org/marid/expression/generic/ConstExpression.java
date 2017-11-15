@@ -45,6 +45,14 @@ public interface ConstExpression extends ValueExpression {
 
   enum ConstantType {
 
+    Z(boolean.class, Boolean::valueOf),
+    B(byte.class, Byte::decode),
+    S(short.class, Short::decode),
+    I(int.class, Integer::decode),
+    J(long.class, Long::decode),
+    C(char.class, v -> (char) (int) Integer.decode(v)),
+    F(float.class, Float::valueOf),
+    D(double.class, Double::valueOf),
     BOOL(Boolean.class, Boolean::valueOf),
     BYTE(Byte.class, Byte::decode),
     SHORT(Short.class, Short::decode),

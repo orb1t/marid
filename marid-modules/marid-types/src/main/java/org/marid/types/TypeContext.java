@@ -135,36 +135,42 @@ public class TypeContext {
         for (int i = 0; i < formals.length; i++) {
           e.accept(formals[i], actuals[i]);
         }
-        expression.getInitializers().forEach(i -> i.resolve(type, this, e));
+        for (final TypedExpression i : expression.getInitializers()) {
+          i.resolve(type, this, e);
+        }
       }, type);
     }
   }
 
   @Nonnull
-  public Type commonAncestor(@Nonnull Type formal, @Nonnull Set<Type> actuals) {
-    final Supplier<Stream<Type>> as = () -> actuals.stream().filter(t -> !WILDCARD_ALL.equals(t));
-    if (as.get().allMatch(TypeContext.this::isNonPrimitiveArray)) {
-      final Set<Type> aes = as.get().map(TypeUtils::getArrayComponentType).collect(toCollection(LinkedHashSet::new));
-      final Type elementType = commonAncestor(Object.class, aes);
-      if (elementType instanceof Class<?>) {
-        return Array.newInstance((Class<?>) elementType, 0).getClass();
-      } else {
-        return TypeUtils.genericArrayType(elementType);
-      }
+  public Type commonAncestor(@Nonnull Type formal, @Nonnull Collection<Type> actuals) {
+    if (actuals.isEmpty()) {
+      return formal;
     } else {
-      final Type[][] tss = as.get().sorted(this::cmp).map(t -> types(t).toArray(Type[]::new)).toArray(Type[][]::new);
-      final int max = of(tss).mapToInt(a -> a.length).max().orElse(0);
-      for (int level = 0; level < max; level++) {
-        for (final Type[] ts : tss) {
-          if (level < ts.length) {
-            final Type actual = ts[level];
-            if (actuals.stream().allMatch(t -> TypeUtils.isAssignable(t, actual))) {
-              return actual;
+      final Supplier<Stream<Type>> as = () -> actuals.stream().filter(t -> !WILDCARD_ALL.equals(t));
+      if (as.get().allMatch(TypeContext.this::isNonPrimitiveArray)) {
+        final Set<Type> aes = as.get().map(TypeUtils::getArrayComponentType).collect(toCollection(LinkedHashSet::new));
+        final Type elementType = commonAncestor(Object.class, aes);
+        if (elementType instanceof Class<?>) {
+          return Array.newInstance((Class<?>) elementType, 0).getClass();
+        } else {
+          return TypeUtils.genericArrayType(elementType);
+        }
+      } else {
+        final Type[][] tss = as.get().sorted(this::cmp).map(t -> types(t).toArray(Type[]::new)).toArray(Type[][]::new);
+        final int max = of(tss).mapToInt(a -> a.length).max().orElse(0);
+        for (int level = 0; level < max; level++) {
+          for (final Type[] ts : tss) {
+            if (level < ts.length) {
+              final Type actual = ts[level];
+              if (actuals.stream().allMatch(t -> TypeUtils.isAssignable(t, actual))) {
+                return actual;
+              }
             }
           }
         }
+        return formal;
       }
-      return formal;
     }
   }
 

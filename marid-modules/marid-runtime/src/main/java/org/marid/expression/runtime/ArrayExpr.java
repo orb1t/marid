@@ -24,12 +24,10 @@ package org.marid.expression.runtime;
 import org.marid.expression.generic.ArrayExpression;
 import org.marid.io.Xmls;
 import org.marid.runtime.context.BeanContext;
-import org.marid.runtime.context.MaridRuntimeUtils;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
 
@@ -38,26 +36,15 @@ import static java.util.stream.Collectors.toList;
 public final class ArrayExpr extends Expr implements ArrayExpression {
 
   @Nonnull
-  private final String elementType;
-
-  @Nonnull
   private final List<Expr> elements;
 
-  public ArrayExpr(@Nonnull String elementType, @Nonnull Expr... elements) {
-    this.elementType = elementType;
+  public ArrayExpr(@Nonnull Expr... elements) {
     this.elements = Arrays.asList(elements);
   }
 
   ArrayExpr(@Nonnull Element element) {
     super(element);
-    elementType = Xmls.attribute(element, "type").orElseThrow(() -> new NullPointerException("type"));
     elements = Xmls.elements("elements", element).map(Expr::of).collect(toList());
-  }
-
-  @Nonnull
-  @Override
-  public String getElementType() {
-    return elementType;
   }
 
   @Nonnull
@@ -67,17 +54,7 @@ public final class ArrayExpr extends Expr implements ArrayExpression {
   }
 
   @Override
-  protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
-    final Class<?> elementClass;
-    try {
-      elementClass = MaridRuntimeUtils.loadClass(getElementType(), context.getClassLoader(), true);
-    } catch (ClassNotFoundException x) {
-      throw new IllegalStateException(x);
-    }
-    final Object array = Array.newInstance(elementClass, elements.size());
-    for (int i = 0; i < elements.size(); i++) {
-      Array.set(array, i, elements.get(i).evaluate(self, context));
-    }
-    return array;
+  protected Object[] execute(@Nullable Object self, @Nonnull BeanContext context) {
+    return elements.stream().map(e -> e.evaluate(self, context)).toArray();
   }
 }

@@ -23,11 +23,8 @@ package org.marid.types;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.marid.runtime.context.MaridRuntimeUtils;
-import org.marid.types.expression.TypedCallExpression;
-import org.marid.types.expression.TypedExpression;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.lang.reflect.*;
 import java.util.HashSet;
 import java.util.Map;
@@ -58,15 +55,6 @@ public interface TypeUtil {
       return Optional.of(MaridRuntimeUtils.loadClass(name, classLoader, false));
     } catch (ClassNotFoundException x) {
       return Optional.empty();
-    }
-  }
-
-  @Nonnull
-  static Type resolve(@Nonnull TypedExpression expression, @Nonnull Type type, @Nonnull TypeContext context) {
-    if (type instanceof Class<?>) {
-      return type;
-    } else {
-      return context.evaluate(e -> expression.getInitializers().forEach(i -> i.resolve(type, context, e)), type);
     }
   }
 

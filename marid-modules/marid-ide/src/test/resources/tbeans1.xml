@@ -156,7 +156,7 @@
           <class class="java.util.Arrays"/>
         </target>
         <args>
-          <array type="java.util.List">
+          <array>
             <elements>
               <call method="singletonList">
                 <target>
@@ -175,7 +175,7 @@
 
   <bean name="b10">
     <factory>
-      <array type="java.util.List">
+      <array>
         <elements>
           <call method="singletonList">
             <target>
@@ -192,9 +192,9 @@
 
   <bean name="b11">
     <factory>
-      <array type="int">
+      <array>
         <elements>
-          <const type="INT" value="1"/>
+          <const type="I" value="1"/>
         </elements>
       </array>
     </factory>
@@ -212,7 +212,11 @@
               <this/>
             </target>
             <args>
-              <array type="java.lang.Integer"/>
+              <array>
+                <elements>
+                  <const type="INT" value="1"/>
+                </elements>
+              </array>
             </args>
           </call>
           <call method="add">
@@ -220,7 +224,11 @@
               <this/>
             </target>
             <args>
-              <array type="java.lang.Long"/>
+              <array>
+                <elements>
+                  <const type="LONG" value="1"/>
+                </elements>
+              </array>
             </args>
           </call>
         </initializers>

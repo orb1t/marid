@@ -27,8 +27,5 @@ import java.util.List;
 public interface ArrayExpression extends Expression {
 
   @Nonnull
-  String getElementType();
-
-  @Nonnull
   List<? extends Expression> getElements();
 }
