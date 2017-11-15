@@ -24,7 +24,6 @@ package org.marid.types;
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.marid.runtime.context.MaridRuntimeUtils;
 import org.marid.types.beans.TypedBean;
-import org.marid.types.expression.TypedCallExpression;
 import org.marid.types.expression.TypedExpression;
 
 import javax.annotation.Nonnull;
@@ -35,7 +34,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Stream.of;
 import static org.apache.commons.lang3.reflect.TypeUtils.WILDCARD_ALL;
 import static org.apache.commons.lang3.reflect.TypeUtils.getArrayComponentType;
 import static org.marid.runtime.context.MaridRuntimeUtils.compatible;
@@ -138,6 +137,64 @@ public class TypeContext {
     }
   }
 
+  @Nonnull
+  public Type commonAncestor(@Nonnull Type formal, @Nonnull Type... actuals) {
+    if (of(actuals).allMatch(TypeContext.this::isNonPrimitiveArray)) {
+      final Type[] elementActuals = of(actuals).map(TypeUtils::getArrayComponentType).toArray(Type[]::new);
+      final Type elementType = commonAncestor(Object.class, elementActuals);
+      if (elementType instanceof Class<?>) {
+        return Array.newInstance((Class<?>) elementType, 0).getClass();
+      } else {
+        return TypeUtils.genericArrayType(elementType);
+      }
+    } else {
+      Arrays.sort(actuals, (t1, t2) -> TypeUtils.isAssignable(t1, t2) ? -1 : TypeUtils.isAssignable(t2, t1) ? +1 : 0);
+      final Type[][] tokens = new Type[actuals.length][];
+      for (int i = 0; i < actuals.length; i++) {
+        tokens[i] = types(actuals[i]).toArray(Type[]::new);
+      }
+      final int max = of(tokens).mapToInt(a -> a.length).max().orElse(0);
+      for (int level = 0; level < max; level++) {
+        for (final Type[] token : tokens) {
+          if (level < token.length) {
+            final Type actual = token[level];
+            if (of(actuals).allMatch(t -> TypeUtils.isAssignable(t, actual))) {
+              return actual;
+            }
+          }
+        }
+      }
+      return formal;
+    }
+  }
+
+  private Stream<? extends Type> types(Type type) {
+    final Class<?> raw = TypeUtil.getRaw(type);
+    return Stream.concat(MaridRuntimeUtils.superClasses(raw), of(raw.getInterfaces()))
+        .map(c -> generic(c, type));
+  }
+
+  private Type generic(Class<?> c, Type type) {
+    final TypeVariable<?>[] vars = c.getTypeParameters();
+    if (vars.length == 0) {
+      return c;
+    } else {
+      final Map<TypeVariable<?>, Type> map = TypeUtils.getTypeArguments(type, c);
+      return TypeUtils.parameterize(c, map);
+    }
+  }
+
+  private boolean isNonPrimitiveArray(Type type) {
+    if (type instanceof GenericArrayType) {
+      return true;
+    } else if (type instanceof Class<?>) {
+      final Class<?> c = (Class<?>) type;
+      return c.isArray() && !c.getComponentType().isPrimitive();
+    } else {
+      return false;
+    }
+  }
+
   private final class GuavaTypeEvaluator implements BiConsumer<Type, Type> {
 
     private final HashSet<Type> passed = new HashSet<>();
@@ -175,66 +232,8 @@ public class TypeContext {
     @Nonnull
     Type resolve(@Nonnull Type type) {
       final LinkedHashMap<TypeVariable<?>, Type> mapping = new LinkedHashMap<>(typeMappings.size());
-      typeMappings.forEach((k, v) -> mapping.put(k, commonAncestor(k, v)));
+      typeMappings.forEach((k, v) -> mapping.put(k, commonAncestor(k, v.toArray(new Type[v.size()]))));
       return TypeUtil.ground(type, mapping);
-    }
-
-    private Type commonAncestor(Type formal, LinkedHashSet<Type> actuals) {
-      if (actuals.stream().allMatch(TypeContext.this::isNonPrimitiveArray)) {
-        final LinkedHashSet<Type> elementActuals = actuals.stream()
-            .map(TypeUtils::getArrayComponentType)
-            .collect(toCollection(LinkedHashSet::new));
-        final Type elementType = commonAncestor(Object.class, elementActuals);
-        if (elementType instanceof Class<?>) {
-          return Array.newInstance((Class<?>) elementType, 0).getClass();
-        } else {
-          return TypeUtils.genericArrayType(elementType);
-        }
-      } else {
-        final Type[][] tokens = actuals.stream()
-            .sorted((t1, t2) -> TypeUtils.isAssignable(t1, t2) ? -1 : TypeUtils.isAssignable(t2, t1) ? +1 : 0)
-            .map(t -> types(t).toArray(Type[]::new))
-            .toArray(Type[][]::new);
-        final int max = Stream.of(tokens).mapToInt(a -> a.length).max().orElse(0);
-        for (int level = 0; level < max; level++) {
-          for (final Type[] token : tokens) {
-            if (level < token.length) {
-              final Type actual = token[level];
-              if (actuals.stream().allMatch(t -> TypeUtils.isAssignable(t, actual))) {
-                return actual;
-              }
-            }
-          }
-        }
-        return formal;
-      }
-    }
-  }
-
-  private Stream<? extends Type> types(Type type) {
-    final Class<?> raw = TypeUtil.getRaw(type);
-    return Stream.concat(MaridRuntimeUtils.superClasses(raw), Stream.of(raw.getInterfaces()))
-        .map(c -> generic(c, type));
-  }
-
-  private Type generic(Class<?> c, Type type) {
-    final TypeVariable<?>[] vars = c.getTypeParameters();
-    if (vars.length == 0) {
-      return c;
-    } else {
-      final Map<TypeVariable<?>, Type> map = TypeUtils.getTypeArguments(type, c);
-      return TypeUtils.parameterize(c, map);
-    }
-  }
-
-  private boolean isNonPrimitiveArray(Type type) {
-    if (type instanceof GenericArrayType) {
-      return true;
-    } else if (type instanceof Class<?>) {
-      final Class<?> c = (Class<?>) type;
-      return c.isArray() && !c.getComponentType().isPrimitive();
-    } else {
-      return false;
     }
   }
 }
