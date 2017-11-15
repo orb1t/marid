@@ -230,7 +230,7 @@ public class TypeContext {
     }
 
     @Nonnull
-    Type resolve(@Nonnull Type type) {
+    private Type resolve(@Nonnull Type type) {
       final LinkedHashMap<TypeVariable<?>, Type> mapping = new LinkedHashMap<>(typeMappings.size());
       typeMappings.forEach((k, v) -> mapping.put(k, commonAncestor(k, v.toArray(new Type[v.size()]))));
       return TypeUtil.ground(type, mapping);
