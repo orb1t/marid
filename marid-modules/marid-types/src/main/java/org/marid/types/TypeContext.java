@@ -202,30 +202,29 @@ public class TypeContext {
 
     @Override
     public void accept(Type formal, Type actual) {
-      if (!(formal instanceof TypeVariable<?>) && !passed.add(formal)) {
-        return;
-      }
-      if (TypeUtils.isArrayType(formal) && TypeUtils.isArrayType(actual)) {
-        accept(getArrayComponentType(formal), getArrayComponentType(actual));
-      } else if (formal instanceof TypeVariable<?>) {
+      if (formal instanceof TypeVariable<?>) {
         final TypeVariable<?> typeVariable = (TypeVariable<?>) formal;
         for (final Type bound : typeVariable.getBounds()) {
           accept(bound, actual);
         }
         typeMappings.computeIfAbsent(typeVariable, k -> new LinkedHashSet<>()).add(boxed(actual));
-      } else if (formal instanceof ParameterizedType) {
-        final Class<?> formalRaw = TypeUtil.getRaw(formal);
-        final Class<?> actualRaw = TypeUtil.getRaw(actual);
-        if (formalRaw.isAssignableFrom(actualRaw)) {
-          TypeUtils.getTypeArguments(actual, formalRaw).forEach((v, t) -> {
-            final LinkedHashSet<Type> set = typeMappings.computeIfAbsent(v, k -> new LinkedHashSet<>());
-            set.add(boxed(t));
-          });
-        }
-      } else if (formal instanceof WildcardType) {
-        final WildcardType wildcardType = (WildcardType) formal;
-        for (final Type bound : wildcardType.getUpperBounds()) {
-          accept(bound, actual);
+      } else if (passed.add(formal)) {
+        if (TypeUtils.isArrayType(formal) && TypeUtils.isArrayType(actual)) {
+          accept(getArrayComponentType(formal), getArrayComponentType(actual));
+        } else if (formal instanceof ParameterizedType) {
+          final Class<?> formalRaw = TypeUtil.getRaw(formal);
+          final Class<?> actualRaw = TypeUtil.getRaw(actual);
+          if (formalRaw.isAssignableFrom(actualRaw)) {
+            TypeUtils.getTypeArguments(actual, formalRaw).forEach((v, t) -> {
+              final LinkedHashSet<Type> set = typeMappings.computeIfAbsent(v, k -> new LinkedHashSet<>());
+              set.add(boxed(t));
+            });
+          }
+        } else if (formal instanceof WildcardType) {
+          final WildcardType wildcardType = (WildcardType) formal;
+          for (final Type bound : wildcardType.getUpperBounds()) {
+            accept(bound, actual);
+          }
         }
       }
     }
