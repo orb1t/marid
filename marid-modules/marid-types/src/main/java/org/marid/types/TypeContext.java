@@ -22,7 +22,6 @@
 package org.marid.types;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
-import org.marid.runtime.context.MaridRuntimeUtils;
 import org.marid.types.beans.TypedBean;
 import org.marid.types.expression.TypedExpression;
 
@@ -34,10 +33,12 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 import static org.apache.commons.lang3.reflect.TypeUtils.WILDCARD_ALL;
 import static org.apache.commons.lang3.reflect.TypeUtils.getArrayComponentType;
 import static org.marid.runtime.context.MaridRuntimeUtils.compatible;
+import static org.marid.runtime.context.MaridRuntimeUtils.superClasses;
 import static org.marid.types.TypeUtil.boxed;
 
 public class TypeContext {
@@ -170,8 +171,7 @@ public class TypeContext {
 
   private Stream<? extends Type> types(Type type) {
     final Class<?> raw = TypeUtil.getRaw(type);
-    return Stream.concat(MaridRuntimeUtils.superClasses(raw), of(raw.getInterfaces()))
-        .map(c -> generic(c, type));
+    return concat(superClasses(raw), of(raw.getInterfaces())).map(c -> generic(c, type));
   }
 
   private Type generic(Class<?> c, Type type) {
