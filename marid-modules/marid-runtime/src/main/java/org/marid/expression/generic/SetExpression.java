@@ -21,7 +21,14 @@
 
 package org.marid.expression.generic;
 
+import org.marid.types.TypeContext;
+import org.marid.types.TypeUtil;
+
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Type;
+import java.util.function.BiConsumer;
 
 public interface SetExpression extends Expression {
 
@@ -33,4 +40,32 @@ public interface SetExpression extends Expression {
 
   @Nonnull
   Expression getValue();
+
+  @Nonnull
+  @Override
+  default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
+    return getTarget().getType(owner, context);
+  }
+
+  @Override
+  default void resolve(@Nonnull Type type, @Nonnull TypeContext context, @Nonnull BiConsumer<Type, Type> evaluator) {
+    for (final Field field : TypeUtil.getRaw(type).getFields()) {
+      if (field.getName().equals(getField())) {
+        evaluator.accept(context.resolve(type, field.getGenericType()), getValue().getType(type, context));
+        return;
+      }
+    }
+  }
+
+  default boolean isValueAssignableFrom(@Nonnull Type type, @Nullable Type owner, @Nonnull TypeContext context) {
+    final Type targetType = getTarget().getType(owner, context);
+    for (final Field field : TypeUtil.getRaw(targetType).getFields()) {
+      if (field.getName().equals(getField())) {
+        if (context.isAssignable(type, field.getGenericType())) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
 }

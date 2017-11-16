@@ -22,8 +22,8 @@
 package org.marid.types;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
-import org.marid.types.beans.TypedBean;
-import org.marid.types.expression.TypedExpression;
+import org.marid.beans.MaridBean;
+import org.marid.expression.generic.Expression;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -45,10 +45,10 @@ import static org.marid.types.TypeUtil.boxed;
 
 public class TypeContext {
 
-  private final TypedBean bean;
+  private final MaridBean bean;
   private final ClassLoader classLoader;
 
-  public TypeContext(TypedBean bean, ClassLoader classLoader) {
+  public TypeContext(MaridBean bean, ClassLoader classLoader) {
     this.bean = bean;
     this.classLoader = classLoader;
   }
@@ -57,8 +57,6 @@ public class TypeContext {
   public Type getBeanType(@Nonnull String name) {
     return bean.matchingCandidates()
         .filter(b -> name.equals(b.getName()))
-        .filter(TypedBean.class::isInstance)
-        .map(TypedBean.class::cast)
         .findFirst()
         .map(b -> b.getFactory().getType(null, new TypeContext(b, classLoader)))
         .orElse(WILDCARD_ALL);
@@ -127,7 +125,7 @@ public class TypeContext {
   }
 
   @Nonnull
-  public Type resolve(@Nonnull Type[] formals, @Nonnull Type[] actuals, @Nonnull TypedExpression expression, @Nonnull Type type) {
+  public Type resolve(@Nonnull Type[] formals, @Nonnull Type[] actuals, @Nonnull Expression expression, @Nonnull Type type) {
     if (type instanceof Class<?>) {
       return type;
     } else {
@@ -135,7 +133,7 @@ public class TypeContext {
         for (int i = 0; i < formals.length; i++) {
           e.accept(formals[i], actuals[i]);
         }
-        for (final TypedExpression i : expression.getInitializers()) {
+        for (final Expression i : expression.getInitializers()) {
           i.resolve(type, this, e);
         }
       }, type);

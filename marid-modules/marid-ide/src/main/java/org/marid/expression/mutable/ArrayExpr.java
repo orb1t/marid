@@ -21,7 +21,7 @@
 package org.marid.expression.mutable;
 
 import javafx.collections.ObservableList;
-import org.marid.types.expression.TypedArrayExpression;
+import org.marid.expression.generic.ArrayExpression;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
@@ -32,7 +32,7 @@ import static javafx.collections.FXCollections.observableArrayList;
 import static org.marid.io.Xmls.create;
 import static org.marid.io.Xmls.elements;
 
-public class ArrayExpr extends Expr implements TypedArrayExpression {
+public class ArrayExpr extends Expr implements ArrayExpression {
 
   public final ObservableList<Expr> elements;
 

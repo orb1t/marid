@@ -22,14 +22,14 @@ package org.marid.expression.mutable;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.marid.types.expression.TypedNullExpression;
+import org.marid.expression.generic.NullExpression;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 
 import static org.marid.io.Xmls.attribute;
 
-public class NullExpr extends Expr implements TypedNullExpression {
+public class NullExpr extends Expr implements NullExpression {
 
   public final StringProperty type;
 

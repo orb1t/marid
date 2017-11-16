@@ -21,11 +21,22 @@
 
 package org.marid.expression.generic;
 
+import org.marid.types.TypeContext;
+
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.lang.reflect.Type;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 public interface Expression {
 
   @Nonnull
   List<? extends Expression> getInitializers();
+
+  @Nonnull
+  Type getType(@Nullable Type owner, @Nonnull TypeContext context);
+
+  default void resolve(@Nonnull Type type, @Nonnull TypeContext context, @Nonnull BiConsumer<Type, Type> evaluator) {
+  }
 }

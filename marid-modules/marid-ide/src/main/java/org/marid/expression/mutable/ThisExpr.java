@@ -20,12 +20,12 @@
 
 package org.marid.expression.mutable;
 
-import org.marid.types.expression.TypedThisExpression;
+import org.marid.expression.generic.ThisExpression;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 
-public class ThisExpr extends Expr implements TypedThisExpression {
+public class ThisExpr extends Expr implements ThisExpression {
 
   public ThisExpr() {
   }

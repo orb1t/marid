@@ -23,7 +23,7 @@ package org.marid.expression.mutable;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
-import org.marid.types.expression.TypedCallExpression;
+import org.marid.expression.generic.CallExpression;
 import org.marid.jfx.props.FxObject;
 import org.w3c.dom.Element;
 
@@ -34,7 +34,7 @@ import static java.util.stream.Collectors.toCollection;
 import static javafx.collections.FXCollections.observableArrayList;
 import static org.marid.io.Xmls.*;
 
-public class CallExpr extends Expr implements TypedCallExpression {
+public class CallExpr extends Expr implements CallExpression {
 
   public final FxObject<Expr> target;
   public final StringProperty method;

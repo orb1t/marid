@@ -21,11 +21,29 @@
 
 package org.marid.expression.generic;
 
+import org.marid.types.TypeContext;
+
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.lang.reflect.Array;
+import java.lang.reflect.Type;
 import java.util.List;
+
+import static java.util.stream.Collectors.toList;
+import static org.apache.commons.lang3.reflect.TypeUtils.genericArrayType;
 
 public interface ArrayExpression extends Expression {
 
   @Nonnull
   List<? extends Expression> getElements();
+
+  @Nonnull
+  @Override
+  default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
+    final List<Type> set = getElements().stream().map(e -> e.getType(owner, context)).distinct().collect(toList());
+    final Type elementType = context.commonAncestor(Object.class, set);
+    return elementType instanceof Class<?>
+        ? Array.newInstance((Class<?>) elementType, 0).getClass()
+        : genericArrayType(elementType);
+  }
 }

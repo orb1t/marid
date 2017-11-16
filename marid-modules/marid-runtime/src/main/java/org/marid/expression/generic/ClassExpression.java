@@ -21,10 +21,25 @@
 
 package org.marid.expression.generic;
 
+import org.marid.types.TypeContext;
+import org.marid.types.TypeUtil;
+
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.lang.reflect.Type;
+
+import static org.apache.commons.lang3.reflect.TypeUtils.WILDCARD_ALL;
 
 public interface ClassExpression extends Expression {
 
   @Nonnull
   String getClassName();
+
+  @Nonnull
+  @Override
+  default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
+    return TypeUtil.getClass(context.getClassLoader(), getClassName())
+        .map(context::getClassType)
+        .orElse(WILDCARD_ALL);
+  }
 }

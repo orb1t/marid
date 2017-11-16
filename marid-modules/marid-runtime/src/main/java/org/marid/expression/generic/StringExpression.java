@@ -21,10 +21,20 @@
 
 package org.marid.expression.generic;
 
+import org.marid.types.TypeContext;
+
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.lang.reflect.Type;
 
 public interface StringExpression extends Expression {
 
   @Nonnull
   String getValue();
+
+  @Nonnull
+  @Override
+  default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
+    return String.class;
+  }
 }

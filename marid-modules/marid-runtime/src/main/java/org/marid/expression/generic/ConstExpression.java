@@ -22,9 +22,12 @@
 package org.marid.expression.generic;
 
 import org.marid.misc.Calls;
+import org.marid.types.TypeContext;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.File;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.InetAddress;
@@ -42,6 +45,12 @@ public interface ConstExpression extends ValueExpression {
 
   @Nonnull
   ConstantType getType();
+
+  @Nonnull
+  @Override
+  default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
+    return getType().type;
+  }
 
   enum ConstantType {
 
