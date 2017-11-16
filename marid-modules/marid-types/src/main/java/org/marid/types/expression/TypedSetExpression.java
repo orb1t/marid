@@ -56,4 +56,16 @@ public interface TypedSetExpression extends SetExpression, TypedExpression {
       }
     }
   }
+
+  default boolean isValueAssignableFrom(@Nonnull Type type, @Nullable Type owner, @Nonnull TypeContext context) {
+    final Type targetType = getTarget().getType(owner, context);
+    for (final Field field : TypeUtil.getRaw(targetType).getFields()) {
+      if (field.getName().equals(getField())) {
+        if (context.isAssignable(type, field.getGenericType())) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
 }

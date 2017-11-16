@@ -23,7 +23,6 @@ package org.marid.types.expression;
 
 import org.marid.expression.generic.CallExpression;
 import org.marid.expression.generic.ClassExpression;
-import org.marid.runtime.context.MaridRuntimeUtils;
 import org.marid.types.TypeContext;
 import org.marid.types.TypeUtil;
 
@@ -38,6 +37,7 @@ import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 import static java.lang.reflect.Modifier.isStatic;
+import static java.util.stream.Stream.of;
 import static org.apache.commons.lang3.reflect.TypeUtils.WILDCARD_ALL;
 import static org.marid.types.TypeUtil.classType;
 import static org.marid.types.TypeUtil.getRaw;
@@ -97,9 +97,8 @@ public interface TypedCallExpression extends CallExpression, TypedExpression {
   default void resolve(@Nonnull Type type, @Nonnull TypeContext context, @Nonnull BiConsumer<Type, Type> evaluator) {
     if (getTarget() instanceof TypedThisExpression) {
       final Type[] ats = getArgs().stream().map(a -> a.getType(type, context)).toArray(Type[]::new);
-      final Class<?>[] rts = Stream.of(ats).map(TypeUtil::getRaw).toArray(Class<?>[]::new);
       for (final Method method : TypeUtil.getRaw(type).getMethods()) {
-        if (method.getName().equals(getMethod()) && MaridRuntimeUtils.compatible(method, rts)) {
+        if (method.getName().equals(getMethod()) && matches(method, null, context)) {
           final Type[] ts = method.getGenericParameterTypes();
           for (int i = 0; i < ts.length; i++) {
             evaluator.accept(context.resolve(type, ts[i]), ats[i]);
@@ -107,6 +106,29 @@ public interface TypedCallExpression extends CallExpression, TypedExpression {
         }
       }
     }
+  }
+
+  default boolean isArgAssignableFrom(@Nonnull Type type, int arg, @Nullable Type owner, @Nonnull TypeContext context) {
+    final Type targetType = getTarget().getType(owner, context);
+    final Stream<? extends Executable> executables;
+    if (getTarget() instanceof ClassExpression) {
+      final Class<?> targetRaw = classType(targetType).map(t -> (Class) getRaw(t)).orElse(void.class);
+      executables = !"new".equals(getMethod())
+          ? of(targetRaw.getMethods()).filter(m -> m.getName().equals(getMethod()) && isStatic(m.getModifiers()))
+          : of(targetRaw.getConstructors());
+    } else {
+      executables = of(TypeUtil.getRaw(targetType).getMethods())
+          .filter(m -> m.getName().equals(getMethod()))
+          .filter(m -> !isStatic(m.getModifiers()));
+    }
+    return executables
+        .filter(e -> matches(e, owner, context))
+        .findFirst()
+        .filter(e -> {
+          final Type argType = e.getGenericParameterTypes()[arg];
+          return context.isAssignable(type, argType);
+        })
+        .isPresent();
   }
 
   private boolean matches(@Nonnull Executable e, @Nullable Type owner, @Nonnull TypeContext context) {

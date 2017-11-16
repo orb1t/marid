@@ -29,6 +29,7 @@ import org.w3c.dom.Element;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
@@ -38,6 +39,7 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.IntStream.range;
 import static org.marid.io.Xmls.*;
 import static org.marid.runtime.context.MaridRuntimeUtils.*;
 
@@ -72,7 +74,7 @@ public final class CallExpr extends Expr implements CallExpression {
     final Object[] args = getArgs().stream().map(a -> a.evaluate(self, context)).toArray();
     if ("new".equals(getMethod())) {
       final Constructor<?> constructor = Stream.of(targetClass.getConstructors())
-          .filter(c -> compatible(c, args))
+          .filter(c -> matches(c, context, args))
           .findFirst()
           .orElseThrow(() -> methodState(getMethod(), args, new NoSuchElementException()));
       try {
@@ -82,8 +84,7 @@ public final class CallExpr extends Expr implements CallExpression {
       }
     } else {
       final Method method = MaridRuntimeUtils.accessibleMethods(targetClass)
-          .filter(m -> m.getName().equals(getMethod()))
-          .filter(m -> compatible(m, args))
+          .filter(m -> m.getName().equals(getMethod()) && matches(m, context, args))
           .findFirst()
           .orElseThrow(() -> methodState(getMethod(), args, new NoSuchElementException()));
       try {
@@ -115,5 +116,14 @@ public final class CallExpr extends Expr implements CallExpression {
   @Override
   public String toString() {
     return args.stream().map(Object::toString).collect(joining(",", target + "." + method + "(", ")"));
+  }
+
+  private boolean matches(Executable executable, BeanContext context, Object... args) {
+    if (executable.getParameterCount() == args.length) {
+      final Class<?>[] ts = executable.getParameterTypes();
+      return range(0, ts.length).filter(i -> args[i] != null).allMatch(i -> compatible(ts[i], args[i].getClass()));
+    } else {
+      return false;
+    }
   }
 }

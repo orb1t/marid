@@ -21,6 +21,39 @@
 
 package org.marid.expression.generic;
 
+import org.marid.runtime.context.MaridRuntimeUtils;
+
+import javax.annotation.Nonnull;
+import java.lang.reflect.Array;
+
 public interface NullExpression extends Expression {
 
+  @Nonnull
+  String getType();
+
+  @Nonnull
+  default Class<?> getType(@Nonnull ClassLoader classLoader, boolean init) {
+    final String type = getType();
+    final String elementType;
+    final int dimensions;
+    final int index = type.indexOf("[]");
+    if (index >= 0) {
+      elementType = type.substring(0, index);
+      dimensions = (type.length() - elementType.length()) / 2;
+    } else {
+      elementType = type;
+      dimensions = 0;
+    }
+    final Class<?> et;
+    try {
+      et = MaridRuntimeUtils.loadClass(elementType, classLoader, init);
+    } catch (ClassNotFoundException x) {
+      throw new IllegalStateException(x);
+    }
+    if (dimensions > 0) {
+      return Array.newInstance(et, new int[dimensions]).getClass();
+    } else {
+      return et;
+    }
+  }
 }

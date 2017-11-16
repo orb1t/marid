@@ -38,7 +38,6 @@ import java.util.stream.Stream;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.util.logging.Level.WARNING;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.IntStream.range;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 import static org.marid.logging.Log.log;
@@ -99,24 +98,6 @@ public interface MaridRuntimeUtils {
     }, "repl", 96L * 1024L);
     daemon.setDaemon(true);
     return daemon;
-  }
-
-  static boolean compatible(@Nonnull Executable executable, @Nonnull Object... args) {
-    if (executable.getParameterCount() == args.length) {
-      final Class<?>[] ts = executable.getParameterTypes();
-      return range(0, ts.length).filter(i -> args[i] != null).allMatch(i -> compatible(ts[i], args[i].getClass()));
-    } else {
-      return false;
-    }
-  }
-
-  static boolean compatible(@Nonnull Executable executable, @Nonnull Class<?>... types) {
-    if (executable.getParameterCount() == types.length) {
-      final Class<?>[] ts = executable.getParameterTypes();
-      return range(0, ts.length).allMatch(i -> compatible(ts[i], types[i]));
-    } else {
-      return false;
-    }
   }
 
   @Nonnull

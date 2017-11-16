@@ -22,6 +22,7 @@
 package org.marid.expression.runtime;
 
 import org.marid.expression.generic.NullExpression;
+import org.marid.io.Xmls;
 import org.marid.runtime.context.BeanContext;
 import org.w3c.dom.Element;
 
@@ -30,7 +31,20 @@ import javax.annotation.Nullable;
 
 public final class NullExpr extends Expr implements NullExpression {
 
+  @Nonnull
+  private final String type;
+
   public NullExpr() {
+    this("void");
+  }
+
+  public NullExpr(@Nonnull String type) {
+    this.type = type;
+  }
+
+  NullExpr(Element element) {
+    super(element);
+    this.type = Xmls.attribute(element, "type").orElse("void");
   }
 
   @Override
@@ -38,12 +52,14 @@ public final class NullExpr extends Expr implements NullExpression {
     return null;
   }
 
-  NullExpr(Element element) {
-    super(element);
-  }
-
   @Override
   public String toString() {
     return "null";
+  }
+
+  @Nonnull
+  @Override
+  public String getType() {
+    return type;
   }
 }

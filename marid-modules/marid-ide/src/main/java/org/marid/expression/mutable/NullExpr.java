@@ -20,17 +20,43 @@
 
 package org.marid.expression.mutable;
 
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import org.marid.types.expression.TypedNullExpression;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 
+import static org.marid.io.Xmls.attribute;
+
 public class NullExpr extends Expr implements TypedNullExpression {
 
+  public final StringProperty type;
+
   public NullExpr() {
+    this(void.class.getName());
+  }
+
+  public NullExpr(@Nonnull String type) {
+    this.type = new SimpleStringProperty(type);
   }
 
   NullExpr(@Nonnull Element element) {
     super(element);
+    this.type = new SimpleStringProperty(attribute(element, "type").orElse(void.class.getName()));
+  }
+
+  @Nonnull
+  @Override
+  public String getType() {
+    return type.get();
+  }
+
+  @Override
+  public void writeTo(@Nonnull Element element) {
+    super.writeTo(element);
+    if (!"void".equals(getType())) {
+      element.setAttribute("type", getType());
+    }
   }
 }
