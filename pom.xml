@@ -401,20 +401,20 @@
           <reuseForks>false</reuseForks>
           <forkCount>1</forkCount>
           <threadCount>1</threadCount>
-          <groups>${test.groups}</groups>
           <argLine>--add-opens java.base/java.lang=ALL-UNNAMED</argLine>
+          <groups>${test.groups}</groups>
         </configuration>
         <dependencies>
           <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-surefire-provider</artifactId>
-            <version>1.0.1</version>
+            <version>1.0.2</version>
           </dependency>
 
           <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.0.1</version>
+            <version>5.0.2</version>
           </dependency>
         </dependencies>
       </plugin>

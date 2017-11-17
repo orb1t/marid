@@ -21,7 +21,6 @@
 
 package org.marid.expression.generic;
 
-import org.marid.runtime.context.MaridRuntimeUtils;
 import org.marid.types.TypeContext;
 
 import javax.annotation.Nonnull;
@@ -29,15 +28,14 @@ import javax.annotation.Nullable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 
-import static org.marid.types.MaridWildcardType.ALL;
-
 public interface NullExpression extends Expression {
 
   @Nonnull
   String getType();
 
   @Nonnull
-  default Class<?> getType(@Nonnull ClassLoader classLoader, boolean init) {
+  @Override
+  default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
     final String type = getType();
     final String elementType;
     final int dimensions;
@@ -49,22 +47,14 @@ public interface NullExpression extends Expression {
       elementType = type;
       dimensions = 0;
     }
-    final Class<?> et;
-    try {
-      et = MaridRuntimeUtils.loadClass(elementType, classLoader, init);
-    } catch (ClassNotFoundException x) {
-      throw new IllegalStateException(x);
+    final Class<?> et = context.getClass(elementType);
+    switch (dimensions) {
+      case 0:
+        return et;
+      case 1:
+        return Array.newInstance(et, 0).getClass();
+      default:
+        return Array.newInstance(et, new int[dimensions]).getClass();
     }
-    if (dimensions > 0) {
-      return Array.newInstance(et, new int[dimensions]).getClass();
-    } else {
-      return et;
-    }
-  }
-
-  @Nonnull
-  @Override
-  default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
-    return ALL;
   }
 }

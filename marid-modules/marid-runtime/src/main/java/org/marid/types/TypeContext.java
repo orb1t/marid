@@ -251,7 +251,7 @@ public class TypeContext {
   }
 
   @Nonnull
-  public Type resolve(@Nonnull Type[] formals, @Nonnull Type[] actuals, @Nonnull Expression expression, @Nonnull Type type) {
+  public Type resolve(@Nonnull Type[] formals, @Nonnull Type[] actuals, @Nonnull Expression expr, @Nonnull Type type) {
     if (type instanceof Class<?>) {
       return type;
     } else {
@@ -259,7 +259,7 @@ public class TypeContext {
         for (int i = 0; i < formals.length; i++) {
           e.accept(formals[i], actuals[i]);
         }
-        for (final Expression i : expression.getInitializers()) {
+        for (final Expression i : expr.getInitializers()) {
           i.resolve(type, this, e);
         }
       }, type);
