@@ -21,7 +21,7 @@
 
 package org.marid.expression.generic;
 
-import org.marid.types.TypeContext;
+import org.marid.types.BeanTypeContext;
 import org.marid.types.TypeUtil;
 
 import javax.annotation.Nonnull;
@@ -42,7 +42,7 @@ public interface GetExpression extends Expression {
 
   @Nonnull
   @Override
-  default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
+  default Type getType(@Nullable Type owner, @Nonnull BeanTypeContext context) {
     final Type targetType = getTarget().getType(owner, context);
     if (getTarget() instanceof ClassExpression) {
       return classType(targetType).stream().flatMap(t -> accessibleFields(TypeUtil.getRaw(t)))

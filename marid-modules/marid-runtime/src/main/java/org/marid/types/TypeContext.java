@@ -1,6 +1,6 @@
 /*-
  * #%L
- * marid-ide
+ * marid-runtime
  * %%
  * Copyright (C) 2012 - 2017 MARID software development group
  * %%
@@ -22,8 +22,6 @@
 package org.marid.types;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
-import org.marid.beans.MaridBean;
-import org.marid.expression.generic.Expression;
 import org.marid.runtime.context.MaridRuntimeUtils;
 
 import javax.annotation.Nonnull;
@@ -47,30 +45,15 @@ import static org.marid.types.TypeUtil.*;
 
 public class TypeContext {
 
-  private final MaridBean bean;
-  private final ClassLoader classLoader;
-  private final List<Throwable> errors = new ArrayList<>();
+  protected final ClassLoader classLoader;
+  protected final List<Throwable> errors = new ArrayList<>();
 
-  public TypeContext(MaridBean bean, ClassLoader classLoader) {
-    this.bean = bean;
+  public TypeContext(ClassLoader classLoader) {
     this.classLoader = classLoader;
-  }
-
-  public MaridBean getBean() {
-    return bean;
   }
 
   public List<Throwable> getErrors() {
     return errors;
-  }
-
-  @Nonnull
-  public Type getBeanType(@Nonnull String name) {
-    return bean.matchingCandidates()
-        .filter(b -> name.equals(b.getName()))
-        .findFirst()
-        .map(b -> b.getFactory().getType(null, new TypeContext(b, classLoader)))
-        .orElse(ALL);
   }
 
   @Nonnull
@@ -247,22 +230,6 @@ public class TypeContext {
       final TypeEvaluator evaluator = new TypeEvaluator();
       callback.accept(evaluator);
       return evaluator.resolve(type);
-    }
-  }
-
-  @Nonnull
-  public Type resolve(@Nonnull Type[] formals, @Nonnull Type[] actuals, @Nonnull Expression expr, @Nonnull Type type) {
-    if (type instanceof Class<?>) {
-      return type;
-    } else {
-      return evaluate(e -> {
-        for (int i = 0; i < formals.length; i++) {
-          e.accept(formals[i], actuals[i]);
-        }
-        for (final Expression i : expr.getInitializers()) {
-          i.resolve(type, this, e);
-        }
-      }, type);
     }
   }
 

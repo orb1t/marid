@@ -22,7 +22,7 @@
 package org.marid.expression.generic;
 
 import org.marid.misc.Calls;
-import org.marid.types.TypeContext;
+import org.marid.types.BeanTypeContext;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -48,7 +48,7 @@ public interface ConstExpression extends ValueExpression {
 
   @Nonnull
   @Override
-  default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
+  default Type getType(@Nullable Type owner, @Nonnull BeanTypeContext context) {
     return getType().type;
   }
 

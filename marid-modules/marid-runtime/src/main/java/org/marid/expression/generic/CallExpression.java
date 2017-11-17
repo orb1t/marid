@@ -21,7 +21,7 @@
 
 package org.marid.expression.generic;
 
-import org.marid.types.TypeContext;
+import org.marid.types.BeanTypeContext;
 import org.marid.types.TypeUtil;
 
 import javax.annotation.Nonnull;
@@ -53,7 +53,7 @@ public interface CallExpression extends Expression {
 
   @Nonnull
   @Override
-  default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
+  default Type getType(@Nullable Type owner, @Nonnull BeanTypeContext context) {
     final Type targetType = getTarget().getType(owner, context);
     if (getTarget() instanceof ClassExpression) { // static call
       final Class<?> targetRaw = classType(targetType).map(t -> (Class) getRaw(t)).orElse(void.class);
@@ -93,7 +93,7 @@ public interface CallExpression extends Expression {
   }
 
   @Override
-  default void resolve(@Nonnull Type type, @Nonnull TypeContext context, @Nonnull BiConsumer<Type, Type> evaluator) {
+  default void resolve(@Nonnull Type type, @Nonnull BeanTypeContext context, @Nonnull BiConsumer<Type, Type> evaluator) {
     if (getTarget() instanceof ThisExpression) {
       final Type[] ats = getArgs().stream().map(a -> a.getType(type, context)).toArray(Type[]::new);
       for (final Method method : TypeUtil.getRaw(type).getMethods()) {
@@ -107,7 +107,7 @@ public interface CallExpression extends Expression {
     }
   }
 
-  default boolean isArgAssignableFrom(@Nonnull Type type, int arg, @Nullable Type owner, @Nonnull TypeContext context) {
+  default boolean isArgAssignableFrom(@Nonnull Type type, int arg, @Nullable Type owner, @Nonnull BeanTypeContext context) {
     final Type targetType = getTarget().getType(owner, context);
     final Stream<? extends Executable> executables;
     if (getTarget() instanceof ClassExpression) {
@@ -130,7 +130,7 @@ public interface CallExpression extends Expression {
         .isPresent();
   }
 
-  private boolean matches(@Nonnull Executable e, @Nullable Type owner, @Nonnull TypeContext context) {
+  private boolean matches(@Nonnull Executable e, @Nullable Type owner, @Nonnull BeanTypeContext context) {
     if (e.getParameterCount() == getArgs().size()) {
       final Type[] pt = e.getGenericParameterTypes();
       for (int i = 0; i < pt.length; i++) {
