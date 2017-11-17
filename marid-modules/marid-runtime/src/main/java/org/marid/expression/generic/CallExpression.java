@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 
 import static java.lang.reflect.Modifier.isStatic;
 import static java.util.stream.Stream.of;
-import static org.apache.commons.lang3.reflect.TypeUtils.WILDCARD_ALL;
+import static org.marid.types.MaridWildcardType.ALL;
 import static org.marid.types.TypeUtil.classType;
 import static org.marid.types.TypeUtil.getRaw;
 
@@ -67,7 +67,7 @@ public interface CallExpression extends Expression {
             return context.resolve(owner, type);
           }
         }
-        return WILDCARD_ALL;
+        return ALL;
       } else { // static method
         for (final Method m : targetRaw.getMethods()) {
           if (m.getName().equals(getMethod()) && isStatic(m.getModifiers()) && matches(m, owner, context)) {
@@ -77,7 +77,7 @@ public interface CallExpression extends Expression {
             return context.resolve(owner, type);
           }
         }
-        return WILDCARD_ALL;
+        return ALL;
       }
     } else { // virtual method
       for (final Method m : TypeUtil.getRaw(targetType).getMethods()) {
@@ -88,7 +88,7 @@ public interface CallExpression extends Expression {
           return context.resolve(owner, type);
         }
       }
-      return WILDCARD_ALL;
+      return ALL;
     }
   }
 

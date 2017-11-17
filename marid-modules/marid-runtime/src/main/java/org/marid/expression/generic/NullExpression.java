@@ -21,7 +21,6 @@
 
 package org.marid.expression.generic;
 
-import org.apache.commons.lang3.reflect.TypeUtils;
 import org.marid.runtime.context.MaridRuntimeUtils;
 import org.marid.types.TypeContext;
 
@@ -29,6 +28,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
+
+import static org.marid.types.MaridWildcardType.ALL;
 
 public interface NullExpression extends Expression {
 
@@ -64,6 +65,6 @@ public interface NullExpression extends Expression {
   @Nonnull
   @Override
   default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
-    return TypeUtils.WILDCARD_ALL;
+    return ALL;
   }
 }

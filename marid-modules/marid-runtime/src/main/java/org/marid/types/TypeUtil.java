@@ -21,15 +21,14 @@
 
 package org.marid.types;
 
-import org.apache.commons.lang3.reflect.TypeUtils;
 import org.marid.runtime.context.MaridRuntimeUtils;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.*;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.LinkedHashSet;
 import java.util.Optional;
-import java.util.function.Function;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -37,6 +36,21 @@ import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
 public interface TypeUtil {
+
+  static boolean isArrayType(@Nonnull Type type) {
+    return type instanceof GenericArrayType || type instanceof Class<?> && ((Class<?>) type).isArray();
+  }
+
+  @Nullable
+  static Type getArrayComponentType(@Nonnull Type type) {
+    if (type instanceof GenericArrayType) {
+      return ((GenericArrayType) type).getGenericComponentType();
+    } else if (type instanceof Class<?>) {
+      return ((Class<?>) type).getComponentType();
+    } else {
+      return null;
+    }
+  }
 
   @Nonnull
   static Optional<Type> classType(@Nonnull Type type) {
@@ -49,17 +63,10 @@ public interface TypeUtil {
     }
   }
 
-  @Nonnull
-  static Optional<Class<?>> getClass(@Nonnull ClassLoader classLoader, @Nonnull String name) {
-    try {
-      return Optional.of(MaridRuntimeUtils.loadClass(name, classLoader, false));
-    } catch (ClassNotFoundException x) {
-      return Optional.empty();
-    }
-  }
-
   static boolean isGround(@Nonnull Type type) {
-    if (type instanceof TypeVariable<?>) {
+    if (type instanceof Class<?>) {
+      return true;
+    } else if (type instanceof TypeVariable<?>) {
       return false;
     } else if (type instanceof GenericArrayType) {
       return isGround(((GenericArrayType) type).getGenericComponentType());
@@ -70,24 +77,42 @@ public interface TypeUtil {
     } else if (type instanceof ParameterizedType) {
       return Stream.of(((ParameterizedType) type).getActualTypeArguments()).allMatch(TypeUtil::isGround);
     } else {
-      return true;
+      throw new IllegalArgumentException("Unknown type: " + type);
     }
   }
 
   @Nonnull
-  static Stream<TypeVariable<?>> vars(@Nonnull Type type) {
+  static Set<TypeVariable<?>> vars(@Nonnull Type type) {
+    final LinkedHashSet<TypeVariable<?>> vars = new LinkedHashSet<>();
+    vars(type, vars);
+    return vars;
+  }
+
+  private static void vars(@Nonnull Type type, @Nonnull LinkedHashSet<TypeVariable<?>> vars) {
     if (type instanceof TypeVariable<?>) {
-      return Stream.of((TypeVariable<?>) type);
+      final TypeVariable<?> v = (TypeVariable<?>) type;
+      if (!vars.contains(v)) {
+        vars.add(v);
+        for (final Type bound : v.getBounds()) {
+          vars(bound, vars);
+        }
+      }
     } else if (type instanceof GenericArrayType) {
-      return vars(((GenericArrayType) type).getGenericComponentType());
+      final GenericArrayType a = (GenericArrayType) type;
+      vars(a.getGenericComponentType(), vars);
     } else if (type instanceof WildcardType) {
-      final WildcardType wt = (WildcardType) type;
-      final Function<Type[], Stream<TypeVariable<?>>> vars = ts -> Stream.of(ts).flatMap(TypeUtil::vars);
-      return Stream.concat(vars.apply(wt.getUpperBounds()), vars.apply(wt.getLowerBounds()));
+      final WildcardType w = (WildcardType) type;
+      for (final Type upper : w.getUpperBounds()) {
+        vars(upper, vars);
+      }
+      for (final Type lower : w.getLowerBounds()) {
+        vars(lower, vars);
+      }
     } else if (type instanceof ParameterizedType) {
-      return Stream.of(((ParameterizedType) type).getActualTypeArguments()).flatMap(TypeUtil::vars);
-    } else {
-      return Stream.empty();
+      final ParameterizedType p = (ParameterizedType) type;
+      for (final Type arg : p.getActualTypeArguments()) {
+        vars(arg, vars);
+      }
     }
   }
 
@@ -112,40 +137,6 @@ public interface TypeUtil {
   static Type boxed(@Nonnull Type type) {
     if (type instanceof Class<?> && ((Class<?>) type).isPrimitive()) {
       return MaridRuntimeUtils.wrapper((Class<?>) type);
-    } else {
-      return type;
-    }
-  }
-
-  @Nonnull
-  static Type ground(@Nonnull Type type, @Nonnull Map<TypeVariable<?>, Type> map) {
-    return ground(type, map, new HashSet<>());
-  }
-
-  @Nonnull
-  private static Type ground(@Nonnull Type type, @Nonnull Map<TypeVariable<?>, Type> map, @Nonnull HashSet<TypeVariable<?>> passed) {
-    if (isGround(type)) {
-      return type;
-    } else if (type instanceof GenericArrayType) {
-      final GenericArrayType t = (GenericArrayType) type;
-      return TypeUtils.genericArrayType(ground(t.getGenericComponentType(), map));
-    } else if (type instanceof ParameterizedType) {
-      final ParameterizedType t = (ParameterizedType) type;
-      final Type[] types = Stream.of(t.getActualTypeArguments()).map(e -> ground(e, map)).toArray(Type[]::new);
-      return TypeUtils.parameterizeWithOwner(t.getOwnerType(), (Class<?>) t.getRawType(), types);
-    } else if (type instanceof WildcardType) {
-      return ground(((WildcardType) type).getUpperBounds()[0], map);
-    } else if (type instanceof TypeVariable<?>) {
-      final TypeVariable<?> v = (TypeVariable<?>) type;
-      if (passed.add(v)) {
-        return ground(map.getOrDefault(v, v), map, passed);
-      } else {
-        return Stream.of(v.getBounds())
-            .map(e -> ground(e, map, passed))
-            .filter(e -> !(e instanceof TypeVariable))
-            .findFirst()
-            .orElse(Object.class);
-      }
     } else {
       return type;
     }

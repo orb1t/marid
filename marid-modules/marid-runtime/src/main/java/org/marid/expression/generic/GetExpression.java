@@ -28,8 +28,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
 
-import static org.apache.commons.lang3.reflect.TypeUtils.WILDCARD_ALL;
 import static org.marid.runtime.context.MaridRuntimeUtils.accessibleFields;
+import static org.marid.types.MaridWildcardType.ALL;
 import static org.marid.types.TypeUtil.classType;
 
 public interface GetExpression extends Expression {
@@ -49,14 +49,14 @@ public interface GetExpression extends Expression {
           .filter(f -> f.getName().equals(getField()))
           .map(f -> context.resolve(owner, f.getGenericType()))
           .findFirst()
-          .orElse(WILDCARD_ALL);
+          .orElse(ALL);
     } else {
       return accessibleFields(TypeUtil.getRaw(targetType))
           .filter(f -> f.getName().equals(getField()))
           .map(f -> context.resolve(targetType, f.getGenericType()))
           .map(t -> context.resolve(owner, t))
           .findFirst()
-          .orElse(WILDCARD_ALL);
+          .orElse(ALL);
     }
   }
 }

@@ -19,29 +19,37 @@
  * #L%
  */
 
-package org.marid.expression.generic;
+package org.marid.types;
 
-import org.marid.types.MaridArrayType;
-import org.marid.types.TypeContext;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Type;
-import java.util.List;
 
-import static java.lang.reflect.Array.newInstance;
-import static java.util.stream.Collectors.toList;
+public class MaridArrayType implements GenericArrayType {
 
-public interface ArrayExpression extends Expression {
+  private final Type componentType;
 
-  @Nonnull
-  List<? extends Expression> getElements();
+  public MaridArrayType(Type componentType) {
+    this.componentType = componentType;
+  }
 
-  @Nonnull
   @Override
-  default Type getType(@Nullable Type owner, @Nonnull TypeContext context) {
-    final List<Type> set = getElements().stream().map(e -> e.getType(owner, context)).distinct().collect(toList());
-    final Type et = context.commonAncestor(Object.class, set);
-    return et instanceof Class<?> ? newInstance((Class<?>) et, 0).getClass() : new MaridArrayType(et);
+  public Type getGenericComponentType() {
+    return componentType;
+  }
+
+  @Override
+  public int hashCode() {
+    return componentType.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return obj == this
+        || obj instanceof GenericArrayType && ((GenericArrayType) obj).getGenericComponentType().equals(componentType);
+  }
+
+  @Override
+  public String toString() {
+    return componentType.getTypeName() + "[]";
   }
 }
