@@ -37,6 +37,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Spliterator.NONNULL;
 import static java.util.Spliterators.spliteratorUnknownSize;
 import static java.util.stream.Stream.concat;
 import static org.marid.collections.MaridIterators.lineIterator;
@@ -150,7 +151,7 @@ public interface Urls {
         .flatMap(url -> {
           try {
             final Scanner scanner = new Scanner(new InputStreamReader(url.openStream(), UTF_8));
-            final Spliterator<String> spliterator = spliteratorUnknownSize(lineIterator(scanner), 0);
+            final Spliterator<String> spliterator = spliteratorUnknownSize(lineIterator(scanner), NONNULL);
             return StreamSupport.stream(spliterator, false).onClose(scanner::close);
           } catch (IOException x) {
             throw new UncheckedIOException(x);
