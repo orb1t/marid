@@ -21,8 +21,8 @@
 
 package org.marid.expression.generic;
 
-import org.marid.types.MaridArrayType;
 import org.marid.types.BeanTypeContext;
+import org.marid.types.MaridArrayType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -30,7 +30,6 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 import static java.lang.reflect.Array.newInstance;
-import static java.util.stream.Collectors.toList;
 
 public interface ArrayExpression extends Expression {
 
@@ -40,7 +39,7 @@ public interface ArrayExpression extends Expression {
   @Nonnull
   @Override
   default Type getType(@Nullable Type owner, @Nonnull BeanTypeContext context) {
-    final List<Type> set = getElements().stream().map(e -> e.getType(owner, context)).distinct().collect(toList());
+    final Type[] set = getElements().stream().map(e -> e.getType(owner, context)).distinct().toArray(Type[]::new);
     final Type et = context.commonAncestor(Object.class, set);
     return et instanceof Class<?> ? newInstance((Class<?>) et, 0).getClass() : new MaridArrayType(et);
   }

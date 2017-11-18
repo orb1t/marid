@@ -25,7 +25,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Executable;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Comparator;
 import java.util.Scanner;
@@ -35,11 +34,9 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static java.lang.reflect.Modifier.isPublic;
 import static java.util.logging.Level.WARNING;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Stream.concat;
-import static java.util.stream.Stream.of;
+import static java.util.stream.Stream.*;
 import static org.marid.logging.Log.log;
 
 /**
@@ -101,29 +98,13 @@ public interface MaridRuntimeUtils {
   }
 
   @Nonnull
-  static Stream<Class<?>> superClasses(@Nonnull Class<?> type) {
-    return type.getSuperclass() == null ? of(type) : concat(of(type), superClasses(type.getSuperclass()));
-  }
-
-  static boolean isAccessible(@Nonnull Class<?> type) {
-    final boolean isPublic = isPublic(type.getModifiers());
-    return type.getEnclosingClass() == null ? isPublic : isPublic && isAccessible(type.getEnclosingClass());
+  static Stream<Class<?>> types(@Nonnull Class<?> type) {
+    return concat(of(type), superclasses(type));
   }
 
   @Nonnull
-  static Stream<Method> accessibleMethods(@Nonnull Class<?> type) {
-    return concat(superClasses(type), of(type.getInterfaces()))
-        .flatMap(c -> of(c.getMethods()))
-        .filter(m -> isAccessible(m.getDeclaringClass()))
-        .distinct();
-  }
-
-  @Nonnull
-  static Stream<Field> accessibleFields(@Nonnull Class<?> type) {
-    return concat(superClasses(type), of(type.getInterfaces()))
-        .flatMap(c -> of(c.getFields()))
-        .filter(f -> isAccessible(f.getDeclaringClass()))
-        .distinct();
+  static Stream<Class<?>> superclasses(@Nonnull Class<?> type) {
+    return concat(ofNullable(type.getSuperclass()), of(type.getInterfaces())).flatMap(c -> concat(of(c), types(c)));
   }
 
   static boolean compatible(@Nonnull Class<?> to, @Nonnull Class<?> from) {

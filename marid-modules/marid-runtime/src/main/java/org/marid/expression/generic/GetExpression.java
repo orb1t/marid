@@ -27,8 +27,8 @@ import org.marid.types.TypeUtil;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
+import java.util.stream.Stream;
 
-import static org.marid.runtime.context.MaridRuntimeUtils.accessibleFields;
 import static org.marid.types.MaridWildcardType.ALL;
 import static org.marid.types.TypeUtil.classType;
 
@@ -45,13 +45,13 @@ public interface GetExpression extends Expression {
   default Type getType(@Nullable Type owner, @Nonnull BeanTypeContext context) {
     final Type targetType = getTarget().getType(owner, context);
     if (getTarget() instanceof ClassExpression) {
-      return classType(targetType).stream().flatMap(t -> accessibleFields(TypeUtil.getRaw(t)))
+      return classType(targetType).stream().flatMap(t -> Stream.of(TypeUtil.getRaw(t).getFields()))
           .filter(f -> f.getName().equals(getField()))
           .map(f -> context.resolve(owner, f.getGenericType()))
           .findFirst()
           .orElse(ALL);
     } else {
-      return accessibleFields(TypeUtil.getRaw(targetType))
+      return Stream.of(TypeUtil.getRaw(targetType).getFields())
           .filter(f -> f.getName().equals(getField()))
           .map(f -> context.resolve(targetType, f.getGenericType()))
           .map(t -> context.resolve(owner, t))

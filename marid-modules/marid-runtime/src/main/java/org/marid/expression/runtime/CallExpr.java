@@ -23,7 +23,6 @@ package org.marid.expression.runtime;
 
 import org.marid.expression.generic.CallExpression;
 import org.marid.runtime.context.BeanContext;
-import org.marid.runtime.context.MaridRuntimeUtils;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
@@ -83,7 +82,7 @@ public final class CallExpr extends Expr implements CallExpression {
         throw methodState(getMethod(), args, x);
       }
     } else {
-      final Method method = MaridRuntimeUtils.accessibleMethods(targetClass)
+      final Method method = Stream.of(targetClass.getMethods())
           .filter(m -> m.getName().equals(getMethod()) && matches(m, context, args))
           .findFirst()
           .orElseThrow(() -> methodState(getMethod(), args, new NoSuchElementException()));

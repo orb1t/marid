@@ -36,10 +36,9 @@ import java.util.stream.Stream;
 import static java.lang.reflect.Proxy.newProxyInstance;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toCollection;
-import static java.util.stream.Stream.concat;
+import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Stream.of;
 import static org.marid.runtime.context.MaridRuntimeUtils.compatible;
-import static org.marid.runtime.context.MaridRuntimeUtils.superClasses;
 import static org.marid.types.MaridWildcardType.ALL;
 import static org.marid.types.TypeUtil.*;
 
@@ -186,13 +185,13 @@ public class TypeContext {
       } else if (from instanceof ParameterizedType) {
         final ParameterizedType t = (ParameterizedType) from;
         final Class<?> raw = (Class<?>) t.getRawType();
-        return compatible(toClass, raw) && of(t.getActualTypeArguments()).allMatch(WildcardType.class::isInstance);
+        return compatible(toClass, raw);
       } else if (from instanceof TypeVariable<?>) {
         final TypeVariable<?> v = (TypeVariable<?>) from;
-        return of(v.getBounds()).allMatch(t -> isAssignable(to, t, passed));
+        return of(v.getBounds()).anyMatch(t -> isAssignable(to, t, passed));
       } else if (from instanceof WildcardType) {
         final WildcardType w = (WildcardType) from;
-        return of(w.getUpperBounds()).allMatch(t -> isAssignable(to, t, passed));
+        return of(w.getUpperBounds()).anyMatch(t -> isAssignable(to, t, passed));
       } else {
         return false;
       }
@@ -204,6 +203,47 @@ public class TypeContext {
     } else {
       errors.add(new IllegalArgumentException("Unknown type: " + to));
       return false;
+    }
+  }
+
+  public Map<TypeVariable<?>, Type> resolveVars(@Nonnull Type type) {
+    final LinkedHashMap<TypeVariable<?>, Type> map = new LinkedHashMap<>();
+    resolveVars(type, map);
+    return map;
+  }
+
+  private void resolveVars(Type type, Map<TypeVariable<?>, Type> map) {
+    final Class<?> raw;
+    if (type instanceof ParameterizedType) {
+      final ParameterizedType pt = (ParameterizedType) type;
+      raw = (Class<?>) pt.getRawType();
+      final TypeVariable<?>[] vars = raw.getTypeParameters();
+      final Type[] args = pt.getActualTypeArguments();
+      if (args.length == vars.length) {
+        for (int i = 0; i < vars.length; i++) {
+          if (!vars[i].equals(args[i])) {
+            if (args[i] instanceof TypeVariable<?>) {
+              final TypeVariable<?> arg = (TypeVariable<?>) args[i];
+              map.put(vars[i], map.getOrDefault(arg, args[i]));
+            } else {
+              map.put(vars[i], args[i]);
+            }
+          }
+        }
+      } else {
+        errors.add(new IllegalArgumentException("Illegal type: " + type));
+      }
+    } else if (type instanceof Class<?>) {
+      raw = (Class<?>) type;
+    } else {
+      return;
+    }
+    for (final Type gt : raw.getGenericInterfaces()) {
+      resolveVars(gt, map);
+    }
+    final Type superclass = raw.getGenericSuperclass();
+    if (superclass != null) {
+      resolveVars(raw.getGenericSuperclass(), map);
     }
   }
 
@@ -234,13 +274,12 @@ public class TypeContext {
   }
 
   @Nonnull
-  public Type commonAncestor(@Nonnull Type formal, @Nonnull Collection<Type> actuals) {
-    if (actuals.isEmpty()) {
+  public Type commonAncestor(@Nonnull Type formal, @Nonnull Type... actuals) {
+    if (actuals.length == 0) {
       return formal;
     } else {
-      final Supplier<Stream<Type>> as = () -> actuals.stream().filter(t -> !ALL.equals(t));
-      if (as.get().allMatch(TypeContext.this::isNonPrimitiveArray)) {
-        final Set<Type> aes = as.get().map(TypeUtil::getArrayComponentType).collect(toCollection(LinkedHashSet::new));
+      if (of(actuals).allMatch(TypeContext.this::isNonPrimitiveArray)) {
+        final Type[] aes = of(actuals).map(TypeUtil::getArrayComponentType).distinct().toArray(Type[]::new);
         final Type elementType = commonAncestor(Object.class, aes);
         if (elementType instanceof Class<?>) {
           return Array.newInstance((Class<?>) elementType, 0).getClass();
@@ -248,13 +287,13 @@ public class TypeContext {
           return new MaridArrayType(elementType);
         }
       } else {
-        final Type[][] tss = as.get().sorted(this::cmp).map(t -> types(t).toArray(Type[]::new)).toArray(Type[][]::new);
+        final Type[][] tss = of(actuals).sorted(this::cmp).map(t -> types(t).toArray(Type[]::new)).toArray(Type[][]::new);
         final int max = of(tss).mapToInt(a -> a.length).max().orElse(0);
         for (int level = 0; level < max; level++) {
           for (final Type[] ts : tss) {
             if (level < ts.length) {
               final Type actual = ts[level];
-              if (actuals.stream().allMatch(t -> isAssignable(t, actual))) {
+              if (of(actuals).allMatch(t -> isAssignable(t, actual))) {
                 return actual;
               }
             }
@@ -270,8 +309,7 @@ public class TypeContext {
   }
 
   private Stream<? extends Type> types(Type type) {
-    final Class<?> raw = TypeUtil.getRaw(type);
-    return concat(superClasses(raw), of(raw.getInterfaces())).map(c -> generic(c, type));
+    return MaridRuntimeUtils.types(TypeUtil.getRaw(type)).map(c -> generic(c, type));
   }
 
   private Type generic(Class<?> c, Type type) {
@@ -329,7 +367,7 @@ public class TypeContext {
     @Nonnull
     private Type resolve(@Nonnull Type type) {
       final LinkedHashMap<TypeVariable<?>, Type> mapping = new LinkedHashMap<>(typeMappings.size());
-      typeMappings.forEach((k, v) -> mapping.put(k, commonAncestor(k, v)));
+      typeMappings.forEach((k, v) -> mapping.put(k, commonAncestor(k, v.toArray(new Type[v.size()]))));
       return ground(type, mapping);
     }
 

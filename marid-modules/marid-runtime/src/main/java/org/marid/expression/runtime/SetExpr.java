@@ -31,6 +31,7 @@ import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import static org.marid.io.Xmls.attribute;
 import static org.marid.io.Xmls.element;
@@ -63,7 +64,7 @@ public final class SetExpr extends Expr implements SetExpression {
   protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
     final Object target = Objects.requireNonNull(getTarget().evaluate(self, context));
     final Class<?> targetClass = getTarget() instanceof ClassExpr ? (Class<?>) target : target.getClass();
-    final Field field = MaridRuntimeUtils.accessibleFields(targetClass)
+    final Field field = Stream.of(targetClass.getFields())
         .filter(f -> f.getName().equals(getField()))
         .findFirst()
         .orElseThrow(() -> new NoSuchElementException(getField()));
