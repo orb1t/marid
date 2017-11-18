@@ -24,44 +24,42 @@ package org.marid.jfx.icons;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.util.Pair;
 import org.jetbrains.annotations.PropertyKey;
 
 import javax.annotation.Nonnull;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UncheckedIOException;
-import java.net.URL;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Objects.requireNonNull;
+import static org.marid.misc.Urls.lines;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class FontIcons {
 
-  private static final Map<String, String> SYMBOLS = new HashMap<>();
+  private static final Map<String, String> SYMBOLS;
+  private static final Map<String, String> FAMILIES;
 
   static {
-    final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-    final URL url = requireNonNull(classLoader.getResource("fonts/meta.properties"));
-    try (final BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream(), UTF_8))) {
-      while (true) {
-        final String line = r.readLine();
-        if (line == null || line.isEmpty()) {
-          break;
-        }
-        final int index = line.indexOf('=');
-        final String name = line.substring(0, index);
-        final String value = String.valueOf((char) Integer.parseInt(line.substring(index + 3), 16));
-        SYMBOLS.put(name, value);
-      }
-    } catch (IOException x) {
-      throw new UncheckedIOException(x);
-    }
+    SYMBOLS = lines(Thread.currentThread().getContextClassLoader(), "fonts/meta.properties")
+        .filter(l -> !l.isEmpty())
+        .map(line -> {
+          final int index = line.indexOf('=');
+          final String name = line.substring(0, index);
+          final String value = Character.toString((char) Integer.parseInt(line.substring(index + 1), 16));
+          return new Pair<>(name, value);
+        })
+        .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+    FAMILIES = lines(Thread.currentThread().getContextClassLoader(), "fonts/families.properties")
+        .filter(l -> !l.isEmpty())
+        .map(line -> {
+          final int index = line.indexOf('=');
+          final String name = line.substring(0, index);
+          final String value = line.substring(index + 1);
+          return new Pair<>(name, value);
+        })
+        .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
   }
 
   public static Text glyphIcon(@Nonnull @PropertyKey(resourceBundle = "fonts.meta") String type,
@@ -85,14 +83,7 @@ public class FontIcons {
   }
 
   private static String family(String type) {
-    switch (type.charAt(0)) {
-      case 'O': return "Octicons";
-      case 'D': return "MaterialDesignIcons";
-      case 'M': return "Material Icons";
-      case 'F': return "FontAwesome";
-      case 'W': return "Weather Icons";
-      default: throw new IllegalArgumentException("Unsupported font symbol: " + type);
-    }
+    return FAMILIES.getOrDefault(type.substring(0, 1), "Monospaced");
   }
 
   public static Text glyphIcon(@PropertyKey(resourceBundle = "fonts.meta") String type) {

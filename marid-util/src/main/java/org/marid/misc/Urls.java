@@ -21,10 +21,9 @@
 
 package org.marid.misc;
 
-import org.marid.io.IOFunction;
-
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.io.UnsupportedEncodingException;
 import java.net.*;
@@ -33,12 +32,14 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Spliterators.spliteratorUnknownSize;
 import static java.util.stream.Stream.concat;
+import static org.marid.collections.MaridIterators.lineIterator;
 import static org.marid.misc.StringUtils.pathEndsWith;
 
 /**
@@ -144,27 +145,16 @@ public interface Urls {
   }
 
   @Nonnull
-  static <E> Stream<E> urls(@Nonnull ClassLoader loader,
-                            @Nonnull String resource,
-                            @Nonnull Function<Scanner, E> scannerExtractor) {
-    return urls(loader, resource)
-        .map((IOFunction<URL, E>) url -> {
-          try (final Scanner scanner = new Scanner(url.openStream(), "UTF-8")) {
-            return scannerExtractor.apply(scanner);
+  static Stream<String> lines(@Nonnull ClassLoader classLoader, @Nonnull String resource) {
+    return urls(classLoader, resource)
+        .flatMap(url -> {
+          try {
+            final Scanner scanner = new Scanner(new InputStreamReader(url.openStream(), UTF_8));
+            final Spliterator<String> spliterator = spliteratorUnknownSize(lineIterator(scanner), 0);
+            return StreamSupport.stream(spliterator, false).onClose(scanner::close);
+          } catch (IOException x) {
+            throw new UncheckedIOException(x);
           }
         });
-  }
-
-  @Nonnull
-  static <E> Stream<E> lines(@Nonnull ClassLoader classLoader,
-                             @Nonnull String resource,
-                             @Nonnull Function<String, E> lineExtractor) {
-    return urls(classLoader, resource, scanner -> {
-      final Stream.Builder<String> builder = Stream.builder();
-      while (scanner.hasNextLine()) {
-        builder.accept(scanner.nextLine().trim());
-      }
-      return builder.build();
-    }).flatMap(Function.identity()).map(lineExtractor);
   }
 }
