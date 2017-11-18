@@ -24,13 +24,15 @@ package org.marid.jfx.icons;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-import javafx.util.Pair;
 import org.jetbrains.annotations.PropertyKey;
 
 import javax.annotation.Nonnull;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Map.Entry;
 
+import static java.lang.Thread.currentThread;
+import static java.util.Map.ofEntries;
+import static org.marid.misc.Casts.cast;
 import static org.marid.misc.Urls.lines;
 
 /**
@@ -42,48 +44,41 @@ public class FontIcons {
   private static final Map<String, String> FAMILIES;
 
   static {
-    SYMBOLS = lines(Thread.currentThread().getContextClassLoader(), "fonts/meta.properties")
+    SYMBOLS = ofEntries(cast(lines(currentThread().getContextClassLoader(), "fonts/meta.properties")
         .filter(l -> !l.isEmpty())
         .map(line -> {
           final int index = line.indexOf('=');
           final String name = line.substring(0, index);
           final String value = Character.toString((char) Integer.parseInt(line.substring(index + 1), 16));
-          return new Pair<>(name, value);
+          return Map.entry(name, value);
         })
-        .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
-    FAMILIES = lines(Thread.currentThread().getContextClassLoader(), "fonts/families.properties")
+        .toArray(Entry[]::new)));
+    FAMILIES = ofEntries(cast(lines(currentThread().getContextClassLoader(), "fonts/families.properties")
         .filter(l -> !l.isEmpty())
         .map(line -> {
           final int index = line.indexOf('=');
           final String name = line.substring(0, index);
           final String value = line.substring(index + 1);
-          return new Pair<>(name, value);
+          return Map.entry(name, value);
         })
-        .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+        .toArray(Entry[]::new)));
   }
 
-  public static Text glyphIcon(@Nonnull @PropertyKey(resourceBundle = "fonts.meta") String type,
-                               double size) {
-    if (type.length() < 3) {
+  public static Text glyphIcon(@Nonnull @PropertyKey(resourceBundle = "fonts.meta") String type, double size) {
+    if (type.length() < 3 || !FAMILIES.containsKey(type.substring(0, 1))) {
       return glyphIcon("F_SMILE_ALT", size);
     } else {
       final Text label = new Text();
-      label.setFont(new Font(family(type), size));
-      label.setText(SYMBOLS.getOrDefault(type, ""));
+      label.setFont(new Font(FAMILIES.get(type.substring(0, 1)), size));
+      label.setText(SYMBOLS.getOrDefault(type, "*"));
       return label;
     }
   }
 
-  public static Text glyph(@Nonnull @PropertyKey(resourceBundle = "fonts.meta") String type,
-                           double size,
-                           @Nonnull Color color) {
+  public static Text glyph(@Nonnull @PropertyKey(resourceBundle = "fonts.meta") String type, double size, @Nonnull Color color) {
     final Text text = glyphIcon(type, size);
     text.setStroke(color);
     return text;
-  }
-
-  private static String family(String type) {
-    return FAMILIES.getOrDefault(type.substring(0, 1), "Monospaced");
   }
 
   public static Text glyphIcon(@PropertyKey(resourceBundle = "fonts.meta") String type) {
