@@ -21,8 +21,6 @@
 
 package org.marid.types;
 
-import org.marid.runtime.context.MaridRuntimeUtils;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.*;
@@ -35,7 +33,7 @@ import java.util.stream.Stream;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
-public interface TypeUtil {
+public interface Types {
 
   static boolean isArrayType(@Nonnull Type type) {
     return type instanceof GenericArrayType || type instanceof Class<?> && ((Class<?>) type).isArray();
@@ -72,10 +70,10 @@ public interface TypeUtil {
       return isGround(((GenericArrayType) type).getGenericComponentType());
     } else if (type instanceof WildcardType) {
       final WildcardType wt = (WildcardType) type;
-      final Predicate<Type[]> ground = ts -> Stream.of(ts).allMatch(TypeUtil::isGround);
+      final Predicate<Type[]> ground = ts -> Stream.of(ts).allMatch(Types::isGround);
       return ground.test(wt.getUpperBounds()) && ground.test(wt.getLowerBounds());
     } else if (type instanceof ParameterizedType) {
-      return Stream.of(((ParameterizedType) type).getActualTypeArguments()).allMatch(TypeUtil::isGround);
+      return Stream.of(((ParameterizedType) type).getActualTypeArguments()).allMatch(Types::isGround);
     } else {
       throw new IllegalArgumentException("Unknown type: " + type);
     }
@@ -136,7 +134,7 @@ public interface TypeUtil {
   @Nonnull
   static Type boxed(@Nonnull Type type) {
     if (type instanceof Class<?> && ((Class<?>) type).isPrimitive()) {
-      return MaridRuntimeUtils.wrapper((Class<?>) type);
+      return Classes.wrapper((Class<?>) type);
     } else {
       return type;
     }

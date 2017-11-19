@@ -40,7 +40,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 import static org.marid.io.Xmls.*;
-import static org.marid.runtime.context.MaridRuntimeUtils.*;
+import static org.marid.types.Classes.*;
 
 public final class CallExpr extends Expr implements CallExpression {
 

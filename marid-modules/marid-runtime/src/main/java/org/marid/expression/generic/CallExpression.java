@@ -22,7 +22,7 @@
 package org.marid.expression.generic;
 
 import org.marid.types.BeanTypeContext;
-import org.marid.types.TypeUtil;
+import org.marid.types.Types;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -37,8 +37,8 @@ import java.util.stream.Stream;
 import static java.lang.reflect.Modifier.isStatic;
 import static java.util.stream.Stream.of;
 import static org.marid.types.MaridWildcardType.ALL;
-import static org.marid.types.TypeUtil.classType;
-import static org.marid.types.TypeUtil.getRaw;
+import static org.marid.types.Types.classType;
+import static org.marid.types.Types.getRaw;
 
 public interface CallExpression extends Expression {
 
@@ -80,7 +80,7 @@ public interface CallExpression extends Expression {
         return ALL;
       }
     } else { // virtual method
-      for (final Method m : TypeUtil.getRaw(targetType).getMethods()) {
+      for (final Method m : Types.getRaw(targetType).getMethods()) {
         if (m.getName().equals(getMethod()) && !isStatic(m.getModifiers()) && matches(m, owner, context)) {
           final Type[] formals = m.getGenericParameterTypes();
           final Type[] actuals = getArgs().stream().map(a -> a.getType(owner, context)).toArray(Type[]::new);
@@ -96,7 +96,7 @@ public interface CallExpression extends Expression {
   default void resolve(@Nonnull Type type, @Nonnull BeanTypeContext context, @Nonnull BiConsumer<Type, Type> evaluator) {
     if (getTarget() instanceof ThisExpression) {
       final Type[] ats = getArgs().stream().map(a -> a.getType(type, context)).toArray(Type[]::new);
-      for (final Method method : TypeUtil.getRaw(type).getMethods()) {
+      for (final Method method : Types.getRaw(type).getMethods()) {
         if (method.getName().equals(getMethod()) && matches(method, null, context)) {
           final Type[] ts = method.getGenericParameterTypes();
           for (int i = 0; i < ts.length; i++) {
@@ -116,7 +116,7 @@ public interface CallExpression extends Expression {
           ? of(targetRaw.getMethods()).filter(m -> m.getName().equals(getMethod()) && isStatic(m.getModifiers()))
           : of(targetRaw.getConstructors());
     } else {
-      executables = of(TypeUtil.getRaw(targetType).getMethods())
+      executables = of(Types.getRaw(targetType).getMethods())
           .filter(m -> m.getName().equals(getMethod()))
           .filter(m -> !isStatic(m.getModifiers()));
     }

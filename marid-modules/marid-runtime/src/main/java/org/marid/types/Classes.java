@@ -19,7 +19,7 @@
  * #L%
  */
 
-package org.marid.runtime.context;
+package org.marid.types;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -27,22 +27,18 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.Comparator;
-import java.util.Scanner;
 import java.util.TreeSet;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static java.util.logging.Level.WARNING;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Stream.*;
-import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-public interface MaridRuntimeUtils {
+public interface Classes {
 
   static TreeSet<Method> methods(@Nonnull Object bean,
                                  @Nonnull Predicate<Method> filter,
@@ -60,41 +56,6 @@ public interface MaridRuntimeUtils {
       consumer.accept(c);
     }
     return methods;
-  }
-
-  static Thread daemonThread(AtomicReference<? extends AutoCloseable> contextRef) {
-    final Thread daemon = new Thread(null, () -> {
-      final Scanner scanner = new Scanner(System.in);
-      try {
-        while (scanner.hasNextLine()) {
-          final String line = scanner.nextLine().trim();
-          if (line.isEmpty()) {
-            continue;
-          }
-          System.err.println(line);
-          switch (line) {
-            case "close":
-              try {
-                final AutoCloseable context = contextRef.get();
-                if (context != null) {
-                  context.close();
-                  contextRef.set(null);
-                }
-              } catch (Exception x) {
-                x.printStackTrace();
-              }
-              break;
-            case "exit":
-              System.exit(1);
-              break;
-          }
-        }
-      } catch (Exception x) {
-        log(WARNING, "Command processing error", x);
-      }
-    }, "repl", 96L * 1024L);
-    daemon.setDaemon(true);
-    return daemon;
   }
 
   @Nonnull

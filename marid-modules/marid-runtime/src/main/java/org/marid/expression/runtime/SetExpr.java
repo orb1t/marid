@@ -23,7 +23,7 @@ package org.marid.expression.runtime;
 
 import org.marid.expression.generic.SetExpression;
 import org.marid.runtime.context.BeanContext;
-import org.marid.runtime.context.MaridRuntimeUtils;
+import org.marid.types.Classes;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
@@ -70,7 +70,7 @@ public final class SetExpr extends Expr implements SetExpression {
         .orElseThrow(() -> new NoSuchElementException(getField()));
     try {
       final Object v = getValue().evaluate(self, context);
-      field.set(target, MaridRuntimeUtils.value(field.getType(), v));
+      field.set(target, Classes.value(field.getType(), v));
       return target;
     } catch (IllegalAccessException x) {
       throw new IllegalStateException(x);

@@ -25,15 +25,17 @@ package org.marid.runtime;
 import org.marid.beans.RuntimeBean;
 import org.marid.runtime.context.BeanConfiguration;
 import org.marid.runtime.context.BeanContext;
-import org.marid.runtime.context.MaridRuntimeUtils;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
+import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.logging.Level.WARNING;
 import static org.marid.io.Xmls.read;
+import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -48,7 +50,7 @@ public class MaridLauncher {
     }
 
     final AtomicReference<BeanContext> contextRef = new AtomicReference<>();
-    MaridRuntimeUtils.daemonThread(contextRef).start();
+    daemonThread(contextRef).start();
 
     try (final Reader reader = new InputStreamReader(beansXmlUrl.openStream(), UTF_8)) {
       final BeanConfiguration configuration = new BeanConfiguration(classLoader, System.getProperties());
@@ -58,5 +60,40 @@ public class MaridLauncher {
     } catch (Throwable x) {
       x.printStackTrace();
     }
+  }
+
+  private static Thread daemonThread(AtomicReference<? extends AutoCloseable> contextRef) {
+    final Thread daemon = new Thread(null, () -> {
+      final Scanner scanner = new Scanner(System.in);
+      try {
+        while (scanner.hasNextLine()) {
+          final String line = scanner.nextLine().trim();
+          if (line.isEmpty()) {
+            continue;
+          }
+          System.err.println(line);
+          switch (line) {
+            case "close":
+              try {
+                final AutoCloseable context = contextRef.get();
+                if (context != null) {
+                  context.close();
+                  contextRef.set(null);
+                }
+              } catch (Exception x) {
+                x.printStackTrace();
+              }
+              break;
+            case "exit":
+              System.exit(1);
+              break;
+          }
+        }
+      } catch (Exception x) {
+        log(WARNING, "Command processing error", x);
+      }
+    }, "repl", 96L * 1024L);
+    daemon.setDaemon(true);
+    return daemon;
   }
 }

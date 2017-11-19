@@ -23,7 +23,6 @@ package org.marid.types;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.marid.collections.MaridSets;
-import org.marid.runtime.context.MaridRuntimeUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -36,8 +35,8 @@ import java.util.stream.Stream;
 import static java.util.Collections.emptySet;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Stream.of;
-import static org.marid.runtime.context.MaridRuntimeUtils.compatible;
-import static org.marid.types.TypeUtil.*;
+import static org.marid.types.Classes.compatible;
+import static org.marid.types.Types.*;
 
 public class TypeContext {
 
@@ -61,7 +60,7 @@ public class TypeContext {
   @Nonnull
   public Class<?> getClass(@Nonnull String name) {
     try {
-      return MaridRuntimeUtils.loadClass(name, getClassLoader(), false);
+      return Classes.loadClass(name, getClassLoader(), false);
     } catch (ClassNotFoundException x) {
       throwError(new IllegalStateException(x));
     } catch (RuntimeException x) {
@@ -155,7 +154,7 @@ public class TypeContext {
   private boolean isAssignable(@Nonnull Type from, @Nonnull Type to, @Nonnull HashSet<TypeVariable<?>> passed) {
     if (to.equals(from) || Object.class.equals(to)) {
       return true;
-    } else if (TypeUtil.isArrayType(from) && TypeUtil.isArrayType(to)) {
+    } else if (Types.isArrayType(from) && Types.isArrayType(to)) {
       final Type fromCt = requireNonNull(getArrayComponentType(from));
       final Type toCt = requireNonNull(getArrayComponentType(to));
       return isAssignable(fromCt, toCt);
@@ -244,7 +243,7 @@ public class TypeContext {
 
   @Nonnull
   public Type evaluate(@Nonnull Consumer<BiConsumer<Type, Type>> callback, @Nonnull Type type) {
-    if (TypeUtil.isGround(type)) {
+    if (Types.isGround(type)) {
       return type;
     } else {
       final TypeEvaluator evaluator = new TypeEvaluator();
@@ -259,7 +258,7 @@ public class TypeContext {
       return formal;
     } else {
       if (of(actuals).allMatch(TypeContext.this::isNonPrimitiveArray)) {
-        final Type[] aes = of(actuals).map(TypeUtil::getArrayComponentType).distinct().toArray(Type[]::new);
+        final Type[] aes = of(actuals).map(Types::getArrayComponentType).distinct().toArray(Type[]::new);
         final Type elementType = commonAncestor(Object.class, aes);
         if (elementType instanceof Class<?>) {
           return Array.newInstance((Class<?>) elementType, 0).getClass();
@@ -289,7 +288,7 @@ public class TypeContext {
   }
 
   private Stream<? extends Type> types(Type type) {
-    return MaridRuntimeUtils.types(TypeUtil.getRaw(type)).map(c -> generic(c, type));
+    return Classes.types(Types.getRaw(type)).map(c -> generic(c, type));
   }
 
   private Type generic(Class<?> c, Type type) {
@@ -327,11 +326,11 @@ public class TypeContext {
         }
         put(typeVariable, actual);
       } else if (passed.add(formal)) {
-        if (TypeUtil.isArrayType(formal) && TypeUtil.isArrayType(actual)) {
+        if (Types.isArrayType(formal) && Types.isArrayType(actual)) {
           accept(getArrayComponentType(formal), getArrayComponentType(actual));
         } else if (formal instanceof ParameterizedType) {
-          final Class<?> formalRaw = TypeUtil.getRaw(formal);
-          final Class<?> actualRaw = TypeUtil.getRaw(actual);
+          final Class<?> formalRaw = Types.getRaw(formal);
+          final Class<?> actualRaw = Types.getRaw(actual);
           if (formalRaw.isAssignableFrom(actualRaw)) {
             TypeUtils.getTypeArguments(actual, formalRaw).forEach(this::put);
           }

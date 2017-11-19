@@ -32,7 +32,7 @@ import java.util.TreeSet;
 import java.util.stream.Stream;
 
 import static java.lang.System.getProperties;
-import static org.marid.runtime.context.MaridRuntimeUtils.methods;
+import static org.marid.types.Classes.methods;
 
 /**
  * @author Dmitry Ovchinnikov

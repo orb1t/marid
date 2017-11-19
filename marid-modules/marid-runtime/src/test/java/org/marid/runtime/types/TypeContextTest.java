@@ -41,7 +41,7 @@ import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Stream.of;
 import static org.apache.commons.lang3.reflect.TypeUtils.parameterize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.marid.runtime.context.MaridRuntimeUtils.types;
+import static org.marid.types.Classes.types;
 
 @Tag("normal")
 class TypeContextTest {
