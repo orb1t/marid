@@ -22,6 +22,7 @@
 package org.marid.types;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
+import org.marid.collections.MaridSets;
 import org.marid.runtime.context.MaridRuntimeUtils;
 
 import javax.annotation.Nonnull;
@@ -30,16 +31,12 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static java.lang.reflect.Proxy.newProxyInstance;
+import static java.util.Collections.emptySet;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toCollection;
-import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Stream.of;
 import static org.marid.runtime.context.MaridRuntimeUtils.compatible;
-import static org.marid.types.MaridWildcardType.ALL;
 import static org.marid.types.TypeUtil.*;
 
 public class TypeContext {
@@ -60,11 +57,7 @@ public class TypeContext {
     if (owner == null) {
       return type;
     } else {
-      if (owner instanceof ParameterizedType) {
-        return type; // replace vars here
-      } else {
-        return type;
-      }
+      return resolve(type, resolveVars(owner));
     }
   }
 
@@ -79,61 +72,42 @@ public class TypeContext {
   }
 
   @Nonnull
-  public TypeVariable<?> var(@Nonnull TypeVariable<?> v, @Nonnull Type... newBounds) {
-    return ((TypeVariable<?>) newProxyInstance(classLoader, new Class[]{TypeVariable.class}, (proxy, method, args) -> {
-      switch (method.getName()) {
-        case "getBounds": return newBounds;
-        case "toString": return v.getName();
-        case "equals": return v.equals(args[0]);
-        case "hashCode": return v.hashCode();
-        default: return method.invoke(v, args);
-      }
-    }));
-  }
-
-  @Nonnull
-  private HashSet<TypeVariable<?>> passed(@Nonnull Map<TypeVariable<?>, Type> map) {
-    final HashSet<TypeVariable<?>> passed = new HashSet<>();
-    map.forEach((k, v) -> {
-      if (v instanceof TypeVariable<?>) { // cyclic reference detection
-        for (Type t = v; t instanceof TypeVariable<?>; t = map.get(v)) {
-          if (t.equals(k)) {
-            passed.add(k);
-            break;
-          }
-        }
-      }
-    });
-    return passed;
-  }
-
-  @Nonnull
   public Type ground(@Nonnull Type type, @Nonnull Map<TypeVariable<?>, Type> map) {
-    return ground(type, map, passed(map));
+    return ground(type, map, emptySet());
   }
 
-  private Type ground(Type type, Map<TypeVariable<?>, Type> map, HashSet<TypeVariable<?>> passed) {
+  private Type ground(Type type, Map<TypeVariable<?>, Type> map, Set<TypeVariable<?>> passed) {
     if (type instanceof Class<?> || isGround(type)) {
       return type;
     } else if (type instanceof GenericArrayType) {
       final GenericArrayType t = (GenericArrayType) type;
-      return new MaridArrayType(ground(t.getGenericComponentType(), map));
+      final Type et = ground(t.getGenericComponentType(), map, passed);
+      return et instanceof Class<?> ? Array.newInstance((Class<?>) et, 0).getClass() : new MaridArrayType(et);
     } else if (type instanceof ParameterizedType) {
       final ParameterizedType t = (ParameterizedType) type;
-      final Type[] types = Stream.of(t.getActualTypeArguments()).map(e -> ground(e, map)).toArray(Type[]::new);
+      final Type[] types = Stream.of(t.getActualTypeArguments()).map(e -> ground(e, map, passed)).toArray(Type[]::new);
       return new MaridParameterizedType(t.getOwnerType(), t.getRawType(), types);
     } else if (type instanceof WildcardType) {
-      return ground(((WildcardType) type).getUpperBounds()[0], map);
+      final WildcardType t = (WildcardType) type;
+      final Type[] upper = of(t.getUpperBounds()).map(e -> ground(e, map, passed)).toArray(Type[]::new);
+      final Type[] lower = of(t.getLowerBounds()).map(e -> ground(e, map, passed)).toArray(Type[]::new);
+      return new MaridWildcardType(upper, lower);
     } else if (type instanceof TypeVariable<?>) {
       final TypeVariable<?> v = (TypeVariable<?>) type;
-      if (passed.add(v)) {
-        return ground(map.getOrDefault(v, v), map, passed);
+      final Set<TypeVariable<?>> p = MaridSets.add(passed, v, HashSet::new);
+      final Type t = map.get(v);
+      if (t == null || t.equals(v) || p.size() == passed.size()) { // not found or circular reference
+        final Type[] bounds = Stream.of(v.getBounds())
+            .filter(e -> !(e instanceof TypeVariable<?>) || !p.contains(e))
+            .map(e -> ground(e, map, p))
+            .toArray(Type[]::new);
+        switch (bounds.length) {
+          case 0: return Object.class;
+          case 1: return bounds[0];
+          default: return new MaridWildcardType(bounds, new Type[0]);
+        }
       } else {
-        return Stream.of(v.getBounds())
-            .map(e -> ground(e, map, passed))
-            .filter(e -> !(e instanceof TypeVariable))
-            .findFirst()
-            .orElse(Object.class);
+        return ground(t, map, p);
       }
     } else {
       return type;
@@ -142,28 +116,36 @@ public class TypeContext {
 
   @Nonnull
   public Type resolve(@Nonnull Type type, @Nonnull Map<TypeVariable<?>, Type> map) {
+    return resolve(type, map, emptySet());
+  }
+
+  private Type resolve(Type type, Map<TypeVariable<?>, Type> map, Set<TypeVariable<?>> passed) {
     if (type instanceof Class<?> || vars(type).stream().noneMatch(map::containsKey)) {
       return type;
     } else if (type instanceof ParameterizedType) {
       final ParameterizedType t = (ParameterizedType) type;
-      final Type[] args = of(t.getActualTypeArguments()).map(e -> resolve(e, map)).toArray(Type[]::new);
+      final Type[] args = of(t.getActualTypeArguments()).map(e -> resolve(e, map, passed)).toArray(Type[]::new);
       return new MaridParameterizedType(t.getOwnerType(), t.getRawType(), args);
     } else if (type instanceof WildcardType) {
       final WildcardType t = (WildcardType) type;
-      final Type[] upper = of(t.getUpperBounds()).map(e -> resolve(e, map)).toArray(Type[]::new);
-      final Type[] lower = of(t.getLowerBounds()).map(e -> resolve(e, map)).toArray(Type[]::new);
+      final Type[] upper = of(t.getUpperBounds()).map(e -> resolve(e, map, passed)).toArray(Type[]::new);
+      final Type[] lower = of(t.getLowerBounds()).map(e -> resolve(e, map, passed)).toArray(Type[]::new);
       return new MaridWildcardType(upper, lower);
     } else if (type instanceof GenericArrayType) {
       final GenericArrayType t = (GenericArrayType) type;
-      final Type et = resolve(t.getGenericComponentType(), map);
+      final Type et = resolve(t.getGenericComponentType(), map, passed);
       return et instanceof Class<?> ? Array.newInstance((Class<?>) et, 0).getClass() : new MaridArrayType(et);
     } else if (type instanceof TypeVariable<?>) {
       final TypeVariable<?> v = (TypeVariable<?>) type;
-      final Type[] bounds = of(v.getBounds()).map(e -> resolve(e, map)).toArray(Type[]::new);
-      return var(v, bounds);
+      for (Type t = map.getOrDefault(v, v); t instanceof TypeVariable<?>; t = map.getOrDefault(t, t)) {
+        if (t.equals(v)) { // circular reference detected
+          return v;
+        }
+      }
+      final Set<TypeVariable<?>> p = MaridSets.add(passed, v, HashSet::new);
+      return p.size() == passed.size() ? v : resolve(map.get(v), map, p);
     } else {
-      errors.add(new IllegalStateException("Unsupported type: " + type));
-      return type;
+      throw new IllegalStateException("Unsupported type: " + type);
     }
   }
 
@@ -201,8 +183,7 @@ public class TypeContext {
     } else if (to instanceof WildcardType) {
       return Arrays.stream(((WildcardType) to).getUpperBounds()).allMatch(t -> isAssignable(from, t));
     } else {
-      errors.add(new IllegalArgumentException("Unknown type: " + to));
-      return false;
+      throw new IllegalArgumentException("Unknown type: " + to);
     }
   }
 

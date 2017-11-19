@@ -23,19 +23,23 @@ package org.marid.runtime.types;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.marid.runtime.types.AuxTypeUtils.I1;
+import org.marid.runtime.types.AuxTypeUtils.Map1;
 import org.marid.types.TypeContext;
 
-import java.io.Closeable;
 import java.io.Writer;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Stream.of;
+import static org.apache.commons.lang3.reflect.TypeUtils.parameterize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.marid.runtime.context.MaridRuntimeUtils.types;
 
@@ -45,40 +49,46 @@ class TypeContextTest {
   private final TypeContext context = new TypeContext(Thread.currentThread().getContextClassLoader());
 
   @Test
-  void test1() {
-    final Type from = List2.class;
+  void resolveVars1() {
+    final Map<TypeVariable<?>, Type> map = context.resolveVars(AuxTypeUtils.List2.class);
 
-    final Map<TypeVariable<?>, Type> map = context.resolveVars(from);
-
-    final Set<Class<?>> ec = types(List2.class).filter(c -> c.getTypeParameters().length > 0).collect(toSet());
+    final Set<Class<?>> ec = types(AuxTypeUtils.List2.class).filter(c -> c.getTypeParameters().length > 0).collect(toSet());
     final Set<Class<?>> ac = map.keySet().stream().map(v -> (Class<?>) v.getGenericDeclaration()).collect(toSet());
-
-    assertEquals(ec, ac);
-
     final Set<TypeVariable<?>> expectedVars = ec.stream().flatMap(c -> of(c.getTypeParameters())).collect(toSet());
 
+    assertEquals(ec, ac);
+    assertEquals(expectedVars, map.keySet());
+    assertEquals(Set.of(Writer.class), new HashSet<>(map.values()));
+  }
+
+  @Test
+  void resolveVars2() {
+    final Map<TypeVariable<?>, Type> map = context.resolveVars(AuxTypeUtils.List2.M.class);
+
+    final Set<Class<?>> ec = types(AuxTypeUtils.List1.M.class).filter(c -> c.getTypeParameters().length > 0).collect(toSet());
+    final Set<Class<?>> ac = map.keySet().stream().map(v -> (Class<?>) v.getGenericDeclaration()).collect(toSet());
+    final Set<TypeVariable<?>> expectedVars = ec.stream().flatMap(c -> of(c.getTypeParameters())).collect(toSet());
+
+    assertEquals(ec, ac);
     assertEquals(expectedVars, map.keySet());
   }
 
   @Test
-  void test2() {
-    final Type from = List2.M.class;
-    final Class<?> to = List.class;
+  void resolveVarsStackOverflow() {
+    final Map<TypeVariable<?>, Type> map = context.resolveVars(AuxTypeUtils.Map2.class);
 
-    final Map<TypeVariable<?>, Type> actual = context.resolveVars(from);
+    assertEquals(Set.of(Map1.class.getTypeParameters()), map.keySet());
+    assertEquals(Set.of(parameterize(I1.class, I1.class)), new HashSet<>(map.values()));
+  }
+
+  @Test
+  void resolveStackOverflow() {
+    final TypeVariable<?>[] vars = Map1.class.getTypeParameters();
+    final ParameterizedType type = parameterize(Map1.class, vars);
+
+    final Map<TypeVariable<?>, Type> map = of(vars).collect(toMap(e -> e, e -> parameterize(List.class, e)));
+    final Type actual = context.resolve(type, map);
 
     System.out.println(actual);
-  }
-
-  public static class List1<E extends Closeable> extends ArrayList<E> {
-
-    public abstract class L<X extends E> implements List<X> {
-    }
-
-    public abstract class M implements List<E> {
-    }
-  }
-
-  public static class List2 extends List1<Writer> {
   }
 }

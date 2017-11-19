@@ -21,7 +21,6 @@
 
 package org.marid.jfx.icons;
 
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import org.jetbrains.annotations.PropertyKey;
@@ -45,7 +44,7 @@ public class FontIcons {
 
   static {
     SYMBOLS = ofEntries(cast(lines(currentThread().getContextClassLoader(), "fonts/meta.properties")
-        .filter(l -> !l.isEmpty())
+        .filter(l -> l.contains("="))
         .map(line -> {
           final int index = line.indexOf('=');
           final String name = line.substring(0, index);
@@ -54,7 +53,7 @@ public class FontIcons {
         })
         .toArray(Entry[]::new)));
     FAMILIES = ofEntries(cast(lines(currentThread().getContextClassLoader(), "fonts/families.properties")
-        .filter(l -> !l.isEmpty())
+        .filter(l -> l.contains("="))
         .map(line -> {
           final int index = line.indexOf('=');
           final String name = line.substring(0, index);
@@ -70,15 +69,9 @@ public class FontIcons {
     } else {
       final Text label = new Text();
       label.setFont(new Font(FAMILIES.get(type.substring(0, 1)), size));
-      label.setText(SYMBOLS.getOrDefault(type, "*"));
+      label.setText(SYMBOLS.getOrDefault(type, ""));
       return label;
     }
-  }
-
-  public static Text glyph(@Nonnull @PropertyKey(resourceBundle = "fonts.meta") String type, double size, @Nonnull Color color) {
-    final Text text = glyphIcon(type, size);
-    text.setStroke(color);
-    return text;
   }
 
   public static Text glyphIcon(@PropertyKey(resourceBundle = "fonts.meta") String type) {
