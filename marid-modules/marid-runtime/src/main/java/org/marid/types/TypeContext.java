@@ -41,15 +41,12 @@ import static org.marid.types.TypeUtil.*;
 
 public class TypeContext {
 
-  protected final ClassLoader classLoader;
-  protected final List<Throwable> errors = new ArrayList<>();
-
-  public TypeContext(ClassLoader classLoader) {
-    this.classLoader = classLoader;
+  public <E extends Throwable> void throwError(@Nonnull E exception) throws E {
+    throw exception;
   }
 
-  public List<Throwable> getErrors() {
-    return errors;
+  public ClassLoader getClassLoader() {
+    return Thread.currentThread().getContextClassLoader();
   }
 
   @Nonnull
@@ -64,11 +61,13 @@ public class TypeContext {
   @Nonnull
   public Class<?> getClass(@Nonnull String name) {
     try {
-      return MaridRuntimeUtils.loadClass(name, classLoader, false);
-    } catch (Throwable x) {
-      errors.add(x);
-      return Object.class;
+      return MaridRuntimeUtils.loadClass(name, getClassLoader(), false);
+    } catch (ClassNotFoundException x) {
+      throwError(new IllegalStateException(x));
+    } catch (RuntimeException x) {
+      throwError(x);
     }
+    return Object.class;
   }
 
   @Nonnull
@@ -212,7 +211,7 @@ public class TypeContext {
           }
         }
       } else {
-        errors.add(new IllegalArgumentException("Illegal type: " + type));
+        throwError(new IllegalArgumentException("Illegal type: " + type));
       }
     } else if (type instanceof Class<?>) {
       raw = (Class<?>) type;

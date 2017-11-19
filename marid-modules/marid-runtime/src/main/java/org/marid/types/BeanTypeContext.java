@@ -26,35 +26,14 @@ import org.marid.expression.generic.Expression;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Type;
-import java.util.List;
 
-import static org.marid.types.MaridWildcardType.ALL;
-
-public class BeanTypeContext extends TypeContext {
-
-  private final MaridBean bean;
-
-  public BeanTypeContext(MaridBean bean, ClassLoader classLoader) {
-    super(classLoader);
-    this.bean = bean;
-  }
-
-  public MaridBean getBean() {
-    return bean;
-  }
-
-  public List<Throwable> getErrors() {
-    return errors;
-  }
+public abstract class BeanTypeContext extends TypeContext {
 
   @Nonnull
-  public Type getBeanType(@Nonnull String name) {
-    return bean.matchingCandidates()
-        .filter(b -> name.equals(b.getName()))
-        .findFirst()
-        .map(b -> b.getFactory().getType(null, new BeanTypeContext(b, classLoader)))
-        .orElse(ALL);
-  }
+  public abstract MaridBean getBean();
+
+  @Nonnull
+  public abstract Type getBeanType(@Nonnull String name);
 
   @Nonnull
   public Type resolve(@Nonnull Type[] formals, @Nonnull Type[] actuals, @Nonnull Expression expr, @Nonnull Type type) {

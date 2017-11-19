@@ -28,9 +28,11 @@ import org.marid.runtime.event.BeanPreDestroyEvent;
 import org.marid.runtime.event.ContextBootstrapEvent;
 import org.marid.runtime.event.ContextFailEvent;
 import org.marid.runtime.exception.MaridBeanNotFoundException;
+import org.marid.types.BeanTypeContext;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.reflect.Type;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -42,7 +44,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 
-public final class BeanContext implements MaridRuntime, AutoCloseable {
+public final class BeanContext extends BeanTypeContext implements MaridRuntime, AutoCloseable {
 
   private final BeanContext parent;
   private final BeanConfiguration configuration;
@@ -146,9 +148,16 @@ public final class BeanContext implements MaridRuntime, AutoCloseable {
     return configuration.getPlaceholderResolver().getProperties();
   }
 
+  @Nonnull
   @Override
   public RuntimeBean getBean() {
     return bean;
+  }
+
+  @Nonnull
+  public Type getBeanType(@Nonnull String name) {
+    final BeanContext context = getContext(name);
+    return context.getBean().getFactory().getType(null, context);
   }
 
   private Object create(RuntimeBean bean, BeanContext context) {

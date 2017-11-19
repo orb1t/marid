@@ -46,7 +46,7 @@ import static org.marid.runtime.context.MaridRuntimeUtils.types;
 @Tag("normal")
 class TypeContextTest {
 
-  private final TypeContext context = new TypeContext(Thread.currentThread().getContextClassLoader());
+  private final TypeContext context = new TypeContext();
 
   @Test
   void resolveVars1() {

@@ -30,6 +30,7 @@ import org.marid.expression.mutable.testclasses.MyComplexBean;
 import org.marid.expression.mutable.testclasses.MyList;
 import org.marid.idelib.beans.BeanUtils;
 import org.marid.idelib.beans.IdeBean;
+import org.marid.idelib.beans.IdeBeanContext;
 import org.marid.io.Xmls;
 import org.marid.types.BeanTypeContext;
 
@@ -82,7 +83,7 @@ class ExpressionTypeTest {
   @MethodSource("testData")
   void testBean(String beanName, Type expectedType) {
     final IdeBean bean = BeanUtils.find(root, beanName);
-    final BeanTypeContext context = new BeanTypeContext(bean, classLoader);
+    final BeanTypeContext context = new IdeBeanContext(bean, classLoader);
     final Type type = bean.getFactory().getType(null, context);
     assertEquals(expectedType, type);
   }
