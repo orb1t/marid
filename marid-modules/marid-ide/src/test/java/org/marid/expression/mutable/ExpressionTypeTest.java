@@ -32,7 +32,7 @@ import org.marid.idelib.beans.BeanUtils;
 import org.marid.idelib.beans.IdeBean;
 import org.marid.idelib.beans.IdeBeanContext;
 import org.marid.io.Xmls;
-import org.marid.types.BeanTypeContext;
+import org.marid.beans.BeanTypeContext;
 
 import java.io.IOException;
 import java.io.InputStreamReader;

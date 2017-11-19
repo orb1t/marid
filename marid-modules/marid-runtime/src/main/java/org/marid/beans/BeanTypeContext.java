@@ -19,10 +19,10 @@
  * #L%
  */
 
-package org.marid.types;
+package org.marid.beans;
 
-import org.marid.beans.MaridBean;
 import org.marid.expression.generic.Expression;
+import org.marid.types.TypeContext;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Type;

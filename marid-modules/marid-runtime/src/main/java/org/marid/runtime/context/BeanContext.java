@@ -28,7 +28,7 @@ import org.marid.runtime.event.BeanPreDestroyEvent;
 import org.marid.runtime.event.ContextBootstrapEvent;
 import org.marid.runtime.event.ContextFailEvent;
 import org.marid.runtime.exception.MaridBeanNotFoundException;
-import org.marid.types.BeanTypeContext;
+import org.marid.beans.BeanTypeContext;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

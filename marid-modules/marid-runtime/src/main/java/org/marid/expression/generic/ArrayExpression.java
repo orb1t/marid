@@ -21,7 +21,7 @@
 
 package org.marid.expression.generic;
 
-import org.marid.types.BeanTypeContext;
+import org.marid.beans.BeanTypeContext;
 import org.marid.types.MaridArrayType;
 
 import javax.annotation.Nonnull;

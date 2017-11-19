@@ -22,7 +22,7 @@
 package org.marid.expression.generic;
 
 import org.marid.misc.Calls;
-import org.marid.types.BeanTypeContext;
+import org.marid.beans.BeanTypeContext;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

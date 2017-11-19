@@ -20,7 +20,7 @@
 
 package org.marid.idelib.beans;
 
-import org.marid.types.BeanTypeContext;
+import org.marid.beans.BeanTypeContext;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Type;
