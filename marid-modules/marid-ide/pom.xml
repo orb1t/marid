@@ -10,13 +10,6 @@
 
   <artifactId>marid-ide</artifactId>
 
-  <licenses>
-    <license>
-      <name>Apache License 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-    </license>
-  </licenses>
-
   <dependencies>
     <dependency>
       <groupId>org.marid</groupId>
@@ -93,14 +86,6 @@
             </configuration>
           </execution>
         </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>license-maven-plugin</artifactId>
-        <configuration>
-          <licenseName>apache_v2</licenseName>
-        </configuration>
       </plugin>
     </plugins>
   </build>
