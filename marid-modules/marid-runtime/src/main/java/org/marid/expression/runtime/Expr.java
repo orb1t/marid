@@ -54,10 +54,10 @@ public abstract class Expr implements Expression {
 
   @Nullable
   public final Object evaluate(@Nullable Object self, @Nullable Type selfType, @Nonnull BeanContext context) {
-    final Object v = execute(self, selfType = getType(selfType, context), context);
-
+    final Object v = execute(self, selfType, context);
+    final Type newSelf = getType(selfType, context);
     for (final Expr initializer : getInitializers()) {
-      initializer.evaluate(v, selfType, context);
+      initializer.evaluate(v, newSelf, context);
     }
     return v;
   }
