@@ -28,6 +28,7 @@ import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.reflect.Type;
 
 public final class RefExpr extends Expr implements RefExpression {
 
@@ -44,7 +45,7 @@ public final class RefExpr extends Expr implements RefExpression {
   }
 
   @Override
-  protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
+  protected Object execute(@Nullable Object self, @Nullable Type owner, @Nonnull BeanContext context) {
     return context.getBean(getReference());
   }
 

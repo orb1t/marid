@@ -27,6 +27,7 @@ import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.reflect.Type;
 
 import static org.marid.io.Xmls.content;
 
@@ -45,7 +46,7 @@ public final class StringExpr extends Expr implements StringExpression {
   }
 
   @Override
-  protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
+  protected Object execute(@Nullable Object self, @Nullable Type owner, @Nonnull BeanContext context) {
     return context.resolvePlaceholders(getValue());
   }
 

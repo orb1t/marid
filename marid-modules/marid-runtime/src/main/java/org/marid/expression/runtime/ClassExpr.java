@@ -27,7 +27,7 @@ import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.NoSuchElementException;
+import java.lang.reflect.Type;
 
 import static org.marid.io.Xmls.attribute;
 
@@ -46,12 +46,8 @@ public final class ClassExpr extends Expr implements ClassExpression {
   }
 
   @Override
-  protected Class<?> execute(@Nullable Object self, @Nonnull BeanContext context) {
-    try {
-      return context.getClassLoader().loadClass(getClassName());
-    } catch (ClassNotFoundException x) {
-      throw new NoSuchElementException(getClassName());
-    }
+  protected Class<?> execute(@Nullable Object self, @Nullable Type owner, @Nonnull BeanContext context) {
+    return getTargetClass(owner, context);
   }
 
   @Nonnull

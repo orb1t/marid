@@ -27,6 +27,7 @@ import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.reflect.Type;
 
 import static org.marid.io.Xmls.attribute;
 
@@ -45,7 +46,7 @@ public final class ConstExpr extends ValueExpr implements ConstExpression {
   }
 
   @Override
-  protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
+  protected Object execute(@Nullable Object self, @Nullable Type owner, @Nonnull BeanContext context) {
     final String v = context.resolvePlaceholders(getValue()).trim();
     if (v.isEmpty()) {
       return null;

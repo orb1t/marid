@@ -28,6 +28,7 @@ import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
 
@@ -54,7 +55,7 @@ public final class ArrayExpr extends Expr implements ArrayExpression {
   }
 
   @Override
-  protected Object[] execute(@Nullable Object self, @Nonnull BeanContext context) {
-    return elements.stream().map(e -> e.evaluate(self, context)).toArray();
+  protected Object[] execute(@Nullable Object self, @Nullable Type owner, @Nonnull BeanContext context) {
+    return elements.stream().map(e -> e.evaluate(self, owner, context)).toArray();
   }
 }

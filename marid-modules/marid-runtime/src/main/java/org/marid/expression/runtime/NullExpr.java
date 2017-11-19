@@ -28,6 +28,7 @@ import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.reflect.Type;
 
 public final class NullExpr extends Expr implements NullExpression {
 
@@ -48,7 +49,7 @@ public final class NullExpr extends Expr implements NullExpression {
   }
 
   @Override
-  protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
+  protected Object execute(@Nullable Object self, @Nullable Type owner, @Nonnull BeanContext context) {
     return null;
   }
 

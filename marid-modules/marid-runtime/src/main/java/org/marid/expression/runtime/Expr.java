@@ -27,6 +27,7 @@ import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,15 +53,16 @@ public abstract class Expr implements Expression {
   }
 
   @Nullable
-  public final Object evaluate(@Nullable Object self, @Nonnull BeanContext context) {
-    final Object v = execute(self, context);
+  public final Object evaluate(@Nullable Object self, @Nullable Type selfType, @Nonnull BeanContext context) {
+    final Object v = execute(self, selfType = getType(selfType, context), context);
+
     for (final Expr initializer : getInitializers()) {
-      initializer.evaluate(v, context);
+      initializer.evaluate(v, selfType, context);
     }
     return v;
   }
 
-  protected abstract Object execute(@Nullable Object self, @Nonnull BeanContext context);
+  protected abstract Object execute(@Nullable Object self, @Nullable Type selfType, @Nonnull BeanContext context);
 
   public String getTag() {
     return getClass().getSimpleName().replace("Expr", "").toLowerCase();

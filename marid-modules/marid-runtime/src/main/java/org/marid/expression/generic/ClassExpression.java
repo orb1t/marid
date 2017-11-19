@@ -37,4 +37,17 @@ public interface ClassExpression extends Expression {
   default Type getType(@Nullable Type owner, @Nonnull BeanTypeContext context) {
     return context.getClassType(context.getClass(getClassName()));
   }
+
+  @Nonnull
+  @Override
+  default Class<?> getTargetClass(@Nullable Type owner, @Nonnull BeanTypeContext context) {
+    try {
+      return context.getClassLoader().loadClass(getClassName());
+    } catch (ClassNotFoundException x) {
+      context.throwError(new IllegalStateException(x));
+    } catch (RuntimeException x) {
+      context.throwError(x);
+    }
+    return Object.class;
+  }
 }

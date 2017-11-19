@@ -28,8 +28,8 @@ import org.w3c.dom.Element;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.stream.Stream;
 
 import static org.marid.io.Xmls.attribute;
@@ -55,9 +55,9 @@ public final class GetExpr extends Expr implements GetExpression {
   }
 
   @Override
-  protected Object execute(@Nullable Object self, @Nonnull BeanContext context) {
-    final Object target = Objects.requireNonNull(getTarget().evaluate(self, context));
-    final Class<?> targetClass = getTarget() instanceof ClassExpr ? (Class<?>) target : target.getClass();
+  protected Object execute(@Nullable Object self, @Nullable Type owner, @Nonnull BeanContext context) {
+    final Object target = getTarget().evaluate(self, owner, context);
+    final Class<?> targetClass = getTarget().getTargetClass(owner, context);
     final Field field = Stream.of(targetClass.getFields())
         .filter(f -> f.getName().equals(getField()))
         .findFirst()

@@ -163,7 +163,7 @@ public final class BeanContext extends BeanTypeContext implements MaridRuntime, 
   private Object create(RuntimeBean bean, BeanContext context) {
     if (processing.add(bean)) {
       try {
-        return bean.getFactory().evaluate(null, context);
+        return bean.getFactory().evaluate(null, null, context);
       } finally {
         processing.remove(bean);
       }

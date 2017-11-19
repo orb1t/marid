@@ -32,7 +32,6 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Stream.*;
 
 /**
@@ -122,15 +121,6 @@ public interface Classes {
     }
   }
 
-  @Nonnull
-  static Object[] values(@Nonnull Class<?>[] types, @Nonnull Object[] values) {
-    final Object[] result = new Object[values.length];
-    for (int i = 0; i < result.length; i++) {
-      result[i] = value(types[i], values[i]);
-    }
-    return result;
-  }
-
   static Object[] args(@Nonnull Executable executable, @Nonnull Object[] args) {
     final Class<?>[] types = executable.getParameterTypes();
     final Object[] result = new Object[args.length];
@@ -154,13 +144,5 @@ public interface Classes {
       case "void": return void.class;
       default: return Class.forName(name, init, classLoader);
     }
-  }
-
-  @Nonnull
-  static IllegalStateException methodState(@Nonnull String method, @Nonnull Object[] args, @Nonnull Throwable cause) {
-    return new IllegalStateException(
-        of(args).map(v -> v == null ? "*" : v.getClass().getName()).collect(joining(",", method + "(", ")")),
-        cause
-    );
   }
 }

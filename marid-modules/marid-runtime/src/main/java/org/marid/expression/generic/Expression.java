@@ -22,6 +22,7 @@
 package org.marid.expression.generic;
 
 import org.marid.beans.BeanTypeContext;
+import org.marid.types.Types;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -38,5 +39,10 @@ public interface Expression {
   Type getType(@Nullable Type owner, @Nonnull BeanTypeContext context);
 
   default void resolve(@Nonnull Type type, @Nonnull BeanTypeContext context, @Nonnull BiConsumer<Type, Type> evaluator) {
+  }
+
+  @Nonnull
+  default Class<?> getTargetClass(@Nullable Type owner, @Nonnull BeanTypeContext context) {
+    return Types.getRaw(getType(owner, context));
   }
 }
