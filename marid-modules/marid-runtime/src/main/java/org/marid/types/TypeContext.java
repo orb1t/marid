@@ -254,31 +254,33 @@ public class TypeContext {
 
   @Nonnull
   public Type commonAncestor(@Nonnull Type formal, @Nonnull Type... actuals) {
-    if (actuals.length == 0) {
-      return formal;
-    } else {
-      if (of(actuals).allMatch(TypeContext.this::isNonPrimitiveArray)) {
-        final Type[] aes = of(actuals).map(Types::getArrayComponentType).distinct().toArray(Type[]::new);
-        final Type elementType = commonAncestor(Object.class, aes);
-        if (elementType instanceof Class<?>) {
-          return Array.newInstance((Class<?>) elementType, 0).getClass();
+    switch (actuals.length) {
+      case 0: return formal;
+      case 1: return actuals[0];
+      default: {
+        if (of(actuals).allMatch(Types::isArrayType)) {
+          final Type[] aes = of(actuals).map(Types::getArrayComponentType).distinct().toArray(Type[]::new);
+          final Type elementType = commonAncestor(Object.class, aes);
+          if (elementType instanceof Class<?>) {
+            return Array.newInstance((Class<?>) elementType, 0).getClass();
+          } else {
+            return new MaridArrayType(elementType);
+          }
         } else {
-          return new MaridArrayType(elementType);
-        }
-      } else {
-        final Type[][] tss = of(actuals).sorted(this::cmp).map(t -> types(t).toArray(Type[]::new)).toArray(Type[][]::new);
-        final int max = of(tss).mapToInt(a -> a.length).max().orElse(0);
-        for (int level = 0; level < max; level++) {
-          for (final Type[] ts : tss) {
-            if (level < ts.length) {
-              final Type actual = ts[level];
-              if (of(actuals).allMatch(t -> isAssignable(t, actual))) {
-                return actual;
+          final Type[][] tss = of(actuals).sorted(this::cmp).map(t -> types(t).toArray(Type[]::new)).toArray(Type[][]::new);
+          final int max = of(tss).mapToInt(a -> a.length).max().orElse(0);
+          for (int level = 0; level < max; level++) {
+            for (final Type[] ts : tss) {
+              if (level < ts.length) {
+                final Type actual = ts[level];
+                if (of(actuals).allMatch(t -> isAssignable(t, actual))) {
+                  return actual;
+                }
               }
             }
           }
+          return formal;
         }
-        return formal;
       }
     }
   }
@@ -298,17 +300,6 @@ public class TypeContext {
     } else {
       final Map<TypeVariable<?>, Type> map = TypeUtils.getTypeArguments(type, c);
       return TypeUtils.parameterize(c, map);
-    }
-  }
-
-  private boolean isNonPrimitiveArray(Type type) {
-    if (type instanceof GenericArrayType) {
-      return true;
-    } else if (type instanceof Class<?>) {
-      final Class<?> c = (Class<?>) type;
-      return c.isArray() && !c.getComponentType().isPrimitive();
-    } else {
-      return false;
     }
   }
 
