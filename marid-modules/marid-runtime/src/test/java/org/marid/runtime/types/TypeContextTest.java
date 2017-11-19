@@ -89,6 +89,6 @@ class TypeContextTest {
     final Map<TypeVariable<?>, Type> map = of(vars).collect(toMap(e -> e, e -> parameterize(List.class, e)));
     final Type actual = context.resolve(type, map);
 
-    System.out.println(actual);
+    System.out.println(AuxTypeUtils.List2.M.class);
   }
 }

@@ -27,11 +27,13 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.Comparator;
+import java.util.Optional;
 import java.util.TreeSet;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import static java.lang.reflect.Modifier.isPublic;
 import static java.util.stream.Stream.*;
 
 /**
@@ -144,5 +146,15 @@ public interface Classes {
       case "void": return void.class;
       default: return Class.forName(name, init, classLoader);
     }
+  }
+
+  @Nonnull
+  static Stream<Class<?>> declaredClasses(@Nonnull Class<?> type) {
+    return types(type).flatMap(c -> Stream.of(c.getDeclaredClasses())).filter(c -> isPublic(c.getModifiers()));
+  }
+
+  @Nonnull
+  static Optional<Class<?>> declaredClass(@Nonnull Class<?> type, @Nonnull String name) {
+    return declaredClasses(type).filter(c -> c.getSimpleName().equals(name)).findFirst();
   }
 }
