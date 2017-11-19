@@ -23,25 +23,21 @@ package org.marid.expression.runtime;
 
 import org.marid.expression.generic.CallExpression;
 import org.marid.runtime.context.BeanContext;
-import org.marid.types.Types;
+import org.marid.types.Invokable;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Executable;
-import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Stream;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.IntStream.range;
 import static org.marid.io.Xmls.*;
-import static org.marid.types.Classes.*;
+import static org.marid.types.Classes.value;
 
 public final class CallExpr extends Expr implements CallExpression {
 
@@ -69,39 +65,28 @@ public final class CallExpr extends Expr implements CallExpression {
 
   @Override
   protected Object execute(@Nullable Object self, @Nullable Type owner, @Nonnull BeanContext context) {
-    final Object target = getTarget().evaluate(self, owner, context);
-    final Class<?> targetClass = getTarget().getTargetClass(owner, context);
     final Type[] argTypes = getArgs().stream().map(a -> a.getType(owner, context)).toArray(Type[]::new);
-    if ("new".equals(getMethod())) {
-      final Constructor<?> constructor = Stream.of(targetClass.getConstructors())
-          .filter(c -> matches(c, argTypes))
-          .findFirst()
-          .orElseThrow(() -> new NoSuchElementException(getMethod() + " in " + context));
+    final Optional<? extends Invokable<?>> optional = CallExpression.invokable(this, owner, context, argTypes);
+    if (optional.isPresent()) {
+      final Invokable<?> invokable = optional.get();
+      final Class<?>[] argClasses = invokable.getParameterClasses();
+      final Object[] args = new Object[argClasses.length];
+      for (int i = 0; i < args.length; i++) {
+        args[i] = value(argClasses[i], this.args.get(i).evaluate(self, owner, context));
+      }
       try {
-        final Class<?>[] argClasses = constructor.getParameterTypes();
-        final Object[] args = new Object[argClasses.length];
-        for (int i = 0; i < args.length; i++) {
-          args[i] = value(argClasses[i], this.args.get(i).evaluate(self, owner, context));
+        if (invokable.isStatic()) {
+          return invokable.execute(null, args);
+        } else {
+          return invokable.execute(getTarget().evaluate(self, owner, context), args);
         }
-        return constructor.newInstance(args(constructor, args));
       } catch (ReflectiveOperationException x) {
-        throw new IllegalStateException(x);
+        context.throwError(new IllegalStateException(x));
+        return null;
       }
     } else {
-      final Method method = Stream.of(targetClass.getMethods())
-          .filter(m -> m.getName().equals(getMethod()) && matches(m, argTypes))
-          .findFirst()
-          .orElseThrow(() -> new NoSuchElementException(getMethod() + " in " + context));
-      try {
-        final Class<?>[] argClasses = method.getParameterTypes();
-        final Object[] args = new Object[argClasses.length];
-        for (int i = 0; i < args.length; i++) {
-          args[i] = value(argClasses[i], this.args.get(i).evaluate(self, owner, context));
-        }
-        return method.invoke(target, args);
-      } catch (ReflectiveOperationException x) {
-        throw new IllegalStateException(x);
-      }
+      context.throwError(new NoSuchElementException(getMethod()));
+      return null;
     }
   }
 
@@ -126,14 +111,5 @@ public final class CallExpr extends Expr implements CallExpression {
   @Override
   public String toString() {
     return args.stream().map(Object::toString).collect(joining(",", target + "." + method + "(", ")"));
-  }
-
-  private boolean matches(Executable executable, Type... types) {
-    if (executable.getParameterCount() == types.length) {
-      final Class<?>[] ts = executable.getParameterTypes();
-      return range(0, ts.length).allMatch(i -> compatible(ts[i], Types.getRaw(types[i])));
-    } else {
-      return false;
-    }
   }
 }

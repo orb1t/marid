@@ -22,15 +22,12 @@
 package org.marid.expression.generic;
 
 import org.marid.beans.BeanTypeContext;
-import org.marid.types.Types;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
-import java.util.stream.Stream;
-
-import static org.marid.types.MaridWildcardType.ALL;
-import static org.marid.types.Types.classType;
 
 public interface GetExpression extends Expression {
 
@@ -43,20 +40,19 @@ public interface GetExpression extends Expression {
   @Nonnull
   @Override
   default Type getType(@Nullable Type owner, @Nonnull BeanTypeContext context) {
-    final Type targetType = getTarget().getType(owner, context);
-    if (getTarget() instanceof ClassExpression) {
-      return classType(targetType).stream().flatMap(t -> Stream.of(Types.getRaw(t).getFields()))
-          .filter(f -> f.getName().equals(getField()))
-          .map(f -> context.resolve(owner, f.getGenericType()))
-          .findFirst()
-          .orElse(ALL);
-    } else {
-      return Stream.of(Types.getRaw(targetType).getFields())
-          .filter(f -> f.getName().equals(getField()))
-          .map(f -> context.resolve(targetType, f.getGenericType()))
-          .map(t -> context.resolve(owner, t))
-          .findFirst()
-          .orElse(ALL);
+    final Class<?> targetClass = getTarget().getTargetClass(owner, context);
+    try {
+      final Field field = targetClass.getField(getField());
+      final Type result = context.resolve(new Type[0], new Type[0], this, field.getGenericType());
+      if (Modifier.isStatic(field.getModifiers())) {
+        return result;
+      } else {
+        final Type targetType = getTarget().getType(owner, context);
+        return context.resolve(targetType, result);
+      }
+    } catch (NoSuchFieldException x) {
+      context.throwError(new IllegalStateException(x));
+      return Object.class;
     }
   }
 }
