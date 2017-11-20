@@ -310,13 +310,11 @@ public class TypeContext {
   public Stream<? extends Type> types(@Nonnull Type type) {
     final Map<TypeVariable<?>, Type> map = resolveVars(type);
     return Classes.classes(Types.getRaw(type))
-        .map(this::generic)
+        .map(c -> {
+          final TypeVariable<?>[] vars = c.getTypeParameters();
+          return vars.length == 0 ? c : new MaridParameterizedType(null, c, vars);
+        })
         .map(t -> resolve(t, map));
-  }
-
-  private Type generic(Class<?> c) {
-    final TypeVariable<?>[] vars = c.getTypeParameters();
-    return vars.length == 0 ? c : new MaridParameterizedType(null, c, vars);
   }
 
   private final class TypeEvaluator implements BiConsumer<Type, Type> {
@@ -336,10 +334,15 @@ public class TypeContext {
         if (Types.isArrayType(formal) && Types.isArrayType(actual)) {
           accept(getArrayComponentType(formal), getArrayComponentType(actual));
         } else if (formal instanceof ParameterizedType) {
-          final Class<?> formalRaw = Types.getRaw(formal);
-          final Class<?> actualRaw = Types.getRaw(actual);
-          if (formalRaw.isAssignableFrom(actualRaw)) {
-            //TypeUtils.getTypeArguments(actual, formalRaw).forEach(this::put); TODO: fix this
+          final ParameterizedType p = (ParameterizedType) formal;
+          final Class<?> raw = (Class<?>) p.getRawType();
+          final TypeVariable<?>[] vars = raw.getTypeParameters();
+          final Map<TypeVariable<?>, Type> map = resolveVars(actual);
+          for (final TypeVariable<?> var : vars) {
+            final Type type = TypeContext.this.resolve(var, map);
+            if (isGround(type)) {
+              accept(var, type);
+            }
           }
         } else if (formal instanceof WildcardType) {
           final WildcardType wildcardType = (WildcardType) formal;
