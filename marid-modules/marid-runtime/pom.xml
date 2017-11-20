@@ -22,12 +22,6 @@
       <artifactId>javax.annotation-api</artifactId>
       <scope>provided</scope>
     </dependency>
-
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-      <scope>provided</scope>
-    </dependency>
   </dependencies>
 
   <build>

@@ -21,7 +21,6 @@
 
 package org.marid.types;
 
-import org.apache.commons.lang3.reflect.TypeUtils;
 import org.marid.collections.MaridSets;
 
 import javax.annotation.Nonnull;
@@ -307,18 +306,17 @@ public class TypeContext {
     }
   }
 
-  private Stream<? extends Type> types(Type type) {
-    return Classes.types(Types.getRaw(type)).map(c -> generic(c, type));
+  @Nonnull
+  public Stream<? extends Type> types(@Nonnull Type type) {
+    final Map<TypeVariable<?>, Type> map = resolveVars(type);
+    return Classes.classes(Types.getRaw(type))
+        .map(this::generic)
+        .map(t -> resolve(t, map));
   }
 
-  private Type generic(Class<?> c, Type type) {
+  private Type generic(Class<?> c) {
     final TypeVariable<?>[] vars = c.getTypeParameters();
-    if (vars.length == 0) {
-      return c;
-    } else {
-      final Map<TypeVariable<?>, Type> map = TypeUtils.getTypeArguments(type, c);
-      return TypeUtils.parameterize(c, map);
-    }
+    return vars.length == 0 ? c : new MaridParameterizedType(null, c, vars);
   }
 
   private final class TypeEvaluator implements BiConsumer<Type, Type> {
@@ -341,7 +339,7 @@ public class TypeContext {
           final Class<?> formalRaw = Types.getRaw(formal);
           final Class<?> actualRaw = Types.getRaw(actual);
           if (formalRaw.isAssignableFrom(actualRaw)) {
-            TypeUtils.getTypeArguments(actual, formalRaw).forEach(this::put);
+            //TypeUtils.getTypeArguments(actual, formalRaw).forEach(this::put); TODO: fix this
           }
         } else if (formal instanceof WildcardType) {
           final WildcardType wildcardType = (WildcardType) formal;

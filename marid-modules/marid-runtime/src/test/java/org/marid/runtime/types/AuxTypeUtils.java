@@ -21,12 +21,29 @@
 
 package org.marid.runtime.types;
 
+import org.marid.types.MaridArrayType;
+import org.marid.types.MaridParameterizedType;
+import org.marid.types.MaridWildcardType;
+
 import java.io.Closeable;
 import java.io.Writer;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
 public interface AuxTypeUtils {
+
+  static MaridParameterizedType p(Type raw, Type... args) {
+    return new MaridParameterizedType(null, raw, args);
+  }
+
+  static MaridWildcardType w(Type... bounds) {
+    return new MaridWildcardType(bounds, new Type[0]);
+  }
+
+  static MaridArrayType a(Type elementType) {
+    return new MaridArrayType(elementType);
+  }
 
   class List1<E extends Closeable> extends ArrayList<E> {
 

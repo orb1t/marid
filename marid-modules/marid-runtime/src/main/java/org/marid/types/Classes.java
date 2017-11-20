@@ -27,6 +27,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.TreeSet;
 import java.util.function.Consumer;
@@ -34,7 +35,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static java.lang.reflect.Modifier.isPublic;
-import static java.util.stream.Stream.*;
+import static java.util.stream.Stream.of;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -60,13 +61,28 @@ public interface Classes {
   }
 
   @Nonnull
-  static Stream<Class<?>> types(@Nonnull Class<?> type) {
-    return concat(of(type), superclasses(type));
+  static Stream<Class<?>> classes(@Nonnull Class<?> type) {
+    final LinkedHashSet<Class<?>> set = new LinkedHashSet<>();
+    addClasses(type, set);
+    return set.stream();
   }
 
-  @Nonnull
-  static Stream<Class<?>> superclasses(@Nonnull Class<?> type) {
-    return concat(ofNullable(type.getSuperclass()), of(type.getInterfaces())).flatMap(c -> concat(of(c), types(c)));
+  private static void addClasses(@Nonnull Class<?> type, @Nonnull LinkedHashSet<Class<?>> classes) {
+    if (type.isInterface()) {
+      classes.add(type);
+      for (final Class<?> i : type.getInterfaces()) {
+        addClasses(i, classes);
+      }
+    } else {
+      for (Class<?> c = type; c != null; c = c.getSuperclass()) {
+        classes.add(c);
+      }
+      for (Class<?> c = type; c != null; c = c.getSuperclass()) {
+        for (final Class<?> i : c.getInterfaces()) {
+          addClasses(i, classes);
+        }
+      }
+    }
   }
 
   static boolean compatible(@Nonnull Class<?> to, @Nonnull Class<?> from) {
@@ -150,7 +166,7 @@ public interface Classes {
 
   @Nonnull
   static Stream<Class<?>> declaredClasses(@Nonnull Class<?> type) {
-    return types(type).flatMap(c -> Stream.of(c.getDeclaredClasses())).filter(c -> isPublic(c.getModifiers()));
+    return classes(type).flatMap(c -> Stream.of(c.getDeclaredClasses())).filter(c -> isPublic(c.getModifiers()));
   }
 
   @Nonnull
