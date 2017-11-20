@@ -165,7 +165,7 @@ public class TypeContext {
       if (Types.isArrayType(from)) {
         final Type fromCt = requireNonNull(getArrayComponentType(from));
         final Type toCt = requireNonNull(getArrayComponentType(to));
-        return isAssignable(fromCt, toCt);
+        return isAssignable(fromCt, toCt, passed);
       } else {
         return false;
       }
