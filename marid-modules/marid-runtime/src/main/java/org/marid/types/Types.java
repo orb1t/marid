@@ -25,39 +25,22 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.*;
 import java.util.LinkedHashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
-
 public interface Types {
 
   static boolean isArrayType(@Nonnull Type type) {
-    return type instanceof GenericArrayType || type instanceof Class<?> && ((Class<?>) type).isArray();
+    return type instanceof GenericArrayType || getRaw(type).isArray();
   }
 
   @Nullable
   static Type getArrayComponentType(@Nonnull Type type) {
     if (type instanceof GenericArrayType) {
       return ((GenericArrayType) type).getGenericComponentType();
-    } else if (type instanceof Class<?>) {
-      return ((Class<?>) type).getComponentType();
     } else {
-      return null;
-    }
-  }
-
-  @Nonnull
-  static Optional<Type> classType(@Nonnull Type type) {
-    if (type instanceof ParameterizedType) {
-      final ParameterizedType pt = (ParameterizedType) type;
-      final Type[] args = pt.getActualTypeArguments();
-      return args.length == 1 && pt.getRawType() == Class.class ? of(args[0]) : empty();
-    } else {
-      return empty();
+      return getRaw(type).getComponentType();
     }
   }
 
@@ -74,6 +57,25 @@ public interface Types {
       return ground.test(wt.getUpperBounds()) && ground.test(wt.getLowerBounds());
     } else if (type instanceof ParameterizedType) {
       return Stream.of(((ParameterizedType) type).getActualTypeArguments()).allMatch(Types::isGround);
+    } else {
+      throw new IllegalArgumentException("Unknown type: " + type);
+    }
+  }
+
+  static boolean isClass(@Nonnull Type type) {
+    if (type instanceof Class<?>) {
+      return !((Class<?>) type).isInterface();
+    } else if (type instanceof ParameterizedType) {
+      final ParameterizedType p = (ParameterizedType) type;
+      return isClass(p.getRawType());
+    } else if (type instanceof GenericArrayType) {
+      return false;
+    } else if (type instanceof WildcardType) {
+      final WildcardType wt = (WildcardType) type;
+      return Stream.of(wt.getUpperBounds()).anyMatch(Types::isClass);
+    } else if (type instanceof TypeVariable<?>) {
+      final TypeVariable<?> v = (TypeVariable<?>) type;
+      return Stream.of(v.getBounds()).anyMatch(Types::isClass);
     } else {
       throw new IllegalArgumentException("Unknown type: " + type);
     }

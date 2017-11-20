@@ -30,12 +30,16 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptySet;
+import static java.util.Comparator.comparingInt;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 import static org.marid.types.Classes.compatible;
+import static org.marid.types.MaridWildcardType.ALL;
 import static org.marid.types.Types.*;
 
 public class TypeContext {
@@ -154,10 +158,17 @@ public class TypeContext {
   private boolean isAssignable(@Nonnull Type from, @Nonnull Type to, @Nonnull HashSet<TypeVariable<?>> passed) {
     if (to.equals(from) || Object.class.equals(to)) {
       return true;
-    } else if (Types.isArrayType(from) && Types.isArrayType(to)) {
-      final Type fromCt = requireNonNull(getArrayComponentType(from));
-      final Type toCt = requireNonNull(getArrayComponentType(to));
-      return isAssignable(fromCt, toCt);
+    } if (from instanceof WildcardType) {
+      final WildcardType w = (WildcardType) from;
+      return of(w.getUpperBounds()).anyMatch(t -> isAssignable(to, t, passed));
+    } else if (Types.isArrayType(to)) {
+      if (Types.isArrayType(from)) {
+        final Type fromCt = requireNonNull(getArrayComponentType(from));
+        final Type toCt = requireNonNull(getArrayComponentType(to));
+        return isAssignable(fromCt, toCt);
+      } else {
+        return false;
+      }
     } else if (to instanceof Class<?>) {
       final Class<?> toClass = (Class<?>) to;
       if (from instanceof Class<?>) {
@@ -166,20 +177,38 @@ public class TypeContext {
         final ParameterizedType t = (ParameterizedType) from;
         final Class<?> raw = (Class<?>) t.getRawType();
         return compatible(toClass, raw);
-      } else if (from instanceof TypeVariable<?>) {
-        final TypeVariable<?> v = (TypeVariable<?>) from;
-        return of(v.getBounds()).anyMatch(t -> isAssignable(to, t, passed));
-      } else if (from instanceof WildcardType) {
-        final WildcardType w = (WildcardType) from;
-        return of(w.getUpperBounds()).anyMatch(t -> isAssignable(to, t, passed));
       } else {
         return false;
       }
     } else if (to instanceof TypeVariable<?>) {
       final TypeVariable<?> v = (TypeVariable<?>) to;
-      return passed.add(v) && Arrays.stream(v.getBounds()).allMatch(t -> isAssignable(from, t));
+      return passed.add(v) && Arrays.stream(v.getBounds()).allMatch(t -> isAssignable(from, t, passed));
     } else if (to instanceof WildcardType) {
-      return Arrays.stream(((WildcardType) to).getUpperBounds()).allMatch(t -> isAssignable(from, t));
+      return Arrays.stream(((WildcardType) to).getUpperBounds()).allMatch(t -> isAssignable(from, t, passed));
+    } else if (to instanceof ParameterizedType) {
+      final ParameterizedType p = (ParameterizedType) to;
+      final Class<?> raw = (Class<?>) p.getRawType();
+      if (from instanceof Class<?>) {
+        return compatible(raw, (Class<?>) from) && of(p.getActualTypeArguments()).allMatch(ALL::equals);
+      } else if (from instanceof ParameterizedType) {
+        final ParameterizedType t = (ParameterizedType) from;
+        if (compatible(raw, (Class<?>) t.getRawType())) {
+          final Map<TypeVariable<?>, Type> mapFrom = resolveVars(from);
+          final Map<TypeVariable<?>, Type> mapTo = resolveVars(to);
+          for (final TypeVariable<?> v : raw.getTypeParameters()) {
+            final Type resolvedFrom = resolve(v, mapFrom);
+            final Type resolvedTo = resolve(v, mapTo);
+            if (!isAssignable(resolvedFrom, resolvedTo, passed)) {
+              return false;
+            }
+          }
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        return false;
+      }
     } else {
       throw new IllegalArgumentException("Unknown type: " + to);
     }
@@ -253,40 +282,29 @@ public class TypeContext {
   }
 
   @Nonnull
-  public Type commonAncestor(@Nonnull Type formal, @Nonnull Type... actuals) {
-    switch (actuals.length) {
-      case 0: return formal;
-      case 1: return actuals[0];
-      default: {
-        if (of(actuals).allMatch(Types::isArrayType)) {
-          final Type[] aes = of(actuals).map(Types::getArrayComponentType).distinct().toArray(Type[]::new);
-          final Type elementType = commonAncestor(Object.class, aes);
-          if (elementType instanceof Class<?>) {
-            return Array.newInstance((Class<?>) elementType, 0).getClass();
-          } else {
-            return new MaridArrayType(elementType);
-          }
-        } else {
-          final Type[][] tss = of(actuals).sorted(this::cmp).map(t -> types(t).toArray(Type[]::new)).toArray(Type[][]::new);
-          final int max = of(tss).mapToInt(a -> a.length).max().orElse(0);
-          for (int level = 0; level < max; level++) {
-            for (final Type[] ts : tss) {
-              if (level < ts.length) {
-                final Type actual = ts[level];
-                if (of(actuals).allMatch(t -> isAssignable(t, actual))) {
-                  return actual;
-                }
-              }
-            }
-          }
-          return formal;
+  public Type nct(@Nonnull Type t1, @Nonnull Type t2) {
+    if (t1.equals(t2)) {
+      return t1;
+    } else {
+      final Type at1 = getArrayComponentType(t1), at2 = getArrayComponentType(t2);
+      if (at1 != null && at2 != null) {
+        final Type c = nct(at1, at2);
+        return c instanceof Class<?> ? Array.newInstance((Class<?>) c, 0).getClass() : new MaridArrayType(c);
+      } else {
+        final Set<Type> ts = concat(types(t1), types(t2))
+            .distinct()
+            .filter(t -> Object.class != t)
+            .filter(t -> isAssignable(t1, t) && isAssignable(t2, t))
+            .sorted(comparingInt(t -> isClass(t) ? 1 : 0))
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+        ts.removeIf(t -> ts.stream().anyMatch(e -> e != t && isAssignable(e, t)));
+        switch (ts.size()) {
+          case 0: return Object.class;
+          case 1: return ts.iterator().next();
+          default: return new MaridWildcardType(ts.toArray(new Type[ts.size()]), new Type[0]);
         }
       }
     }
-  }
-
-  private int cmp(Type t1, Type t2) {
-    return isAssignable(t1, t2) ? -1 : isAssignable(t2, t1) ? +1 : 0;
   }
 
   private Stream<? extends Type> types(Type type) {
@@ -337,7 +355,7 @@ public class TypeContext {
     @Nonnull
     private Type resolve(@Nonnull Type type) {
       final LinkedHashMap<TypeVariable<?>, Type> mapping = new LinkedHashMap<>(typeMappings.size());
-      typeMappings.forEach((k, v) -> mapping.put(k, commonAncestor(k, v.toArray(new Type[v.size()]))));
+      typeMappings.forEach((k, v) -> mapping.put(k, v.stream().reduce(TypeContext.this::nct).orElse(k)));
       return ground(type, mapping);
     }
 

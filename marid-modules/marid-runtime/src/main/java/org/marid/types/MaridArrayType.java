@@ -23,6 +23,7 @@ package org.marid.types;
 
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Type;
+import java.lang.reflect.WildcardType;
 
 public class MaridArrayType implements GenericArrayType {
 
@@ -50,6 +51,12 @@ public class MaridArrayType implements GenericArrayType {
 
   @Override
   public String toString() {
+    if (componentType instanceof WildcardType) {
+      final WildcardType t = (WildcardType) componentType;
+      if (t.getUpperBounds().length + t.getLowerBounds().length > 1) {
+        return "(" + componentType.getTypeName() + ")[]";
+      }
+    }
     return componentType.getTypeName() + "[]";
   }
 }

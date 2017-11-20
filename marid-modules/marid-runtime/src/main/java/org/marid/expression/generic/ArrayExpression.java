@@ -39,8 +39,11 @@ public interface ArrayExpression extends Expression {
   @Nonnull
   @Override
   default Type getType(@Nullable Type owner, @Nonnull BeanTypeContext context) {
-    final Type[] set = getElements().stream().map(e -> e.getType(owner, context)).distinct().toArray(Type[]::new);
-    final Type et = context.commonAncestor(Object.class, set);
-    return et instanceof Class<?> ? newInstance((Class<?>) et, 0).getClass() : new MaridArrayType(et);
+    return getElements().stream()
+        .map(e -> e.getType(owner, context))
+        .distinct()
+        .reduce(context::nct)
+        .map(e -> e instanceof Class<?> ? newInstance((Class<?>) e, 0).getClass() : new MaridArrayType(e))
+        .orElse(Object.class);
   }
 }
