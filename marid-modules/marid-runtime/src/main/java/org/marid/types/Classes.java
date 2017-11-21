@@ -23,6 +23,7 @@ package org.marid.types;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Array;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
@@ -69,19 +70,32 @@ public interface Classes {
 
   private static void addClasses(@Nonnull Class<?> type, @Nonnull LinkedHashSet<Class<?>> classes) {
     if (type.isInterface()) {
-      classes.add(type);
+      if (isAccessible(type)) {
+        classes.add(type);
+      }
       for (final Class<?> i : type.getInterfaces()) {
         addClasses(i, classes);
       }
     } else {
       for (Class<?> c = type; c != null; c = c.getSuperclass()) {
-        classes.add(c);
+        if (isAccessible(c)) {
+          classes.add(c);
+        }
       }
       for (Class<?> c = type; c != null; c = c.getSuperclass()) {
         for (final Class<?> i : c.getInterfaces()) {
           addClasses(i, classes);
         }
       }
+    }
+  }
+
+  static boolean isAccessible(@Nonnull Class<?> type) {
+    try {
+      MethodHandles.publicLookup().accessClass(type);
+      return true;
+    } catch (IllegalAccessException | SecurityException x) {
+      return false;
     }
   }
 
