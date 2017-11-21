@@ -29,12 +29,11 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptySet;
-import static java.util.Comparator.comparingInt;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 import static org.marid.types.Classes.compatible;
@@ -139,7 +138,7 @@ public class TypeContext {
     } else if (type instanceof TypeVariable<?>) {
       final TypeVariable<?> v = (TypeVariable<?>) type;
       for (Type t = map.getOrDefault(v, v); t instanceof TypeVariable<?>; t = map.getOrDefault(t, t)) {
-        if (t.equals(v)) { // absent or circular reference detected
+        if (t.equals(v)) { // absent var or circular reference detected
           return v;
         }
       }
@@ -291,11 +290,8 @@ public class TypeContext {
         return c instanceof Class<?> ? Array.newInstance((Class<?>) c, 0).getClass() : new MaridArrayType(c);
       } else {
         final Set<Type> ts = concat(types(t1), types(t2))
-            .distinct()
-            .filter(t -> Object.class != t)
-            .filter(t -> isAssignable(t1, t) && isAssignable(t2, t))
-            .sorted(comparingInt(t -> isClass(t) ? 1 : 0))
-            .collect(Collectors.toCollection(LinkedHashSet::new));
+            .filter(t -> Object.class != t && isAssignable(t1, t) && isAssignable(t2, t))
+            .collect(toCollection(LinkedHashSet::new));
         ts.removeIf(t -> ts.stream().anyMatch(e -> e != t && isAssignable(e, t)));
         switch (ts.size()) {
           case 0: return Object.class;
