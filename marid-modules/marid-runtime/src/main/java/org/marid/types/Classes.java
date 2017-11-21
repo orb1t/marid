@@ -70,17 +70,13 @@ public interface Classes {
 
   private static void addClasses(@Nonnull Class<?> type, @Nonnull LinkedHashSet<Class<?>> classes) {
     if (type.isInterface()) {
-      if (isAccessible(type)) {
-        classes.add(type);
-      }
+      ifAccessible(type, classes::add);
       for (final Class<?> i : type.getInterfaces()) {
         addClasses(i, classes);
       }
     } else {
       for (Class<?> c = type; c != null; c = c.getSuperclass()) {
-        if (isAccessible(c)) {
-          classes.add(c);
-        }
+        ifAccessible(c, classes::add);
       }
       for (Class<?> c = type; c != null; c = c.getSuperclass()) {
         for (final Class<?> i : c.getInterfaces()) {
@@ -90,12 +86,12 @@ public interface Classes {
     }
   }
 
-  static boolean isAccessible(@Nonnull Class<?> type) {
+  static <T> void ifAccessible(@Nonnull Class<T> type, @Nonnull Consumer<Class<T>> consumer) {
     try {
       MethodHandles.publicLookup().accessClass(type);
-      return true;
+      consumer.accept(type);
     } catch (IllegalAccessException | SecurityException x) {
-      return false;
+      // do nothing
     }
   }
 
