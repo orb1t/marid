@@ -73,25 +73,6 @@ public interface Types {
     }
   }
 
-  static boolean isClass(@Nonnull Type type) {
-    if (type instanceof Class<?>) {
-      return !((Class<?>) type).isInterface();
-    } else if (type instanceof ParameterizedType) {
-      final ParameterizedType p = (ParameterizedType) type;
-      return isClass(p.getRawType());
-    } else if (type instanceof GenericArrayType) {
-      return false;
-    } else if (type instanceof WildcardType) {
-      final WildcardType wt = (WildcardType) type;
-      return Stream.of(wt.getUpperBounds()).anyMatch(Types::isClass);
-    } else if (type instanceof TypeVariable<?>) {
-      final TypeVariable<?> v = (TypeVariable<?>) type;
-      return Stream.of(v.getBounds()).anyMatch(Types::isClass);
-    } else {
-      throw new IllegalArgumentException("Unknown type: " + type);
-    }
-  }
-
   @Nonnull
   static Set<TypeVariable<?>> vars(@Nonnull Type type) {
     final LinkedHashSet<TypeVariable<?>> vars = new LinkedHashSet<>();
@@ -252,11 +233,10 @@ public interface Types {
     } else if (to instanceof Class<?>) {
       final Class<?> toClass = (Class<?>) to;
       if (from instanceof Class<?>) {
-        return compatible(toClass, (Class<?>) from);
+        return compatible((Class<?>) from, toClass);
       } else if (from instanceof ParameterizedType) {
         final ParameterizedType t = (ParameterizedType) from;
-        final Class<?> raw = (Class<?>) t.getRawType();
-        return compatible(toClass, raw);
+        return isAssignable(t.getRawType(), toClass, passed);
       } else {
         return false;
       }
@@ -266,16 +246,15 @@ public interface Types {
     } else if (to instanceof WildcardType) {
       return Arrays.stream(((WildcardType) to).getUpperBounds()).allMatch(t -> isAssignable(from, t, passed));
     } else if (to instanceof ParameterizedType) {
-      final ParameterizedType p = (ParameterizedType) to;
-      final Class<?> raw = (Class<?>) p.getRawType();
+      final ParameterizedType t = (ParameterizedType) to;
       if (from instanceof Class<?>) {
-        return compatible(raw, (Class<?>) from) && of(p.getActualTypeArguments()).allMatch(ALL::equals);
+        return isAssignable(t.getRawType(), from, passed) && of(t.getActualTypeArguments()).allMatch(ALL::equals);
       } else if (from instanceof ParameterizedType) {
-        final ParameterizedType t = (ParameterizedType) from;
-        if (compatible(raw, (Class<?>) t.getRawType())) {
+        final ParameterizedType f = (ParameterizedType) from;
+        if (isAssignable(t.getRawType(), f.getRawType(), passed)) {
           final Map<TypeVariable<?>, Type> mapFrom = resolveVars(from);
           final Map<TypeVariable<?>, Type> mapTo = resolveVars(to);
-          for (final TypeVariable<?> v : raw.getTypeParameters()) {
+          for (final TypeVariable<?> v : ((Class<?>) t.getRawType()).getTypeParameters()) {
             final Type resolvedFrom = resolve(v, mapFrom);
             final Type resolvedTo = resolve(v, mapTo);
             if (!isAssignable(resolvedFrom, resolvedTo, passed)) {

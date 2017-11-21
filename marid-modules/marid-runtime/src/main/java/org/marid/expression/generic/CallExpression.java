@@ -25,6 +25,7 @@ import org.marid.beans.BeanTypeContext;
 import org.marid.types.Invokable;
 import org.marid.types.InvokableConstructor;
 import org.marid.types.InvokableMethod;
+import org.marid.types.Types;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -36,7 +37,6 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
-import static org.marid.types.Classes.compatible;
 import static org.marid.types.Types.getRaw;
 
 public interface CallExpression extends Expression {
@@ -111,7 +111,7 @@ public interface CallExpression extends Expression {
   static boolean matches(Invokable<?> executable, Type... types) {
     if (executable.getParameterCount() == types.length) {
       for (int i = 0; i < types.length; i++) {
-        if (!compatible(executable.getParameterClasses()[i], getRaw(types[i]))) {
+        if (!Types.isAssignable(types[i], executable.getParameterTypes()[i])) {
           return false;
         }
       }

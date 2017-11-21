@@ -85,11 +85,11 @@ public interface Classes {
     }
   }
 
-  static boolean compatible(@Nonnull Class<?> to, @Nonnull Class<?> from) {
+  static boolean compatible(@Nonnull Class<?> from, @Nonnull Class<?> to) {
     return to.equals(from)
         || to.isAssignableFrom(from)
-        || to.isPrimitive() && compatible(wrapper(to), from)
-        || from.isPrimitive() && compatible(to, wrapper(from));
+        || to.isPrimitive() && compatible(from, wrapper(to))
+        || from.isPrimitive() && compatible(wrapper(from), to);
   }
 
   @Nonnull
