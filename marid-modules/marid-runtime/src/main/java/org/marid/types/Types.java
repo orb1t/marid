@@ -127,11 +127,7 @@ public interface Types {
 
   @Nonnull
   static Type boxed(@Nonnull Type type) {
-    if (type instanceof Class<?> && ((Class<?>) type).isPrimitive()) {
-      return Classes.wrapper((Class<?>) type);
-    } else {
-      return type;
-    }
+    return type instanceof Class<?> ? Classes.wrapper((Class<?>) type) : type;
   }
 
   @Nonnull

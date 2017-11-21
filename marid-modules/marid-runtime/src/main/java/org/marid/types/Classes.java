@@ -86,15 +86,12 @@ public interface Classes {
   }
 
   static boolean compatible(@Nonnull Class<?> from, @Nonnull Class<?> to) {
-    return to.equals(from)
-        || to.isAssignableFrom(from)
-        || to.isPrimitive() && compatible(from, wrapper(to))
-        || from.isPrimitive() && compatible(wrapper(from), to);
+    return wrapper(to).isAssignableFrom(wrapper(from));
   }
 
   @Nonnull
-  static Class<?> wrapper(@Nonnull Class<?> primitiveType) {
-    switch (primitiveType.getName()) {
+  static Class<?> wrapper(@Nonnull Class<?> type) {
+    switch (type.getName()) {
       case "int": return Integer.class;
       case "long": return Long.class;
       case "boolean": return Boolean.class;
@@ -104,7 +101,7 @@ public interface Classes {
       case "float": return Float.class;
       case "double": return Double.class;
       case "void": return Void.class;
-      default: throw new IllegalArgumentException(primitiveType.getName());
+      default: return type;
     }
   }
 
