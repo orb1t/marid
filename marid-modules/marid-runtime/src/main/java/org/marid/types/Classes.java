@@ -93,10 +93,6 @@ public interface Classes {
     }
   }
 
-  static boolean compatible(@Nonnull Class<?> from, @Nonnull Class<?> to) {
-    return wrapper(to).isAssignableFrom(wrapper(from));
-  }
-
   @Nonnull
   static Class<?> wrapper(@Nonnull Class<?> type) {
     switch (type.getName()) {

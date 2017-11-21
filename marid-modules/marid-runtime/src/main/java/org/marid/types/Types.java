@@ -37,7 +37,6 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
-import static org.marid.types.Classes.compatible;
 import static org.marid.types.MaridWildcardType.ALL;
 
 public interface Types {
@@ -229,7 +228,7 @@ public interface Types {
     } else if (to instanceof Class<?>) {
       final Class<?> toClass = (Class<?>) to;
       if (from instanceof Class<?>) {
-        return compatible((Class<?>) from, toClass);
+        return Classes.wrapper(toClass).isAssignableFrom(Classes.wrapper((Class<?>) from));
       } else if (from instanceof ParameterizedType) {
         final ParameterizedType t = (ParameterizedType) from;
         return isAssignable(t.getRawType(), toClass, passed);
