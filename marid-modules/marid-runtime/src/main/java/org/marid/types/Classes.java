@@ -146,7 +146,7 @@ public interface Classes {
   }
 
   @Nonnull
-  static Class<?> loadClass(@Nonnull String name, @Nonnull ClassLoader classLoader, boolean init) throws ClassNotFoundException {
+  static Class<?> loadClass(@Nonnull String name, @Nonnull ClassLoader classLoader) throws ClassNotFoundException {
     switch (name) {
       case "int": return int.class;
       case "long": return long.class;
@@ -157,7 +157,7 @@ public interface Classes {
       case "float": return float.class;
       case "double": return double.class;
       case "void": return void.class;
-      default: return Class.forName(name, init, classLoader);
+      default: return Class.forName(name, false, classLoader);
     }
   }
 

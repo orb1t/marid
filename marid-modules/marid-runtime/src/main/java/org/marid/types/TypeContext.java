@@ -47,7 +47,7 @@ public class TypeContext {
   @Nonnull
   public Class<?> getClass(@Nonnull String name) {
     try {
-      return Classes.loadClass(name, getClassLoader(), false);
+      return Classes.loadClass(name, getClassLoader());
     } catch (ClassNotFoundException x) {
       throwError(new IllegalStateException(x));
     } catch (RuntimeException x) {
