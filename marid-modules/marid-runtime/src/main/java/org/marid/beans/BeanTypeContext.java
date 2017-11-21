@@ -23,6 +23,7 @@ package org.marid.beans;
 
 import org.marid.expression.generic.Expression;
 import org.marid.types.TypeContext;
+import org.marid.types.Types;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Type;
@@ -40,7 +41,7 @@ public abstract class BeanTypeContext extends TypeContext {
     if (type instanceof Class<?>) {
       return type;
     } else {
-      return evaluate(e -> {
+      return Types.evaluate(e -> {
         for (int i = 0; i < formals.length; i++) {
           e.accept(formals[i], actuals[i]);
         }

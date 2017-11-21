@@ -28,7 +28,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.marid.runtime.types.AuxTypeUtils.I1;
 import org.marid.runtime.types.AuxTypeUtils.Map1;
-import org.marid.types.TypeContext;
+import org.marid.types.Types;
 
 import java.io.Serializable;
 import java.io.Writer;
@@ -47,13 +47,11 @@ import static org.marid.runtime.types.AuxTypeUtils.w;
 import static org.marid.types.Classes.classes;
 
 @Tag("normal")
-class TypeContextTest {
-
-  private final TypeContext context = new TypeContext();
+class TypesTest {
 
   @Test
   void resolveVars1() {
-    final Map<TypeVariable<?>, Type> map = context.resolveVars(AuxTypeUtils.List2.class);
+    final Map<TypeVariable<?>, Type> map = Types.resolveVars(AuxTypeUtils.List2.class);
 
     final Set<Class<?>> ec = classes(AuxTypeUtils.List2.class).filter(c -> c.getTypeParameters().length > 0).collect(toSet());
     final Set<Class<?>> ac = map.keySet().stream().map(v -> (Class<?>) v.getGenericDeclaration()).collect(toSet());
@@ -66,7 +64,7 @@ class TypeContextTest {
 
   @Test
   void resolveVars2() {
-    final Map<TypeVariable<?>, Type> map = context.resolveVars(AuxTypeUtils.List2.M.class);
+    final Map<TypeVariable<?>, Type> map = Types.resolveVars(AuxTypeUtils.List2.M.class);
 
     final Set<Class<?>> ec = classes(AuxTypeUtils.List1.M.class).filter(c -> c.getTypeParameters().length > 0).collect(toSet());
     final Set<Class<?>> ac = map.keySet().stream().map(v -> (Class<?>) v.getGenericDeclaration()).collect(toSet());
@@ -78,7 +76,7 @@ class TypeContextTest {
 
   @Test
   void resolveVarsStackOverflow() {
-    final Map<TypeVariable<?>, Type> map = context.resolveVars(AuxTypeUtils.Map2.class);
+    final Map<TypeVariable<?>, Type> map = Types.resolveVars(AuxTypeUtils.Map2.class);
 
     assertEquals(Set.of(Map1.class.getTypeParameters()), map.keySet());
     assertEquals(Set.of(parameterize(I1.class, I1.class)), new HashSet<>(map.values()));
@@ -112,7 +110,7 @@ class TypeContextTest {
   @ParameterizedTest
   @MethodSource("typesData")
   void types(Type type, List<Type> expected) {
-    final List<Type> actual = context.types(type).collect(toList());
+    final List<Type> actual = Types.types(type).collect(toList());
     assertEquals(expected, actual);
   }
 }

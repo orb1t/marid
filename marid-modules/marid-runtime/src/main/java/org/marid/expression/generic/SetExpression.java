@@ -56,16 +56,4 @@ public interface SetExpression extends Expression {
       }
     }
   }
-
-  default boolean isValueAssignableFrom(@Nonnull Type type, @Nullable Type owner, @Nonnull BeanTypeContext context) {
-    final Type targetType = getTarget().getType(owner, context);
-    for (final Field field : Types.getRaw(targetType).getFields()) {
-      if (field.getName().equals(getField())) {
-        if (context.isAssignable(type, field.getGenericType())) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
 }

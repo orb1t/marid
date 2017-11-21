@@ -22,6 +22,7 @@
 package org.marid.expression.generic;
 
 import org.marid.beans.BeanTypeContext;
+import org.marid.types.Types;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -35,19 +36,12 @@ public interface ClassExpression extends Expression {
   @Nonnull
   @Override
   default Type getType(@Nullable Type owner, @Nonnull BeanTypeContext context) {
-    return context.getClassType(context.getClass(getClassName()));
+    return Types.getClassType(context.getClass(getClassName()));
   }
 
   @Nonnull
   @Override
   default Class<?> getTargetClass(@Nullable Type owner, @Nonnull BeanTypeContext context) {
-    try {
-      return context.getClassLoader().loadClass(getClassName());
-    } catch (ClassNotFoundException x) {
-      context.throwError(new IllegalStateException(x));
-    } catch (RuntimeException x) {
-      context.throwError(x);
-    }
-    return Object.class;
+      return context.getClass(getClassName());
   }
 }
