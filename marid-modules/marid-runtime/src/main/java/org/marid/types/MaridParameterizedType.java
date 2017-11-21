@@ -71,6 +71,10 @@ public class MaridParameterizedType implements ParameterizedType {
     }
   }
 
+  public static MaridParameterizedType withTypes(ParameterizedType parameterizedType, Type... parameters) {
+    return new MaridParameterizedType(parameterizedType.getOwnerType(), parameterizedType.getRawType(), parameters);
+  }
+
   public String toString() {
     final StringBuilder sb = new StringBuilder();
 

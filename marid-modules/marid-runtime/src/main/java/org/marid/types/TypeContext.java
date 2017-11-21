@@ -139,7 +139,7 @@ public class TypeContext {
     } else if (type instanceof TypeVariable<?>) {
       final TypeVariable<?> v = (TypeVariable<?>) type;
       for (Type t = map.getOrDefault(v, v); t instanceof TypeVariable<?>; t = map.getOrDefault(t, t)) {
-        if (t.equals(v)) { // circular reference detected
+        if (t.equals(v)) { // absent or circular reference detected
           return v;
         }
       }
@@ -276,7 +276,7 @@ public class TypeContext {
     } else {
       final TypeEvaluator evaluator = new TypeEvaluator();
       callback.accept(evaluator);
-      return evaluator.resolve(type);
+      return evaluator.eval(type);
     }
   }
 
@@ -335,14 +335,12 @@ public class TypeContext {
           accept(getArrayComponentType(formal), getArrayComponentType(actual));
         } else if (formal instanceof ParameterizedType) {
           final ParameterizedType p = (ParameterizedType) formal;
-          final Class<?> raw = (Class<?>) p.getRawType();
-          final TypeVariable<?>[] vars = raw.getTypeParameters();
           final Map<TypeVariable<?>, Type> map = resolveVars(actual);
-          for (final TypeVariable<?> var : vars) {
-            final Type type = TypeContext.this.resolve(var, map);
-            if (isGround(type)) {
-              accept(var, type);
-            }
+          final ParameterizedType resolved = (ParameterizedType) resolve(formal, map);
+          final Type[] formals = p.getActualTypeArguments();
+          final Type[] actuals = resolved.getActualTypeArguments();
+          for (int i = 0; i < formals.length; i++) {
+            accept(formals[i], actuals[i]);
           }
         } else if (formal instanceof WildcardType) {
           final WildcardType wildcardType = (WildcardType) formal;
@@ -354,7 +352,7 @@ public class TypeContext {
     }
 
     @Nonnull
-    private Type resolve(@Nonnull Type type) {
+    private Type eval(@Nonnull Type type) {
       final LinkedHashMap<TypeVariable<?>, Type> mapping = new LinkedHashMap<>(typeMappings.size());
       typeMappings.forEach((k, v) -> mapping.put(k, v.stream().reduce(TypeContext.this::nct).orElse(k)));
       return ground(type, mapping);
