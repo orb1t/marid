@@ -33,7 +33,6 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptySet;
-import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
@@ -42,15 +41,29 @@ import static org.marid.types.MaridWildcardType.ALL;
 public interface Types {
 
   static boolean isArrayType(@Nonnull Type type) {
-    return type instanceof GenericArrayType || getRaw(type).isArray();
+    return getArrayComponentType(type) != null;
   }
 
   @Nullable
   static Type getArrayComponentType(@Nonnull Type type) {
-    if (type instanceof GenericArrayType) {
+    if (type instanceof Class<?>) {
+      return ((Class<?>) type).getComponentType();
+    } else if (type instanceof GenericArrayType) {
       return ((GenericArrayType) type).getGenericComponentType();
+    } else if (type instanceof TypeVariable<?>) {
+      return of(((TypeVariable<?>) type).getBounds())
+          .map(Types::getArrayComponentType)
+          .filter(Objects::nonNull)
+          .findFirst()
+          .orElse(null);
+    } else if (type instanceof WildcardType) {
+      return of(((WildcardType) type).getUpperBounds())
+          .map(Types::getArrayComponentType)
+          .filter(Objects::nonNull)
+          .findFirst()
+          .orElse(null);
     } else {
-      return getRaw(type).getComponentType();
+      return null;
     }
   }
 
@@ -104,23 +117,6 @@ public interface Types {
       for (final Type arg : p.getActualTypeArguments()) {
         vars(arg, vars);
       }
-    }
-  }
-
-  @Nonnull
-  static Class<?> getRaw(@Nonnull Type type) {
-    if (type instanceof Class<?>) {
-      return (Class<?>) type;
-    } else if (type instanceof ParameterizedType) {
-      return (Class<?>) ((ParameterizedType) type).getRawType();
-    } else if (type instanceof WildcardType) {
-      return getRaw(((WildcardType) type).getUpperBounds()[0]);
-    } else if (type instanceof GenericArrayType) {
-      return Array.newInstance(getRaw(((GenericArrayType) type).getGenericComponentType()), 0).getClass();
-    } else if (type instanceof TypeVariable<?>) {
-      return getRaw(((TypeVariable<?>) type).getBounds()[0]);
-    } else {
-      throw new IllegalArgumentException(type.getTypeName());
     }
   }
 
@@ -249,7 +245,7 @@ public interface Types {
     return isAssignable(from, to, new HashSet<>());
   }
 
-  private static boolean isAssignable(@Nonnull Type from, @Nonnull Type to, @Nonnull HashSet<TypeVariable<?>> passed) {
+  private static boolean isAssignable(Type from, Type to, HashSet<TypeVariable<?>> passed) {
     if (to.equals(from) || Object.class.equals(to)) {
       return true;
     } if (from instanceof WildcardType) {
@@ -257,8 +253,8 @@ public interface Types {
       return of(w.getUpperBounds()).anyMatch(t -> isAssignable(to, t, passed));
     } else if (Types.isArrayType(to)) {
       if (Types.isArrayType(from)) {
-        final Type fromCt = requireNonNull(getArrayComponentType(from));
-        final Type toCt = requireNonNull(getArrayComponentType(to));
+        final Type fromCt = getArrayComponentType(from);
+        final Type toCt = getArrayComponentType(to);
         return isAssignable(fromCt, toCt, passed);
       } else {
         return false;
@@ -399,7 +395,8 @@ public interface Types {
   @Nonnull
   static Stream<? extends Type> types(@Nonnull Type type) {
     final Map<TypeVariable<?>, Type> map = resolveVars(type);
-    return Classes.classes(Types.getRaw(type))
+    return rawClasses(type).flatMap(Classes::classes)
+        .distinct()
         .map(c -> {
           final TypeVariable<?>[] vars = c.getTypeParameters();
           return vars.length == 0 ? c : new MaridParameterizedType(null, c, vars);
