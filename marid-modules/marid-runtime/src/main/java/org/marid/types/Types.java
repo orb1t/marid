@@ -125,6 +125,39 @@ public interface Types {
   }
 
   @Nonnull
+  static Stream<Class<?>> rawClasses(@Nonnull Type type) {
+    final LinkedList<Class<?>> set = new LinkedList<>();
+    raw(type, new HashSet<>(), c -> {
+      if (set.stream().noneMatch(c::isAssignableFrom)) {
+        set.add(c);
+      }
+    });
+    return set.stream();
+  }
+
+  private static void raw(Type type, HashSet<TypeVariable<?>> passed, Consumer<Class<?>> v) {
+    if (type instanceof Class<?>) {
+      v.accept((Class<?>) type);
+    } else if (type instanceof ParameterizedType) {
+      v.accept((Class<?>) ((ParameterizedType) type).getRawType());
+    } else if (type instanceof GenericArrayType) {
+      v.accept(Object.class);
+    } else if (type instanceof TypeVariable<?>) {
+      if (passed.add((TypeVariable<?>) type)) {
+        for (final Type bound : ((TypeVariable<?>) type).getBounds()) {
+          raw(bound, passed, v);
+        }
+      }
+    } else if (type instanceof WildcardType) {
+      for (final Type bound : ((WildcardType) type).getUpperBounds()) {
+        raw(bound, passed, v);
+      }
+    } else {
+      throw new IllegalArgumentException(type.getTypeName());
+    }
+  }
+
+  @Nonnull
   static Type boxed(@Nonnull Type type) {
     return type instanceof Class<?> ? Classes.wrapper((Class<?>) type) : type;
   }
@@ -195,13 +228,18 @@ public interface Types {
       return et instanceof Class<?> ? Array.newInstance((Class<?>) et, 0).getClass() : new MaridArrayType(et);
     } else if (type instanceof TypeVariable<?>) {
       final TypeVariable<?> v = (TypeVariable<?>) type;
-      for (Type t = map.getOrDefault(v, v); t instanceof TypeVariable<?>; t = map.getOrDefault(t, t)) {
-        if (t.equals(v)) { // absent var or circular reference detected
+      for (Type t = map.get(v); t instanceof TypeVariable<?>; t = map.get(t)) {
+        if (t.equals(v)) { // circular reference detected
           return v;
         }
       }
-      final Set<TypeVariable<?>> p = MaridSets.add(passed, v, HashSet::new);
-      return p.size() == passed.size() ? v : resolve(map.get(v), map, p);
+      final Type t = map.get(v);
+      if (t == null) {
+        return v;
+      } else {
+        final Set<TypeVariable<?>> p = MaridSets.add(passed, v, HashSet::new);
+        return p.size() == passed.size() ? v : resolve(t, map, p);
+      }
     } else {
       throw new IllegalStateException("Unsupported type: " + type);
     }

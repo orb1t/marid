@@ -29,15 +29,12 @@ import org.marid.types.Types;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
-
-import static org.marid.types.Types.getRaw;
 
 public interface CallExpression extends Expression {
 
@@ -74,17 +71,17 @@ public interface CallExpression extends Expression {
   default void resolve(@Nonnull Type type, @Nonnull BeanTypeContext context, @Nonnull BiConsumer<Type, Type> evaluator) {
     if (getTarget() instanceof ThisExpression) {
       final Type[] ats = getArgs().stream().map(a -> a.getType(type, context)).toArray(Type[]::new);
-      for (final Method method : getRaw(type).getMethods()) {
-        if (method.getName().equals(getMethod())) {
-          final Invokable<?> invokable = new InvokableMethod(method);
-          if (matches(invokable, ats)) {
-            final Type[] ts = method.getGenericParameterTypes();
+      Types.rawClasses(type).flatMap(c -> Stream.of(c.getMethods()))
+          .filter(m -> m.getName().equals(getMethod()))
+          .map(InvokableMethod::new)
+          .filter(i -> matches(i, ats))
+          .findFirst()
+          .ifPresent(invokable -> {
+            final Type[] ts = invokable.getParameterTypes();
             for (int i = 0; i < ts.length; i++) {
               evaluator.accept(context.resolve(type, ts[i]), ats[i]);
             }
-          }
-        }
-      }
+          });
     }
   }
 
@@ -93,14 +90,15 @@ public interface CallExpression extends Expression {
                                                     @Nullable Type owner,
                                                     @Nonnull BeanTypeContext context,
                                                     @Nonnull Type... argTypes) {
-    final Class<?> targetClass = e.getTarget().getTargetClass(owner, context);
     if ("new".equals(e.getMethod())) {
-      return Stream.of(targetClass.getConstructors())
+      return e.getTarget().getTargetClass(owner, context)
+          .flatMap(c -> Stream.of(c.getConstructors()))
           .map(InvokableConstructor::new)
           .filter(c -> matches(c, argTypes))
           .findFirst();
     } else {
-      return Stream.of(targetClass.getMethods())
+      return e.getTarget().getTargetClass(owner, context)
+          .flatMap(c -> Stream.of(c.getMethods()))
           .filter(m -> m.getName().equals(e.getMethod()))
           .map(InvokableMethod::new)
           .filter(m -> matches(m, argTypes))

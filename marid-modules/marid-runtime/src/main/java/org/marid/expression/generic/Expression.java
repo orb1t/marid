@@ -29,6 +29,7 @@ import javax.annotation.Nullable;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.stream.Stream;
 
 public interface Expression {
 
@@ -42,7 +43,7 @@ public interface Expression {
   }
 
   @Nonnull
-  default Class<?> getTargetClass(@Nullable Type owner, @Nonnull BeanTypeContext context) {
-    return Types.getRaw(getType(owner, context));
+  default Stream<Class<?>> getTargetClass(@Nullable Type owner, @Nonnull BeanTypeContext context) {
+    return Types.rawClasses(getType(owner, context));
   }
 }

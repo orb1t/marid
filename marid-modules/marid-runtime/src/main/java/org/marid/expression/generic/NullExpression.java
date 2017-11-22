@@ -47,14 +47,17 @@ public interface NullExpression extends Expression {
       elementType = type;
       dimensions = 0;
     }
-    final Class<?> et = context.getClass(elementType);
-    switch (dimensions) {
-      case 0:
-        return et;
-      case 1:
-        return Array.newInstance(et, 0).getClass();
-      default:
-        return Array.newInstance(et, new int[dimensions]).getClass();
-    }
+    return context.getClass(elementType)
+        .map(c -> {
+          switch (dimensions) {
+            case 0:
+              return c;
+            case 1:
+              return Array.newInstance(c, 0).getClass();
+            default:
+              return Array.newInstance(c, new int[dimensions]).getClass();
+          }
+        })
+        .orElse(Object.class);
   }
 }

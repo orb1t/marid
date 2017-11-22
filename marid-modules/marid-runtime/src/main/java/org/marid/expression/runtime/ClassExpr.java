@@ -47,7 +47,7 @@ public final class ClassExpr extends Expr implements ClassExpression {
 
   @Override
   protected Class<?> execute(@Nullable Object self, @Nullable Type owner, @Nonnull BeanContext context) {
-    return getTargetClass(owner, context);
+    return getTargetClass(owner, context).findFirst().orElse(Object.class);
   }
 
   @Nonnull

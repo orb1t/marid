@@ -25,9 +25,9 @@ import org.marid.beans.BeanTypeContext;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
+import java.util.stream.Stream;
 
 public interface GetExpression extends Expression {
 
@@ -40,19 +40,22 @@ public interface GetExpression extends Expression {
   @Nonnull
   @Override
   default Type getType(@Nullable Type owner, @Nonnull BeanTypeContext context) {
-    final Class<?> targetClass = getTarget().getTargetClass(owner, context);
-    try {
-      final Field field = targetClass.getField(getField());
-      final Type result = context.resolve(new Type[0], new Type[0], this, field.getGenericType());
-      if (Modifier.isStatic(field.getModifiers())) {
-        return result;
-      } else {
-        final Type targetType = getTarget().getType(owner, context);
-        return context.resolve(targetType, result);
-      }
-    } catch (NoSuchFieldException x) {
-      context.throwError(new IllegalStateException(x));
-      return Object.class;
-    }
+    return getTarget().getTargetClass(owner, context)
+        .flatMap(c -> Stream.of(c.getFields()))
+        .filter(f -> f.getName().equals(getField()))
+        .map(f -> {
+          final Type result = context.resolve(new Type[0], new Type[0], this, f.getGenericType());
+          if (Modifier.isStatic(f.getModifiers())) {
+            return result;
+          } else {
+            final Type targetType = getTarget().getType(owner, context);
+            return context.resolve(targetType, result);
+          }
+        })
+        .findFirst()
+        .orElseGet(() -> {
+          context.throwError(new IllegalStateException(new NoSuchFieldException(getField())));
+          return Object.class;
+        });
   }
 }

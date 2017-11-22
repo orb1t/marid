@@ -24,6 +24,7 @@ package org.marid.types;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
+import java.util.Optional;
 
 public class TypeContext {
 
@@ -31,6 +32,7 @@ public class TypeContext {
     throw exception;
   }
 
+  @Nonnull
   public ClassLoader getClassLoader() {
     return Thread.currentThread().getContextClassLoader();
   }
@@ -45,14 +47,14 @@ public class TypeContext {
   }
 
   @Nonnull
-  public Class<?> getClass(@Nonnull String name) {
+  public Optional<Class<?>> getClass(@Nonnull String name) {
     try {
-      return Classes.loadClass(name, getClassLoader());
+      return Optional.of(Classes.loadClass(name, getClassLoader()));
     } catch (ClassNotFoundException x) {
       throwError(new IllegalStateException(x));
     } catch (RuntimeException x) {
       throwError(x);
     }
-    return Object.class;
+    return Optional.empty();
   }
 }

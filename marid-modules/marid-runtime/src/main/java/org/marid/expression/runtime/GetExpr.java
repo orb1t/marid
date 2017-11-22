@@ -57,8 +57,8 @@ public final class GetExpr extends Expr implements GetExpression {
   @Override
   protected Object execute(@Nullable Object self, @Nullable Type owner, @Nonnull BeanContext context) {
     final Object target = getTarget().evaluate(self, owner, context);
-    final Class<?> targetClass = getTarget().getTargetClass(owner, context);
-    final Field field = Stream.of(targetClass.getFields())
+    final Field field = getTarget().getTargetClass(owner, context)
+        .flatMap(c -> Stream.of(c.getFields()))
         .filter(f -> f.getName().equals(getField()))
         .findFirst()
         .orElseThrow(() -> new NoSuchElementException(getField()));

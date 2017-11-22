@@ -27,6 +27,7 @@ import org.marid.types.Types;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
+import java.util.stream.Stream;
 
 public interface ClassExpression extends Expression {
 
@@ -36,12 +37,12 @@ public interface ClassExpression extends Expression {
   @Nonnull
   @Override
   default Type getType(@Nullable Type owner, @Nonnull BeanTypeContext context) {
-    return Types.getClassType(context.getClass(getClassName()));
+    return Types.getClassType(context.getClass(getClassName()).orElse(Object.class));
   }
 
   @Nonnull
   @Override
-  default Class<?> getTargetClass(@Nullable Type owner, @Nonnull BeanTypeContext context) {
-      return context.getClass(getClassName());
+  default Stream<Class<?>> getTargetClass(@Nullable Type owner, @Nonnull BeanTypeContext context) {
+      return context.getClass(getClassName()).stream();
   }
 }

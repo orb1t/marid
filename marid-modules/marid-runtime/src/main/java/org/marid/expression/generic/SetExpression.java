@@ -26,9 +26,9 @@ import org.marid.types.Types;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.function.BiConsumer;
+import java.util.stream.Stream;
 
 public interface SetExpression extends Expression {
 
@@ -49,11 +49,11 @@ public interface SetExpression extends Expression {
 
   @Override
   default void resolve(@Nonnull Type type, @Nonnull BeanTypeContext context, @Nonnull BiConsumer<Type, Type> evaluator) {
-    for (final Field field : Types.getRaw(type).getFields()) {
-      if (field.getName().equals(getField())) {
-        evaluator.accept(context.resolve(type, field.getGenericType()), getValue().getType(type, context));
-        return;
-      }
+    if (getTarget() instanceof ThisExpression) {
+      Types.rawClasses(type).flatMap(c -> Stream.of(c.getFields()))
+          .filter(f -> f.getName().equals(getField()))
+          .findFirst()
+          .ifPresent(f -> evaluator.accept(context.resolve(type, f.getGenericType()), getValue().getType(type, context)));
     }
   }
 }
