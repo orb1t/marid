@@ -76,7 +76,8 @@ class ExpressionTypeTest {
         () -> new Object[]{"b11", int[].class},
         () -> new Object[]{"b12", new TypeToken<ArrayList<Number[]>>() {}.getType()},
         () -> new Object[]{"b13", new TypeToken<MyList<AutoCloseable>>() {}.getType()},
-        () -> new Object[]{"b14", new TypeToken<MyComplexBean<Integer, Integer>>() {}.getType()}
+        () -> new Object[]{"b14", new TypeToken<MyComplexBean<Integer, Integer>>() {}.getType()},
+        () -> new Object[]{"b15", new TypeToken<List<Number>>() {}.getType()}
     );
   }
 

@@ -259,4 +259,23 @@
       </call>
     </factory>
   </bean>
+
+  <bean name="b15">
+    <factory>
+      <call method="asList">
+        <target>
+          <class class="java.util.Arrays"/>
+        </target>
+        <args>
+          <array>
+            <elements>
+              <const type="I" value="1"/>
+              <const type="J" value="2"/>
+              <const type="D" value="2.0"/>
+            </elements>
+          </array>
+        </args>
+      </call>
+    </factory>
+  </bean>
 </bean>

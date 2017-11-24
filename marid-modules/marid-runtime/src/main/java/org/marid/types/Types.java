@@ -123,7 +123,7 @@ public interface Types {
   @Nonnull
   static Stream<Class<?>> rawClasses(@Nonnull Type type) {
     final LinkedList<Class<?>> set = new LinkedList<>();
-    raw(type, new HashSet<>(), c -> {
+    raw(boxed(type), new HashSet<>(), c -> {
       if (set.stream().noneMatch(c::isAssignableFrom)) {
         set.add(c);
       }
@@ -181,9 +181,9 @@ public interface Types {
       return new MaridWildcardType(upper, lower);
     } else if (type instanceof TypeVariable<?>) {
       final TypeVariable<?> v = (TypeVariable<?>) type;
-      final Set<TypeVariable<?>> p = MaridSets.add(passed, v, HashSet::new);
+      final Set<TypeVariable<?>> p = MaridSets.add(passed, v);
       final Type t = map.get(v);
-      if (t == null || t.equals(v) || p.size() == passed.size()) { // not found or circular reference
+      if (t == null || t.equals(v) || p == passed) { // not found or circular reference
         final Type[] bounds = Stream.of(v.getBounds())
             .filter(e -> !(e instanceof TypeVariable<?>) || !p.contains(e))
             .map(e -> ground(e, map, p))
@@ -233,8 +233,8 @@ public interface Types {
       if (t == null) {
         return v;
       } else {
-        final Set<TypeVariable<?>> p = MaridSets.add(passed, v, HashSet::new);
-        return p.size() == passed.size() ? v : resolve(t, map, p);
+        final Set<TypeVariable<?>> p = MaridSets.add(passed, v);
+        return p == passed ? v : resolve(t, map, p);
       }
     } else {
       throw new IllegalStateException("Unsupported type: " + type);
@@ -242,7 +242,7 @@ public interface Types {
   }
 
   static boolean isAssignable(@Nonnull Type from, @Nonnull Type to) {
-    return isAssignable(from, to, new HashSet<>());
+    return isAssignable(boxed(from), boxed(to), new HashSet<>());
   }
 
   private static boolean isAssignable(Type from, Type to, HashSet<TypeVariable<?>> passed) {
@@ -344,11 +344,6 @@ public interface Types {
   }
 
   @Nonnull
-  static Type getClassType(@Nonnull Class<?> type) {
-    return new MaridParameterizedType(null, Class.class, (Type) type);
-  }
-
-  @Nonnull
   static Type getType(@Nonnull Class<?> type) {
     final TypeVariable<?>[] vars = type.getTypeParameters();
     if (vars.length == 0) {
@@ -370,7 +365,8 @@ public interface Types {
   }
 
   @Nonnull
-  static Type nct(@Nonnull Type t1, @Nonnull Type t2) {
+  static Type nct(@Nonnull Type type1, @Nonnull Type type2) {
+    final Type t1 = boxed(type1), t2 = boxed(type2);
     if (t1.equals(t2)) {
       return t1;
     } else {
@@ -394,7 +390,7 @@ public interface Types {
 
   @Nonnull
   static Stream<? extends Type> types(@Nonnull Type type) {
-    final Map<TypeVariable<?>, Type> map = resolveVars(type);
+    final Map<TypeVariable<?>, Type> map = resolveVars(type = boxed(type));
     return rawClasses(type).flatMap(Classes::classes)
         .distinct()
         .map(c -> {

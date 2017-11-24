@@ -25,7 +25,6 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
-import org.marid.function.ForwardedPredicate;
 import org.marid.idelib.spring.ui.FxComponent;
 
 import java.util.Map;
@@ -39,7 +38,7 @@ import java.util.stream.Stream;
  * @author Dmitry Ovchinnikov
  */
 @FxComponent
-public class LoggingFilter implements Predicate<LogRecord> {
+public class LoggingFilter {
 
   private final BooleanProperty offProperty = new SimpleBooleanProperty();
   private final BooleanProperty allProperty = new SimpleBooleanProperty(true);
@@ -60,7 +59,7 @@ public class LoggingFilter implements Predicate<LogRecord> {
         properties.forEach((l, p) -> p.setValue(false));
         allProperty.set(false);
       }
-      filteredList.setPredicate(new ForwardedPredicate<>(this));
+      filteredList.setPredicate(new LogPredicate());
     });
     allProperty.addListener((observable, oldValue, newValue) -> {
       if (newValue) {
@@ -68,7 +67,7 @@ public class LoggingFilter implements Predicate<LogRecord> {
         offProperty.set(false);
         filteredList.setPredicate(null);
       } else {
-        filteredList.setPredicate(new ForwardedPredicate<>(this));
+        filteredList.setPredicate(new LogPredicate());
       }
     });
     properties.forEach((l, p) -> p.addListener((observable, oldValue, newValue) -> {
@@ -76,7 +75,7 @@ public class LoggingFilter implements Predicate<LogRecord> {
         allProperty.set(false);
         offProperty.set(false);
       }
-      filteredList.setPredicate(new ForwardedPredicate<>(this));
+      filteredList.setPredicate(new LogPredicate());
     }));
   }
 
@@ -96,18 +95,21 @@ public class LoggingFilter implements Predicate<LogRecord> {
   }
 
   public FilteredList<LogRecord> filteredList(ObservableList<LogRecord> list) {
-    return filteredList = new FilteredList<>(list, this);
+    return filteredList = new FilteredList<>(list, new LogPredicate());
   }
 
-  @Override
-  public boolean test(LogRecord logRecord) {
-    if (allProperty.get()) {
-      return true;
-    } else if (offProperty.get()) {
-      return false;
-    } else {
-      final BooleanProperty property = properties.get(logRecord.getLevel());
-      return property != null && property.get();
+  private class LogPredicate implements Predicate<LogRecord> {
+
+    @Override
+    public boolean test(LogRecord logRecord) {
+      if (allProperty.get()) {
+        return true;
+      } else if (offProperty.get()) {
+        return false;
+      } else {
+        final BooleanProperty property = properties.get(logRecord.getLevel());
+        return property != null && property.get();
+      }
     }
   }
 }

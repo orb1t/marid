@@ -22,7 +22,7 @@
 package org.marid.expression.generic;
 
 import org.marid.beans.BeanTypeContext;
-import org.marid.types.Types;
+import org.marid.types.MaridParameterizedType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -37,7 +37,7 @@ public interface ClassExpression extends Expression {
   @Nonnull
   @Override
   default Type getType(@Nullable Type owner, @Nonnull BeanTypeContext context) {
-    return Types.getClassType(context.getClass(getClassName()).orElse(Object.class));
+    return new MaridParameterizedType(null, Class.class, (Type) context.getClass(getClassName()).orElse(Object.class));
   }
 
   @Nonnull

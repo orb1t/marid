@@ -22,24 +22,31 @@
 package org.marid.collections;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.Collections;
+import java.util.Iterator;
 import java.util.Set;
-import java.util.function.IntFunction;
+import java.util.stream.Stream;
 
 public interface MaridSets {
 
+  @SuppressWarnings("unchecked")
   @Nonnull
-  static <E> Set<E> add(@Nonnull Set<E> set, @Nullable E element, @Nonnull IntFunction<? extends Set<E>> setCreator) {
+  static <E> Set<E> add(@Nonnull Set<E> set, @Nonnull E element) {
     if (set.isEmpty()) {
-      return Collections.singleton(element);
+      return Set.of(element);
     } else if (set.contains(element)) {
       return set;
     } else {
-      final Set<E> newSet = setCreator.apply(set.size() + 1);
-      newSet.addAll(set);
-      newSet.add(element);
-      return newSet;
+      switch (set.size()) {
+        case 1: {
+          final Iterator<E> i = set.iterator();
+          return Set.of(i.next(), element);
+        }
+        case 2: {
+          final Iterator<E> i = set.iterator();
+          return Set.of(i.next(), i.next(), element);
+        }
+        default: return (Set<E>) Set.of(Stream.concat(set.stream(), Stream.of(element)).toArray());
+      }
     }
   }
 }
