@@ -54,4 +54,9 @@ public class StringExpr extends Expr implements StringExpression {
     super.writeTo(element);
     element.setTextContent(getValue());
   }
+
+  @Override
+  public String toString() {
+    return "`" + getValue() + "`";
+  }
 }

@@ -21,19 +21,19 @@
 
 package org.marid.dependant.beaneditor.view;
 
-import javafx.scene.layout.HBox;
-import javafx.scene.text.Text;
-import org.marid.expression.mutable.Expr;
-
 import javax.annotation.Nonnull;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-public abstract class IdeBeanView extends HBox {
+import static java.util.regex.Pattern.compile;
 
-  public static IdeBeanView view(@Nonnull Expr expr) {
-    return null;
-  }
+public class BeanViewUtils {
 
-  public static Text glyph(@Nonnull Expr expr) {
-    return null;
+  private static final Pattern QUALIFIED_NAME = compile("((\\w+)[.])*(?<simpleName>\\w+)");
+
+  @Nonnull
+  public static String replaceQualified(@Nonnull String text) {
+    final Matcher matcher = QUALIFIED_NAME.matcher(text);
+    return matcher.replaceAll(r -> ((Matcher) r).group("simpleName"));
   }
 }

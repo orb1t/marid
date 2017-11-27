@@ -21,6 +21,7 @@
 
 package org.marid.expression.generic;
 
+import org.marid.annotation.MetaInfo;
 import org.marid.beans.BeanTypeContext;
 import org.marid.types.Invokable;
 import org.marid.types.InvokableConstructor;
@@ -36,6 +37,7 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
+@MetaInfo(name = "Invokable Call", icon = "F_CODE")
 public interface CallExpression extends Expression {
 
   @Nonnull

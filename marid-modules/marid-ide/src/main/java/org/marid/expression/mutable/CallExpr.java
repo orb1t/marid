@@ -31,6 +31,7 @@ import org.w3c.dom.Element;
 import javax.annotation.Nonnull;
 import java.util.List;
 
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toCollection;
 import static javafx.collections.FXCollections.observableArrayList;
 import static org.marid.io.Xmls.*;
@@ -88,5 +89,10 @@ public class CallExpr extends Expr implements CallExpression {
     if (!args.isEmpty()) {
       create(element, "args", as -> getArgs().forEach(a -> create(as, a.getTag(), a::writeTo)));
     }
+  }
+
+  @Override
+  public String toString() {
+    return getArgs().stream().map(Object::toString).collect(joining(",", target + "." + method + "(", ")"));
   }
 }

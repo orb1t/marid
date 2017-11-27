@@ -60,4 +60,9 @@ public class NullExpr extends Expr implements NullExpression {
       element.setAttribute("type", getType());
     }
   }
+
+  @Override
+  public String toString() {
+    return "null(" + getType() + ")";
+  }
 }

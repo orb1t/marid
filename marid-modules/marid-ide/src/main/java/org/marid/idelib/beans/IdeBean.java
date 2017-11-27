@@ -128,7 +128,7 @@ public class IdeBean implements MaridBean {
     writeFormatted("bean", this::writeTo, file);
   }
 
-  private Observable[] observables() {
+  public Observable[] observables() {
     return new Observable[]{name, factory, children};
   }
 

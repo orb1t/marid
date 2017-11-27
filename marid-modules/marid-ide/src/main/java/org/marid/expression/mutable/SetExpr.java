@@ -83,4 +83,9 @@ public class SetExpr extends Expr implements SetExpression {
     element.setAttribute("field", getField());
     create(element, "value", v -> create(v, getValue().getTag(), getValue()::writeTo));
   }
+
+  @Override
+  public String toString() {
+    return "(" + target + "." + field + "=" + value + ")";
+  }
 }

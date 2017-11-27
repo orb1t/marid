@@ -56,4 +56,9 @@ public class ClassExpr extends Expr implements ClassExpression {
     super.writeTo(element);
     element.setAttribute("class", getClassName());
   }
+
+  @Override
+  public String toString() {
+    return className.get();
+  }
 }

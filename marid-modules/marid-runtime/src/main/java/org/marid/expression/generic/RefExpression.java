@@ -21,12 +21,14 @@
 
 package org.marid.expression.generic;
 
+import org.marid.annotation.MetaInfo;
 import org.marid.beans.BeanTypeContext;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
 
+@MetaInfo(name = "Reference", icon = "D_LINK")
 public interface RefExpression extends Expression {
 
   @Nonnull

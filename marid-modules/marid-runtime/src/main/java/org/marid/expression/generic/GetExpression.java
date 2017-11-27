@@ -21,6 +21,7 @@
 
 package org.marid.expression.generic;
 
+import org.marid.annotation.MetaInfo;
 import org.marid.beans.BeanTypeContext;
 
 import javax.annotation.Nonnull;
@@ -29,6 +30,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.stream.Stream;
 
+@MetaInfo(name = "Field Getter", icon = "D_CODEPEN")
 public interface GetExpression extends Expression {
 
   @Nonnull

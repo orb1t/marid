@@ -21,6 +21,7 @@
 
 package org.marid.expression.generic;
 
+import org.marid.annotation.MetaInfo;
 import org.marid.beans.BeanTypeContext;
 import org.marid.types.Types;
 
@@ -30,6 +31,7 @@ import java.lang.reflect.Type;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
+@MetaInfo(name = "Field Setter", icon = "F_SEND")
 public interface SetExpression extends Expression {
 
   @Nonnull

@@ -55,7 +55,7 @@ public final class ArrayExpr extends Expr implements ArrayExpression {
   }
 
   @Override
-  protected Object[] execute(@Nullable Object self, @Nullable Type owner, @Nonnull BeanContext context) {
+  protected Object execute(@Nullable Object self, @Nullable Type owner, @Nonnull BeanContext context) {
     return elements.stream().map(e -> e.evaluate(self, owner, context)).toArray();
   }
 }

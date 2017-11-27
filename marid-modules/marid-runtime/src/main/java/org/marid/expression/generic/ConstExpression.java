@@ -21,6 +21,7 @@
 
 package org.marid.expression.generic;
 
+import org.marid.annotation.MetaInfo;
 import org.marid.misc.Calls;
 import org.marid.beans.BeanTypeContext;
 
@@ -41,6 +42,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 import java.util.function.Function;
 
+@MetaInfo(name = "Constant", icon = "D_COLLAGE")
 public interface ConstExpression extends ValueExpression {
 
   @Nonnull

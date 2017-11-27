@@ -27,6 +27,7 @@ import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toCollection;
 import static javafx.collections.FXCollections.observableArrayList;
@@ -61,5 +62,10 @@ public class ArrayExpr extends Expr implements ArrayExpression {
     if (!elements.isEmpty()) {
       create(element, "elements", es -> getElements().forEach(e -> create(es, e.getTag(), e::writeTo)));
     }
+  }
+
+  @Override
+  public String toString() {
+    return getElements().stream().map(Object::toString).collect(Collectors.joining(",", "[", "]"));
   }
 }

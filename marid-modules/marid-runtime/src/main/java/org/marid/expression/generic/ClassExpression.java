@@ -21,6 +21,7 @@
 
 package org.marid.expression.generic;
 
+import org.marid.annotation.MetaInfo;
 import org.marid.beans.BeanTypeContext;
 import org.marid.types.MaridParameterizedType;
 
@@ -29,6 +30,7 @@ import javax.annotation.Nullable;
 import java.lang.reflect.Type;
 import java.util.stream.Stream;
 
+@MetaInfo(name = "Class", icon = "D_FILE")
 public interface ClassExpression extends Expression {
 
   @Nonnull

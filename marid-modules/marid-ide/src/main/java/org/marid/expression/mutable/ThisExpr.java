@@ -34,4 +34,9 @@ public class ThisExpr extends Expr implements ThisExpression {
   ThisExpr(@Nonnull Element element) {
     super(element);
   }
+
+  @Override
+  public String toString() {
+    return "this";
+  }
 }

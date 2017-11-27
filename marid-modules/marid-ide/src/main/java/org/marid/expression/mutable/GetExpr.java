@@ -69,4 +69,9 @@ public class GetExpr extends Expr implements GetExpression {
     create(element, "target", t -> create(t, getTarget().getTag(), getTarget()::writeTo));
     element.setAttribute("field", getField());
   }
+
+  @Override
+  public String toString() {
+    return target + "." + field;
+  }
 }

@@ -21,6 +21,7 @@
 
 package org.marid.expression.generic;
 
+import org.marid.annotation.MetaInfo;
 import org.marid.beans.BeanTypeContext;
 import org.marid.types.MaridArrayType;
 import org.marid.types.Types;
@@ -32,6 +33,7 @@ import java.util.List;
 
 import static java.lang.reflect.Array.newInstance;
 
+@MetaInfo(name = "Array", icon = "D_CODE_ARRAY")
 public interface ArrayExpression extends Expression {
 
   @Nonnull
@@ -45,6 +47,6 @@ public interface ArrayExpression extends Expression {
         .distinct()
         .reduce(Types::nct)
         .map(e -> e instanceof Class<?> ? newInstance((Class<?>) e, 0).getClass() : new MaridArrayType(e))
-        .orElse(Object.class);
+        .orElse(Object[].class);
   }
 }

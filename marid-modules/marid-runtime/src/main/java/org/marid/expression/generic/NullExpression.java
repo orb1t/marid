@@ -21,6 +21,7 @@
 
 package org.marid.expression.generic;
 
+import org.marid.annotation.MetaInfo;
 import org.marid.beans.BeanTypeContext;
 
 import javax.annotation.Nonnull;
@@ -28,6 +29,7 @@ import javax.annotation.Nullable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 
+@MetaInfo(name = "Null", icon = "D_NULL")
 public interface NullExpression extends Expression {
 
   @Nonnull

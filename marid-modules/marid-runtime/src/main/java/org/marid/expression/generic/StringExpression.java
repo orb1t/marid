@@ -21,12 +21,14 @@
 
 package org.marid.expression.generic;
 
+import org.marid.annotation.MetaInfo;
 import org.marid.beans.BeanTypeContext;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
 
+@MetaInfo(name = "String", icon = "D_CODE_STRING")
 public interface StringExpression extends Expression {
 
   @Nonnull

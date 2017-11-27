@@ -32,7 +32,7 @@ import static org.marid.io.Xmls.attribute;
 
 public class ConstExpr extends ValueExpr implements ConstExpression {
 
-  public final ObjectProperty<ConstExpression.ConstantType> type;
+  public final ObjectProperty<ConstantType> type;
 
   public ConstExpr(@Nonnull ConstantType type, @Nonnull String value) {
     super(value);
@@ -56,5 +56,10 @@ public class ConstExpr extends ValueExpr implements ConstExpression {
   public void writeTo(@Nonnull Element element) {
     super.writeTo(element);
     element.setAttribute("type", getType().name());
+  }
+
+  @Override
+  public String toString() {
+    return getType() + "(" + getValue() + ")";
   }
 }
