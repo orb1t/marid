@@ -32,9 +32,9 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toCollection;
 import static javafx.collections.FXCollections.observableArrayList;
 import static org.marid.io.Xmls.*;
+import static org.marid.jfx.props.ObservablesProvider.toObservableList;
 
 public class CallExpr extends Expr implements CallExpression {
 
@@ -43,24 +43,17 @@ public class CallExpr extends Expr implements CallExpression {
   public final ObservableList<Expr> args;
 
   public CallExpr(@Nonnull Expr target, @Nonnull String method, @Nonnull Expr... args) {
-    this.target = new FxObject<>(Expr::getObservables, target);
+    this.target = new FxObject<>(Expr::observables, target);
     this.method = new SimpleStringProperty(method);
-    this.args = observableArrayList(Expr::getObservables);
+    this.args = observableArrayList(Expr::observables);
     this.args.setAll(args);
   }
 
   CallExpr(@Nonnull Element element) {
     super(element);
-    target = new FxObject<>(
-        Expr::getObservables,
-        element("target", element).map(Expr::of).orElseThrow(() -> new NullPointerException("target"))
-    );
-    method = new SimpleStringProperty(
-        attribute(element, "method").orElseThrow(() -> new NullPointerException("method"))
-    );
-    args = elements("args", element)
-        .map(Expr::of)
-        .collect(toCollection(() -> observableArrayList(Expr::getObservables)));
+    target = new FxObject<>(Expr::observables, element("target", element).map(Expr::of).orElseGet(NullExpr::new));
+    method = new SimpleStringProperty(attribute(element, "method").orElse("get"));
+    args = elements("args", element).map(Expr::of).collect(toObservableList());
   }
 
   @Nonnull

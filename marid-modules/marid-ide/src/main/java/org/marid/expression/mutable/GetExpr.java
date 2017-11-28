@@ -30,6 +30,7 @@ import org.w3c.dom.Element;
 import javax.annotation.Nonnull;
 
 import static org.marid.io.Xmls.*;
+import static org.marid.jfx.props.ObservablesProvider.object;
 
 public class GetExpr extends Expr implements GetExpression {
 
@@ -37,18 +38,13 @@ public class GetExpr extends Expr implements GetExpression {
   public final StringProperty field;
 
   public GetExpr(@Nonnull Expr target, @Nonnull String field) {
-    this.target = new FxObject<>(Expr::getObservables, target);
+    this.target = object(target);
     this.field = new SimpleStringProperty(field);
   }
 
   GetExpr(@Nonnull Element element) {
-    this.target = new FxObject<>(
-        Expr::getObservables,
-        element("target", element).map(Expr::of).orElseThrow(() -> new NullPointerException("target"))
-    );
-    this.field = new SimpleStringProperty(
-        attribute(element, "field").orElseThrow(() -> new NullPointerException("field"))
-    );
+    this.target = object(element("target", element).map(Expr::of).orElseGet(NullExpr::new));
+    this.field = new SimpleStringProperty(attribute(element, "field").orElse("field"));
   }
 
   @Nonnull

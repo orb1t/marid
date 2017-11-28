@@ -21,18 +21,15 @@
 
 package org.marid.ide.common;
 
+import org.marid.idelib.spring.annotation.IdeAction;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.dnd.DndManager;
-import org.marid.jfx.track.PeriodicObservable;
-import org.marid.idelib.spring.annotation.IdeAction;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Spliterator;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -51,11 +48,6 @@ public class ActionConfiguration {
         actions.getObject().stream(),
         actionQueues.getObject().stream().flatMap(s -> StreamSupport.stream(s, false))
     ).collect(Collectors.toList());
-  }
-
-  @Bean
-  public PeriodicObservable bySeconds(ScheduledThreadPoolExecutor scheduledExecutorService) {
-    return new PeriodicObservable(scheduledExecutorService, 1L, TimeUnit.SECONDS);
   }
 
   @Bean

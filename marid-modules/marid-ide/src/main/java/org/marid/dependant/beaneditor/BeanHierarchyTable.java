@@ -22,10 +22,13 @@
 package org.marid.dependant.beaneditor;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import org.marid.dependant.beaneditor.view.BeanViewUtils;
+import org.marid.dependant.beaneditor.view.IdeBeanViewFactory;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.idelib.beans.IdeBean;
 import org.marid.idelib.beans.IdeBeanContext;
@@ -39,7 +42,6 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Nonnull;
 import java.util.List;
 
-import static javafx.beans.binding.Bindings.createStringBinding;
 import static org.marid.jfx.LocalizedStrings.ls;
 
 @Component
@@ -81,7 +83,7 @@ public class BeanHierarchyTable extends MaridTreeTableView<IdeBean> {
           return Bindings.createStringBinding(() -> {
             final IdeBeanContext context = new IdeBeanContext(bean, profile.getClassLoader());
             return BeanViewUtils.replaceQualified(bean.getFactory().getType(null, context).toString());
-          }, getRoot().getValue().observables());
+          }, bean.observables());
         }
       });
       column.setPrefWidth(200);
@@ -93,18 +95,13 @@ public class BeanHierarchyTable extends MaridTreeTableView<IdeBean> {
 
   @Order(2)
   @Bean(initMethod = "run")
-  public Runnable factoryColumn() {
+  public Runnable factoryColumn(IdeBeanViewFactory viewFactory) {
     return () -> {
-      final TreeTableColumn<IdeBean, String> column = new TreeTableColumn<>();
+      final TreeTableColumn<IdeBean, Node> column = new TreeTableColumn<>();
       column.textProperty().bind(ls("Factory"));
       column.setCellValueFactory(p -> {
-        final TreeItem<IdeBean> item = p.getValue();
-        final IdeBean bean = item.getValue();
-        if (bean.getParent() == null) {
-          return new SimpleStringProperty();
-        } else {
-          return createStringBinding(() -> bean.getFactory().toString(), bean.factory);
-        }
+        final IdeBean bean = p.getValue().getValue();
+        return new SimpleObjectProperty<>(viewFactory.createView(bean, bean.getFactory()));
       });
       column.setPrefWidth(500);
       column.setMinWidth(300);

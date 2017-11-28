@@ -21,7 +21,6 @@
 
 package org.marid.idelib.beans;
 
-import javafx.beans.Observable;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
@@ -31,6 +30,7 @@ import org.marid.beans.MaridBean;
 import org.marid.expression.mutable.Expr;
 import org.marid.expression.mutable.NullExpr;
 import org.marid.jfx.props.FxObject;
+import org.marid.jfx.props.ObservablesProvider;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
@@ -40,12 +40,13 @@ import java.io.Writer;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import static javafx.collections.FXCollections.observableArrayList;
 import static org.marid.io.Xmls.*;
+import static org.marid.jfx.props.ObservablesProvider.object;
+import static org.marid.jfx.props.ObservablesProvider.toObservableList;
 
-public class IdeBean implements MaridBean {
+public class IdeBean implements MaridBean, ObservablesProvider {
 
   public final IdeBean parent;
   public final StringProperty name;
@@ -55,7 +56,7 @@ public class IdeBean implements MaridBean {
   public IdeBean(@Nullable IdeBean parent, @Nonnull String name, @Nonnull Expr factory) {
     this.parent = parent;
     this.name = new SimpleStringProperty(name);
-    this.factory = new FxObject<>(Expr::getObservables, factory);
+    this.factory = object(factory);
     this.children = observableArrayList(IdeBean::observables);
   }
 
@@ -65,16 +66,9 @@ public class IdeBean implements MaridBean {
 
   public IdeBean(@Nullable IdeBean parent, @Nonnull Element element) {
     this.parent = parent;
-    this.name = new SimpleStringProperty(
-        attribute(element, "name").orElseThrow(() -> new NullPointerException("name"))
-    );
-    this.factory = new FxObject<>(
-        Expr::getObservables,
-        element("factory", element).map(Expr::of).orElseThrow(() -> new NullPointerException("factory"))
-    );
-    this.children = elements(element, "bean")
-        .map(e -> new IdeBean(this, e))
-        .collect(Collectors.toCollection(() -> observableArrayList(IdeBean::observables)));
+    this.name = new SimpleStringProperty(attribute(element, "name").orElse(""));
+    this.factory = object(element("factory", element).map(Expr::of).orElseGet(NullExpr::new));
+    this.children = elements(element, "bean").map(e -> new IdeBean(this, e)).collect(toObservableList());
   }
 
   public IdeBean(@Nonnull Element element) {
@@ -126,10 +120,6 @@ public class IdeBean implements MaridBean {
 
   public void save(@Nonnull Path file) {
     writeFormatted("bean", this::writeTo, file);
-  }
-
-  public Observable[] observables() {
-    return new Observable[]{name, factory, children};
   }
 
   @Override

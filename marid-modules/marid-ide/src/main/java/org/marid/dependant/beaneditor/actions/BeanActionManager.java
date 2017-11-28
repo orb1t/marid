@@ -1,6 +1,6 @@
 /*-
  * #%L
- * marid-runtime
+ * marid-ide
  * %%
  * Copyright (C) 2012 - 2017 MARID software development group
  * %%
@@ -19,32 +19,28 @@
  * #L%
  */
 
-package org.marid.expression.generic;
+package org.marid.dependant.beaneditor.actions;
 
-import org.marid.beans.BeanTypeContext;
-import org.marid.types.MaridArrayType;
-import org.marid.types.Types;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import org.marid.expression.mutable.Expr;
+import org.marid.idelib.beans.IdeBean;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.lang.reflect.Type;
-import java.util.List;
 
-import static java.lang.reflect.Array.newInstance;
+@Component
+public class BeanActionManager {
 
-public interface ArrayExpression extends Expression {
+  public EventHandler<ActionEvent> editAction(@Nonnull IdeBean bean, @Nonnull Expr expr) {
+    return event -> {
 
-  @Nonnull
-  List<? extends Expression> getElements();
+    };
+  }
 
-  @Nonnull
-  @Override
-  default Type getType(@Nullable Type owner, @Nonnull BeanTypeContext context) {
-    return getElements().stream()
-        .map(e -> e.getType(owner, context))
-        .distinct()
-        .reduce(Types::nct)
-        .map(e -> e instanceof Class<?> ? newInstance((Class<?>) e, 0).getClass() : new MaridArrayType(e))
-        .orElse(Object[].class);
+  public EventHandler<ActionEvent> initializersEditAction(@Nonnull IdeBean bean, @Nonnull Expr expr) {
+    return event -> {
+
+    };
   }
 }

@@ -40,9 +40,7 @@ public abstract class ValueExpr extends Expr implements ValueExpression {
 
   ValueExpr(@Nonnull Element element) {
     super(element);
-    this.value = new SimpleStringProperty(
-        attribute(element, "value").orElseThrow(() -> new NullPointerException("value"))
-    );
+    this.value = new SimpleStringProperty(attribute(element, "value").orElse(""));
   }
 
   @Nonnull

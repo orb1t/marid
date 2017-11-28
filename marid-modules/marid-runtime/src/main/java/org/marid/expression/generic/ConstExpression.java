@@ -21,9 +21,8 @@
 
 package org.marid.expression.generic;
 
-import org.marid.annotation.MetaInfo;
-import org.marid.misc.Calls;
 import org.marid.beans.BeanTypeContext;
+import org.marid.misc.Calls;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -42,7 +41,6 @@ import java.util.Locale;
 import java.util.TimeZone;
 import java.util.function.Function;
 
-@MetaInfo(name = "Constant", icon = "D_COLLAGE")
 public interface ConstExpression extends ValueExpression {
 
   @Nonnull
@@ -95,7 +93,8 @@ public interface ConstExpression extends ValueExpression {
     MONTH_DAY(MonthDay.class, MonthDay::parse),
     DAY_OF_WEEK(DayOfWeek.class, DayOfWeek::valueOf),
     INET_ADDR(InetAddress.class, v -> Calls.call(() -> InetAddress.getByName(v))),
-    UUID(java.util.UUID.class, java.util.UUID::fromString);
+    UUID(java.util.UUID.class, java.util.UUID::fromString),
+    VOID(Void.class, s -> null);
 
     public final Class<?> type;
     public final Function<String, ?> converter;

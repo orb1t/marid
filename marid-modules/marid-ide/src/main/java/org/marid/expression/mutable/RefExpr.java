@@ -40,7 +40,7 @@ public class RefExpr extends Expr implements RefExpression {
 
   public RefExpr(@Nonnull Element element) {
     super(element);
-    this.ref = new SimpleStringProperty(attribute(element, "ref").orElseThrow(() -> new NullPointerException("ref")));
+    this.ref = new SimpleStringProperty(attribute(element, "ref").orElse(""));
   }
 
   @Nonnull

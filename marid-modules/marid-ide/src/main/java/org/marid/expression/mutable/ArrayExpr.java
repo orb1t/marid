@@ -29,25 +29,23 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toCollection;
 import static javafx.collections.FXCollections.observableArrayList;
 import static org.marid.io.Xmls.create;
 import static org.marid.io.Xmls.elements;
+import static org.marid.jfx.props.ObservablesProvider.toObservableList;
 
 public class ArrayExpr extends Expr implements ArrayExpression {
 
   public final ObservableList<Expr> elements;
 
   public ArrayExpr(@Nonnull String elementType, @Nonnull Expr... elements) {
-    this.elements = observableArrayList(Expr::getObservables);
+    this.elements = observableArrayList(Expr::observables);
     this.elements.setAll(elements);
   }
 
   ArrayExpr(@Nonnull Element element) {
     super(element);
-    this.elements = elements("elements", element)
-        .map(Expr::of)
-        .collect(toCollection(() -> observableArrayList(Expr::getObservables)));
+    this.elements = elements("elements", element).map(Expr::of).collect(toObservableList());
   }
 
   @Nonnull

@@ -40,7 +40,7 @@ public class StringExpr extends Expr implements StringExpression {
 
   StringExpr(@Nonnull Element element) {
     super(element);
-    this.value = new SimpleStringProperty(content(element).orElseThrow(() -> new NullPointerException("content")));
+    this.value = new SimpleStringProperty(content(element).orElse(""));
   }
 
   @Nonnull

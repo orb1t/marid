@@ -28,6 +28,7 @@ import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 
+import static org.marid.expression.generic.ConstExpression.ConstantType.VOID;
 import static org.marid.io.Xmls.attribute;
 
 public class ConstExpr extends ValueExpr implements ConstExpression {
@@ -41,9 +42,7 @@ public class ConstExpr extends ValueExpr implements ConstExpression {
 
   ConstExpr(@Nonnull Element element) {
     super(element);
-    this.type = new SimpleObjectProperty<>(
-        attribute(element, "type").map(ConstantType::valueOf).orElseThrow(() -> new NullPointerException("type"))
-    );
+    this.type = new SimpleObjectProperty<>(attribute(element, "type").map(ConstantType::valueOf).orElse(VOID));
   }
 
   @Nonnull

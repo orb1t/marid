@@ -40,9 +40,7 @@ public class ClassExpr extends Expr implements ClassExpression {
 
   ClassExpr(@Nonnull Element element) {
     super(element);
-    this.className = new SimpleStringProperty(
-        attribute(element, "class").orElseThrow(() -> new NullPointerException("class"))
-    );
+    this.className = new SimpleStringProperty(attribute(element, "class").orElseGet(Object.class::getName));
   }
 
   @Nonnull

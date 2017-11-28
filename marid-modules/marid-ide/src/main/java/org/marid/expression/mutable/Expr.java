@@ -21,47 +21,37 @@
 
 package org.marid.expression.mutable;
 
-import javafx.beans.Observable;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import org.marid.expression.generic.Expression;
-import org.marid.misc.Calls;
+import org.marid.jfx.props.ObservablesProvider;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.Field;
-import java.util.Comparator;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.deepEquals;
-import static javafx.collections.FXCollections.observableArrayList;
+import static java.util.stream.Collectors.toCollection;
 import static org.marid.io.Xmls.create;
 import static org.marid.io.Xmls.elements;
 
-public abstract class Expr implements Expression {
+public abstract class Expr implements Expression, ObservablesProvider {
 
   public final ObservableList<Expr> initializers;
 
   public Expr() {
-    initializers = observableArrayList(Expr::getObservables);
+    initializers = ObservablesProvider.list();
   }
 
   Expr(@Nonnull Element element) {
-    initializers = elements("initializers", element)
-        .map(Expr::of)
-        .collect(Collectors.toCollection(() -> observableArrayList(Expr::getObservables)));
+    initializers = elements("initializers", element).map(Expr::of).collect(toCollection(ObservablesProvider::list));
   }
 
   @Nonnull
   @Override
   public ObservableList<Expr> getInitializers() {
     return initializers;
-  }
-
-  public Observable[] getObservables() {
-    return ostream().toArray(Observable[]::new);
   }
 
   public String getTag() {
@@ -72,13 +62,6 @@ public abstract class Expr implements Expression {
     if (!initializers.isEmpty()) {
       create(element, "initializers", is -> getInitializers().forEach(i -> create(is, i.getTag(), i::writeTo)));
     }
-  }
-
-  private Stream<Observable> ostream() {
-    return Stream.of(getClass().getFields())
-        .filter(f -> Observable.class.isAssignableFrom(f.getType()))
-        .sorted(Comparator.comparing(Field::getName))
-        .map(f -> Calls.call(() -> (Observable) f.get(this)));
   }
 
   private Stream<Object> stream() {

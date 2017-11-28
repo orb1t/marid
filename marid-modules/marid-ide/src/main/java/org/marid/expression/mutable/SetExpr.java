@@ -30,6 +30,7 @@ import org.w3c.dom.Element;
 import javax.annotation.Nonnull;
 
 import static org.marid.io.Xmls.*;
+import static org.marid.jfx.props.ObservablesProvider.object;
 
 public class SetExpr extends Expr implements SetExpression {
 
@@ -38,24 +39,16 @@ public class SetExpr extends Expr implements SetExpression {
   public final FxObject<Expr> value;
 
   public SetExpr(@Nonnull Expr target, @Nonnull String field, @Nonnull Expr value) {
-    this.target = new FxObject<>(Expr::getObservables, target);
+    this.target = new FxObject<>(Expr::observables, target);
     this.field = new SimpleStringProperty(field);
-    this.value = new FxObject<>(Expr::getObservables, value);
+    this.value = new FxObject<>(Expr::observables, value);
   }
 
   SetExpr(@Nonnull Element element) {
     super(element);
-    this.target = new FxObject<>(
-        Expr::getObservables,
-        element("target", element).map(Expr::of).orElseThrow(() -> new NullPointerException("target"))
-    );
-    this.field = new SimpleStringProperty(
-        attribute(element, "field").orElseThrow(() -> new NullPointerException("field"))
-    );
-    this.value = new FxObject<>(
-        Expr::getObservables,
-        element("value", element).map(Expr::of).orElseThrow(() -> new NullPointerException("value"))
-    );
+    this.target = object(element("target", element).map(Expr::of).orElseGet(NullExpr::new));
+    this.field = new SimpleStringProperty(attribute(element, "field").orElse("field"));
+    this.value = object(element("value", element).map(Expr::of).orElseGet(NullExpr::new));
   }
 
   @Nonnull
