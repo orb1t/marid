@@ -45,7 +45,7 @@ public final class NullExpr extends Expr implements NullExpression {
 
   NullExpr(Element element) {
     super(element);
-    this.type = Xmls.attribute(element, "type").orElse("void");
+    this.type = Xmls.attribute(element, "type").orElse(void.class.getName());
   }
 
   @Override

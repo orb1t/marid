@@ -50,8 +50,9 @@ class BeanContextTest {
   @Test
   void testOneBean() {
     final BeanConfiguration configuration = new BeanConfiguration(CLASS_LOADER, PROPERTIES);
-    final RuntimeBean root = new RuntimeBean()
-        .add("bean1", new GetExpr(new ClassExpr(TimeUnit.class.getName()), "SECONDS"));
+    final RuntimeBean root = new RuntimeBean(
+        new RuntimeBean("bean1", new GetExpr(new ClassExpr(TimeUnit.class.getName()), "SECONDS"))
+    );
     try (final BeanContext context = new BeanContext(configuration, root)) {
       final Object seconds = context.findBean("bean1");
       assertEquals(TimeUnit.SECONDS, seconds);
@@ -61,9 +62,10 @@ class BeanContextTest {
   @Test
   void testTwoBeans() {
     final BeanConfiguration configuration = new BeanConfiguration(CLASS_LOADER, PROPERTIES);
-    final RuntimeBean root = new RuntimeBean()
-        .add("bean1", new CallExpr(new ClassExpr(TimeUnit.class.getName()), "valueOf", new RefExpr("bean2")))
-        .add("bean2", new StringExpr("SECONDS"));
+    final RuntimeBean root = new RuntimeBean(
+        new RuntimeBean("bean1", new CallExpr(new ClassExpr(TimeUnit.class.getName()), "valueOf", new RefExpr("bean2"))),
+        new RuntimeBean("bean2", new StringExpr("SECONDS"))
+    );
     try (final BeanContext context = new BeanContext(configuration, root)) {
       final Object seconds = context.findBean("bean1");
       assertEquals(TimeUnit.SECONDS, seconds);
@@ -71,21 +73,22 @@ class BeanContextTest {
   }
 
   private static Stream<Arguments> matchingCandidatesArguments() {
-    final RuntimeBean root = new RuntimeBean()
-        .add("b1", new NullExpr(), b1 -> {
-          b1.add("b11", b11 -> {b11.add("b111"); b11.add("b112");});
-          b1.add("b12", new NullExpr());
-        })
-        .add("b2", b2 -> {
-          b2.add("b21", b21 -> {
-            b21.add("b211");
-            b21.add("b212");
-            b21.add("b213", b213 -> {b213.add("b2131"); b213.add("b2132");});
-          });
-          b2.add("b22");
-          b2.add("b23");
-        });
-
+    final NullExpr n = new NullExpr();
+    final RuntimeBean root = new RuntimeBean(
+        new RuntimeBean("b1", n,
+            new RuntimeBean("b11", n, new RuntimeBean("b111", n), new RuntimeBean("b112", n)),
+            new RuntimeBean("b12", n)
+        ),
+        new RuntimeBean("b2", n,
+            new RuntimeBean("b21", n,
+                new RuntimeBean("b211", n),
+                new RuntimeBean("b212", n),
+                new RuntimeBean("b213", n, new RuntimeBean("b2131", n), new RuntimeBean("b2132", n))
+            ),
+            new RuntimeBean("b22", n),
+            new RuntimeBean("b23", n)
+        )
+    );
     final Map<String, List<String>> map = Map.ofEntries(
         entry("b1", of("b2")),
         entry("b11", of("b12", "b1", "b2")),

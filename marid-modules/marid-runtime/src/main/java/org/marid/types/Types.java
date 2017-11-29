@@ -246,7 +246,7 @@ public interface Types {
   }
 
   private static boolean isAssignable(Type from, Type to, HashSet<TypeVariable<?>> passed) {
-    if (to.equals(from) || Object.class.equals(to)) {
+    if (to.equals(from) || Object.class.equals(to) || void.class.equals(from)) {
       return true;
     } if (from instanceof WildcardType) {
       final WildcardType w = (WildcardType) from;

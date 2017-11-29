@@ -23,14 +23,13 @@ package org.marid.beans;
 
 import org.marid.expression.runtime.Expr;
 import org.marid.expression.runtime.NullExpr;
+import org.marid.function.ToImmutableList;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toList;
 import static org.marid.io.Xmls.*;
 
 public class RuntimeBean implements MaridBean {
@@ -40,22 +39,28 @@ public class RuntimeBean implements MaridBean {
   private final Expr factory;
   private final List<RuntimeBean> children;
 
-  public RuntimeBean(RuntimeBean parent, @Nonnull String name, @Nonnull Expr factory) {
+  public RuntimeBean(RuntimeBean parent, @Nonnull String name, @Nonnull Expr factory, @Nonnull RuntimeBean... children) {
     this.parent = parent;
     this.name = name;
     this.factory = factory;
-    this.children = new ArrayList<>();
+    this.children = Stream.of(children)
+        .map(o -> new RuntimeBean(this, o.name, o.factory, o.children.toArray(new RuntimeBean[o.children.size()])))
+        .collect(new ToImmutableList<>());
+  }
+
+  public RuntimeBean(@Nonnull RuntimeBean... children) {
+    this("beans", new NullExpr(), children);
+  }
+
+  public RuntimeBean(@Nonnull String name, @Nonnull Expr factory, @Nonnull RuntimeBean... children) {
+    this(null, name, factory, children);
   }
 
   public RuntimeBean(RuntimeBean parent, @Nonnull Element element) {
     this.parent = parent;
     this.name = attribute(element, "name").orElseThrow(() -> new NullPointerException("name"));
-    this.factory = element("factory", element).map(Expr::of).orElseThrow(() -> new NullPointerException("factory"));
-    this.children = elements(element, "bean").map(e -> new RuntimeBean(this, e)).collect(toList());
-  }
-
-  public RuntimeBean() {
-    this(null, "beans", new NullExpr());
+    this.factory = element("factory", element).map(Expr::of).orElseGet(NullExpr::new);
+    this.children = elements(element, "bean").map(e -> new RuntimeBean(this, e)).collect(new ToImmutableList<>());
   }
 
   @Override
@@ -79,23 +84,6 @@ public class RuntimeBean implements MaridBean {
   @Override
   public List<RuntimeBean> getChildren() {
     return children;
-  }
-
-  @SafeVarargs
-  @Nonnull
-  public final RuntimeBean add(@Nonnull String name, @Nonnull Expr factory, @Nonnull Consumer<RuntimeBean>... consumers) {
-    final RuntimeBean bean = new RuntimeBean(this, name, factory);
-    children.add(bean);
-    for (final Consumer<RuntimeBean> consumer : consumers) {
-      consumer.accept(bean);
-    }
-    return this;
-  }
-
-  @SafeVarargs
-  @Nonnull
-  public final RuntimeBean add(@Nonnull String name, @Nonnull Consumer<RuntimeBean>... consumers) {
-    return add(name, new NullExpr(), consumers);
   }
 
   @Override

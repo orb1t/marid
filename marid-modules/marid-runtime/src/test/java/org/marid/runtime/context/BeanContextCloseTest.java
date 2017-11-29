@@ -23,10 +23,10 @@ package org.marid.runtime.context;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.marid.runtime.exception.MaridBeanInitializationException;
+import org.marid.beans.RuntimeBean;
 import org.marid.expression.runtime.CallExpr;
 import org.marid.expression.runtime.ClassExpr;
-import org.marid.beans.RuntimeBean;
+import org.marid.runtime.exception.MaridBeanInitializationException;
 
 import javax.annotation.PostConstruct;
 import java.util.Properties;
@@ -47,15 +47,15 @@ class BeanContextCloseTest {
         new Properties(),
         new MaridDefaultContextListener()
     );
-    final RuntimeBean root = new RuntimeBean()
-        .add("bean1", new CallExpr(new ClassExpr(C1.class.getName()), "new"), b -> {
-          b.add("bean11", new CallExpr(new ClassExpr(C2.class.getName()), "new"));
-        })
-        .add("bean2", new CallExpr(new ClassExpr(C2.class.getName()), "new"), b -> {
-          b.add("bean21", new CallExpr(new ClassExpr(C3.class.getName()), "new"), bb -> {
-            bb.add("bean211", new CallExpr(new ClassExpr(C4.class.getName()), "new"));
-          });
-        });
+    final RuntimeBean root = new RuntimeBean(
+        new RuntimeBean("bean1", new CallExpr(new ClassExpr(C1.class.getName()), "new"),
+            new RuntimeBean("bean11", new CallExpr(new ClassExpr(C2.class.getName()), "new"))
+        ),
+        new RuntimeBean("bean2", new CallExpr(new ClassExpr(C2.class.getName()), "new"),
+            new RuntimeBean("bean21", new CallExpr(new ClassExpr(C3.class.getName()), "new"),
+                new RuntimeBean("bean211", new CallExpr(new ClassExpr(C4.class.getName()), "new")))
+        )
+    );
     try (final BeanContext context = new BeanContext(configuration, root)) {
       throw new AssertionError("Unreachable");
     } catch (Throwable x) {
