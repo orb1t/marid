@@ -31,7 +31,7 @@ import javax.annotation.Nullable;
 
 public class FxObject<T> extends SimpleObjectProperty<T> {
 
-  private final WeakInvalidationListener invalidationListener = new WeakInvalidationListener(this::onInvalidate);
+  private final WeakInvalidationListener listener = new WeakInvalidationListener(o -> fireValueChangedEvent());
 
   public FxObject(@Nonnull Callback<T, Observable[]> observables, @Nullable T value) {
     this(observables);
@@ -42,18 +42,14 @@ public class FxObject<T> extends SimpleObjectProperty<T> {
     addListener((o, oV, nV) -> {
       if (oV != null) {
         for (final Observable observable : observables.call(oV)) {
-          observable.removeListener(invalidationListener);
+          observable.removeListener(listener);
         }
       }
       if (nV != null) {
         for (final Observable observable : observables.call(nV)) {
-          observable.addListener(invalidationListener);
+          observable.addListener(listener);
         }
       }
     });
-  }
-
-  private void onInvalidate(Observable observable) {
-    fireValueChangedEvent();
   }
 }

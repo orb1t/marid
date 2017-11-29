@@ -21,12 +21,12 @@
 
 package org.marid.dependant.beaneditor.view;
 
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
-import javafx.scene.text.Text;
 import org.marid.dependant.beaneditor.actions.BeanActionManager;
 import org.marid.expression.mutable.*;
 import org.marid.idelib.beans.IdeBean;
@@ -52,13 +52,16 @@ public class IdeBeanViewFactory {
       return FontIcons.glyphIcon("D_ROOMBA");
     } else {
       final Node node = createView(0, bean, expr);
+      final HBox box;
       if (node instanceof HBox) {
-        final HBox box = (HBox) node;
+        box = (HBox) node;
         box.getChildren().add(0, editButton(bean, expr));
-        return box;
       } else {
-        return new HBox(4, editButton(bean, expr), node);
+        box = new HBox(4, editButton(bean, expr), node);
       }
+      box.setAlignment(Pos.CENTER_LEFT);
+      box.setFillHeight(true);
+      return box;
     }
   }
 
@@ -88,7 +91,7 @@ public class IdeBeanViewFactory {
 
   @Nonnull
   private Node createView(@Nonnull ConstExpr expr) {
-    return new Text(expr.getValue());
+    return new Label(expr.getValue());
   }
 
   @Nonnull
@@ -97,15 +100,15 @@ public class IdeBeanViewFactory {
 
     box.getChildren().add(editInitializersButton(bean, expr));
     box.getChildren().add(createView(level + 1, bean, expr.getTarget()));
-    box.getChildren().add(new Text("." + expr.getMethod() + "("));
+    box.getChildren().add(new Label("." + expr.getMethod() + "("));
 
     expr.getArgs().stream().reduce((e1, e2) -> {
       box.getChildren().add(createView(level + 1, bean, e1));
-      box.getChildren().add(new Text(","));
+      box.getChildren().add(new Label(","));
       return e2;
     }).ifPresent(e -> box.getChildren().add(createView(level + 1, bean, e)));
 
-    box.getChildren().add(new Text(")"));
+    box.getChildren().add(new Label(")"));
     return box;
   }
 
@@ -115,7 +118,7 @@ public class IdeBeanViewFactory {
 
     box.getChildren().add(editInitializersButton(bean, expr));
     box.getChildren().add(createView(level + 1, bean, expr.getTarget()));
-    box.getChildren().add(new Text("." + expr.getField()));
+    box.getChildren().add(new Label("." + expr.getField()));
 
     return box;
   }
@@ -125,7 +128,7 @@ public class IdeBeanViewFactory {
     final HBox box = new HBox();
 
     box.getChildren().add(createView(level + 1, bean, expr.getTarget()));
-    box.getChildren().add(new Text("." + expr.getField() + "="));
+    box.getChildren().add(new Label("." + expr.getField() + "="));
     box.getChildren().add(createView(level + 1, bean, expr.getValue()));
 
     return box;
@@ -137,7 +140,7 @@ public class IdeBeanViewFactory {
 
     expr.getElements().stream().reduce((e1, e2) -> {
       box.getChildren().add(createView(level + 1, bean, e1));
-      box.getChildren().add(new Text(","));
+      box.getChildren().add(new Label(","));
       return e2;
     }).ifPresent(e -> box.getChildren().add(createView(level + 1, bean, e)));
 
@@ -153,12 +156,12 @@ public class IdeBeanViewFactory {
 
   @Nonnull
   private Node createView(@Nonnull StringExpr expr) {
-    return new Text(expr.getValue());
+    return new Label(expr.getValue());
   }
 
   @Nonnull
   private Node createView(@Nonnull RefExpr expr) {
-    return new Text(expr.getReference());
+    return new Label(expr.getReference());
   }
 
   @Nonnull

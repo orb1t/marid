@@ -24,9 +24,11 @@ package org.marid.dependant.beaneditor;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.cell.TextFieldTreeTableCell;
 import org.marid.dependant.beaneditor.view.BeanViewUtils;
 import org.marid.dependant.beaneditor.view.IdeBeanViewFactory;
 import org.marid.ide.project.ProjectProfile;
@@ -63,6 +65,11 @@ public class BeanHierarchyTable extends MaridTreeTableView<IdeBean> {
       nameColumn.setPrefWidth(200);
       nameColumn.setMinWidth(50);
       nameColumn.setMaxWidth(1000);
+      nameColumn.setCellFactory(param -> {
+        final TextFieldTreeTableCell<IdeBean, String> cell = new TextFieldTreeTableCell<>();
+        cell.setAlignment(Pos.CENTER_LEFT);
+        return cell;
+      });
       getColumns().add(nameColumn);
       setTreeColumn(nameColumn);
     };
@@ -85,6 +92,11 @@ public class BeanHierarchyTable extends MaridTreeTableView<IdeBean> {
             return BeanViewUtils.replaceQualified(bean.getFactory().getType(null, context).toString());
           }, bean.observables());
         }
+      });
+      column.setCellFactory(param -> {
+        final TextFieldTreeTableCell<IdeBean, String> cell = new TextFieldTreeTableCell<>();
+        cell.setAlignment(Pos.CENTER_LEFT);
+        return cell;
       });
       column.setPrefWidth(200);
       column.setMinWidth(100);

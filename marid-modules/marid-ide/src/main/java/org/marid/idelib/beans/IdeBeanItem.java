@@ -21,11 +21,9 @@
 
 package org.marid.idelib.beans;
 
-import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.scene.control.TreeItem;
-import org.marid.dependant.beaneditor.view.BeanViewUtils;
 import org.marid.jfx.track.Tracks;
 
 import javax.annotation.Nonnull;
@@ -40,7 +38,6 @@ public class IdeBeanItem extends TreeItem<IdeBean> {
     final ObservableList<TreeItem<IdeBean>> children = getChildren();
 
     children.setAll(bean.children.stream().map(IdeBeanItem::new).collect(toList()));
-    graphicProperty().bind(Bindings.createObjectBinding(() -> BeanViewUtils.icon(bean.getFactory()), bean.factory));
 
     Tracks.addListListener(this, bean.children, change -> {
       while (change.next()) {
