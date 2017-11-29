@@ -39,7 +39,7 @@ public class RuntimeBean implements MaridBean {
   private final Expr factory;
   private final List<RuntimeBean> children;
 
-  public RuntimeBean(RuntimeBean parent, @Nonnull String name, @Nonnull Expr factory, @Nonnull RuntimeBean... children) {
+  private RuntimeBean(RuntimeBean parent, @Nonnull String name, @Nonnull Expr factory, @Nonnull RuntimeBean... children) {
     this.parent = parent;
     this.name = name;
     this.factory = factory;
