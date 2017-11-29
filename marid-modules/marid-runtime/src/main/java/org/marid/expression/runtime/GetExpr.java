@@ -33,7 +33,6 @@ import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 
 import static org.marid.io.Xmls.attribute;
-import static org.marid.io.Xmls.element;
 
 public final class GetExpr extends Expr implements GetExpression {
 
@@ -50,7 +49,7 @@ public final class GetExpr extends Expr implements GetExpression {
 
   GetExpr(@Nonnull Element element) {
     super(element);
-    this.target = element("target", element).map(Expr::of).orElseThrow(() -> new NullPointerException("target"));
+    this.target = target(element, Expr::of, ClassExpr::new, RefExpr::new);
     this.field = attribute(element, "field").orElseThrow(() -> new NullPointerException("field"));
   }
 

@@ -29,14 +29,12 @@ import org.w3c.dom.Element;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
-import static org.marid.io.Xmls.*;
+import static org.marid.io.Xmls.attribute;
+import static org.marid.io.Xmls.elements;
 import static org.marid.types.Classes.value;
 
 public final class CallExpr extends Expr implements CallExpression {
@@ -58,9 +56,11 @@ public final class CallExpr extends Expr implements CallExpression {
 
   CallExpr(@Nonnull Element element) {
     super(element);
-    target = element("target", element).map(Expr::of).orElseThrow(() -> new NullPointerException("target"));
+    target = target(element, Expr::of, ClassExpr::new, RefExpr::new);
     method = attribute(element, "method").orElseThrow(() -> new NullPointerException("method"));
-    args = elements("args", element).map(Expr::of).collect(toList());
+    args = attribute(element, "arg")
+        .map(e -> Collections.<Expr>singletonList(new StringExpr(e)))
+        .orElseGet(() -> elements("args", element).map(Expr::of).collect(toList()));
   }
 
   @Override
