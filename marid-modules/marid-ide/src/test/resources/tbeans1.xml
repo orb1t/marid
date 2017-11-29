@@ -278,4 +278,17 @@
       </call>
     </factory>
   </bean>
+
+  <bean name="b16">
+    <factory>
+      <call method="parseInt">
+        <target>
+          <class class="java.lang.Integer"/>
+        </target>
+        <args>
+          <string>1</string>
+        </args>
+      </call>
+    </factory>
+  </bean>
 </bean>
