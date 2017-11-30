@@ -23,9 +23,11 @@ package org.marid.expression.mutable;
 
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import org.marid.XmlWritable;
 import org.marid.expression.generic.Expression;
 import org.marid.expression.generic.XmlExpression;
 import org.marid.jfx.props.ObservablesProvider;
+import org.marid.xml.Tagged;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
@@ -33,9 +35,8 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.deepEquals;
-import static org.marid.io.Xmls.create;
 
-public abstract class Expr implements Expression, ObservablesProvider {
+public abstract class Expr implements Expression, ObservablesProvider, Tagged, XmlWritable {
 
   public final ObservableList<Expr> initializers;
 
@@ -53,14 +54,15 @@ public abstract class Expr implements Expression, ObservablesProvider {
     return initializers;
   }
 
+  @Nonnull
+  @Override
   public String getTag() {
     return getClass().getSimpleName().replace("Expr", "").toLowerCase();
   }
 
+  @Override
   public void writeTo(@Nonnull Element element) {
-    if (!initializers.isEmpty()) {
-      create(element, "initializers", is -> getInitializers().forEach(i -> create(is, i.getTag(), i::writeTo)));
-    }
+    XmlExpression.initializers(element, getInitializers());
   }
 
   private Stream<Object> stream() {

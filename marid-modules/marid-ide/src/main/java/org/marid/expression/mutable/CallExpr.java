@@ -79,7 +79,7 @@ public class CallExpr extends Expr implements CallExpression {
   @Override
   public void writeTo(@Nonnull Element element) {
     super.writeTo(element);
-    create(element, "target", t -> create(t, getTarget().getTag(), getTarget()::writeTo));
+    XmlExpression.target(element, getTarget());
     element.setAttribute("method", getMethod());
     if (!args.isEmpty()) {
       create(element, "args", as -> getArgs().forEach(a -> create(as, a.getTag(), a::writeTo)));

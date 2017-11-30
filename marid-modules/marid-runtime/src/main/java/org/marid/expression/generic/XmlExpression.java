@@ -21,7 +21,9 @@
 
 package org.marid.expression.generic;
 
+import org.marid.XmlWritable;
 import org.marid.runtime.MaridFactory;
+import org.marid.xml.Tagged;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
@@ -47,6 +49,19 @@ public interface XmlExpression {
             .orElseGet(() -> attribute(element, "ref")
                 .map(refExprFunc)
                 .orElseGet(() -> classExprFunc.apply(MaridFactory.class.getName()))));
+  }
+
+  static <E extends Expression & Tagged & XmlWritable> void target(@Nonnull Element element, @Nonnull E target) {
+    if (target instanceof ClassExpression) {
+      final ClassExpression expression = (ClassExpression) target;
+      if (!MaridFactory.class.getName().equals(expression.getClassName())) {
+        element.setAttribute("class", expression.getClassName());
+      }
+    } else if (target instanceof RefExpression) {
+      element.setAttribute("ref", ((RefExpression) target).getReference());
+    } else {
+      create(element, "target", t -> create(t, target.getTag(), target::writeTo));
+    }
   }
 
   @Nonnull
@@ -107,5 +122,12 @@ public interface XmlExpression {
                                                                   @Nonnull Function<Element, E> exprFunc,
                                                                   @Nonnull Collector<E, ?, L> collector) {
     return elements("initializers", element).map(exprFunc).collect(collector);
+  }
+
+  static <E extends Expression & Tagged & XmlWritable> void initializers(@Nonnull Element element,
+                                                                         @Nonnull List<? extends E> list) {
+    if (!list.isEmpty()) {
+      create(element, "initializers", is -> list.forEach(i -> create(is, i.getTag(), i::writeTo)));
+    }
   }
 }
