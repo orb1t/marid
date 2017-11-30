@@ -27,8 +27,24 @@ public interface MaridFactory {
     return Integer.parseInt(value);
   }
 
+  static int int32h(String value) {
+    return Integer.parseInt(value, 16);
+  }
+
+  static int uint32(String value) {
+    return Integer.parseUnsignedInt(value);
+  }
+
+  static int uint32h(String value) {
+    return Integer.parseUnsignedInt(value, 16);
+  }
+
   static long int64(String value) {
     return Long.parseLong(value);
+  }
+
+  static long uint64(String value) {
+    return Long.parseUnsignedLong(value);
   }
 
   static double float64(String value) {
@@ -37,5 +53,25 @@ public interface MaridFactory {
 
   static float float32(String value) {
     return Float.parseFloat(value);
+  }
+
+  static short int16(String value) {
+    return Short.parseShort(value);
+  }
+
+  static short int16h(String value) {
+    return Short.parseShort(value, 16);
+  }
+
+  static byte int8(String value) {
+    return Byte.parseByte(value);
+  }
+
+  static byte int8h(String value) {
+    return Byte.parseByte(value, 16);
+  }
+
+  static String string(String value) {
+    return value;
   }
 }

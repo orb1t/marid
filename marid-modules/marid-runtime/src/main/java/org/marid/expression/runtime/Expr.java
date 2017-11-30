@@ -30,7 +30,7 @@ import org.w3c.dom.Element;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public abstract class Expr implements Expression {
@@ -42,7 +42,7 @@ public abstract class Expr implements Expression {
   }
 
   public Expr() {
-    initializers = new ArrayList<>();
+    initializers = new LinkedList<>();
   }
 
   @Nonnull
