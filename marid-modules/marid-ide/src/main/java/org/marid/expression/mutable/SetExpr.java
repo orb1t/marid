@@ -24,12 +24,13 @@ package org.marid.expression.mutable;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.marid.expression.generic.SetExpression;
+import org.marid.expression.generic.XmlExpression;
 import org.marid.jfx.props.FxObject;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 
-import static org.marid.io.Xmls.*;
+import static org.marid.io.Xmls.create;
 import static org.marid.jfx.props.ObservablesProvider.object;
 
 public class SetExpr extends Expr implements SetExpression {
@@ -46,9 +47,9 @@ public class SetExpr extends Expr implements SetExpression {
 
   SetExpr(@Nonnull Element element) {
     super(element);
-    this.target = object(element("target", element).map(Expr::of).orElseGet(NullExpr::new));
-    this.field = new SimpleStringProperty(attribute(element, "field").orElse("field"));
-    this.value = object(element("value", element).map(Expr::of).orElseGet(NullExpr::new));
+    this.target = object(XmlExpression.target(element, Expr::of, StringExpr::new, RefExpr::new));
+    this.field = new SimpleStringProperty(XmlExpression.field(element));
+    this.value = object(XmlExpression.value(element, Expr::of, NullExpr::new));
   }
 
   @Nonnull

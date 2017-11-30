@@ -24,11 +24,10 @@ package org.marid.expression.mutable;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.marid.expression.generic.ClassExpression;
+import org.marid.expression.generic.XmlExpression;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
-
-import static org.marid.io.Xmls.attribute;
 
 public class ClassExpr extends Expr implements ClassExpression {
 
@@ -40,7 +39,7 @@ public class ClassExpr extends Expr implements ClassExpression {
 
   ClassExpr(@Nonnull Element element) {
     super(element);
-    this.className = new SimpleStringProperty(attribute(element, "class").orElseGet(Object.class::getName));
+    this.className = new SimpleStringProperty(XmlExpression.className(element));
   }
 
   @Nonnull

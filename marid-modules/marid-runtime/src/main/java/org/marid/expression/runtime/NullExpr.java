@@ -22,7 +22,7 @@
 package org.marid.expression.runtime;
 
 import org.marid.expression.generic.NullExpression;
-import org.marid.io.Xmls;
+import org.marid.expression.generic.XmlExpression;
 import org.marid.runtime.context.BeanContext;
 import org.w3c.dom.Element;
 
@@ -45,7 +45,7 @@ public final class NullExpr extends Expr implements NullExpression {
 
   NullExpr(Element element) {
     super(element);
-    this.type = Xmls.attribute(element, "type").orElse(void.class.getName());
+    this.type = XmlExpression.type(element);
   }
 
   @Override

@@ -24,6 +24,7 @@ package org.marid.expression.mutable;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import org.marid.expression.generic.Expression;
+import org.marid.expression.generic.XmlExpression;
 import org.marid.jfx.props.ObservablesProvider;
 import org.w3c.dom.Element;
 
@@ -32,9 +33,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.deepEquals;
-import static java.util.stream.Collectors.toCollection;
 import static org.marid.io.Xmls.create;
-import static org.marid.io.Xmls.elements;
 
 public abstract class Expr implements Expression, ObservablesProvider {
 
@@ -45,7 +44,7 @@ public abstract class Expr implements Expression, ObservablesProvider {
   }
 
   Expr(@Nonnull Element element) {
-    initializers = elements("initializers", element).map(Expr::of).collect(toCollection(ObservablesProvider::list));
+    initializers = XmlExpression.initializers(element, Expr::of, ObservablesProvider.toObservableList());
   }
 
   @Nonnull

@@ -22,14 +22,13 @@
 package org.marid.expression.runtime;
 
 import org.marid.expression.generic.ClassExpression;
+import org.marid.expression.generic.XmlExpression;
 import org.marid.runtime.context.BeanContext;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
-
-import static org.marid.io.Xmls.attribute;
 
 public final class ClassExpr extends Expr implements ClassExpression {
 
@@ -42,7 +41,7 @@ public final class ClassExpr extends Expr implements ClassExpression {
 
   ClassExpr(@Nonnull Element element) {
     super(element);
-    className = attribute(element, "class").orElseThrow(() -> new NullPointerException("class"));
+    className = XmlExpression.className(element);
   }
 
   @Override

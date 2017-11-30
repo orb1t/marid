@@ -22,7 +22,8 @@
 package org.marid.expression.runtime;
 
 import org.marid.expression.generic.Expression;
-import org.marid.runtime.MaridFactory;
+import org.marid.expression.generic.XmlExpression;
+import org.marid.function.ToImmutableList;
 import org.marid.runtime.context.BeanContext;
 import org.w3c.dom.Element;
 
@@ -31,17 +32,13 @@ import javax.annotation.Nullable;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
-
-import static java.util.stream.Collectors.toList;
-import static org.marid.io.Xmls.*;
 
 public abstract class Expr implements Expression {
 
   private final List<Expr> initializers;
 
   public Expr(@Nonnull Element element) {
-    initializers = elements("initializers", element).map(Expr::of).collect(toList());
+    initializers = XmlExpression.initializers(element, Expr::of, new ToImmutableList<>());
   }
 
   public Expr() {
@@ -84,19 +81,5 @@ public abstract class Expr implements Expression {
       case "null": return new NullExpr(element);
       default: throw new IllegalArgumentException(element.getTagName());
     }
-  }
-
-  @Nonnull
-  public static <E extends Expression> E target(@Nonnull Element element,
-                                                @Nonnull Function<Element, E> exprFunc,
-                                                @Nonnull Function<String, E> classExprFunc,
-                                                @Nonnull Function<String, E> refExprFunc) {
-    return element("target", element)
-        .map(exprFunc)
-        .orElseGet(() -> attribute(element, "class")
-            .map(classExprFunc)
-            .orElseGet(() -> attribute(element, "ref")
-                .map(refExprFunc)
-                .orElseGet(() -> classExprFunc.apply(MaridFactory.class.getName()))));
   }
 }

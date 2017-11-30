@@ -22,6 +22,7 @@
 package org.marid.expression.runtime;
 
 import org.marid.expression.generic.SetExpression;
+import org.marid.expression.generic.XmlExpression;
 import org.marid.runtime.context.BeanContext;
 import org.marid.types.Classes;
 import org.w3c.dom.Element;
@@ -32,9 +33,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
-
-import static org.marid.io.Xmls.attribute;
-import static org.marid.io.Xmls.element;
 
 public final class SetExpr extends Expr implements SetExpression {
 
@@ -55,9 +53,9 @@ public final class SetExpr extends Expr implements SetExpression {
 
   SetExpr(@Nonnull Element element) {
     super(element);
-    target = target(element, Expr::of, ClassExpr::new, RefExpr::new);
-    field = attribute(element, "field").orElseThrow(() -> new NullPointerException("field"));
-    value = element("value", element).map(Expr::of).orElseThrow(() -> new NullPointerException("value"));
+    target = XmlExpression.target(element, Expr::of, ClassExpr::new, RefExpr::new);
+    field = XmlExpression.field(element);
+    value = XmlExpression.value(element, Expr::of, NullExpr::new);
   }
 
   @Override

@@ -22,6 +22,7 @@
 package org.marid.expression.runtime;
 
 import org.marid.expression.generic.GetExpression;
+import org.marid.expression.generic.XmlExpression;
 import org.marid.runtime.context.BeanContext;
 import org.w3c.dom.Element;
 
@@ -31,8 +32,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
-
-import static org.marid.io.Xmls.attribute;
 
 public final class GetExpr extends Expr implements GetExpression {
 
@@ -49,8 +48,8 @@ public final class GetExpr extends Expr implements GetExpression {
 
   GetExpr(@Nonnull Element element) {
     super(element);
-    this.target = target(element, Expr::of, ClassExpr::new, RefExpr::new);
-    this.field = attribute(element, "field").orElseThrow(() -> new NullPointerException("field"));
+    this.target = XmlExpression.target(element, Expr::of, ClassExpr::new, RefExpr::new);
+    this.field = XmlExpression.field(element);
   }
 
   @Override

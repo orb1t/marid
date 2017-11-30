@@ -24,11 +24,10 @@ package org.marid.expression.mutable;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.marid.expression.generic.RefExpression;
+import org.marid.expression.generic.XmlExpression;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
-
-import static org.marid.io.Xmls.attribute;
 
 public class RefExpr extends Expr implements RefExpression {
 
@@ -40,7 +39,7 @@ public class RefExpr extends Expr implements RefExpression {
 
   public RefExpr(@Nonnull Element element) {
     super(element);
-    this.ref = new SimpleStringProperty(attribute(element, "ref").orElse(""));
+    this.ref = new SimpleStringProperty(XmlExpression.ref(element));
   }
 
   @Nonnull

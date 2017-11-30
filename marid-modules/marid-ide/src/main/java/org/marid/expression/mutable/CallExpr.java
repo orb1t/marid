@@ -25,6 +25,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
 import org.marid.expression.generic.CallExpression;
+import org.marid.expression.generic.XmlExpression;
 import org.marid.jfx.props.FxObject;
 import org.w3c.dom.Element;
 
@@ -33,7 +34,8 @@ import java.util.List;
 
 import static java.util.stream.Collectors.joining;
 import static javafx.collections.FXCollections.observableArrayList;
-import static org.marid.io.Xmls.*;
+import static org.marid.io.Xmls.create;
+import static org.marid.jfx.props.ObservablesProvider.object;
 import static org.marid.jfx.props.ObservablesProvider.toObservableList;
 
 public class CallExpr extends Expr implements CallExpression {
@@ -51,9 +53,9 @@ public class CallExpr extends Expr implements CallExpression {
 
   CallExpr(@Nonnull Element element) {
     super(element);
-    target = new FxObject<>(Expr::observables, element("target", element).map(Expr::of).orElseGet(NullExpr::new));
-    method = new SimpleStringProperty(attribute(element, "method").orElse("get"));
-    args = elements("args", element).map(Expr::of).collect(toObservableList());
+    target = object(XmlExpression.target(element, Expr::of, ClassExpr::new, RefExpr::new));
+    method = new SimpleStringProperty(XmlExpression.method(element));
+    args = XmlExpression.args(element, Expr::of, StringExpr::new, toObservableList());
   }
 
   @Nonnull

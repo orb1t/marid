@@ -22,7 +22,8 @@
 package org.marid.expression.runtime;
 
 import org.marid.expression.generic.ArrayExpression;
-import org.marid.io.Xmls;
+import org.marid.expression.generic.XmlExpression;
+import org.marid.function.ToImmutableList;
 import org.marid.runtime.context.BeanContext;
 import org.w3c.dom.Element;
 
@@ -31,8 +32,6 @@ import javax.annotation.Nullable;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
-
-import static java.util.stream.Collectors.toList;
 
 public final class ArrayExpr extends Expr implements ArrayExpression {
 
@@ -45,7 +44,7 @@ public final class ArrayExpr extends Expr implements ArrayExpression {
 
   ArrayExpr(@Nonnull Element element) {
     super(element);
-    elements = Xmls.elements("elements", element).map(Expr::of).collect(toList());
+    elements = XmlExpression.arrayElems(element, Expr::of, new ToImmutableList<>());
   }
 
   @Nonnull

@@ -22,14 +22,13 @@
 package org.marid.expression.runtime;
 
 import org.marid.expression.generic.StringExpression;
+import org.marid.expression.generic.XmlExpression;
 import org.marid.runtime.context.BeanContext;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
-
-import static org.marid.io.Xmls.content;
 
 public final class StringExpr extends Expr implements StringExpression {
 
@@ -42,7 +41,7 @@ public final class StringExpr extends Expr implements StringExpression {
 
   StringExpr(@Nonnull Element element) {
     super(element);
-    value = content(element).orElseThrow(() -> new NullPointerException("content"));
+    value = XmlExpression.string(element);
   }
 
   @Override

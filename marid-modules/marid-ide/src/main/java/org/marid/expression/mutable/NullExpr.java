@@ -24,11 +24,10 @@ package org.marid.expression.mutable;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.marid.expression.generic.NullExpression;
+import org.marid.expression.generic.XmlExpression;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
-
-import static org.marid.io.Xmls.attribute;
 
 public class NullExpr extends Expr implements NullExpression {
 
@@ -44,7 +43,7 @@ public class NullExpr extends Expr implements NullExpression {
 
   NullExpr(@Nonnull Element element) {
     super(element);
-    this.type = new SimpleStringProperty(attribute(element, "type").orElse(void.class.getName()));
+    this.type = new SimpleStringProperty(XmlExpression.type(element));
   }
 
   @Nonnull

@@ -22,7 +22,7 @@
 package org.marid.expression.runtime;
 
 import org.marid.expression.generic.CallExpression;
-import org.marid.expression.generic.Expression;
+import org.marid.expression.generic.XmlExpression;
 import org.marid.function.ToImmutableList;
 import org.marid.runtime.context.BeanContext;
 import org.marid.types.Invokable;
@@ -35,13 +35,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collector;
-import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
-import static org.marid.io.Xmls.attribute;
-import static org.marid.io.Xmls.elements;
 import static org.marid.types.Classes.value;
 
 public final class CallExpr extends Expr implements CallExpression {
@@ -63,9 +58,9 @@ public final class CallExpr extends Expr implements CallExpression {
 
   CallExpr(@Nonnull Element element) {
     super(element);
-    target = target(element, Expr::of, ClassExpr::new, RefExpr::new);
-    method = attribute(element, "method").orElse("int32");
-    args = args(element, Expr::of, StringExpr::new, new ToImmutableList<>());
+    target = XmlExpression.target(element, Expr::of, ClassExpr::new, RefExpr::new);
+    method = XmlExpression.method(element);
+    args = XmlExpression.args(element, Expr::of, StringExpr::new, new ToImmutableList<>());
   }
 
   @Override
@@ -116,14 +111,5 @@ public final class CallExpr extends Expr implements CallExpression {
   @Override
   public String toString() {
     return args.stream().map(Object::toString).collect(joining(",", target + "." + method + "(", ")"));
-  }
-
-  public static <E extends Expression, L extends List<E>> L args(@Nonnull Element element,
-                                                                 @Nonnull Function<Element, E> exprFunc,
-                                                                 @Nonnull Function<String, E> stringFunc,
-                                                                 @Nonnull Collector<E, ?, L> collector) {
-    return attribute(element, "arg")
-        .map(c -> Stream.of(c).map(stringFunc).collect(collector))
-        .orElseGet(() -> elements("args", element).map(exprFunc).collect(collector));
   }
 }

@@ -22,7 +22,7 @@
 package org.marid.expression.runtime;
 
 import org.marid.expression.generic.RefExpression;
-import org.marid.io.Xmls;
+import org.marid.expression.generic.XmlExpression;
 import org.marid.runtime.context.BeanContext;
 import org.w3c.dom.Element;
 
@@ -41,7 +41,7 @@ public final class RefExpr extends Expr implements RefExpression {
 
   RefExpr(@Nonnull Element element) {
     super(element);
-    reference = Xmls.attribute(element, "ref").orElseThrow(() -> new NullPointerException("ref"));
+    reference = XmlExpression.ref(element);
   }
 
   @Override
