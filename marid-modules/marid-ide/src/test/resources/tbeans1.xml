@@ -37,7 +37,7 @@
           <class class="java.math.BigInteger"/>
         </target>
         <args>
-          <const type="LONG" value="1"/>
+          <call method="int64" arg="1"/>
         </args>
       </call>
     </factory>
@@ -50,7 +50,7 @@
           <class class="java.util.ArrayList"/>
         </target>
         <args>
-          <const type="INT" value="10"/>
+          <call arg="10"/>
         </args>
         <initializers>
           <call method="add">
@@ -58,7 +58,7 @@
               <this/>
             </target>
             <args>
-              <const type="INT" value="2"/>
+              <call arg="2"/>
             </args>
           </call>
         </initializers>
@@ -75,7 +75,7 @@
               <class class="java.util.Collections"/>
             </target>
             <args>
-              <const type="LONG" value="12"/>
+              <call method="int64" arg="12"/>
             </args>
           </call>
         </target>
@@ -90,7 +90,7 @@
           <class class="java.util.Collections"/>
         </target>
         <args>
-          <const type="LONG" value="12"/>
+          <call method="int64" arg="12"/>
         </args>
       </call>
     </factory>
@@ -134,7 +134,7 @@
               <this/>
             </target>
             <args>
-              <const type="INT" value="2"/>
+              <call arg="2"/>
             </args>
           </call>
           <call method="add">
@@ -142,7 +142,7 @@
               <this/>
             </target>
             <args>
-              <const type="LONG" value="2"/>
+              <call method="int64" arg="2"/>
             </args>
           </call>
         </initializers>
@@ -164,7 +164,7 @@
                   <class class="java.util.Collections"/>
                 </target>
                 <args>
-                  <const type="INT" value="1"/>
+                  <call arg="1"/>
                 </args>
               </call>
             </elements>
@@ -183,7 +183,7 @@
               <class class="java.util.Collections"/>
             </target>
             <args>
-              <const type="LONG" value="1"/>
+              <call method="int64" arg="1"/>
             </args>
           </call>
         </elements>
@@ -195,7 +195,7 @@
     <factory>
       <array>
         <elements>
-          <const type="I" value="1"/>
+          <call arg="1"/>
         </elements>
       </array>
     </factory>
@@ -215,7 +215,7 @@
             <args>
               <array>
                 <elements>
-                  <const type="INT" value="1"/>
+                  <call arg="1"/>
                 </elements>
               </array>
             </args>
@@ -227,7 +227,7 @@
             <args>
               <array>
                 <elements>
-                  <const type="LONG" value="1"/>
+                  <call method="int64" arg="2"/>
                 </elements>
               </array>
             </args>
@@ -254,7 +254,7 @@
           <class class="org.marid.expression.mutable.testclasses.MyComplexBean"/>
         </target>
         <args>
-          <const type="INT" value="1"/>
+          <call arg="1"/>
         </args>
       </call>
     </factory>
@@ -269,9 +269,9 @@
         <args>
           <array>
             <elements>
-              <const type="I" value="1"/>
-              <const type="J" value="2"/>
-              <const type="D" value="2.0"/>
+              <call arg="1"/>
+              <call method="int64" arg="2"/>
+              <call method="float64" arg="2.0"/>
             </elements>
           </array>
         </args>

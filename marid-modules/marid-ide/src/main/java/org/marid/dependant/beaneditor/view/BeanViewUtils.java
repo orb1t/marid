@@ -49,13 +49,6 @@ public class BeanViewUtils {
       return FontIcons.glyphIcon("F_GET_POCKET");
     } else if (expr instanceof SetExpr) {
       return FontIcons.glyphIcon("D_ARROW_RIGHT");
-    } else if (expr instanceof ConstExpr) {
-      final ConstExpr e = (ConstExpr) expr;
-      switch (e.getType()) {
-        case B: return FontIcons.glyphIcon("F_ADN");
-        case I: return FontIcons.glyphIcon("F_S15");
-        default: return FontIcons.glyphIcon("V_FROWNING_FACE");
-      }
     } else if (expr instanceof ThisExpr) {
       return FontIcons.glyphIcon("D_THERMOMETER");
     } else if (expr instanceof NullExpr) {

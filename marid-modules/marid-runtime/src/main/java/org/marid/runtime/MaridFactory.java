@@ -30,4 +30,12 @@ public interface MaridFactory {
   static long int64(String value) {
     return Long.parseLong(value);
   }
+
+  static double float64(String value) {
+    return Double.parseDouble(value);
+  }
+
+  static float float32(String value) {
+    return Float.parseFloat(value);
+  }
 }

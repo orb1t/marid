@@ -68,9 +68,7 @@ public class IdeBeanViewFactory {
   @Nonnull
   private Node createView(int level, @Nonnull IdeBean bean, @Nonnull Expr expr) {
     if (level < 3) {
-      if (expr instanceof ConstExpr) {
-        return createView((ConstExpr) expr);
-      } else if (expr instanceof CallExpr) {
+      if (expr instanceof CallExpr) {
         return createView(level, bean, (CallExpr) expr);
       } else if (expr instanceof GetExpr) {
         return createView(level, bean, (GetExpr) expr);
@@ -87,11 +85,6 @@ public class IdeBeanViewFactory {
       }
     }
     return new HBox();
-  }
-
-  @Nonnull
-  private Node createView(@Nonnull ConstExpr expr) {
-    return new Label(expr.getValue());
   }
 
   @Nonnull
