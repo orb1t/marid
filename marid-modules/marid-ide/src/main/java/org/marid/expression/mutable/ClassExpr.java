@@ -51,7 +51,7 @@ public class ClassExpr extends Expr implements ClassExpression {
   @Override
   public void writeTo(@Nonnull Element element) {
     super.writeTo(element);
-    element.setAttribute("class", getClassName());
+    XmlExpression.className(element, getClassName());
   }
 
   @Override

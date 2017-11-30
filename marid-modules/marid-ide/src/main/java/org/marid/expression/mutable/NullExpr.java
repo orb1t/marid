@@ -55,9 +55,7 @@ public class NullExpr extends Expr implements NullExpression {
   @Override
   public void writeTo(@Nonnull Element element) {
     super.writeTo(element);
-    if (!"void".equals(getType())) {
-      element.setAttribute("type", getType());
-    }
+    XmlExpression.type(element, getType());
   }
 
   @Override

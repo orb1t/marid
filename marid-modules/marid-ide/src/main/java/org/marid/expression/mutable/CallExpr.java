@@ -34,7 +34,6 @@ import java.util.List;
 
 import static java.util.stream.Collectors.joining;
 import static javafx.collections.FXCollections.observableArrayList;
-import static org.marid.io.Xmls.create;
 import static org.marid.jfx.props.ObservablesProvider.object;
 import static org.marid.jfx.props.ObservablesProvider.toObservableList;
 
@@ -80,10 +79,8 @@ public class CallExpr extends Expr implements CallExpression {
   public void writeTo(@Nonnull Element element) {
     super.writeTo(element);
     XmlExpression.target(element, getTarget());
-    element.setAttribute("method", getMethod());
-    if (!args.isEmpty()) {
-      create(element, "args", as -> getArgs().forEach(a -> create(as, a.getTag(), a::writeTo)));
-    }
+    XmlExpression.method(element, getMethod());
+    XmlExpression.args(element, getArgs());
   }
 
   @Override

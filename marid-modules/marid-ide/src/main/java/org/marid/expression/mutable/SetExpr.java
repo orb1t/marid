@@ -30,7 +30,6 @@ import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 
-import static org.marid.io.Xmls.create;
 import static org.marid.jfx.props.ObservablesProvider.object;
 
 public class SetExpr extends Expr implements SetExpression {
@@ -73,9 +72,9 @@ public class SetExpr extends Expr implements SetExpression {
   @Override
   public void writeTo(@Nonnull Element element) {
     super.writeTo(element);
-    create(element, "target", t -> create(t, getTarget().getTag(), getTarget()::writeTo));
-    element.setAttribute("field", getField());
-    create(element, "value", v -> create(v, getValue().getTag(), getValue()::writeTo));
+    XmlExpression.target(element, getTarget());
+    XmlExpression.field(element, getField());
+    XmlExpression.value(element, getValue());
   }
 
   @Override

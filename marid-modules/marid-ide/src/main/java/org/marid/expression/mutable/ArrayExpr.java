@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static javafx.collections.FXCollections.observableArrayList;
-import static org.marid.io.Xmls.create;
 import static org.marid.jfx.props.ObservablesProvider.toObservableList;
 
 public class ArrayExpr extends Expr implements ArrayExpression {
@@ -57,9 +56,7 @@ public class ArrayExpr extends Expr implements ArrayExpression {
   @Override
   public void writeTo(@Nonnull Element element) {
     super.writeTo(element);
-    if (!elements.isEmpty()) {
-      create(element, "elements", es -> getElements().forEach(e -> create(es, e.getTag(), e::writeTo)));
-    }
+    XmlExpression.arrayElems(element, getElements());
   }
 
   @Override
