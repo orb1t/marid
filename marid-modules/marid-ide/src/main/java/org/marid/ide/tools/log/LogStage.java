@@ -27,7 +27,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.StageStyle;
-import org.marid.Ide;
+import org.marid.ide.Ide;
 import org.marid.ide.IdePrefs;
 import org.marid.idelib.spring.annotation.PrototypeComponent;
 import org.marid.idelib.spring.ui.FxStage;

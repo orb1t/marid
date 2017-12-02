@@ -21,7 +21,16 @@
 
 package org.marid.ide;
 
+import org.marid.ide.logging.IdeLogConsoleHandler;
+import org.marid.ide.logging.IdeLogHandler;
+
+import java.util.Locale;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 import java.util.prefs.Preferences;
+
+import static java.util.logging.Level.WARNING;
+import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -29,4 +38,18 @@ import java.util.prefs.Preferences;
 public class IdePrefs {
 
   public static final Preferences PREFERENCES = Preferences.userNodeForPackage(IdePrefs.class).node("Ide");
+
+  static {
+    // locale
+    final String locale = PREFERENCES.get("locale", null);
+    if (locale != null) {
+      Locale.setDefault(Locale.forLanguageTag(locale));
+    }
+
+    // logging
+    LogManager.getLogManager().reset();
+    Logger.getLogger("").addHandler(new IdeLogHandler());
+    Logger.getLogger("").addHandler(new IdeLogConsoleHandler());
+    Thread.setDefaultUncaughtExceptionHandler((t, e) -> log(WARNING, "Exception in {0}", e, t));
+  }
 }

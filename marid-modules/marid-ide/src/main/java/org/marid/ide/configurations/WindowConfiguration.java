@@ -22,7 +22,7 @@
 package org.marid.ide.configurations;
 
 import javafx.scene.input.KeyCodeCombination;
-import org.marid.Ide;
+import org.marid.ide.Ide;
 import org.marid.jfx.action.FxAction;
 import org.marid.idelib.spring.annotation.IdeAction;
 import org.springframework.stereotype.Component;

@@ -19,28 +19,9 @@
  * #L%
  */
 
-package org.marid.idelib.spring.ui;
+package org.marid.idelib.splash;
 
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import javafx.stage.WindowEvent;
+import javafx.application.Preloader;
 
-import static org.marid.ide.Ide.FX_SCOPE;
-
-public abstract class FxStage extends Stage {
-
-  private final String conversationId;
-
-  public FxStage(StageStyle style) {
-    super(style);
-    conversationId = FX_SCOPE.nextConversationId();
-    FX_SCOPE.setConversationId(conversationId);
-    focusedProperty().addListener((o, oV, nV) -> {
-      if (nV) {
-        FX_SCOPE.setConversationId(conversationId);
-      }
-    });
-    addEventHandler(WindowEvent.WINDOW_SHOWING, event -> FX_SCOPE.setConversationId(conversationId));
-    addEventHandler(WindowEvent.WINDOW_HIDDEN, event -> FX_SCOPE.destroy(conversationId));
-  }
+public class MaridSplashCloseNotification implements Preloader.PreloaderNotification {
 }

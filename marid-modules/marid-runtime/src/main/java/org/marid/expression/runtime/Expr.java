@@ -63,10 +63,6 @@ public abstract class Expr implements Expression {
 
   protected abstract Object execute(@Nullable Object self, @Nullable Type selfType, @Nonnull BeanContext context);
 
-  public String getTag() {
-    return getClass().getSimpleName().replace("Expr", "").toLowerCase();
-  }
-
   public static Expr of(@Nonnull Element element) {
     switch (element.getTagName()) {
       case "array": return new ArrayExpr(element);

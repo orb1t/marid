@@ -31,7 +31,6 @@ import javafx.stage.Stage;
 import org.controlsfx.control.Notifications;
 import org.controlsfx.control.action.Action;
 import org.intellij.lang.annotations.MagicConstant;
-import org.marid.Ide;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.misc.StringUtils;
 

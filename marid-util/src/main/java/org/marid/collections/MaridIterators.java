@@ -24,6 +24,7 @@ package org.marid.collections;
 import javax.annotation.Nonnull;
 import java.util.Iterator;
 import java.util.Scanner;
+import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
@@ -47,5 +48,15 @@ public interface MaridIterators {
   @Nonnull
   static Iterator<String> lineIterator(@Nonnull Scanner scanner) {
     return iterator(scanner::hasNextLine, scanner::nextLine);
+  }
+
+  static <E> void forEach(@Nonnull Iterable<E> iterable, @Nonnull BiConsumer<Boolean, E> consumer) {
+    boolean hasPrevious = false;
+    for (final E e : iterable) {
+      consumer.accept(hasPrevious, e);
+      if (!hasPrevious) {
+        hasPrevious = true;
+      }
+    }
   }
 }

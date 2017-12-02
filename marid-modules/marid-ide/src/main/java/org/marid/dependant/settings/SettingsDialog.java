@@ -26,7 +26,7 @@ import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.Region;
 import javafx.stage.Modality;
-import org.marid.Ide;
+import org.marid.ide.Ide;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

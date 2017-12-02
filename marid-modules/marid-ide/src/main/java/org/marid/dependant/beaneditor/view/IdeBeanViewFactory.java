@@ -21,12 +21,11 @@
 
 package org.marid.dependant.beaneditor.view;
 
-import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import org.marid.dependant.beaneditor.actions.BeanActionManager;
 import org.marid.expression.mutable.*;
 import org.marid.idelib.beans.IdeBean;
@@ -35,6 +34,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
+
+import static org.marid.collections.MaridIterators.forEach;
 
 @Component
 public class IdeBeanViewFactory {
@@ -47,114 +48,84 @@ public class IdeBeanViewFactory {
   }
 
   @Nonnull
-  public Node createView(@Nonnull IdeBean bean, @Nonnull Expr expr) {
+  public TextFlow createView(@Nonnull IdeBean bean, @Nonnull Expr expr) {
+    final TextFlow tf = new TextFlow();
+    tf.setPrefWidth(Region.USE_COMPUTED_SIZE);
     if (bean.getParent() == null && bean.getFactory() == expr) {
-      return FontIcons.glyphIcon("D_ROOMBA");
+      tf.getChildren().add(FontIcons.glyphIcon("D_ROOMBA"));
     } else {
-      final Node node = createView(0, bean, expr);
-      final HBox box;
-      if (node instanceof HBox) {
-        box = (HBox) node;
-        box.getChildren().add(0, editButton(bean, expr));
-      } else {
-        box = new HBox(4, editButton(bean, expr), node);
-      }
-      box.setAlignment(Pos.CENTER_LEFT);
-      box.setFillHeight(true);
-      return box;
+      tf.getChildren().add(editButton(bean, expr));
+      createView(0, bean, expr, tf);
     }
+    return tf;
   }
 
-  @Nonnull
-  private Node createView(int level, @Nonnull IdeBean bean, @Nonnull Expr expr) {
+  private void createView(int level, @Nonnull IdeBean bean, @Nonnull Expr expr, @Nonnull TextFlow tf) {
     if (level < 3) {
       if (expr instanceof CallExpr) {
-        return createView(level, bean, (CallExpr) expr);
+        createView(level, bean, (CallExpr) expr, tf);
       } else if (expr instanceof GetExpr) {
-        return createView(level, bean, (GetExpr) expr);
+        createView(level, bean, (GetExpr) expr, tf);
       } else if (expr instanceof SetExpr) {
-        return createView(level, bean, (SetExpr) expr);
+        createView(level, bean, (SetExpr) expr, tf);
       } else if (expr instanceof ArrayExpr) {
-        return createView(level, bean, (ArrayExpr) expr);
+        createView(level, bean, (ArrayExpr) expr, tf);
       } else if (expr instanceof ClassExpr) {
-        return createView((ClassExpr) expr);
+        createView((ClassExpr) expr, tf);
       } else if (expr instanceof StringExpr) {
-        return createView((StringExpr) expr);
+        createView((StringExpr) expr, tf);
       } else if (expr instanceof RefExpr) {
-        return createView((RefExpr) expr);
+        createView((RefExpr) expr, tf);
       }
     }
-    return new HBox();
   }
 
-  @Nonnull
-  private Node createView(int level, @Nonnull IdeBean bean, @Nonnull CallExpr expr) {
-    final HBox box = new HBox(4);
-
-    box.getChildren().add(editInitializersButton(bean, expr));
-    box.getChildren().add(createView(level + 1, bean, expr.getTarget()));
-    box.getChildren().add(new Label("." + expr.getMethod() + "("));
-
-    expr.getArgs().stream().reduce((e1, e2) -> {
-      box.getChildren().add(createView(level + 1, bean, e1));
-      box.getChildren().add(new Label(","));
-      return e2;
-    }).ifPresent(e -> box.getChildren().add(createView(level + 1, bean, e)));
-
-    box.getChildren().add(new Label(")"));
-    return box;
+  private void createView(int level, @Nonnull IdeBean bean, @Nonnull CallExpr expr, @Nonnull TextFlow tf) {
+    tf.getChildren().add(editInitializersButton(bean, expr));
+    createView(level + 1, bean, expr.getTarget(), tf);
+    tf.getChildren().add(new Text("." + expr.getMethod() + "("));
+    forEach(expr.getArgs(), (p, e) -> {
+      if (p) {
+        tf.getChildren().add(new Text(", "));
+      }
+      createView(level + 1, bean, e, tf);
+    });
+    tf.getChildren().add(new Text(")"));
   }
 
-  @Nonnull
-  private Node createView(int level, @Nonnull IdeBean bean, @Nonnull GetExpr expr) {
-    final HBox box = new HBox(4);
-
-    box.getChildren().add(editInitializersButton(bean, expr));
-    box.getChildren().add(createView(level + 1, bean, expr.getTarget()));
-    box.getChildren().add(new Label("." + expr.getField()));
-
-    return box;
+  private void createView(int level, @Nonnull IdeBean bean, @Nonnull GetExpr expr, @Nonnull TextFlow tf) {
+    tf.getChildren().add(editInitializersButton(bean, expr));
+    createView(level + 1, bean, expr.getTarget(), tf);
+    tf.getChildren().add(new Text("." + expr.getField()));
   }
 
-  @Nonnull
-  private Node createView(int level, @Nonnull IdeBean bean, @Nonnull SetExpr expr) {
-    final HBox box = new HBox();
-
-    box.getChildren().add(createView(level + 1, bean, expr.getTarget()));
-    box.getChildren().add(new Label("." + expr.getField() + "="));
-    box.getChildren().add(createView(level + 1, bean, expr.getValue()));
-
-    return box;
+  private void createView(int level, @Nonnull IdeBean bean, @Nonnull SetExpr expr, @Nonnull TextFlow tf) {
+    createView(level + 1, bean, expr.getTarget(), tf);
+    tf.getChildren().add(new Text("." + expr.getField() + "="));
+    createView(level + 1, bean, expr.getValue(), tf);
   }
 
-  @Nonnull
-  private Node createView(int level, @Nonnull IdeBean bean, @Nonnull ArrayExpr expr) {
-    final HBox box = new HBox(4);
-
-    expr.getElements().stream().reduce((e1, e2) -> {
-      box.getChildren().add(createView(level + 1, bean, e1));
-      box.getChildren().add(new Label(","));
-      return e2;
-    }).ifPresent(e -> box.getChildren().add(createView(level + 1, bean, e)));
-
-    return box;
+  private void createView(int level, @Nonnull IdeBean bean, @Nonnull ArrayExpr expr, @Nonnull TextFlow tf) {
+    forEach(expr.getElements(), (p, e) -> {
+      if (p) {
+        tf.getChildren().add(new Text(", "));
+      }
+      createView(level + 1, bean, e, tf);
+    });
   }
 
-  @Nonnull
-  private Node createView(@Nonnull ClassExpr expr) {
-    final Label label = new Label(BeanViewUtils.replaceQualified(expr.getClassName()));
-    label.setTooltip(new Tooltip(expr.getClassName()));
-    return label;
+  private void createView(@Nonnull ClassExpr expr, @Nonnull TextFlow tf) {
+    final Text text = new Text(BeanViewUtils.replaceQualified(expr.getClassName()));
+    Tooltip.install(text, new Tooltip(expr.getClassName()));
+    tf.getChildren().add(text);
   }
 
-  @Nonnull
-  private Node createView(@Nonnull StringExpr expr) {
-    return new Label(expr.getValue());
+  private void createView(@Nonnull StringExpr expr, @Nonnull TextFlow tf) {
+    tf.getChildren().add(new Text(expr.getValue()));
   }
 
-  @Nonnull
-  private Node createView(@Nonnull RefExpr expr) {
-    return new Label(expr.getReference());
+  private void createView(@Nonnull RefExpr expr, @Nonnull TextFlow tf) {
+    tf.getChildren().add(new Text(expr.getReference()));
   }
 
   @Nonnull

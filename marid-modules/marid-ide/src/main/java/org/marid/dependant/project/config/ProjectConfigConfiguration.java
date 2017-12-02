@@ -32,7 +32,7 @@ import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import javafx.stage.StageStyle;
 import org.apache.maven.model.Model;
-import org.marid.Ide;
+import org.marid.ide.Ide;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.control.MaridControls;
 import org.springframework.beans.factory.annotation.Qualifier;

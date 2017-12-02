@@ -19,30 +19,20 @@
  * #L%
  */
 
-package org.marid;
+package org.marid.ide;
 
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import org.marid.ide.IdeContext;
-import org.marid.ide.logging.IdeLogConsoleHandler;
-import org.marid.ide.logging.IdeLogHandler;
 import org.marid.ide.panes.main.IdePane;
-import org.marid.image.MaridIconFx;
-import org.marid.idelib.splash.MaridSplash;
+import org.marid.idelib.splash.MaridSplashCloseNotification;
 import org.marid.idelib.spring.postprocessors.MaridCommonPostProcessor;
 import org.marid.idelib.spring.ui.FxScope;
+import org.marid.image.MaridIconFx;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import java.util.Locale;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
-
-import static java.util.logging.Level.WARNING;
 import static org.marid.ide.IdePrefs.PREFERENCES;
-import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -53,10 +43,11 @@ public class Ide extends Application {
 
   public static volatile Stage primaryStage;
 
+  private final String style = PREFERENCES.get("style", STYLESHEET_MODENA);
   private final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 
   @Override
-  public void init() throws Exception {
+  public void init() {
     context.getBeanFactory().addBeanPostProcessor(new MaridCommonPostProcessor());
     context.getBeanFactory().registerScope("fx", FX_SCOPE);
     context.register(IdeContext.class);
@@ -80,42 +71,20 @@ public class Ide extends Application {
         primaryStage.getIcons().addAll(MaridIconFx.getIcons(24, 32));
         primaryStage.setMaximized(true);
         primaryStage.show();
+
+        notifyPreloader(new MaridSplashCloseNotification());
       });
     }).start();
   }
 
   @Override
-  public void start(Stage primaryStage) throws Exception {
+  public void start(Stage primaryStage) {
     Ide.primaryStage = primaryStage;
-
-    final Stage splash = new Stage(StageStyle.UNDECORATED);
-    splash.setTitle("Marid");
-    splash.getIcons().addAll(MaridIconFx.getIcons(24, 32));
-    splash.setScene(new Scene(new MaridSplash(primaryStage, IdeLogHandler.LOG_RECORDS)));
-    splash.show();
-
-    setUserAgentStylesheet(PREFERENCES.get("style", STYLESHEET_MODENA));
+    setUserAgentStylesheet(style);
   }
 
   @Override
-  public void stop() throws Exception {
+  public void stop() {
     context.close();
-  }
-
-  public static void main(String... args) throws Exception {
-    // locale
-    final String locale = PREFERENCES.get("locale", null);
-    if (locale != null) {
-      Locale.setDefault(Locale.forLanguageTag(locale));
-    }
-
-    // logging
-    LogManager.getLogManager().reset();
-    Logger.getLogger("").addHandler(new IdeLogHandler());
-    Logger.getLogger("").addHandler(new IdeLogConsoleHandler());
-    Thread.setDefaultUncaughtExceptionHandler((t, e) -> log(WARNING, "Exception in {0}", e, t));
-
-    // launch application
-    Application.launch(args);
   }
 }

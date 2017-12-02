@@ -29,7 +29,7 @@ import javafx.scene.control.ChoiceDialog;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
 import org.apache.maven.model.Dependency;
-import org.marid.Ide;
+import org.marid.ide.Ide;
 import org.marid.jfx.toolbar.ToolbarBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 

@@ -58,13 +58,15 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>org.marid.Ide</mainClass>
+              <mainClass>org.marid.ide.Ide</mainClass>
               <addClasspath>true</addClasspath>
               <classpathPrefix>lib</classpathPrefix>
             </manifest>
             <manifestFile>build/MANIFEST.MF</manifestFile>
             <manifestEntries>
               <JavaFX-Version>9.0</JavaFX-Version>
+              <JavaFX-Preloader-Class>org.marid.idelib.splash.MaridPreloader</JavaFX-Preloader-Class>
+              <JavaFX-Application-Class>org.marid.ide.Ide</JavaFX-Application-Class>
               <Automatic-Module-Name>marid.ide</Automatic-Module-Name>
             </manifestEntries>
           </archive>

@@ -19,28 +19,29 @@
  * #L%
  */
 
-package org.marid.idelib.spring.ui;
+package org.marid.idelib.splash;
 
+import javafx.application.Preloader;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import javafx.stage.WindowEvent;
+import org.marid.image.MaridIconFx;
 
-import static org.marid.ide.Ide.FX_SCOPE;
+public class MaridPreloader extends Preloader {
 
-public abstract class FxStage extends Stage {
+  private final MaridSplash splash = new MaridSplash();
 
-  private final String conversationId;
+  @Override
+  public void start(Stage primaryStage) {
+    primaryStage.setTitle("Marid");
+    primaryStage.getIcons().addAll(MaridIconFx.getIcons(24, 32));
+    primaryStage.setScene(new Scene(splash));
+    primaryStage.show();
+  }
 
-  public FxStage(StageStyle style) {
-    super(style);
-    conversationId = FX_SCOPE.nextConversationId();
-    FX_SCOPE.setConversationId(conversationId);
-    focusedProperty().addListener((o, oV, nV) -> {
-      if (nV) {
-        FX_SCOPE.setConversationId(conversationId);
-      }
-    });
-    addEventHandler(WindowEvent.WINDOW_SHOWING, event -> FX_SCOPE.setConversationId(conversationId));
-    addEventHandler(WindowEvent.WINDOW_HIDDEN, event -> FX_SCOPE.destroy(conversationId));
+  @Override
+  public void handleApplicationNotification(PreloaderNotification info) {
+    if (info instanceof MaridSplashCloseNotification) {
+      splash.close();
+    }
   }
 }
