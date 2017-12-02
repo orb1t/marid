@@ -31,7 +31,6 @@ import org.w3c.dom.Element;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
-import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -53,7 +52,7 @@ public final class CallExpr extends Expr implements CallExpression {
   public CallExpr(@Nonnull Expr target, @Nonnull String method, @Nonnull Expr... args) {
     this.target = target;
     this.method = method;
-    this.args = Arrays.asList(args);
+    this.args = List.of(args);
   }
 
   CallExpr(@Nonnull Element element) {

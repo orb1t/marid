@@ -37,7 +37,7 @@
           <class class="java.math.BigInteger"/>
         </target>
         <args>
-          <const type="LONG" value="1"/>
+          <call method="int64" arg="1"/>
         </args>
         <initializers>
           <call method="add">
@@ -60,7 +60,7 @@
           <class class="java.util.ArrayList"/>
         </target>
         <args>
-          <const type="INT" value="10"/>
+          <call arg="10"/>
         </args>
       </call>
     </factory>
@@ -68,17 +68,17 @@
 
   <bean name="b4">
     <factory>
-      <call method="size">
+      <call method="asList">
         <target>
-          <call method="singletonList">
-            <target>
-              <class class="java.util.Collections"/>
-            </target>
-            <args>
-              <const type="INT" value="1"/>
-            </args>
-          </call>
+          <class class="java.util.Arrays"/>
         </target>
+        <args>
+          <array>
+            <elements>
+              <call arg="1"/>
+            </elements>
+          </array>
+        </args>
       </call>
     </factory>
   </bean>

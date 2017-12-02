@@ -23,7 +23,10 @@ package org.marid.runtime.context;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.marid.beans.RuntimeBean;
 import org.marid.io.Xmls;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
@@ -34,11 +37,13 @@ import java.io.Reader;
 import java.math.BigInteger;
 import java.util.NoSuchElementException;
 import java.util.Properties;
+import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("normal")
 class XmlBeanContextTest {
 
   private static Properties properties;
@@ -64,30 +69,22 @@ class XmlBeanContextTest {
     }
   }
 
-  @Test
-  void testB1() {
-    final BeanContext b = context.children()
-        .filter(c -> c.getBean().getName().equals("b1"))
-        .findFirst()
-        .orElseThrow(() -> new NoSuchElementException("b1"));
-    assertEquals("str", b.getInstance());
+  private static Stream<Arguments> data() {
+    return Stream.of(
+        () -> new Object[] {"b1", "str"},
+        () -> new Object[] {"b2", BigInteger.ONE},
+        () -> new Object[] {"b3", singletonList(BigInteger.ONE)},
+        () -> new Object[] {"b4", singletonList(BigInteger.ONE)}
+    );
   }
 
-  @Test
-  void testB2() {
+  @ParameterizedTest
+  @MethodSource("data")
+  void testBean(String bean, Object expected) {
     final BeanContext b = context.children()
-        .filter(c -> c.getBean().getName().equals("b2"))
+        .filter(c -> c.getBean().getName().equals(bean))
         .findFirst()
-        .orElseThrow(() -> new NoSuchElementException("b2"));
-    assertEquals(BigInteger.valueOf(1L), b.getInstance());
-  }
-
-  @Test
-  void testB3() {
-    final BeanContext b = context.children()
-        .filter(c -> c.getBean().getName().equals("b3"))
-        .findFirst()
-        .orElseThrow(() -> new NoSuchElementException("b3"));
-    assertEquals(singletonList(BigInteger.valueOf(1L)), b.getInstance());
+        .orElseThrow(() -> new NoSuchElementException(bean));
+    assertEquals(expected, b.getInstance());
   }
 }
