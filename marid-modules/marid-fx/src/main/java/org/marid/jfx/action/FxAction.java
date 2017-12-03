@@ -55,8 +55,6 @@ public class FxAction {
   public final String menu;
   public final SpecialAction specialAction;
 
-  public final List<Object> anchors = new LinkedList<>();
-
   protected final StringProperty text = new SimpleStringProperty(this, "text");
   protected final ObjectProperty<KeyCombination> accelerator = new SimpleObjectProperty<>(this, "accelerator");
   protected final StringProperty icon = new SimpleStringProperty(this, "icon");
