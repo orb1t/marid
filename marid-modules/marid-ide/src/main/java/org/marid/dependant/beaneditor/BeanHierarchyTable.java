@@ -39,8 +39,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
 import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import static javafx.beans.binding.Bindings.createObjectBinding;
 import static org.marid.jfx.LocalizedStrings.ls;
@@ -82,14 +80,13 @@ public class BeanHierarchyTable extends MaridTreeTableView<IdeBean> {
       column.setCellValueFactory(p -> {
         final TreeItem<IdeBean> item = p.getValue();
         final IdeBean bean = item.getValue();
-        final Supplier<Node> supplier = () -> beanViewFactory.typeLabel(bean, profile);
-        final SimpleObjectProperty<Node> property = new SimpleObjectProperty<>(supplier.get());
-        final InvalidationListener listener = o -> property.set(supplier.get());
-        final Consumer<ProjectProfile> profileListener = pr -> property.set(supplier.get());
+        final SimpleObjectProperty<Node> property = new SimpleObjectProperty<>();
+        final InvalidationListener listener = o -> property.set(beanViewFactory.typeLabel(bean, profile));
+        listener.invalidated(null);
         root.ostream().forEach(o -> o.addListener(listener));
-        profile.addOnUpdate(profileListener);
+        profile.addListener(listener);
         CLEANER.register(item, () -> {
-          profile.removeOnUpdate(profileListener);
+          profile.removeListener(listener);
           Platform.runLater(() -> root.ostream().forEach(o -> o.removeListener(listener)));
         });
         return property;
@@ -109,7 +106,7 @@ public class BeanHierarchyTable extends MaridTreeTableView<IdeBean> {
       column.textProperty().bind(ls("Factory"));
       column.setCellValueFactory(p -> {
         final IdeBean bean = p.getValue().getValue();
-        return new SimpleObjectProperty<>(viewFactory.createView(bean, bean.getFactory()));
+        return createObjectBinding(() -> viewFactory.createView(bean, bean.getFactory()), bean.factory);
       });
       column.setPrefWidth(500);
       column.setMinWidth(300);

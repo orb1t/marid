@@ -21,6 +21,7 @@
 
 package org.marid.dependant.beaneditor;
 
+import javafx.beans.InvalidationListener;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.io.PathMatchers;
 import org.springframework.asm.ClassReader;
@@ -34,9 +35,9 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.reflect.Modifier;
 import java.nio.file.*;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 import static java.lang.Integer.MAX_VALUE;
@@ -54,15 +55,18 @@ import static org.springframework.asm.Opcodes.ASM6;
 public class BeanDao {
 
   private final ProjectProfile profile;
-  private final ConcurrentLinkedQueue<Class<?>> publicClasses = new ConcurrentLinkedQueue<>();
+  private final Set<Class<?>> publicClasses = new LinkedHashSet<>();
+  private final AtomicBoolean dirty = new AtomicBoolean(true);
+  private final InvalidationListener listener = o -> dirty.set(true);
 
   @Autowired
   public BeanDao(ProjectProfile profile) {
-    (this.profile = profile).addOnUpdate(this::onUpdate);
-    onUpdate(profile);
+    (this.profile = profile).addListener(listener);
+    listener.invalidated(profile);
   }
 
-  private void onUpdate(ProjectProfile profile) {
+  private ConcurrentLinkedQueue<Class<?>> classes() {
+    final ConcurrentLinkedQueue<Class<?>> publicClasses = new ConcurrentLinkedQueue<>();
     final Path lib = profile.get(TARGET_LIB);
     final ConcurrentLinkedQueue<ClassReader> classReaders = new ConcurrentLinkedQueue<>();
     try (final DirectoryStream<Path> libStream = Files.newDirectoryStream(lib, "*.jar")) {
@@ -112,10 +116,16 @@ public class BeanDao {
       }
     });
     log(INFO, "{0} Public classes updated: {1}", profile, publicClasses.size());
+    return publicClasses;
   }
 
   public Collection<Class<?>> publicClasses() {
-    return Collections.unmodifiableCollection(publicClasses);
+    if (dirty.compareAndSet(true, false)) {
+      final ConcurrentLinkedQueue<Class<?>> classes = classes();
+      publicClasses.clear();
+      publicClasses.addAll(classes);
+    }
+    return publicClasses;
   }
 
   private void fillClassReaders(Path root, Collection<ClassReader> classReaders) throws Exception {
@@ -134,6 +144,6 @@ public class BeanDao {
 
   @PreDestroy
   private void close() {
-    profile.removeOnUpdate(this::onUpdate);
+    profile.removeListener(listener);
   }
 }

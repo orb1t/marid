@@ -21,6 +21,9 @@
 
 package org.marid.ide.project;
 
+import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import org.apache.maven.model.Model;
@@ -43,7 +46,6 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.EnumMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -60,14 +62,14 @@ import static org.marid.misc.Calls.call;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class ProjectProfile {
+public class ProjectProfile implements Observable {
 
   private final Model model;
   private final Path path;
   private final EnumMap<ProjectFileType, Path> paths;
   private final Logger logger;
   private final BooleanProperty enabled;
-  private final ConcurrentLinkedQueue<Consumer<ProjectProfile>> onUpdate = new ConcurrentLinkedQueue<>();
+  private final ConcurrentLinkedQueue<InvalidationListener> onUpdate = new ConcurrentLinkedQueue<>();
 
   private volatile URLClassLoader classLoader;
 
@@ -185,13 +187,15 @@ public class ProjectProfile {
       final URL[] urls = Urls.classpath(get(TARGET_LIB), get(TARGET_CLASSES));
       final ClassLoader parent = Thread.currentThread().getContextClassLoader();
       classLoader = new URLClassLoader(urls, parent);
-      onUpdate.forEach(c -> {
-        try {
-          c.accept(this);
-        } catch (Exception x) {
-          log(WARNING, "Unable to call update trigger {0}", x, c);
-        }
-      });
+      if (!onUpdate.isEmpty()) {
+        Platform.runLater(() -> onUpdate.forEach(c -> {
+          try {
+            c.invalidated(this);
+          } catch (Exception x) {
+            log(WARNING, "Unable to call update trigger {0}", x, c);
+          }
+        }));
+      }
     } catch (Exception x) {
       log(logger, WARNING, "Unable to close class loader", x);
     }
@@ -199,14 +203,6 @@ public class ProjectProfile {
 
   public URLClassLoader getClassLoader() {
     return classLoader;
-  }
-
-  public void addOnUpdate(Consumer<ProjectProfile> listener) {
-    onUpdate.add(listener);
-  }
-
-  public void removeOnUpdate(Consumer<ProjectProfile> listener) {
-    onUpdate.remove(listener);
   }
 
   @Override
@@ -222,5 +218,15 @@ public class ProjectProfile {
   @Override
   public String toString() {
     return getName();
+  }
+
+  @Override
+  public void addListener(InvalidationListener listener) {
+    onUpdate.add(listener);
+  }
+
+  @Override
+  public void removeListener(InvalidationListener listener) {
+    onUpdate.remove(listener);
   }
 }
