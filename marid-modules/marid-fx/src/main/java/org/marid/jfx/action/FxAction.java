@@ -214,7 +214,7 @@ public class FxAction {
     if (icon.isBound() || specialAction == null) {
       item.graphicProperty().bind(icon(16));
     } else {
-      item.graphicProperty().bind(specialAction.icon(20));
+      item.graphicProperty().bind(specialAction.icon(16));
     }
 
     final AtomicReference<WeakInvalidationListener> listener = new AtomicReference<>();
