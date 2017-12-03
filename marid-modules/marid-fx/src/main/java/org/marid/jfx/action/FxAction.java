@@ -42,6 +42,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import static javafx.beans.binding.Bindings.createBooleanBinding;
 import static javafx.collections.FXCollections.observableArrayList;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
@@ -248,13 +249,7 @@ public class FxAction {
 
     button.tooltipProperty().bind(Bindings.createObjectBinding(() -> {
       final String hint = textProperty.getValue();
-      if (hint == null || hint.isEmpty()) {
-        return null;
-      } else {
-        final Tooltip tooltip = new Tooltip();
-        tooltip.textProperty().bind(textProperty);
-        return tooltip;
-      }
+      return hint == null || hint.isEmpty() ? null : new Tooltip(textProperty.getValue());
     }, textProperty));
 
     button.setOnAction(event -> {
@@ -268,13 +263,7 @@ public class FxAction {
         contextMenu.show(button, Side.BOTTOM, 0, 0);
       }
     });
-    button.disableProperty().bind(Bindings.createBooleanBinding(() -> {
-      if (!children.isEmpty()) {
-        return false;
-      } else {
-        return disabled.get();
-      }
-    }, children, disabled));
+    button.disableProperty().bind(createBooleanBinding(() -> children.isEmpty() && disabled.get(), children, disabled));
     return button;
   }
 
