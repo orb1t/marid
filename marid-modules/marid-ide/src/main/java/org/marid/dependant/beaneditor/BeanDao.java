@@ -35,7 +35,9 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.reflect.Modifier;
 import java.nio.file.*;
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
@@ -98,7 +100,6 @@ public class BeanDao {
         }
       }
     }, SKIP_CODE | SKIP_DEBUG | SKIP_FRAMES));
-    publicClasses.clear();
     classNames.parallelStream().forEach(c -> {
       try {
         final Class<?> type = Class.forName(c, false, profile.getClassLoader());
@@ -115,7 +116,6 @@ public class BeanDao {
         log(WARNING, "Unable to load {0}", x, c);
       }
     });
-    log(INFO, "{0} Public classes updated: {1}", profile, publicClasses.size());
     return publicClasses;
   }
 
@@ -124,6 +124,7 @@ public class BeanDao {
       final ConcurrentLinkedQueue<Class<?>> classes = classes();
       publicClasses.clear();
       publicClasses.addAll(classes);
+      log(INFO, "{0} Public classes updated: {1}", profile, publicClasses.size());
     }
     return publicClasses;
   }
