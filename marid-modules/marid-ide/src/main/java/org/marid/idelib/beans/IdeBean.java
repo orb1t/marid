@@ -24,11 +24,13 @@ package org.marid.idelib.beans;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
+import javafx.scene.shape.Circle;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.marid.beans.MaridBean;
 import org.marid.expression.mutable.Expr;
 import org.marid.expression.mutable.NullExpr;
+import org.marid.ide.common.IdeShapes;
 import org.marid.jfx.props.FxObject;
 import org.marid.jfx.props.ObservablesProvider;
 import org.w3c.dom.Element;
@@ -120,6 +122,14 @@ public class IdeBean implements MaridBean, ObservablesProvider {
 
   public void save(@Nonnull Path file) {
     writeFormatted("bean", this::writeTo, file);
+  }
+
+  public Circle icon() {
+    int hash = 0;
+    for (IdeBean b = this; b != null; b = b.parent) {
+      hash ^= b.getName().hashCode();
+    }
+    return IdeShapes.circle(hash, 16);
   }
 
   @Override

@@ -21,19 +21,15 @@
 
 package org.marid.dependant.beaneditor;
 
-import javafx.beans.binding.Bindings;
+import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
-import javafx.scene.control.cell.TextFieldTreeTableCell;
-import org.marid.dependant.beaneditor.view.BeanViewUtils;
 import org.marid.dependant.beaneditor.view.IdeBeanViewFactory;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.idelib.beans.IdeBean;
-import org.marid.idelib.beans.IdeBeanContext;
 import org.marid.idelib.beans.IdeBeanItem;
 import org.marid.jfx.control.MaridTreeTableView;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,8 +39,12 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
+import static javafx.beans.binding.Bindings.createObjectBinding;
 import static org.marid.jfx.LocalizedStrings.ls;
+import static org.marid.jfx.track.Tracks.CLEANER;
 
 @Component
 public class BeanHierarchyTable extends MaridTreeTableView<IdeBean> {
@@ -57,19 +57,17 @@ public class BeanHierarchyTable extends MaridTreeTableView<IdeBean> {
 
   @Order(0)
   @Bean(initMethod = "run")
-  public Runnable nameColumn() {
+  public Runnable nameColumn(IdeBeanViewFactory beanViewFactory) {
     return () -> {
-      final TreeTableColumn<IdeBean, String> nameColumn = new TreeTableColumn<>();
+      final TreeTableColumn<IdeBean, Node> nameColumn = new TreeTableColumn<>();
       nameColumn.textProperty().bind(ls("Name"));
-      nameColumn.setCellValueFactory(p -> p.getValue().getValue().name);
+      nameColumn.setCellValueFactory(p -> {
+        final IdeBean bean = p.getValue().getValue();
+        return createObjectBinding(() -> beanViewFactory.beanLabel(bean), bean.observables());
+      });
       nameColumn.setPrefWidth(200);
       nameColumn.setMinWidth(50);
       nameColumn.setMaxWidth(1000);
-      nameColumn.setCellFactory(param -> {
-        final TextFieldTreeTableCell<IdeBean, String> cell = new TextFieldTreeTableCell<>();
-        cell.setAlignment(Pos.CENTER_LEFT);
-        return cell;
-      });
       getColumns().add(nameColumn);
       setTreeColumn(nameColumn);
     };
@@ -77,26 +75,24 @@ public class BeanHierarchyTable extends MaridTreeTableView<IdeBean> {
 
   @Order(1)
   @Bean(initMethod = "run")
-  public Runnable typeColumn(ProjectProfile profile) {
+  public Runnable typeColumn(ProjectProfile profile, IdeBean root, IdeBeanViewFactory beanViewFactory) {
     return () -> {
-      final TreeTableColumn<IdeBean, String> column = new TreeTableColumn<>();
+      final TreeTableColumn<IdeBean, Node> column = new TreeTableColumn<>();
       column.textProperty().bind(ls("Type"));
       column.setCellValueFactory(p -> {
         final TreeItem<IdeBean> item = p.getValue();
         final IdeBean bean = item.getValue();
-        if (bean.getParent() == null) {
-          return new SimpleStringProperty();
-        } else {
-          return Bindings.createStringBinding(() -> {
-            final IdeBeanContext context = new IdeBeanContext(bean, profile.getClassLoader());
-            return BeanViewUtils.replaceQualified(bean.getFactory().getType(null, context).toString());
-          }, bean.observables());
-        }
-      });
-      column.setCellFactory(param -> {
-        final TextFieldTreeTableCell<IdeBean, String> cell = new TextFieldTreeTableCell<>();
-        cell.setAlignment(Pos.CENTER_LEFT);
-        return cell;
+        final Supplier<Node> supplier = () -> beanViewFactory.typeLabel(bean, profile);
+        final SimpleObjectProperty<Node> property = new SimpleObjectProperty<>(supplier.get());
+        final InvalidationListener listener = o -> property.set(supplier.get());
+        final Consumer<ProjectProfile> profileListener = pr -> property.set(supplier.get());
+        root.ostream().forEach(o -> o.addListener(listener));
+        profile.addOnUpdate(profileListener);
+        CLEANER.register(item, () -> {
+          profile.removeOnUpdate(profileListener);
+          Platform.runLater(() -> root.ostream().forEach(o -> o.removeListener(listener)));
+        });
+        return property;
       });
       column.setPrefWidth(200);
       column.setMinWidth(100);

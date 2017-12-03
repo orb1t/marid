@@ -46,16 +46,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @Tag("normal")
 class XmlBeanContextTest {
 
-  private static Properties properties;
-  private static ClassLoader classLoader;
-  private static BeanConfiguration beanConfiguration;
   private static BeanContext context;
 
   @BeforeAll
   static void init() throws IOException {
-    properties = PropertiesLoaderUtils.loadAllProperties("classpath:beans.properties");
-    classLoader = Thread.currentThread().getContextClassLoader();
-    beanConfiguration = new BeanConfiguration(classLoader, properties);
+    final Properties properties = PropertiesLoaderUtils.loadAllProperties("classpath:beans.properties");
+    final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+    final BeanConfiguration beanConfiguration = new BeanConfiguration(classLoader, properties);
 
     try (final Reader reader = new InputStreamReader(classLoader.getResourceAsStream("beans1.xml"), UTF_8)) {
       context = new BeanContext(beanConfiguration, Xmls.read(reader, e -> new RuntimeBean(null, e)));
@@ -74,7 +71,7 @@ class XmlBeanContextTest {
         () -> new Object[] {"b1", "str"},
         () -> new Object[] {"b2", BigInteger.ONE},
         () -> new Object[] {"b3", singletonList(BigInteger.ONE)},
-        () -> new Object[] {"b4", singletonList(BigInteger.ONE)}
+        () -> new Object[] {"b4", singletonList(1)}
     );
   }
 
