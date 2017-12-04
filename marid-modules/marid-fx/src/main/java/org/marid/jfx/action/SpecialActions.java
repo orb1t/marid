@@ -21,14 +21,15 @@
 
 package org.marid.jfx.action;
 
+import javafx.beans.property.ListProperty;
+import javafx.beans.property.SimpleListProperty;
+
 import javax.annotation.Resource;
 import java.util.Collection;
 import java.util.EnumMap;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toList;
 import static org.marid.jfx.action.SpecialActionType.*;
 
 /**
@@ -106,18 +107,18 @@ public class SpecialActions {
     actionMap.values().forEach(SpecialAction::reset);
   }
 
-  private SpecialAction key(FxAction action) {
-    return action.specialAction == null ? actionMap.get(MISC) : action.specialAction;
-  }
-
   public void assign(Collection<FxAction> actions) {
     reset();
-    final Map<SpecialAction, List<FxAction>> map = actions.stream().collect(groupingBy(this::key, toList()));
+    final Map<SpecialAction, ListProperty<FxAction>> map = new LinkedHashMap<>();
+    actions.forEach(a -> {
+      final SpecialAction type = a.specialAction == null ? actionMap.get(MISC) : a.specialAction;
+      map.computeIfAbsent(type, k -> new SimpleListProperty<>()).add(a);
+    });
     map.forEach((k, v) -> {
       if (v.size() == 1) {
         k.copy(v.get(0));
       } else {
-        k.setChildren(v);
+        k.bindChildren(v);
       }
     });
   }

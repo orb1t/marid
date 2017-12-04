@@ -22,6 +22,7 @@
 package org.marid.jfx.action;
 
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
@@ -133,8 +134,7 @@ public class SpecialAction extends FxAction {
       super.selected.bind(selected == null ? new SimpleObjectProperty<>() : selected);
       super.icon.bind(icon == null ? new SimpleStringProperty() : icon);
       super.eventHandler.bind(eventHandler == null ? new SimpleObjectProperty<>() : eventHandler);
-
-      children.clear();
+      super.children.bind(new SimpleListProperty<>());
     }
   }
 
@@ -143,11 +143,10 @@ public class SpecialAction extends FxAction {
     if (action.description.isBound()) super.description.bind(action.description);
     if (action.text.isBound()) super.text.bind(action.text);
     if (action.icon.isBound()) super.icon.bind(action.icon);
+    if (action.children.isBound()) super.children.bind(action.children);
 
     super.disabled.bind(action.disabled);
     super.selected.bind(action.selected);
     super.eventHandler.bind(action.eventHandler);
-
-    children.addAll(action.children);
   }
 }

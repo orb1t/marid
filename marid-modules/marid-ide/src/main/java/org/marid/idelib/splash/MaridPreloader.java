@@ -24,6 +24,7 @@ package org.marid.idelib.splash;
 import javafx.application.Preloader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import org.marid.image.MaridIconFx;
 
 public class MaridPreloader extends Preloader {
@@ -32,6 +33,7 @@ public class MaridPreloader extends Preloader {
 
   @Override
   public void start(Stage primaryStage) {
+    primaryStage.initStyle(StageStyle.UNDECORATED);
     primaryStage.setTitle("Marid");
     primaryStage.getIcons().addAll(MaridIconFx.getIcons(24, 32));
     primaryStage.setScene(new Scene(splash));

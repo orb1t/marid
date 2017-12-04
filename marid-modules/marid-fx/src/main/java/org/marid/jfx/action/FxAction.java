@@ -27,7 +27,6 @@ import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -43,7 +42,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static javafx.beans.binding.Bindings.createBooleanBinding;
-import static javafx.collections.FXCollections.observableArrayList;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 /**
@@ -56,15 +54,14 @@ public class FxAction {
   public final String menu;
   public final SpecialAction specialAction;
 
-  protected final StringProperty text = new SimpleStringProperty(this, "text");
-  protected final ObjectProperty<KeyCombination> accelerator = new SimpleObjectProperty<>(this, "accelerator");
-  protected final StringProperty icon = new SimpleStringProperty(this, "icon");
-  protected final StringProperty description = new SimpleStringProperty(this, "description");
-  protected final BooleanProperty disabled = new SimpleBooleanProperty(this, "disabled");
-  protected final ObjectProperty<Boolean> selected = new SimpleObjectProperty<>(this, "selected");
-  protected final ObjectProperty<EventHandler<ActionEvent>> eventHandler = new SimpleObjectProperty<>(this, "eventHandler");
-
-  protected final ObservableList<FxAction> children = observableArrayList();
+  protected final StringProperty text = new SimpleStringProperty();
+  protected final ObjectProperty<KeyCombination> accelerator = new SimpleObjectProperty<>();
+  protected final StringProperty icon = new SimpleStringProperty();
+  protected final StringProperty description = new SimpleStringProperty();
+  protected final BooleanProperty disabled = new SimpleBooleanProperty();
+  protected final ObjectProperty<Boolean> selected = new SimpleObjectProperty<>();
+  protected final ObjectProperty<EventHandler<ActionEvent>> eventHandler = new SimpleObjectProperty<>();
+  protected final ListProperty<FxAction> children = new SimpleListProperty<>();
 
   public FxAction(String toolbarGroup, String group, String menu, SpecialAction specialAction) {
     this.toolbarGroup = toolbarGroup;
@@ -182,10 +179,6 @@ public class FxAction {
     return contextMenu;
   }
 
-  public MenuItem[] grouped(List<MenuItem> list) {
-    return grouped(list, children);
-  }
-
   public MenuItem menuItem(List<MenuItem> list) {
     final MenuItem item;
     if (selected.getValue() != null) {
@@ -268,16 +261,11 @@ public class FxAction {
   }
 
   public ObservableList<FxAction> getChildren() {
-    return FXCollections.unmodifiableObservableList(children);
+    return children;
   }
 
-  public FxAction setChildren(FxAction... actions) {
-    children.setAll(actions);
-    return this;
-  }
-
-  public FxAction setChildren(Collection<? extends FxAction> actions) {
-    children.setAll(actions);
+  public FxAction bindChildren(ObservableValue<ObservableList<FxAction>> actions) {
+    children.bind(actions);
     return this;
   }
 
