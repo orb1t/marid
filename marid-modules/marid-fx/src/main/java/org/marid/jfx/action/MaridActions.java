@@ -64,7 +64,7 @@ public interface MaridActions {
         .filter(e -> e.toolbarGroup != null)
         .collect(groupingBy(a -> a.toolbarGroup, TreeMap::new, toList()));
     sorted.values().stream()
-        .flatMap(v -> concat(v.stream().map(FxAction::button), of(new Separator())))
+        .flatMap(v -> concat(v.stream().map(a -> a.button(toolBar.getItems())), of(new Separator())))
         .forEach(toolBar.getItems()::add);
   }
 

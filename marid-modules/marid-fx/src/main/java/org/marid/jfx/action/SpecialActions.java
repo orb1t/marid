@@ -21,14 +21,16 @@
 
 package org.marid.jfx.action;
 
-import javafx.beans.property.ListProperty;
-import javafx.beans.property.SimpleListProperty;
+import javafx.beans.InvalidationListener;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 import javax.annotation.Resource;
-import java.util.Collection;
 import java.util.EnumMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.marid.jfx.action.SpecialActionType.*;
 
@@ -107,19 +109,26 @@ public class SpecialActions {
     actionMap.values().forEach(SpecialAction::reset);
   }
 
-  public void assign(Collection<FxAction> actions) {
-    reset();
-    final Map<SpecialAction, ListProperty<FxAction>> map = new LinkedHashMap<>();
-    actions.forEach(a -> {
-      final SpecialAction type = a.specialAction == null ? actionMap.get(MISC) : a.specialAction;
-      map.computeIfAbsent(type, k -> new SimpleListProperty<>()).add(a);
-    });
-    map.forEach((k, v) -> {
-      if (v.size() == 1) {
-        k.copy(v.get(0));
-      } else {
-        k.bindChildren(v);
+  public void assign(ObservableValue<ObservableList<FxAction>> actions) {
+    final InvalidationListener listener = o -> actionMap.forEach((type, specialAction) -> {
+      specialAction.reset();
+
+      final List<FxAction> matched = actions.getValue().stream()
+          .filter(a -> type == MISC && a.specialAction == null || a.specialAction == specialAction)
+          .collect(Collectors.toList());
+
+      switch (matched.size()) {
+        case 0:
+          break;
+        case 1:
+          specialAction.copy(matched.get(0));
+          break;
+        default:
+          specialAction.bindChildren(new SimpleObjectProperty<>(FXCollections.observableArrayList(matched)));
+          break;
       }
     });
+    actions.addListener(listener);
+    listener.invalidated(actions);
   }
 }

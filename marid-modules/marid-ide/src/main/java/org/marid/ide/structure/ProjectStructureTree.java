@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
@@ -23,13 +23,12 @@ package org.marid.ide.structure;
 
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.geometry.Pos;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TreeItem;
+import javafx.scene.control.*;
 import javafx.scene.control.TreeItem.TreeModificationEvent;
-import javafx.scene.control.TreeTableCell;
-import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
 import org.marid.ide.common.Directories;
 import org.marid.ide.event.FileAddedEvent;
@@ -41,8 +40,7 @@ import org.marid.ide.structure.editor.FileEditor;
 import org.marid.ide.structure.icons.FileIcons;
 import org.marid.jfx.LocalizedStrings;
 import org.marid.jfx.action.FxAction;
-import org.marid.jfx.annotation.DisableStdSelectAndRemoveActions;
-import org.marid.jfx.control.MaridTreeTableView;
+import org.marid.jfx.action.SpecialActions;
 import org.marid.misc.Builder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
@@ -55,18 +53,21 @@ import java.text.NumberFormat;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static java.util.logging.Level.WARNING;
+import static javafx.beans.binding.Bindings.createObjectBinding;
+import static javafx.scene.input.ContextMenuEvent.CONTEXT_MENU_REQUESTED;
 import static org.marid.jfx.LocalizedStrings.ls;
+import static org.marid.jfx.action.FxAction.grouped;
 import static org.marid.logging.Log.log;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@DisableStdSelectAndRemoveActions
 @Component
-public class ProjectStructureTree extends MaridTreeTableView<Path> {
+public class ProjectStructureTree extends TreeTableView<Path> {
 
   private final TreeTableColumn<Path, Path> nameColumn;
   private final TreeTableColumn<Path, String> sizeColumn;
@@ -130,27 +131,42 @@ public class ProjectStructureTree extends MaridTreeTableView<Path> {
   }
 
   @Autowired
-  private void init(Map<String, FileEditor> fileEditors) {
-    fileEditors.forEach((name, editor) -> actions().add((item -> {
+  private void init(Map<String, FileEditor> fileEditors, SpecialActions specialActions) {
+    final Supplier<ObservableList<FxAction>> actionsSupplier = () -> {
+      final TreeItem<Path> item = getSelectionModel().getSelectedItem();
       if (item == null || item.getValue() == null) {
-        return null;
+        return FXCollections.emptyObservableList();
       } else {
-        final Path file = item.getValue();
-        final Runnable task = editor.getEditAction(file);
-        if (task != null) {
-          final FxAction action = editor.getSpecialAction() != null
-              ? new FxAction(editor.getSpecialAction())
-              : new FxAction(name, editor.getGroup(), "Actions");
-          return action
-              .bindText(LocalizedStrings.ls(editor.getName()))
-              .bindIcon(new SimpleStringProperty(editor.getIcon()))
-              .setDisabled(false)
-              .setEventHandler(e -> task.run());
-        } else {
-          return null;
-        }
+        final ObservableList<FxAction> actions = FXCollections.observableArrayList();
+        fileEditors.forEach((name, editor) -> {
+          final Path file = item.getValue();
+          final Runnable task = editor.getEditAction(file);
+          if (task != null) {
+            final FxAction action = editor.getSpecialAction() != null
+                ? new FxAction(editor.getSpecialAction())
+                : new FxAction(name, editor.getGroup(), "Actions");
+            actions.add(action
+                .bindText(LocalizedStrings.ls(editor.getName()))
+                .bindIcon(new SimpleStringProperty(editor.getIcon()))
+                .setDisabled(false)
+                .setEventHandler(e -> task.run()));
+          }
+        });
+        return actions;
       }
-    })));
+    };
+    focusedProperty().addListener((o, oV, nV) -> {
+      if (nV) {
+        specialActions.assign(createObjectBinding(actionsSupplier::get, getSelectionModel().selectedItemProperty()));
+      } else {
+        specialActions.reset();
+      }
+    });
+    setRowFactory(param -> {
+      final TreeTableRow<Path> row = new TreeTableRow<>();
+      row.addEventFilter(CONTEXT_MENU_REQUESTED, event -> row.setContextMenu(grouped(actionsSupplier.get())));
+      return row;
+    });
   }
 
   @Autowired

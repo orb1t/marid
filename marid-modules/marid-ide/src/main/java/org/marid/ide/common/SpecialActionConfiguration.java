@@ -21,14 +21,17 @@
 
 package org.marid.ide.common;
 
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
+import org.marid.idelib.spring.annotation.IdeAction;
 import org.marid.jfx.action.SpecialAction;
 import org.marid.jfx.action.SpecialActions;
-import org.marid.idelib.spring.annotation.IdeAction;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
+
+import static javafx.scene.input.KeyCode.DOWN;
+import static javafx.scene.input.KeyCode.UP;
+import static javafx.scene.input.KeyCombination.CONTROL_DOWN;
+import static javafx.scene.input.KeyCombination.keyCombination;
 
 /**
  * @author Dmitry Ovchinnikov.
@@ -44,107 +47,61 @@ public class SpecialActionConfiguration {
 
   @IdeAction
   public SpecialAction editAction() {
-    return new SpecialAction("edit", "ed", "Edit")
-        .bindText("Edit")
-        .setAccelerator(KeyCombination.valueOf("F4"))
-        .setIcon("M_EDIT")
-        .setDisabled(true);
+    return new SpecialAction("edit", "ed", "Edit", "Edit", keyCombination("F4"), "M_EDIT", "Edit");
   }
 
   @IdeAction
   public SpecialAction addAction() {
-    return new SpecialAction("mod", "mod", "Edit")
-        .bindText("Add")
-        .setAccelerator(KeyCombination.valueOf("Ctrl+I"))
-        .setIcon("M_ADD_BOX")
-        .setDisabled(true);
+    return new SpecialAction("mod", "mod", "Edit", "Add", keyCombination("Ctrl+I"), "M_ADD_BOX", "Add");
   }
 
   @IdeAction
   public SpecialAction removeAction() {
-    return new SpecialAction("mod", "mod", "Edit")
-        .bindText("Remove")
-        .setAccelerator(KeyCombination.valueOf("F8"))
-        .setIcon("D_MINUS_BOX")
-        .setDisabled(true);
+    return new SpecialAction("mod", "mod", "Edit", "Remove", keyCombination("F8"), "D_MINUS_BOX", "Remove");
   }
 
   @IdeAction
   public SpecialAction cutAction() {
-    return new SpecialAction("cp", "cp", "Edit")
-        .bindText("Cut")
-        .setAccelerator(KeyCombination.valueOf("Ctrl+X"))
-        .setIcon("M_CONTENT_CUT")
-        .setDisabled(true);
+    return new SpecialAction("cp", "cp", "Edit", "Cut", keyCombination("Ctrl+X"), "M_CONTENT_CUT", "Cut");
   }
 
   @IdeAction
   public SpecialAction copyAction() {
-    return new SpecialAction("cp", "cp", "Edit")
-        .bindText("Copy")
-        .setAccelerator(KeyCombination.valueOf("Ctrl+C"))
-        .setIcon("M_CONTENT_COPY")
-        .setDisabled(true);
+    return new SpecialAction("cp", "cp", "Edit", "Copy", keyCombination("Ctrl+C"), "M_CONTENT_COPY", "Copy");
   }
 
   @IdeAction
   public SpecialAction pasteAction() {
-    return new SpecialAction("cp", "cp", "Edit")
-        .bindText("Paste")
-        .setAccelerator(KeyCombination.valueOf("Ctrl+V"))
-        .setIcon("M_CONTENT_PASTE")
-        .setDisabled(true);
+    return new SpecialAction("cp", "cp", "Edit", "Paste", keyCombination("Ctrl+V"), "M_CONTENT_PASTE", "Paste");
   }
 
   @IdeAction
   public SpecialAction clearAllAction() {
-    return new SpecialAction("mod", "mod", "Edit")
-        .bindText("Clear All")
-        .setIcon("M_CLEAR_ALL")
-        .setDisabled(true);
+    return new SpecialAction("mod", "mod", "Edit", "Clear All", keyCombination("Ctrl+Y"), "M_CLEAR_ALL", "Clear All");
   }
 
   @IdeAction
   public SpecialAction renameAction() {
-    return new SpecialAction("edit", "ed", "Edit")
-        .bindText("Rename")
-        .setAccelerator(KeyCombination.valueOf("Ctrl+R"))
-        .setIcon("D_RENAME_BOX")
-        .setDisabled(true);
+    return new SpecialAction("edit", "ed", "Edit", "Rename", keyCombination("Ctrl+R"), "D_RENAME_BOX", "Rename");
   }
 
   @IdeAction
   public SpecialAction selectAllAction() {
-    return new SpecialAction("sel", "sel", "Edit")
-        .bindText("Select All")
-        .setAccelerator(KeyCombination.valueOf("Ctrl+A"))
-        .setIcon("D_SELECT_ALL")
-        .setDisabled(true);
+    return new SpecialAction("sel", "sel", "Edit", "Select All", keyCombination("Ctrl+A"), "D_SELECT_ALL", "Select All");
   }
 
   @IdeAction
   public SpecialAction upAction() {
-    return new SpecialAction("ed1", "ed1", "Edit")
-        .bindText("Up")
-        .setAccelerator(new KeyCodeCombination(KeyCode.UP, KeyCombination.CONTROL_DOWN))
-        .setIcon("D_ARROW_UP")
-        .setDisabled(true);
+    return new SpecialAction("ed1", "ed1", "Edit", "Up", new KeyCodeCombination(UP, CONTROL_DOWN), "D_ARROW_UP", "Up");
   }
 
   @IdeAction
   public SpecialAction downAction() {
-    return new SpecialAction("ed1", "ed1", "Edit")
-        .bindText("Down")
-        .setAccelerator(new KeyCodeCombination(KeyCode.DOWN, KeyCombination.CONTROL_DOWN))
-        .setIcon("D_ARROW_DOWN")
-        .setDisabled(true);
+    return new SpecialAction("ed1", "ed1", "Edit", "Down", new KeyCodeCombination(DOWN, CONTROL_DOWN), "D_ARROW_DOWN", "Down");
   }
 
   @IdeAction
   public SpecialAction miscAction() {
-    return new SpecialAction("misc", "misc", "Edit")
-        .bindText("Item action")
-        .setIcon("D_MARTINI")
-        .setDisabled(true);
+    return new SpecialAction("misc", "misc", "Edit", "Miscellaneous", keyCombination("Ctrl+M"), "D_MARTINI", "Miscellaneous");
   }
 }

@@ -23,15 +23,21 @@ package org.marid.dependant.beaneditor;
 
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTableRow;
+import javafx.scene.control.TreeTableView;
 import org.marid.dependant.beaneditor.view.IdeBeanViewFactory;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.idelib.beans.IdeBean;
 import org.marid.idelib.beans.IdeBeanItem;
-import org.marid.jfx.control.MaridTreeTableView;
+import org.marid.jfx.action.FxAction;
+import org.marid.jfx.action.SpecialActions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
@@ -39,13 +45,17 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static javafx.beans.binding.Bindings.createObjectBinding;
+import static javafx.scene.input.ContextMenuEvent.CONTEXT_MENU_REQUESTED;
 import static org.marid.jfx.LocalizedStrings.ls;
+import static org.marid.jfx.action.FxAction.grouped;
 import static org.marid.jfx.track.Tracks.CLEANER;
 
 @Component
-public class BeanHierarchyTable extends MaridTreeTableView<IdeBean> {
+public class BeanHierarchyTable extends TreeTableView<IdeBean> {
 
   @Autowired
   public BeanHierarchyTable(@Nonnull IdeBean root) {
@@ -116,7 +126,26 @@ public class BeanHierarchyTable extends MaridTreeTableView<IdeBean> {
   }
 
   @Autowired
-  private void initActions(List<BeanActionProvider> actionProviders) {
-    actions().addAll(actionProviders);
+  private void initActions(List<BeanActionProvider> actionProviders,
+                           SpecialActions specialActions,
+                           ProjectProfile profile) {
+    final Supplier<ObservableList<FxAction>> actionsSupplier = () -> {
+      final TreeItem<IdeBean> item = getSelectionModel().getSelectedItem();
+      return actionProviders.stream()
+          .map(p -> p.apply(item == null ? null : item.getValue()))
+          .collect(Collectors.toCollection(FXCollections::observableArrayList));
+    };
+    focusedProperty().addListener((o, oV, nV) -> {
+      if (nV) {
+        specialActions.assign(Bindings.createObjectBinding(actionsSupplier::get, profile));
+      } else {
+        specialActions.reset();
+      }
+    });
+    setRowFactory(param -> {
+      final TreeTableRow<IdeBean> row = new TreeTableRow<>();
+      row.addEventFilter(CONTEXT_MENU_REQUESTED, event -> row.setContextMenu(grouped(actionsSupplier.get())));
+      return row;
+    });
   }
 }
