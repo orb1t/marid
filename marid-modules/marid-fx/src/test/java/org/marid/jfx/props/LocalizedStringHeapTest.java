@@ -21,24 +21,29 @@
 
 package org.marid.jfx.props;
 
-import javafx.beans.property.ObjectProperty;
-import javafx.scene.Node;
-import org.marid.jfx.icons.FontIcons;
+import javafx.beans.value.ObservableValue;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.marid.jfx.LocalizedStrings;
 
-/**
- * @author Dmitry Ovchinnikov
- */
-@SuppressWarnings("unchecked")
-public interface GraphicIcons<T extends GraphicIcons<T>> {
+import java.util.LinkedList;
 
-  ObjectProperty<Node> graphicProperty();
+import static java.lang.Runtime.getRuntime;
 
-  default T icon(String icon, int size) {
-    graphicProperty().set(FontIcons.glyphIcon(icon, size));
-    return (T) this;
-  }
+@Tag("manual")
+class LocalizedStringHeapTest {
 
-  default T icon(String icon) {
-    return icon(icon, 16);
+  private final LinkedList<ObservableValue<String>> observableValues = new LinkedList<>();
+
+  @Test
+  void testOutOfMemory() {
+    for (int i = 0; i < 100_000; i++) {
+      for (int j = 0; j < 1_000; j++) {
+        observableValues.add(LocalizedStrings.ls("str %d", j));
+      }
+      Thread.yield();
+      observableValues.clear();
+      System.out.printf("%d: %d/%d%n", i, getRuntime().freeMemory(), getRuntime().totalMemory());
+    }
   }
 }
