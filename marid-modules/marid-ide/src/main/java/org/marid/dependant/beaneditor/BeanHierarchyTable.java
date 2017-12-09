@@ -21,10 +21,8 @@
 
 package org.marid.dependant.beaneditor;
 
-import javafx.application.Platform;
-import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
@@ -32,6 +30,7 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
+import org.apache.commons.lang3.ArrayUtils;
 import org.marid.dependant.beaneditor.view.IdeBeanViewFactory;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.idelib.beans.IdeBean;
@@ -52,7 +51,6 @@ import static javafx.beans.binding.Bindings.createObjectBinding;
 import static javafx.scene.input.ContextMenuEvent.CONTEXT_MENU_REQUESTED;
 import static org.marid.jfx.LocalizedStrings.ls;
 import static org.marid.jfx.action.FxAction.grouped;
-import static org.marid.jfx.track.Tracks.CLEANER;
 
 @Component
 public class BeanHierarchyTable extends TreeTableView<IdeBean> {
@@ -60,7 +58,8 @@ public class BeanHierarchyTable extends TreeTableView<IdeBean> {
   @Autowired
   public BeanHierarchyTable(@Nonnull IdeBean root) {
     super(new IdeBeanItem(root));
-    setShowRoot(false);
+    setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
+    getRoot().setExpanded(true);
   }
 
   @Order(0)
@@ -83,23 +82,21 @@ public class BeanHierarchyTable extends TreeTableView<IdeBean> {
 
   @Order(1)
   @Bean(initMethod = "run")
-  public Runnable typeColumn(ProjectProfile profile, IdeBean root, IdeBeanViewFactory beanViewFactory) {
+  public Runnable typeColumn(ProjectProfile profile, IdeBeanViewFactory beanViewFactory) {
     return () -> {
       final TreeTableColumn<IdeBean, Node> column = new TreeTableColumn<>();
       column.textProperty().bind(ls("Type"));
       column.setCellValueFactory(p -> {
-        final TreeItem<IdeBean> item = p.getValue();
-        final IdeBean bean = item.getValue();
-        final SimpleObjectProperty<Node> property = new SimpleObjectProperty<>();
-        final InvalidationListener listener = o -> property.set(beanViewFactory.typeLabel(bean, profile));
-        listener.invalidated(null);
-        root.ostream().forEach(o -> o.addListener(listener));
-        profile.addListener(listener);
-        CLEANER.register(item, () -> {
-          profile.removeListener(listener);
-          Platform.runLater(() -> root.ostream().forEach(o -> o.removeListener(listener)));
-        });
-        return property;
+        final Observable[] observables = ArrayUtils.add(getRoot().getValue().observables(), profile);
+        return createObjectBinding(() -> {
+          final TreeItem<IdeBean> item = p.getValue();
+          final IdeBean bean = item.getValue();
+          if (bean == getRoot().getValue()) {
+            return null;
+          } else {
+            return beanViewFactory.typeLabel(bean, profile);
+          }
+        }, observables);
       });
       column.setPrefWidth(200);
       column.setMinWidth(100);
@@ -115,8 +112,12 @@ public class BeanHierarchyTable extends TreeTableView<IdeBean> {
       final TreeTableColumn<IdeBean, Node> column = new TreeTableColumn<>();
       column.textProperty().bind(ls("Factory"));
       column.setCellValueFactory(p -> {
-        final IdeBean bean = p.getValue().getValue();
-        return createObjectBinding(() -> viewFactory.createView(bean, bean.getFactory()), bean.factory);
+        if (p.getValue() == getRoot()) {
+          return null;
+        } else {
+          final IdeBean bean = p.getValue().getValue();
+          return createObjectBinding(() -> viewFactory.createView(bean, bean.getFactory()), bean.factory);
+        }
       });
       column.setPrefWidth(500);
       column.setMinWidth(300);

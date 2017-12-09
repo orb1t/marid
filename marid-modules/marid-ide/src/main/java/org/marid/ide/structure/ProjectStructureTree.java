@@ -23,8 +23,6 @@ package org.marid.ide.structure;
 
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
@@ -36,10 +34,7 @@ import org.marid.ide.event.FileChangedEvent;
 import org.marid.ide.event.FileMovedEvent;
 import org.marid.ide.event.FileRemovedEvent;
 import org.marid.ide.project.ProjectManager;
-import org.marid.ide.structure.editor.FileEditor;
 import org.marid.ide.structure.icons.FileIcons;
-import org.marid.jfx.LocalizedStrings;
-import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.SpecialActions;
 import org.marid.misc.Builder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,15 +47,10 @@ import java.nio.file.Path;
 import java.text.NumberFormat;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Map;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static java.util.logging.Level.WARNING;
-import static javafx.beans.binding.Bindings.createObjectBinding;
-import static javafx.scene.input.ContextMenuEvent.CONTEXT_MENU_REQUESTED;
 import static org.marid.jfx.LocalizedStrings.ls;
-import static org.marid.jfx.action.FxAction.grouped;
 import static org.marid.logging.Log.log;
 
 /**
@@ -75,6 +65,7 @@ public class ProjectStructureTree extends TreeTableView<Path> {
   @Autowired
   public ProjectStructureTree(Directories directories, FileIcons icons) {
     super(new TreeItem<>(directories.getProfiles()));
+    setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
     getRoot().setExpanded(true);
     getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 
@@ -131,42 +122,9 @@ public class ProjectStructureTree extends TreeTableView<Path> {
   }
 
   @Autowired
-  private void init(Map<String, FileEditor> fileEditors, SpecialActions specialActions) {
-    final Supplier<ObservableList<FxAction>> actionsSupplier = () -> {
-      final TreeItem<Path> item = getSelectionModel().getSelectedItem();
-      if (item == null || item.getValue() == null) {
-        return FXCollections.emptyObservableList();
-      } else {
-        final ObservableList<FxAction> actions = FXCollections.observableArrayList();
-        fileEditors.forEach((name, editor) -> {
-          final Path file = item.getValue();
-          final Runnable task = editor.getEditAction(file);
-          if (task != null) {
-            final FxAction action = editor.getSpecialAction() != null
-                ? new FxAction(editor.getSpecialAction())
-                : new FxAction(name, editor.getGroup(), "Actions");
-            actions.add(action
-                .bindText(LocalizedStrings.ls(editor.getName()))
-                .bindIcon(new SimpleStringProperty(editor.getIcon()))
-                .setDisabled(false)
-                .setEventHandler(e -> task.run()));
-          }
-        });
-        return actions;
-      }
-    };
-    focusedProperty().addListener((o, oV, nV) -> {
-      if (nV) {
-        specialActions.assign(createObjectBinding(actionsSupplier::get, getSelectionModel().selectedItemProperty()));
-      } else {
-        specialActions.reset();
-      }
-    });
-    setRowFactory(param -> {
-      final TreeTableRow<Path> row = new TreeTableRow<>();
-      row.addEventFilter(CONTEXT_MENU_REQUESTED, event -> row.setContextMenu(grouped(actionsSupplier.get())));
-      return row;
-    });
+  private void init(ProjectStructureActions actions, SpecialActions specialActions) {
+    specialActions.assign(focusedProperty(), actions.actionsValue(getSelectionModel()));
+    setRowFactory(param -> specialActions.wrap(new TreeTableRow<>(), () -> actions.actions(getSelectionModel())));
   }
 
   @Autowired

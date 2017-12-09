@@ -23,15 +23,20 @@ package org.marid.jfx.action;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableBooleanValue;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.Control;
 
 import javax.annotation.Resource;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static javafx.scene.input.ContextMenuEvent.CONTEXT_MENU_REQUESTED;
+import static org.marid.jfx.action.FxAction.grouped;
 import static org.marid.jfx.action.SpecialActionType.*;
 
 /**
@@ -130,5 +135,20 @@ public class SpecialActions {
     });
     actions.addListener(listener);
     listener.invalidated(actions);
+  }
+
+  public void assign(ObservableBooleanValue focused, ObservableValue<ObservableList<FxAction>> actions) {
+    focused.addListener((observable, oldValue, newValue) -> {
+      if (newValue) {
+        assign(actions);
+      } else {
+        reset();
+      }
+    });
+  }
+
+  public <T extends Control> T wrap(T control, Supplier<ObservableList<FxAction>> actions) {
+    control.addEventFilter(CONTEXT_MENU_REQUESTED, event -> control.setContextMenu(grouped(actions.get())));
+    return control;
   }
 }

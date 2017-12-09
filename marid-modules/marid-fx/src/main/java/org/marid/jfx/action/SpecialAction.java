@@ -60,7 +60,6 @@ public class SpecialAction extends FxAction {
     super.accelerator = new SimpleObjectProperty<>(accelerator);
     super.description = ls(description);
     super.text = ls(text);
-    super.icon = new SimpleStringProperty(icon);
     super.disabled = new SimpleBooleanProperty(true);
 
     super.selected = null;
@@ -73,7 +72,6 @@ public class SpecialAction extends FxAction {
   void copy(@Nonnull FxAction action) {
     bindText(action.text);
     bindAccelerator(action.accelerator);
-    bindIcon(action.icon);
     bindDescription(action.description);
     bindDisabled(action.disabled);
     bindSelected(action.selected);
