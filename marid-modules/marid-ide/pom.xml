@@ -67,6 +67,7 @@
               <JavaFX-Version>9.0</JavaFX-Version>
               <JavaFX-Preloader-Class>org.marid.idelib.splash.MaridPreloader</JavaFX-Preloader-Class>
               <JavaFX-Application-Class>org.marid.ide.Ide</JavaFX-Application-Class>
+              <Add-Exports>javafx.graphics/com.sun.javafx.css</Add-Exports>
               <Automatic-Module-Name>marid.ide</Automatic-Module-Name>
             </manifestEntries>
           </archive>
