@@ -22,7 +22,4 @@
 /**
  * @author Dmitry Ovchinnikov
  */
-@MaridBeanPackage(group = "DB", icon = "F_DATABASE")
 package org.marid.db.generator;
-
-import org.marid.runtime.annotation.MaridBeanPackage;

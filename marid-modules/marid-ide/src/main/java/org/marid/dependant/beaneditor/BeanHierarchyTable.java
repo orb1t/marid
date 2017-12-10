@@ -23,6 +23,7 @@ package org.marid.dependant.beaneditor;
 
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.ObjectBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
@@ -44,13 +45,11 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
 import java.util.List;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static javafx.beans.binding.Bindings.createObjectBinding;
-import static javafx.scene.input.ContextMenuEvent.CONTEXT_MENU_REQUESTED;
 import static org.marid.jfx.LocalizedStrings.ls;
-import static org.marid.jfx.action.FxAction.grouped;
 
 @Component
 public class BeanHierarchyTable extends TreeTableView<IdeBean> {
@@ -130,23 +129,14 @@ public class BeanHierarchyTable extends TreeTableView<IdeBean> {
   private void initActions(List<BeanActionProvider> actionProviders,
                            SpecialActions specialActions,
                            ProjectProfile profile) {
-    final Supplier<ObservableList<FxAction>> actionsSupplier = () -> {
+    final ObjectBinding<ObservableList<FxAction>> actions = Bindings.createObjectBinding(() -> {
       final TreeItem<IdeBean> item = getSelectionModel().getSelectedItem();
       return actionProviders.stream()
-          .map(p -> p.apply(item == null ? null : item.getValue()))
+          .map(p -> p.apply(item))
+          .flatMap(Stream::ofNullable)
           .collect(Collectors.toCollection(FXCollections::observableArrayList));
-    };
-    focusedProperty().addListener((o, oV, nV) -> {
-      if (nV) {
-        specialActions.assign(Bindings.createObjectBinding(actionsSupplier::get, profile));
-      } else {
-        specialActions.reset();
-      }
-    });
-    setRowFactory(param -> {
-      final TreeTableRow<IdeBean> row = new TreeTableRow<>();
-      row.addEventFilter(CONTEXT_MENU_REQUESTED, event -> row.setContextMenu(grouped(actionsSupplier.get())));
-      return row;
-    });
+    }, getSelectionModel().selectedItemProperty(), profile);
+    specialActions.assign(focusedProperty(), actions);
+    setRowFactory(param -> specialActions.wrap(new TreeTableRow<>(), actions::get));
   }
 }

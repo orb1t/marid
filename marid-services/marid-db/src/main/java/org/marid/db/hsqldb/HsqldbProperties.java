@@ -23,7 +23,6 @@ package org.marid.db.hsqldb;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.marid.runtime.annotation.MaridBean;
 
 import java.io.File;
 import java.util.Properties;
@@ -31,7 +30,6 @@ import java.util.Properties;
 /**
  * @author Dmitry Ovchinnikov.
  */
-@MaridBean
 public final class HsqldbProperties {
 
   private File directory = new File("daqDatabase");

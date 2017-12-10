@@ -21,14 +21,11 @@
 
 package org.marid.proto.impl.health;
 
-import org.marid.runtime.annotation.MaridBean;
-
 import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@MaridBean(name = "Bus Health Monitor Properties", icon = "F_HEART_ALT")
 public class StdProtoBusHealthMonitorProps {
 
   private long delaySeconds = 60L;

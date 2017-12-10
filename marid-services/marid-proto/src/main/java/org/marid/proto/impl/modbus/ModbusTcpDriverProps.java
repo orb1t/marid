@@ -21,14 +21,11 @@
 
 package org.marid.proto.impl.modbus;
 
-import org.marid.runtime.annotation.MaridBean;
-
 import java.util.concurrent.TimeUnit;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@MaridBean(name = "MODBUS TCP Driver Properties", icon = "D_BUG")
 public class ModbusTcpDriverProps {
 
   private int unitId = 255;

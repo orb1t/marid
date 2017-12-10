@@ -27,6 +27,8 @@ import org.marid.jfx.action.SpecialActions;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
+
 @Component
 public class BeanActions {
 
@@ -34,6 +36,7 @@ public class BeanActions {
   public BeanActionProvider addAction(SpecialActions specialActions, BeanDao beanDao) {
     return bean -> new FxAction(specialActions.get(SpecialActionType.ADD))
         .setEventHandler(event -> {
+          final Collection<Class<?>> classes = beanDao.publicClasses();
 
         });
   }

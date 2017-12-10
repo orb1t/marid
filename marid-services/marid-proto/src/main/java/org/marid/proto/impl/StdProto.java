@@ -22,19 +22,15 @@
 package org.marid.proto.impl;
 
 import org.marid.proto.Proto;
-import org.marid.runtime.annotation.MaridBean;
-import org.marid.runtime.annotation.MaridBeanFactory;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@MaridBean
 public abstract class StdProto implements Proto {
 
   private final String id;
   private final String name;
 
-  @MaridBeanFactory(name = "Proto Object")
   public StdProto(String id, String name) {
     this.id = id;
     this.name = name;
