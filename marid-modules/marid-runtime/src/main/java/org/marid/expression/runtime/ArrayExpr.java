@@ -30,7 +30,6 @@ import org.w3c.dom.Element;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
-import java.util.Arrays;
 import java.util.List;
 
 public final class ArrayExpr extends Expr implements ArrayExpression {
@@ -39,7 +38,7 @@ public final class ArrayExpr extends Expr implements ArrayExpression {
   private final List<Expr> elements;
 
   public ArrayExpr(@Nonnull Expr... elements) {
-    this.elements = Arrays.asList(elements);
+    this.elements = List.of(elements);
   }
 
   ArrayExpr(@Nonnull Element element) {
