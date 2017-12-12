@@ -49,7 +49,7 @@ public interface IdeShapes {
     return new Rectangle(size, size, color(hash));
   }
 
-  static Path javaFile(int hash, int size) {
+  static Path diamond(int hash, int size) {
     final Path path = new Path(
         new MoveTo(0, size / 2.0),
         new LineTo(size / 2.0, size),
