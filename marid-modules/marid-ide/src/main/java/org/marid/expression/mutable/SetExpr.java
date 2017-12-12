@@ -24,7 +24,7 @@ package org.marid.expression.mutable;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.marid.expression.generic.SetExpression;
-import org.marid.expression.generic.XmlExpression;
+import org.marid.expression.xml.XmlExpression;
 import org.marid.jfx.props.FxObject;
 import org.w3c.dom.Element;
 

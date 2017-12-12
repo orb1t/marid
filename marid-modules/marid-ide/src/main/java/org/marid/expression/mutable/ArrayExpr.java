@@ -23,7 +23,7 @@ package org.marid.expression.mutable;
 
 import javafx.collections.ObservableList;
 import org.marid.expression.generic.ArrayExpression;
-import org.marid.expression.generic.XmlExpression;
+import org.marid.expression.xml.XmlExpression;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;

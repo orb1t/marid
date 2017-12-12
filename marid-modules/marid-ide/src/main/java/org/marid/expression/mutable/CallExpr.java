@@ -25,7 +25,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
 import org.marid.expression.generic.CallExpression;
-import org.marid.expression.generic.XmlExpression;
+import org.marid.expression.xml.XmlExpression;
 import org.marid.jfx.props.FxObject;
 import org.w3c.dom.Element;
 

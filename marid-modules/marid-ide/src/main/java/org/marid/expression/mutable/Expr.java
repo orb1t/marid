@@ -25,7 +25,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import org.marid.XmlWritable;
 import org.marid.expression.generic.Expression;
-import org.marid.expression.generic.XmlExpression;
+import org.marid.expression.xml.XmlExpression;
 import org.marid.jfx.props.ObservablesProvider;
 import org.marid.xml.Tagged;
 import org.w3c.dom.Element;

@@ -19,9 +19,10 @@
  * #L%
  */
 
-package org.marid.expression.generic;
+package org.marid.expression.xml;
 
 import org.marid.XmlWritable;
+import org.marid.expression.generic.*;
 import org.marid.runtime.MaridFactory;
 import org.marid.xml.Tagged;
 import org.w3c.dom.Element;
