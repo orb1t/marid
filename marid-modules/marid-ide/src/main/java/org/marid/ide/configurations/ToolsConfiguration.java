@@ -23,11 +23,10 @@ package org.marid.ide.configurations;
 
 import org.marid.dependant.monitor.MonitorConfiguration;
 import org.marid.ide.IdeDependants;
+import org.marid.ide.panes.main.IdePane;
 import org.marid.ide.tools.iconviewer.IconViewer;
-import org.marid.ide.tools.log.LogStage;
-import org.marid.jfx.action.FxAction;
 import org.marid.idelib.spring.annotation.IdeAction;
-import org.springframework.beans.factory.ObjectFactory;
+import org.marid.jfx.action.FxAction;
 import org.springframework.stereotype.Component;
 
 import static org.marid.jfx.LocalizedStrings.ls;
@@ -39,11 +38,11 @@ import static org.marid.jfx.LocalizedStrings.ls;
 public class ToolsConfiguration {
 
   @IdeAction
-  public FxAction iconViewerAction(ObjectFactory<IconViewer> iconViewerFactory) {
+  public FxAction iconViewerAction(IdePane idePane) {
     return new FxAction("icons", "Tools")
         .setIcon("M_OPEN_IN_BROWSER")
         .bindText(ls("Icon viewer"))
-        .setEventHandler(event -> iconViewerFactory.getObject().show());
+        .setEventHandler(event -> new IconViewer(idePane).show());
   }
 
   @IdeAction
@@ -66,13 +65,5 @@ public class ToolsConfiguration {
           System.gc();
           System.runFinalization();
         });
-  }
-
-  @IdeAction
-  public FxAction showLogsAction(ObjectFactory<LogStage> logStageFactory) {
-    return new FxAction("log", "log", "Tools")
-        .setIcon("M_VIEW_LIST")
-        .bindText(ls("Show logs"))
-        .setEventHandler(event -> logStageFactory.getObject().show());
   }
 }

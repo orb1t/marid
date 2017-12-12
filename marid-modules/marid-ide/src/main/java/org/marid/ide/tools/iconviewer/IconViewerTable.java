@@ -28,7 +28,6 @@ import javafx.scene.Node;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import org.marid.l10n.L10n;
-import org.marid.idelib.spring.ui.FxComponent;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,7 +41,6 @@ import static org.marid.jfx.icons.FontIcons.glyphIcon;
 /**
  * @author Dmitry Ovchinnikov
  */
-@FxComponent
 public class IconViewerTable extends TableView<String> {
 
   public IconViewerTable() {

@@ -28,7 +28,6 @@ import javafx.stage.Stage;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.idelib.splash.MaridSplashCloseNotification;
 import org.marid.idelib.spring.postprocessors.MaridCommonPostProcessor;
-import org.marid.idelib.spring.ui.FxScope;
 import org.marid.image.MaridIconFx;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -39,8 +38,6 @@ import static org.marid.ide.IdePrefs.PREFERENCES;
  */
 public class Ide extends Application {
 
-  public static final FxScope FX_SCOPE = new FxScope();
-
   public static volatile Stage primaryStage;
 
   private final String style = PREFERENCES.get("style", STYLESHEET_MODENA);
@@ -49,7 +46,6 @@ public class Ide extends Application {
   @Override
   public void init() {
     context.getBeanFactory().addBeanPostProcessor(new MaridCommonPostProcessor());
-    context.getBeanFactory().registerScope("fx", FX_SCOPE);
     context.register(IdeContext.class);
     context.setAllowBeanDefinitionOverriding(true);
     context.setAllowCircularReferences(false);

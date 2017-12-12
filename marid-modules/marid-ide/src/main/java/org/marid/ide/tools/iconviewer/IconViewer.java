@@ -25,25 +25,19 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.marid.ide.panes.main.IdePane;
 import org.marid.l10n.L10n;
-import org.marid.idelib.spring.annotation.PrototypeComponent;
-import org.marid.idelib.spring.ui.FxStage;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@PrototypeComponent
-public class IconViewer extends FxStage {
+public class IconViewer extends Stage {
 
-  public IconViewer() {
+  public IconViewer(IdePane idePane) {
     super(StageStyle.DECORATED);
-  }
-
-  @Autowired
-  private void configure(IdePane idePane, IconViewerTable table) {
+    final IconViewerTable table = new IconViewerTable();
     initOwner(idePane.getScene().getWindow());
     setTitle(L10n.s("Icon viewer"));
     final BorderPane pane = new BorderPane(table);
