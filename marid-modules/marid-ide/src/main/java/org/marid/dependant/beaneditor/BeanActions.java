@@ -138,7 +138,7 @@ public class BeanActions {
                 final Expr[] args = of(e.getParameters())
                     .map(p -> new NullExpr(p.getType().getTypeName()))
                     .toArray(NullExpr[]::new);
-                final CallExpr expr = new CallExpr(new ClassExpr(c.getName()), "new", args);
+                final CallExpr expr = new CallExpr(new ClassExpr(c.getName()), e.getName(), args);
                 return new FxAction("method", "Actions")
                     .setText(of(e.getGenericParameterTypes())
                         .map(Type::getTypeName)

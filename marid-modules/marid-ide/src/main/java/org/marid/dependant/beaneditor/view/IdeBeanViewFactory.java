@@ -40,6 +40,7 @@ import javax.annotation.Nonnull;
 import java.lang.reflect.Type;
 
 import static org.marid.collections.MaridIterators.forEach;
+import static org.marid.dependant.beaneditor.view.BeanViewUtils.replaceQualified;
 import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 @Component
@@ -77,7 +78,7 @@ public class IdeBeanViewFactory {
     final BeanTypeContext typeContext = new IdeBeanContext(bean, profile.getClassLoader());
     final Type type = bean.getFactory().getType(null, typeContext);
     final String typeText = type.getTypeName();
-    final String shortTypeText = BeanViewUtils.replaceQualified(typeText);
+    final String shortTypeText = replaceQualified(typeText);
     final Label label = new Label(shortTypeText, IdeShapes.rect(typeText.hashCode(), 16));
     label.setGraphicTextGap(6);
     return label;
@@ -141,7 +142,7 @@ public class IdeBeanViewFactory {
   }
 
   private void createView(@Nonnull ClassExpr expr, @Nonnull HBox tf) {
-    final Label text = new Label(BeanViewUtils.replaceQualified(expr.getClassName()));
+    final Label text = new Label(replaceQualified(expr.getClassName()));
     text.setTooltip(new Tooltip(expr.getClassName()));
     tf.getChildren().add(text);
   }
@@ -155,7 +156,7 @@ public class IdeBeanViewFactory {
   }
 
   private void createView(@Nonnull NullExpr expr, @Nonnull HBox tf) {
-    tf.getChildren().add(new Label(expr.getType(), glyphIcon("D_NULL")));
+    tf.getChildren().add(new Label(replaceQualified(expr.getType()), glyphIcon("D_NULL")));
   }
 
   private static boolean isShort(@Nonnull CallExpr expr) {

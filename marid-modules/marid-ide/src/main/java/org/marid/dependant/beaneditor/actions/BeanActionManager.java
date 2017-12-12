@@ -23,8 +23,8 @@ package org.marid.dependant.beaneditor.actions;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import org.marid.idefx.expression.Expr;
 import org.marid.idefx.beans.IdeBean;
+import org.marid.idefx.expression.Expr;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;

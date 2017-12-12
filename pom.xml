@@ -458,7 +458,7 @@
           <organizeLicensesByDependencies>true</organizeLicensesByDependencies>
           <emptyLineAfterHeader>true</emptyLineAfterHeader>
           <roots>src</roots>
-          <excludes>**/*.properties</excludes>
+          <excludes>**/*.properties,**/*.xml</excludes>
         </configuration>
       </plugin>
     </plugins>
