@@ -40,6 +40,7 @@ import javax.annotation.Nonnull;
 import java.lang.reflect.Type;
 
 import static org.marid.collections.MaridIterators.forEach;
+import static org.marid.jfx.icons.FontIcons.glyphIcon;
 
 @Component
 public class IdeBeanViewFactory {
@@ -97,6 +98,8 @@ public class IdeBeanViewFactory {
       createView((StringExpr) expr, tf);
     } else if (expr instanceof RefExpr) {
       createView((RefExpr) expr, tf);
+    } else if (expr instanceof NullExpr) {
+      createView((NullExpr) expr, tf);
     }
   }
 
@@ -149,6 +152,10 @@ public class IdeBeanViewFactory {
 
   private void createView(@Nonnull RefExpr expr, @Nonnull HBox tf) {
     tf.getChildren().add(new Label(expr.getReference()));
+  }
+
+  private void createView(@Nonnull NullExpr expr, @Nonnull HBox tf) {
+    tf.getChildren().add(new Label(expr.getType(), glyphIcon("D_NULL")));
   }
 
   private static boolean isShort(@Nonnull CallExpr expr) {

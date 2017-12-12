@@ -36,7 +36,9 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Stream.of;
 import static javafx.collections.FXCollections.observableArrayList;
 import static org.marid.collections.MaridArrays.concat;
@@ -52,10 +54,16 @@ public class BeanActions {
 
       final ClassTree classTree = new ClassTree(beanDao.publicClasses());
 
-      // static actions
-      final FxAction staticsAction = statics(bean, classTree);
-      if (!staticsAction.isEmpty()) {
-        actions.add(staticsAction);
+      // constructors
+      final FxAction constructorsAction = constructors(bean, classTree);
+      if (!constructorsAction.isEmpty()) {
+        actions.add(constructorsAction);
+      }
+
+      // static methods
+      final FxAction staticMethodsAction = staticMethods(bean, classTree);
+      if (!staticMethodsAction.isEmpty()) {
+        actions.add(staticMethodsAction);
       }
 
       return new FxAction(specialActions.get(ADD)).bindChildren(new SimpleObjectProperty<>(actions));
@@ -63,22 +71,23 @@ public class BeanActions {
   }
 
   @Nonnull
-  private FxAction statics(@Nonnull IdeBean bean, @Nonnull ClassTree tree) {
-    final FxAction action = new FxAction("static", "Actions");
+  private FxAction constructors(@Nonnull IdeBean bean, @Nonnull ClassTree tree) {
+    final FxAction action = new FxAction("constructor", "Actions");
 
     if (tree.name.isEmpty()) {
-      action.bindText("Static code");
+      action.bindText("Constructors");
     } else {
       action.setText(tree.name);
     }
 
     final FxAction[] pkgActions = tree.childStream()
-        .map(c -> statics(bean, c))
+        .map(c -> constructors(bean, c))
+        .filter(a -> !a.isEmpty())
         .toArray(FxAction[]::new);
     final FxAction[] classActions = tree.classStream()
         .filter(c -> !c.isInterface() && !Modifier.isAbstract(c.getModifiers()))
         .map(c -> {
-          final FxAction a = new FxAction("static-classes", "Actions").setText(c.getSimpleName());
+          final FxAction a = new FxAction("class", "Actions").setText(c.getSimpleName());
           final FxAction[] constructors = of(c.getConstructors())
               .map(e -> {
                 final Expr[] args = of(e.getParameters())
@@ -86,7 +95,7 @@ public class BeanActions {
                     .toArray(NullExpr[]::new);
                 final CallExpr expr = new CallExpr(new ClassExpr(c.getName()), "new", args);
                 return new FxAction("constructor", "Actions")
-                    .setText(e.toGenericString())
+                    .setText(of(e.getGenericParameterTypes()).map(Type::getTypeName).collect(joining(",", "(", ")")))
                     .setEventHandler(event -> {
                       final String name = c.getSimpleName();
                       bean.add(name, expr);
@@ -94,6 +103,53 @@ public class BeanActions {
               })
               .toArray(FxAction[]::new);
           a.setChildren(concat(FxAction[]::new, constructors));
+          return a;
+        })
+        .filter(e -> !e.isEmpty())
+        .toArray(FxAction[]::new);
+
+    action.setChildren(concat(FxAction[]::new, pkgActions, classActions));
+
+    return action;
+  }
+
+  @Nonnull
+  private FxAction staticMethods(@Nonnull IdeBean bean, @Nonnull ClassTree tree) {
+    final FxAction action = new FxAction("static-method", "Actions");
+
+    if (tree.name.isEmpty()) {
+      action.bindText("Static factories");
+    } else {
+      action.setText(tree.name);
+    }
+
+    final FxAction[] pkgActions = tree.childStream()
+        .map(c -> staticMethods(bean, c))
+        .filter(a -> !a.isEmpty())
+        .toArray(FxAction[]::new);
+    final FxAction[] classActions = tree.classStream()
+        .filter(c -> !c.isInterface() && !Modifier.isAbstract(c.getModifiers()))
+        .map(c -> {
+          final FxAction a = new FxAction("class", "Actions").setText(c.getSimpleName());
+          final FxAction[] methods = of(c.getMethods())
+              .filter(m -> Modifier.isStatic(m.getModifiers()))
+              .filter(m -> !m.getReturnType().isPrimitive())
+              .map(e -> {
+                final Expr[] args = of(e.getParameters())
+                    .map(p -> new NullExpr(p.getType().getTypeName()))
+                    .toArray(NullExpr[]::new);
+                final CallExpr expr = new CallExpr(new ClassExpr(c.getName()), "new", args);
+                return new FxAction("method", "Actions")
+                    .setText(of(e.getGenericParameterTypes())
+                        .map(Type::getTypeName)
+                        .collect(joining(",", e.getName() + "(", ")")))
+                    .setEventHandler(event -> {
+                      final String name = c.getSimpleName();
+                      bean.add(name, expr);
+                    });
+              })
+              .toArray(FxAction[]::new);
+          a.setChildren(concat(FxAction[]::new, methods));
           return a;
         })
         .filter(e -> !e.isEmpty())

@@ -55,6 +55,7 @@ public class ClassTree {
         })
         .distinct()
         .map(p -> new ClassTree(p, classes))
+        .flatMap(ClassTree::trim)
         .sorted(Comparator.comparing(t -> t.name))
         .toArray(ClassTree[]::new);
   }
@@ -74,6 +75,14 @@ public class ClassTree {
 
   public Stream<ClassTree> childStream() {
     return Stream.of(children);
+  }
+
+  private Stream<ClassTree> trim() {
+    if (classes.length == 0 && children.length == 1 && children[0].classes.length == 0) {
+      return Stream.of(children[0].children).flatMap(ClassTree::trim);
+    } else {
+      return Stream.of(this);
+    }
   }
 
   @Nonnull
