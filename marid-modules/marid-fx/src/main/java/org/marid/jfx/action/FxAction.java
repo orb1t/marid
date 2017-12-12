@@ -26,9 +26,11 @@ import javafx.beans.InvalidationListener;
 import javafx.beans.WeakInvalidationListener;
 import javafx.beans.binding.Binding;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -143,6 +145,10 @@ public class FxAction {
     return bindText(ls(format, args));
   }
 
+  public FxAction setText(String text) {
+    return bindText(new SimpleStringProperty(text));
+  }
+
   public FxAction setAccelerator(KeyCombination value) {
     return bindAccelerator(new SimpleObjectProperty<>(value));
   }
@@ -225,10 +231,8 @@ public class FxAction {
       if (eventHandler != null) {
         item.onActionProperty().bind(eventHandler);
       }
-    } else if (children != null) {
-      final Menu menu = new Menu();
-      item = menu;
-      menu.getItems().setAll(children.getValue().stream().map(c -> menuItem(menu.getItems())).collect(toList()));
+    } else if (!isEmpty()) {
+      item = new Menu(null, null, grouped(list, children.getValue()));
     } else {
       item = new MenuItem();
       if (eventHandler != null) {
@@ -282,7 +286,7 @@ public class FxAction {
     }
 
     button.setOnAction(event -> {
-      if (children == null) {
+      if (isEmpty()) {
         final EventHandler<ActionEvent> h = eventHandler.getValue();
         if (h != null) {
           h.handle(event);
@@ -303,16 +307,40 @@ public class FxAction {
     return this;
   }
 
+  public FxAction setChildren(ObservableList<FxAction> actions) {
+    return bindChildren(new SimpleListProperty<>(actions));
+  }
+
+  public FxAction setChildren(List<FxAction> actions) {
+    return setChildren(FXCollections.observableList(actions));
+  }
+
+  public FxAction setChildren(FxAction... actions) {
+    return setChildren(Arrays.asList(actions));
+  }
+
   public boolean isDisabled() {
     return disabled == null || disabled.getValue() == null ? false : disabled.getValue();
+  }
+
+  public String getText() {
+    return text == null ? null : text.getValue();
   }
 
   public EventHandler<ActionEvent> getEventHandler() {
     return eventHandler == null ? null : eventHandler.getValue();
   }
 
+  public ObservableList<FxAction> getChildren() {
+    return children == null ? null : children.getValue();
+  }
+
+  public boolean isEmpty() {
+    return children == null || children.getValue().isEmpty();
+  }
+
   @Override
   public String toString() {
-    return String.format("%s,%s,%s", group, toolbarGroup, menu);
+    return String.format("%s(%s,%s,%s)", getText(), group, toolbarGroup, menu);
   }
 }
