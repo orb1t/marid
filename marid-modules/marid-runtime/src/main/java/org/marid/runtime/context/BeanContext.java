@@ -23,10 +23,7 @@ package org.marid.runtime.context;
 
 import org.marid.beans.MaridBean;
 import org.marid.beans.RuntimeBean;
-import org.marid.runtime.event.BeanPostConstructEvent;
-import org.marid.runtime.event.BeanPreDestroyEvent;
-import org.marid.runtime.event.ContextBootstrapEvent;
-import org.marid.runtime.event.ContextFailEvent;
+import org.marid.runtime.event.*;
 import org.marid.runtime.exception.MaridBeanNotFoundException;
 import org.marid.beans.BeanTypeContext;
 
@@ -69,6 +66,8 @@ public final class BeanContext extends BeanTypeContext implements MaridRuntime, 
           children.add(new BeanContext(this, configuration, child));
         }
       }
+
+      configuration.fireEvent(l -> l.onStart(new ContextStartEvent(this)), null);
     } catch (Throwable x) {
       configuration.fireEvent(l -> l.onFail(new ContextFailEvent(this, bean.getName(), x)), x::addSuppressed);
 
@@ -186,6 +185,7 @@ public final class BeanContext extends BeanTypeContext implements MaridRuntime, 
       }
       final BeanPreDestroyEvent event = new BeanPreDestroyEvent(this, bean.getName(), instance, e::addSuppressed);
       configuration.fireEvent(l -> l.onPreDestroy(event), e::addSuppressed);
+      configuration.fireEvent(l -> l.onStop(new ContextStopEvent(this)), e::addSuppressed);
     } catch (Throwable x) {
       e.addSuppressed(x);
     } finally {

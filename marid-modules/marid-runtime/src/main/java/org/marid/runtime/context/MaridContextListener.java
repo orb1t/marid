@@ -33,8 +33,6 @@ public interface MaridContextListener extends EventListener, Comparable<MaridCon
 
   void bootstrap(@Nonnull ContextBootstrapEvent contextBootstrapEvent);
 
-  void onEvent(@Nonnull BeanEvent event);
-
   void onPostConstruct(@Nonnull BeanPostConstructEvent postConstructEvent);
 
   void onPreDestroy(@Nonnull BeanPreDestroyEvent preDestroyEvent);

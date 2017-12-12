@@ -50,10 +50,6 @@ public class MaridDefaultContextListener implements MaridContextListener {
   }
 
   @Override
-  public void onEvent(@Nonnull BeanEvent event) {
-  }
-
-  @Override
   public void onPostConstruct(@Nonnull BeanPostConstructEvent postConstructEvent) {
     if (postConstructEvent.getBean() == null) {
       return;

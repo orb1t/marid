@@ -39,11 +39,6 @@ public class MaridLogContextListener implements MaridContextListener {
   }
 
   @Override
-  public void onEvent(@Nonnull BeanEvent event) {
-    log(INFO, "{0}", event);
-  }
-
-  @Override
   public void onPostConstruct(@Nonnull BeanPostConstructEvent postConstructEvent) {
     log(INFO, "{0}", postConstructEvent);
   }
