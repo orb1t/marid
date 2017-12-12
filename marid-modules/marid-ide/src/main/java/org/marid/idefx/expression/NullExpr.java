@@ -19,24 +19,47 @@
  * #L%
  */
 
-package org.marid.expression.mutable;
+package org.marid.idefx.expression;
 
-import org.marid.expression.generic.ThisExpression;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import org.marid.expression.generic.NullExpression;
+import org.marid.expression.xml.XmlExpression;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 
-public class ThisExpr extends Expr implements ThisExpression {
+public class NullExpr extends Expr implements NullExpression {
 
-  public ThisExpr() {
+  public final StringProperty type;
+
+  public NullExpr() {
+    this(void.class.getName());
   }
 
-  ThisExpr(@Nonnull Element element) {
+  public NullExpr(@Nonnull String type) {
+    this.type = new SimpleStringProperty(type);
+  }
+
+  NullExpr(@Nonnull Element element) {
     super(element);
+    this.type = new SimpleStringProperty(XmlExpression.type(element));
+  }
+
+  @Nonnull
+  @Override
+  public String getType() {
+    return type.get();
+  }
+
+  @Override
+  public void writeTo(@Nonnull Element element) {
+    super.writeTo(element);
+    XmlExpression.type(element, getType());
   }
 
   @Override
   public String toString() {
-    return "this";
+    return "null(" + getType() + ")";
   }
 }

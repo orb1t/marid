@@ -19,17 +19,13 @@
  * #L%
  */
 
-package org.marid.idelib.beans;
+package org.marid.idefx.visitor;
+
+import org.marid.idefx.expression.Expr;
 
 import javax.annotation.Nonnull;
-import java.util.NoSuchElementException;
 
-public interface BeanUtils {
+public interface Visitor {
 
-  static IdeBean find(@Nonnull IdeBean root, @Nonnull String name) {
-    return (IdeBean) root.descendants()
-        .filter(b -> name.equals(b.getName()))
-        .findFirst()
-        .orElseThrow(() -> new NoSuchElementException(name));
-  }
+  void visit(@Nonnull Expr expr);
 }

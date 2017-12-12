@@ -19,7 +19,7 @@
  * #L%
  */
 
-package org.marid.expression.mutable;
+package org.marid.idefx.expression;
 
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;

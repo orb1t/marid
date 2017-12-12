@@ -30,9 +30,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.marid.beans.BeanTypeContext;
 import org.marid.expression.mutable.testclasses.MyComplexBean;
 import org.marid.expression.mutable.testclasses.MyList;
-import org.marid.idelib.beans.BeanUtils;
-import org.marid.idelib.beans.IdeBean;
-import org.marid.idelib.beans.IdeBeanContext;
+import org.marid.idefx.beans.BeanUtils;
+import org.marid.idefx.beans.IdeBean;
+import org.marid.idefx.beans.IdeBeanContext;
 import org.marid.io.Xmls;
 
 import java.io.IOException;

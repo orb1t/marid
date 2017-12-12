@@ -19,7 +19,7 @@
  * #L%
  */
 
-package org.marid.idelib.beans;
+package org.marid.idefx.beans;
 
 import javafx.collections.ObservableList;
 import javafx.event.Event;

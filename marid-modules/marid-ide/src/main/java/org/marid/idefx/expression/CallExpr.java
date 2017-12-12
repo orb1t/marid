@@ -19,7 +19,7 @@
  * #L%
  */
 
-package org.marid.expression.mutable;
+package org.marid.idefx.expression;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;

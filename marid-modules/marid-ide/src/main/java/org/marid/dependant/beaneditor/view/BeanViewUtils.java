@@ -22,7 +22,7 @@
 package org.marid.dependant.beaneditor.view;
 
 import javafx.scene.text.Text;
-import org.marid.expression.mutable.*;
+import org.marid.idefx.expression.*;
 import org.marid.jfx.icons.FontIcons;
 
 import javax.annotation.Nonnull;

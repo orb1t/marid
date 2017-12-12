@@ -19,55 +19,39 @@
  * #L%
  */
 
-package org.marid.expression.mutable;
+package org.marid.idefx.expression;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.marid.expression.generic.GetExpression;
-import org.marid.expression.xml.XmlExpression;
-import org.marid.jfx.props.FxObject;
+import org.marid.expression.generic.ValueExpression;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 
-import static org.marid.jfx.props.ObservablesProvider.object;
+import static org.marid.io.Xmls.attribute;
 
-public class GetExpr extends Expr implements GetExpression {
+public abstract class ValueExpr extends Expr implements ValueExpression {
 
-  public final FxObject<Expr> target;
-  public final StringProperty field;
+  public final StringProperty value;
 
-  public GetExpr(@Nonnull Expr target, @Nonnull String field) {
-    this.target = object(target);
-    this.field = new SimpleStringProperty(field);
+  public ValueExpr(@Nonnull String value) {
+    this.value = new SimpleStringProperty(value);
   }
 
-  GetExpr(@Nonnull Element element) {
-    this.target = object(XmlExpression.target(element, Expr::of, ClassExpr::new, RefExpr::new));
-    this.field = new SimpleStringProperty(XmlExpression.field(element));
-  }
-
-  @Nonnull
-  @Override
-  public Expr getTarget() {
-    return target.get();
+  ValueExpr(@Nonnull Element element) {
+    super(element);
+    this.value = new SimpleStringProperty(attribute(element, "value").orElse(""));
   }
 
   @Nonnull
   @Override
-  public String getField() {
-    return field.get();
+  public String getValue() {
+    return value.get();
   }
 
   @Override
   public void writeTo(@Nonnull Element element) {
     super.writeTo(element);
-    XmlExpression.target(element, getTarget());
-    XmlExpression.field(element, getField());
-  }
-
-  @Override
-  public String toString() {
-    return target + "." + field;
+    element.setAttribute("value", getValue());
   }
 }

@@ -19,48 +19,43 @@
  * #L%
  */
 
-package org.marid.expression.mutable;
+package org.marid.idefx.expression;
 
-import javafx.collections.ObservableList;
-import org.marid.expression.generic.ArrayExpression;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import org.marid.expression.generic.StringExpression;
 import org.marid.expression.xml.XmlExpression;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
-import java.util.List;
-import java.util.stream.Collectors;
 
-import static javafx.collections.FXCollections.observableArrayList;
-import static org.marid.jfx.props.ObservablesProvider.toObservableList;
+public class StringExpr extends Expr implements StringExpression {
 
-public class ArrayExpr extends Expr implements ArrayExpression {
+  public final StringProperty value;
 
-  public final ObservableList<Expr> elements;
-
-  public ArrayExpr(@Nonnull Expr... elements) {
-    this.elements = observableArrayList(Expr::observables);
-    this.elements.setAll(elements);
+  public StringExpr(@Nonnull String value) {
+    this.value = new SimpleStringProperty(value);
   }
 
-  ArrayExpr(@Nonnull Element element) {
+  StringExpr(@Nonnull Element element) {
     super(element);
-    this.elements = XmlExpression.arrayElems(element, Expr::of, toObservableList());
+    this.value = new SimpleStringProperty(XmlExpression.string(element));
   }
 
   @Nonnull
   @Override
-  public List<Expr> getElements() {
-    return elements;
+  public String getValue() {
+    return value.get();
   }
 
   @Override
   public void writeTo(@Nonnull Element element) {
     super.writeTo(element);
-    XmlExpression.arrayElems(element, getElements());
+    XmlExpression.string(element, getValue());
   }
 
   @Override
   public String toString() {
-    return getElements().stream().map(Object::toString).collect(Collectors.joining(",", "[", "]"));
+    return "`" + getValue() + "`";
   }
 }

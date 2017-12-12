@@ -19,43 +19,43 @@
  * #L%
  */
 
-package org.marid.expression.mutable;
+package org.marid.idefx.expression;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.marid.expression.generic.ClassExpression;
+import org.marid.expression.generic.RefExpression;
 import org.marid.expression.xml.XmlExpression;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 
-public class ClassExpr extends Expr implements ClassExpression {
+public class RefExpr extends Expr implements RefExpression {
 
-  public final StringProperty className;
+  public final StringProperty ref;
 
-  public ClassExpr(@Nonnull String className) {
-    this.className = new SimpleStringProperty(className);
+  public RefExpr(@Nonnull String ref) {
+    this.ref = new SimpleStringProperty(ref);
   }
 
-  ClassExpr(@Nonnull Element element) {
+  public RefExpr(@Nonnull Element element) {
     super(element);
-    this.className = new SimpleStringProperty(XmlExpression.className(element));
+    this.ref = new SimpleStringProperty(XmlExpression.ref(element));
   }
 
   @Nonnull
   @Override
-  public String getClassName() {
-    return className.get();
+  public String getReference() {
+    return ref.get();
   }
 
   @Override
   public void writeTo(@Nonnull Element element) {
     super.writeTo(element);
-    XmlExpression.className(element, getClassName());
+    XmlExpression.ref(element, getReference());
   }
 
   @Override
   public String toString() {
-    return className.get();
+    return "@(" + ref + ")";
   }
 }

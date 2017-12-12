@@ -19,39 +19,43 @@
  * #L%
  */
 
-package org.marid.expression.mutable;
+package org.marid.idefx.expression;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.marid.expression.generic.ValueExpression;
+import org.marid.expression.generic.ClassExpression;
+import org.marid.expression.xml.XmlExpression;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
 
-import static org.marid.io.Xmls.attribute;
+public class ClassExpr extends Expr implements ClassExpression {
 
-public abstract class ValueExpr extends Expr implements ValueExpression {
+  public final StringProperty className;
 
-  public final StringProperty value;
-
-  public ValueExpr(@Nonnull String value) {
-    this.value = new SimpleStringProperty(value);
+  public ClassExpr(@Nonnull String className) {
+    this.className = new SimpleStringProperty(className);
   }
 
-  ValueExpr(@Nonnull Element element) {
+  ClassExpr(@Nonnull Element element) {
     super(element);
-    this.value = new SimpleStringProperty(attribute(element, "value").orElse(""));
+    this.className = new SimpleStringProperty(XmlExpression.className(element));
   }
 
   @Nonnull
   @Override
-  public String getValue() {
-    return value.get();
+  public String getClassName() {
+    return className.get();
   }
 
   @Override
   public void writeTo(@Nonnull Element element) {
     super.writeTo(element);
-    element.setAttribute("value", getValue());
+    XmlExpression.className(element, getClassName());
+  }
+
+  @Override
+  public String toString() {
+    return className.get();
   }
 }

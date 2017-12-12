@@ -19,28 +19,17 @@
  * #L%
  */
 
-package org.marid.dependant.beaneditor.actions;
-
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import org.marid.idefx.expression.Expr;
-import org.marid.idefx.beans.IdeBean;
-import org.springframework.stereotype.Component;
+package org.marid.idefx.beans;
 
 import javax.annotation.Nonnull;
+import java.util.NoSuchElementException;
 
-@Component
-public class BeanActionManager {
+public interface BeanUtils {
 
-  public EventHandler<ActionEvent> editAction(@Nonnull IdeBean bean, @Nonnull Expr expr) {
-    return event -> {
-
-    };
-  }
-
-  public EventHandler<ActionEvent> initializersEditAction(@Nonnull IdeBean bean, @Nonnull Expr expr) {
-    return event -> {
-
-    };
+  static IdeBean find(@Nonnull IdeBean root, @Nonnull String name) {
+    return (IdeBean) root.descendants()
+        .filter(b -> name.equals(b.getName()))
+        .findFirst()
+        .orElseThrow(() -> new NoSuchElementException(name));
   }
 }

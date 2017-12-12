@@ -23,11 +23,11 @@ package org.marid.dependant.beaneditor;
 
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
-import org.marid.expression.mutable.CallExpr;
-import org.marid.expression.mutable.ClassExpr;
-import org.marid.expression.mutable.Expr;
-import org.marid.expression.mutable.NullExpr;
-import org.marid.idelib.beans.IdeBean;
+import org.marid.idefx.expression.CallExpr;
+import org.marid.idefx.expression.ClassExpr;
+import org.marid.idefx.expression.Expr;
+import org.marid.idefx.expression.NullExpr;
+import org.marid.idefx.beans.IdeBean;
 import org.marid.idelib.util.ClassTree;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.SpecialActions;

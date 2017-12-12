@@ -19,11 +19,11 @@
  * #L%
  */
 
-package org.marid.expression.mutable;
+package org.marid.idefx.expression;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import org.marid.expression.generic.SetExpression;
+import org.marid.expression.generic.GetExpression;
 import org.marid.expression.xml.XmlExpression;
 import org.marid.jfx.props.FxObject;
 import org.w3c.dom.Element;
@@ -32,23 +32,19 @@ import javax.annotation.Nonnull;
 
 import static org.marid.jfx.props.ObservablesProvider.object;
 
-public class SetExpr extends Expr implements SetExpression {
+public class GetExpr extends Expr implements GetExpression {
 
   public final FxObject<Expr> target;
   public final StringProperty field;
-  public final FxObject<Expr> value;
 
-  public SetExpr(@Nonnull Expr target, @Nonnull String field, @Nonnull Expr value) {
-    this.target = new FxObject<>(Expr::observables, target);
+  public GetExpr(@Nonnull Expr target, @Nonnull String field) {
+    this.target = object(target);
     this.field = new SimpleStringProperty(field);
-    this.value = new FxObject<>(Expr::observables, value);
   }
 
-  SetExpr(@Nonnull Element element) {
-    super(element);
-    this.target = object(XmlExpression.target(element, Expr::of, StringExpr::new, RefExpr::new));
+  GetExpr(@Nonnull Element element) {
+    this.target = object(XmlExpression.target(element, Expr::of, ClassExpr::new, RefExpr::new));
     this.field = new SimpleStringProperty(XmlExpression.field(element));
-    this.value = object(XmlExpression.value(element, Expr::of, NullExpr::new));
   }
 
   @Nonnull
@@ -63,22 +59,15 @@ public class SetExpr extends Expr implements SetExpression {
     return field.get();
   }
 
-  @Nonnull
-  @Override
-  public Expr getValue() {
-    return value.get();
-  }
-
   @Override
   public void writeTo(@Nonnull Element element) {
     super.writeTo(element);
     XmlExpression.target(element, getTarget());
     XmlExpression.field(element, getField());
-    XmlExpression.value(element, getValue());
   }
 
   @Override
   public String toString() {
-    return "(" + target + "." + field + "=" + value + ")";
+    return target + "." + field;
   }
 }

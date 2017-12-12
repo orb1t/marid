@@ -19,7 +19,7 @@
  * #L%
  */
 
-package org.marid.idelib.beans;
+package org.marid.idefx.beans;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -28,8 +28,8 @@ import javafx.scene.shape.Circle;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.marid.beans.MaridBean;
-import org.marid.expression.mutable.Expr;
-import org.marid.expression.mutable.NullExpr;
+import org.marid.idefx.expression.Expr;
+import org.marid.idefx.expression.NullExpr;
 import org.marid.ide.common.IdeShapes;
 import org.marid.jfx.props.FxObject;
 import org.marid.jfx.props.ObservablesProvider;
