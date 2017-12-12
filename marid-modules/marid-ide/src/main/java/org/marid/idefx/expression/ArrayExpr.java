@@ -24,6 +24,8 @@ package org.marid.idefx.expression;
 import javafx.collections.ObservableList;
 import org.marid.expression.generic.ArrayExpression;
 import org.marid.expression.xml.XmlExpression;
+import org.marid.idefx.beans.IdeBean;
+import org.marid.idefx.visitor.Visitor;
 import org.w3c.dom.Element;
 
 import javax.annotation.Nonnull;
@@ -45,6 +47,13 @@ public class ArrayExpr extends Expr implements ArrayExpression {
   ArrayExpr(@Nonnull Element element) {
     super(element);
     this.elements = XmlExpression.arrayElems(element, Expr::of, toObservableList());
+  }
+
+  @Override
+  Expr[] visit(@Nonnull IdeBean bean, @Nonnull Expr[] parents, @Nonnull Visitor visitor) {
+    final Expr[] newParents = super.visit(bean, parents, visitor);
+    elements.forEach(e -> visitor.visit(bean, newParents, e));
+    return newParents;
   }
 
   @Nonnull

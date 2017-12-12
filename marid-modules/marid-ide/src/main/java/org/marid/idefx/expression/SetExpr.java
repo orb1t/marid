@@ -25,6 +25,8 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.marid.expression.generic.SetExpression;
 import org.marid.expression.xml.XmlExpression;
+import org.marid.idefx.beans.IdeBean;
+import org.marid.idefx.visitor.Visitor;
 import org.marid.jfx.props.FxObject;
 import org.w3c.dom.Element;
 
@@ -49,6 +51,14 @@ public class SetExpr extends Expr implements SetExpression {
     this.target = object(XmlExpression.target(element, Expr::of, StringExpr::new, RefExpr::new));
     this.field = new SimpleStringProperty(XmlExpression.field(element));
     this.value = object(XmlExpression.value(element, Expr::of, NullExpr::new));
+  }
+
+  @Override
+  Expr[] visit(@Nonnull IdeBean bean, @Nonnull Expr[] parents, @Nonnull Visitor visitor) {
+    final Expr[] newParents = super.visit(bean, parents, visitor);
+    visitor.visit(bean, newParents, getTarget());
+    visitor.visit(bean, newParents, getValue());
+    return newParents;
   }
 
   @Nonnull

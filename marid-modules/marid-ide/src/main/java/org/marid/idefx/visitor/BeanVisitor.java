@@ -22,11 +22,10 @@
 package org.marid.idefx.visitor;
 
 import org.marid.idefx.beans.IdeBean;
-import org.marid.idefx.expression.Expr;
 
 import javax.annotation.Nonnull;
 
-public interface Visitor {
+public interface BeanVisitor {
 
-  void visit(@Nonnull IdeBean bean, @Nonnull Expr[] parents, @Nonnull Expr expr);
+  void visit(@Nonnull IdeBean bean);
 }

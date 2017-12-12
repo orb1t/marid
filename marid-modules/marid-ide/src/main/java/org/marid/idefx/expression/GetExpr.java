@@ -25,6 +25,8 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.marid.expression.generic.GetExpression;
 import org.marid.expression.xml.XmlExpression;
+import org.marid.idefx.beans.IdeBean;
+import org.marid.idefx.visitor.Visitor;
 import org.marid.jfx.props.FxObject;
 import org.w3c.dom.Element;
 
@@ -45,6 +47,13 @@ public class GetExpr extends Expr implements GetExpression {
   GetExpr(@Nonnull Element element) {
     this.target = object(XmlExpression.target(element, Expr::of, ClassExpr::new, RefExpr::new));
     this.field = new SimpleStringProperty(XmlExpression.field(element));
+  }
+
+  @Override
+  Expr[] visit(@Nonnull IdeBean bean, @Nonnull Expr[] parents, @Nonnull Visitor visitor) {
+    final Expr[] newParents = super.visit(bean, parents, visitor);
+    visitor.visit(bean, newParents, getTarget());
+    return newParents;
   }
 
   @Nonnull

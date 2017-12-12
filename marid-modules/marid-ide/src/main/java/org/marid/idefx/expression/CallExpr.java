@@ -26,6 +26,8 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
 import org.marid.expression.generic.CallExpression;
 import org.marid.expression.xml.XmlExpression;
+import org.marid.idefx.beans.IdeBean;
+import org.marid.idefx.visitor.Visitor;
 import org.marid.jfx.props.FxObject;
 import org.w3c.dom.Element;
 
@@ -55,6 +57,14 @@ public class CallExpr extends Expr implements CallExpression {
     target = object(XmlExpression.target(element, Expr::of, ClassExpr::new, RefExpr::new));
     method = new SimpleStringProperty(XmlExpression.method(element));
     args = XmlExpression.args(element, Expr::of, StringExpr::new, toObservableList());
+  }
+
+  @Override
+  Expr[] visit(@Nonnull IdeBean bean, @Nonnull Expr[] parents, @Nonnull Visitor visitor) {
+    final Expr[] newParents = super.visit(bean, parents, visitor);
+    visitor.visit(bean, newParents, getTarget());
+    args.forEach(e -> visitor.visit(bean, newParents, e));
+    return newParents;
   }
 
   @Nonnull

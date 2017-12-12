@@ -31,6 +31,8 @@ import org.marid.beans.MaridBean;
 import org.marid.idefx.expression.Expr;
 import org.marid.idefx.expression.NullExpr;
 import org.marid.ide.common.IdeShapes;
+import org.marid.idefx.visitor.BeanVisitor;
+import org.marid.idefx.visitor.Visitor;
 import org.marid.jfx.props.FxObject;
 import org.marid.jfx.props.ObservablesProvider;
 import org.w3c.dom.Element;
@@ -98,6 +100,35 @@ public class IdeBean implements MaridBean, ObservablesProvider {
   @Override
   public List<IdeBean> getChildren() {
     return children;
+  }
+
+  public void visit(@Nonnull Visitor visitor) {
+    visitor.visit(this, new Expr[0], getFactory());
+  }
+
+  public void visitDescendants(@Nonnull BeanVisitor visitor) {
+    children.forEach(b -> {
+      visitor.visit(b);
+      b.visitDescendants(visitor);
+    });
+  }
+
+  public void visitSiblings(@Nonnull BeanVisitor visitor) {
+    if (parent != null) {
+      parent.children.forEach(b -> {
+        if (b != this) {
+          visitor.visit(b);
+        }
+      });
+    }
+  }
+
+  public void visitDependants(@Nonnull BeanVisitor visitor) {
+    visitDescendants(visitor);
+    visitSiblings(b -> {
+      visitor.visit(b);
+      b.visitDescendants(visitor);
+    });
   }
 
   @SafeVarargs
