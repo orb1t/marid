@@ -24,7 +24,7 @@ package org.marid.idefx.expression;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import org.apache.commons.lang3.ArrayUtils;
-import org.marid.XmlWritable;
+import org.marid.xml.XmlWritable;
 import org.marid.expression.generic.Expression;
 import org.marid.expression.xml.XmlExpression;
 import org.marid.idefx.beans.IdeBean;

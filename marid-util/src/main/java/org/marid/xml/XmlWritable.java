@@ -19,7 +19,7 @@
  * #L%
  */
 
-package org.marid;
+package org.marid.xml;
 
 import org.w3c.dom.Element;
 

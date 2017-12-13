@@ -21,8 +21,8 @@
 
 module marid.util {
 
-  requires java.logging;
-  requires java.xml;
+  requires transitive java.logging;
+  requires transitive java.xml;
 
   requires static java.desktop;
   requires static javafx.base;
