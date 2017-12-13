@@ -315,6 +315,7 @@
                 <Specification-Version>${project.version}</Specification-Version>
                 <Specification-Title>${project.name}</Specification-Title>
                 <Specification-Vendor>${project.organization.name}</Specification-Vendor>
+                <Marid-Module-Name>${project.name}</Marid-Module-Name>
               </manifestEntries>
             </archive>
           </configuration>
