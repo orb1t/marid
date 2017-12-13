@@ -25,7 +25,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import org.jetbrains.annotations.PropertyKey;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -63,7 +63,7 @@ public class FontIcons {
         .toArray(Entry[]::new)));
   }
 
-  public static Text glyphIcon(@Nonnull @PropertyKey(resourceBundle = "fonts.meta") String type, double size) {
+  public static Text glyphIcon(@NotNull @PropertyKey(resourceBundle = "fonts.meta") String type, double size) {
     if (type.length() < 3 || !FAMILIES.containsKey(type.substring(0, 1))) {
       return glyphIcon("F_SMILE_ALT", size);
     } else {

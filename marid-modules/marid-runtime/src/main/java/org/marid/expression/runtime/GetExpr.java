@@ -26,8 +26,8 @@ import org.marid.expression.xml.XmlExpression;
 import org.marid.runtime.context.BeanContext;
 import org.w3c.dom.Element;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.NoSuchElementException;
@@ -35,25 +35,25 @@ import java.util.stream.Stream;
 
 public final class GetExpr extends Expr implements GetExpression {
 
-  @Nonnull
+  @NotNull
   private final Expr target;
 
-  @Nonnull
+  @NotNull
   private final String field;
 
-  public GetExpr(@Nonnull Expr target, @Nonnull String field) {
+  public GetExpr(@NotNull Expr target, @NotNull String field) {
     this.target = target;
     this.field = field;
   }
 
-  GetExpr(@Nonnull Element element) {
+  GetExpr(@NotNull Element element) {
     super(element);
     this.target = XmlExpression.target(element, Expr::of, ClassExpr::new, RefExpr::new);
     this.field = XmlExpression.field(element);
   }
 
   @Override
-  protected Object execute(@Nullable Object self, @Nullable Type owner, @Nonnull BeanContext context) {
+  protected Object execute(@Nullable Object self, @Nullable Type owner, @NotNull BeanContext context) {
     final Object target = getTarget().evaluate(self, owner, context);
     final Field field = getTarget().getTargetClass(owner, context)
         .flatMap(c -> Stream.of(c.getFields()))
@@ -68,13 +68,13 @@ public final class GetExpr extends Expr implements GetExpression {
   }
 
   @Override
-  @Nonnull
+  @NotNull
   public Expr getTarget() {
     return target;
   }
 
   @Override
-  @Nonnull
+  @NotNull
   public String getField() {
     return field;
   }

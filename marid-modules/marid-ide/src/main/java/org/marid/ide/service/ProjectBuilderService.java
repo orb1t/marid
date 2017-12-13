@@ -36,7 +36,7 @@ import org.marid.idelib.spring.annotation.PrototypeComponent;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.function.Consumer;
 
 import static java.lang.System.lineSeparator;
@@ -101,7 +101,7 @@ public class ProjectBuilderService extends IdeService<HBox> {
       manager.waitFor();
     }
 
-    @Nonnull
+    @NotNull
     @Override
     protected HBox createGraphic() {
       return new HBox(IdeShapes.circle(profile.hashCode(), 16));

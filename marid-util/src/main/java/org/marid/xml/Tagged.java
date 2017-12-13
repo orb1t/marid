@@ -21,10 +21,10 @@
 
 package org.marid.xml;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 public interface Tagged {
 
-  @Nonnull
+  @NotNull
   String getTag();
 }

@@ -30,7 +30,7 @@ import org.marid.idefx.visitor.Visitor;
 import org.marid.jfx.props.FxObject;
 import org.w3c.dom.Element;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 import static org.marid.jfx.props.ObservablesProvider.object;
 
@@ -39,37 +39,37 @@ public class GetExpr extends Expr implements GetExpression {
   public final FxObject<Expr> target;
   public final StringProperty field;
 
-  public GetExpr(@Nonnull Expr target, @Nonnull String field) {
+  public GetExpr(@NotNull Expr target, @NotNull String field) {
     this.target = object(target);
     this.field = new SimpleStringProperty(field);
   }
 
-  GetExpr(@Nonnull Element element) {
+  GetExpr(@NotNull Element element) {
     this.target = object(XmlExpression.target(element, Expr::of, ClassExpr::new, RefExpr::new));
     this.field = new SimpleStringProperty(XmlExpression.field(element));
   }
 
   @Override
-  Expr[] visit(@Nonnull IdeBean bean, @Nonnull Expr[] parents, @Nonnull Visitor visitor) {
+  Expr[] visit(@NotNull IdeBean bean, @NotNull Expr[] parents, @NotNull Visitor visitor) {
     final Expr[] newParents = super.visit(bean, parents, visitor);
     visitor.visit(bean, newParents, getTarget());
     return newParents;
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public Expr getTarget() {
     return target.get();
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public String getField() {
     return field.get();
   }
 
   @Override
-  public void writeTo(@Nonnull Element element) {
+  public void writeTo(@NotNull Element element) {
     super.writeTo(element);
     XmlExpression.target(element, getTarget());
     XmlExpression.field(element, getField());

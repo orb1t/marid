@@ -24,31 +24,31 @@ package org.marid.expression.generic;
 import org.marid.beans.BeanTypeContext;
 import org.marid.types.Types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Type;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 public interface SetExpression extends Expression {
 
-  @Nonnull
+  @NotNull
   Expression getTarget();
 
-  @Nonnull
+  @NotNull
   String getField();
 
-  @Nonnull
+  @NotNull
   Expression getValue();
 
-  @Nonnull
+  @NotNull
   @Override
-  default Type getType(@Nullable Type owner, @Nonnull BeanTypeContext context) {
+  default Type getType(@Nullable Type owner, @NotNull BeanTypeContext context) {
     return getTarget().getType(owner, context);
   }
 
   @Override
-  default void resolve(@Nonnull Type type, @Nonnull BeanTypeContext context, @Nonnull BiConsumer<Type, Type> evaluator) {
+  default void resolve(@NotNull Type type, @NotNull BeanTypeContext context, @NotNull BiConsumer<Type, Type> evaluator) {
     if (getTarget() instanceof ThisExpression) {
       Types.rawClasses(type).flatMap(c -> Stream.of(c.getFields()))
           .filter(f -> f.getName().equals(getField()))

@@ -27,33 +27,33 @@ import org.marid.function.ToImmutableList;
 import org.marid.runtime.context.BeanContext;
 import org.w3c.dom.Element;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Type;
 import java.util.List;
 
 public final class ArrayExpr extends Expr implements ArrayExpression {
 
-  @Nonnull
+  @NotNull
   private final List<Expr> elements;
 
-  public ArrayExpr(@Nonnull Expr... elements) {
+  public ArrayExpr(@NotNull Expr... elements) {
     this.elements = List.of(elements);
   }
 
-  ArrayExpr(@Nonnull Element element) {
+  ArrayExpr(@NotNull Element element) {
     super(element);
     elements = XmlExpression.arrayElems(element, Expr::of, new ToImmutableList<>());
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public List<Expr> getElements() {
     return elements;
   }
 
   @Override
-  protected Object execute(@Nullable Object self, @Nullable Type owner, @Nonnull BeanContext context) {
+  protected Object execute(@Nullable Object self, @Nullable Type owner, @NotNull BeanContext context) {
     return elements.stream().map(e -> e.evaluate(self, owner, context)).toArray();
   }
 }

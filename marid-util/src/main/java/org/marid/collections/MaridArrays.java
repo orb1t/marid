@@ -21,15 +21,15 @@
 
 package org.marid.collections;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.function.IntFunction;
 import java.util.stream.Stream;
 
 public interface MaridArrays {
 
   @SafeVarargs
-  @Nonnull
-  static <T> T[] concat(@Nonnull IntFunction<T[]> arrayFunc, @Nonnull T[]... arrays) {
+  @NotNull
+  static <T> T[] concat(@NotNull IntFunction<T[]> arrayFunc, @NotNull T[]... arrays) {
     final T[] result = arrayFunc.apply(Stream.of(arrays).mapToInt(a -> a.length).sum());
 
     int i = 0;

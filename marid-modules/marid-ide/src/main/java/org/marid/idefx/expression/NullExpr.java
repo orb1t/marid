@@ -27,7 +27,7 @@ import org.marid.expression.generic.NullExpression;
 import org.marid.expression.xml.XmlExpression;
 import org.w3c.dom.Element;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 public class NullExpr extends Expr implements NullExpression {
 
@@ -37,23 +37,23 @@ public class NullExpr extends Expr implements NullExpression {
     this(void.class.getName());
   }
 
-  public NullExpr(@Nonnull String type) {
+  public NullExpr(@NotNull String type) {
     this.type = new SimpleStringProperty(type);
   }
 
-  NullExpr(@Nonnull Element element) {
+  NullExpr(@NotNull Element element) {
     super(element);
     this.type = new SimpleStringProperty(XmlExpression.type(element));
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public String getType() {
     return type.get();
   }
 
   @Override
-  public void writeTo(@Nonnull Element element) {
+  public void writeTo(@NotNull Element element) {
     super.writeTo(element);
     XmlExpression.type(element, getType());
   }

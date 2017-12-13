@@ -23,24 +23,24 @@ package org.marid.runtime.event;
 
 import org.marid.runtime.context.MaridRuntime;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public final class BeanPostConstructEvent extends MaridEvent {
 
-  @Nonnull
+  @NotNull
   private final String name;
 
   @Nullable
   private final Object bean;
 
-  public BeanPostConstructEvent(@Nonnull MaridRuntime context, @Nonnull String name, @Nullable Object bean) {
+  public BeanPostConstructEvent(@NotNull MaridRuntime context, @NotNull String name, @Nullable Object bean) {
     super(context);
     this.name = name;
     this.bean = bean;
   }
 
-  @Nonnull
+  @NotNull
   public String getName() {
     return name;
   }

@@ -23,19 +23,19 @@ package org.marid.expression.generic;
 
 import org.marid.beans.BeanTypeContext;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 
 public interface NullExpression extends Expression {
 
-  @Nonnull
+  @NotNull
   String getType();
 
-  @Nonnull
+  @NotNull
   @Override
-  default Type getType(@Nullable Type owner, @Nonnull BeanTypeContext context) {
+  default Type getType(@Nullable Type owner, @NotNull BeanTypeContext context) {
     final String type = getType();
     final String elementType;
     final int dimensions;

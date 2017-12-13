@@ -25,14 +25,14 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.TypeFilter;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 
 public class IdeTypeFilter implements TypeFilter {
 
   @Override
-  public boolean match(@Nonnull MetadataReader metadataReader,
-                       @Nonnull MetadataReaderFactory metadataReaderFactory) throws IOException {
+  public boolean match(@NotNull MetadataReader metadataReader,
+                       @NotNull MetadataReaderFactory metadataReaderFactory) throws IOException {
     System.out.println(metadataReader.getClassMetadata().getClassName());
     return metadataReader.getClassMetadata().getClassName().startsWith("org.marid.ide");
   }

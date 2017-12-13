@@ -24,8 +24,8 @@ package org.marid.logging;
 import org.intellij.lang.annotations.MagicConstant;
 import org.marid.cache.MaridClassValue;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.lang.invoke.MethodHandles;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -48,32 +48,32 @@ public class Log {
     return Logger.getLogger(loggerName);
   });
 
-  public static void log(@Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
-                         @Nonnull String message,
+  public static void log(@NotNull @MagicConstant(valuesFromClass = Level.class) Level level,
+                         @NotNull String message,
                          @Nullable Throwable thrown,
-                         @Nonnull Object... args) {
+                         @NotNull Object... args) {
     log(LOGGER_CLASS_VALUE.get(caller(3)), level, message, thrown, args);
   }
 
-  public static void log(@Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
-                         @Nonnull String message,
-                         @Nonnull Object... args) {
+  public static void log(@NotNull @MagicConstant(valuesFromClass = Level.class) Level level,
+                         @NotNull String message,
+                         @NotNull Object... args) {
     log(LOGGER_CLASS_VALUE.get(caller(3)), level, message, args);
   }
 
   public static void log(int depth,
-                         @Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
-                         @Nonnull String message,
+                         @NotNull @MagicConstant(valuesFromClass = Level.class) Level level,
+                         @NotNull String message,
                          @Nullable Throwable thrown,
-                         @Nonnull Object... args) {
+                         @NotNull Object... args) {
     log(LOGGER_CLASS_VALUE.get(caller(depth)), level, message, thrown, args);
   }
 
-  public static void log(@Nonnull Logger logger,
-                         @Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
-                         @Nonnull String message,
+  public static void log(@NotNull Logger logger,
+                         @NotNull @MagicConstant(valuesFromClass = Level.class) Level level,
+                         @NotNull String message,
                          @Nullable Throwable thrown,
-                         @Nonnull Object... args) {
+                         @NotNull Object... args) {
     final LogRecord record = new LogRecord(level, message);
     record.setLoggerName(logger.getName());
     record.setSourceClassName(null);
@@ -82,10 +82,10 @@ public class Log {
     logger.log(record);
   }
 
-  public static void log(@Nonnull Logger logger,
-                         @Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
-                         @Nonnull String message,
-                         @Nonnull Object... args) {
+  public static void log(@NotNull Logger logger,
+                         @NotNull @MagicConstant(valuesFromClass = Level.class) Level level,
+                         @NotNull String message,
+                         @NotNull Object... args) {
     log(logger, level, message, null, args);
   }
 

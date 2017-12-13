@@ -27,7 +27,7 @@ import org.marid.runtime.MaridFactory;
 import org.marid.xml.Tagged;
 import org.w3c.dom.Element;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -38,11 +38,11 @@ import static org.marid.io.Xmls.*;
 
 public interface XmlExpression {
 
-  @Nonnull
-  static <E extends Expression> E target(@Nonnull Element element,
-                                         @Nonnull Function<Element, E> exprFunc,
-                                         @Nonnull Function<String, E> classExprFunc,
-                                         @Nonnull Function<String, E> refExprFunc) {
+  @NotNull
+  static <E extends Expression> E target(@NotNull Element element,
+                                         @NotNull Function<Element, E> exprFunc,
+                                         @NotNull Function<String, E> classExprFunc,
+                                         @NotNull Function<String, E> refExprFunc) {
     return element("target", element)
         .map(exprFunc)
         .orElseGet(() -> attribute(element, "class")
@@ -52,7 +52,7 @@ public interface XmlExpression {
                 .orElseGet(() -> classExprFunc.apply(MaridFactory.class.getName()))));
   }
 
-  static <E extends Expression & Tagged & XmlWritable> void target(@Nonnull Element element, @Nonnull E target) {
+  static <E extends Expression & Tagged & XmlWritable> void target(@NotNull Element element, @NotNull E target) {
     if (target instanceof ClassExpression) {
       final ClassExpression expression = (ClassExpression) target;
       if (!MaridFactory.class.getName().equals(expression.getClassName())) {
@@ -65,18 +65,18 @@ public interface XmlExpression {
     }
   }
 
-  @Nonnull
-  static <E extends Expression, L extends List<E>> L args(@Nonnull Element element,
-                                                          @Nonnull Function<Element, E> exprFunc,
-                                                          @Nonnull Function<String, E> stringFunc,
-                                                          @Nonnull Collector<E, ?, L> collector) {
+  @NotNull
+  static <E extends Expression, L extends List<E>> L args(@NotNull Element element,
+                                                          @NotNull Function<Element, E> exprFunc,
+                                                          @NotNull Function<String, E> stringFunc,
+                                                          @NotNull Collector<E, ?, L> collector) {
     return attribute(element, "arg")
         .map(c -> Stream.of(c).map(stringFunc).collect(collector))
         .orElseGet(() -> elements("args", element).map(exprFunc).collect(collector));
   }
 
-  static <E extends Expression & Tagged & XmlWritable> void args(@Nonnull Element element,
-                                                                 @Nonnull List<? extends E> args) {
+  static <E extends Expression & Tagged & XmlWritable> void args(@NotNull Element element,
+                                                                 @NotNull List<? extends E> args) {
     switch (args.size()) {
       case 0:
         break;
@@ -95,108 +95,108 @@ public interface XmlExpression {
     }
   }
 
-  @Nonnull
-  static String method(@Nonnull Element element) {
+  @NotNull
+  static String method(@NotNull Element element) {
     return attribute(element, "method").orElse("int32");
   }
 
-  static void method(@Nonnull Element element, @Nonnull String method) {
+  static void method(@NotNull Element element, @NotNull String method) {
     if (!"int32".equals(method)) {
       element.setAttribute("method", method);
     }
   }
 
-  @Nonnull
-  static String field(@Nonnull Element element) {
+  @NotNull
+  static String field(@NotNull Element element) {
     return attribute(element, "field").orElse("value");
   }
 
-  static void field(@Nonnull Element element, @Nonnull String field) {
+  static void field(@NotNull Element element, @NotNull String field) {
     if (!"value".equals(field)) {
       element.setAttribute("field", field);
     }
   }
 
-  @Nonnull
-  static <E extends Expression> E value(@Nonnull Element element,
-                                        @Nonnull Function<Element, E> exprFunc,
-                                        @Nonnull Supplier<E> nullExprFunc) {
+  @NotNull
+  static <E extends Expression> E value(@NotNull Element element,
+                                        @NotNull Function<Element, E> exprFunc,
+                                        @NotNull Supplier<E> nullExprFunc) {
     return element("value", element).map(exprFunc).orElseGet(nullExprFunc);
   }
 
-  static <E extends Expression & Tagged & XmlWritable> void value(@Nonnull Element element,
-                                                                  @Nonnull E expr) {
+  static <E extends Expression & Tagged & XmlWritable> void value(@NotNull Element element,
+                                                                  @NotNull E expr) {
     if (expr instanceof NullExpression && void.class.getName().equals(((NullExpression) expr).getType())) {
       return;
     }
     create(element, "value", v -> create(v, expr.getTag(), expr::writeTo));
   }
 
-  @Nonnull
-  static String ref(@Nonnull Element element) {
+  @NotNull
+  static String ref(@NotNull Element element) {
     return attribute(element, "ref").orElseThrow(() -> new NullPointerException("ref is absent"));
   }
 
-  static void ref(@Nonnull Element element, @Nonnull String ref) {
+  static void ref(@NotNull Element element, @NotNull String ref) {
     element.setAttribute("ref", ref);
   }
 
-  @Nonnull
-  static String type(@Nonnull Element element) {
+  @NotNull
+  static String type(@NotNull Element element) {
     return attribute(element, "type").orElseGet(void.class::getName);
   }
 
-  static void type(@Nonnull Element element, @Nonnull String type) {
+  static void type(@NotNull Element element, @NotNull String type) {
     if (!void.class.getName().equals(type)) {
       element.setAttribute("type", type);
     }
   }
 
-  @Nonnull
-  static String className(@Nonnull Element element) {
+  @NotNull
+  static String className(@NotNull Element element) {
     return attribute(element, "class").orElseGet(MaridFactory.class::getName);
   }
 
-  static void className(@Nonnull Element element, @Nonnull String className) {
+  static void className(@NotNull Element element, @NotNull String className) {
     if (!MaridFactory.class.getName().equals(className)) {
       element.setAttribute("class", className);
     }
   }
 
-  @Nonnull
-  static String string(@Nonnull Element element) {
+  @NotNull
+  static String string(@NotNull Element element) {
     return content(element).orElse("");
   }
 
-  static void string(@Nonnull Element element, @Nonnull String value) {
+  static void string(@NotNull Element element, @NotNull String value) {
     if (!"".equals(value)) {
       element.setTextContent(value);
     }
   }
 
-  @Nonnull
-  static <E extends Expression, L extends List<E>> L arrayElems(@Nonnull Element element,
-                                                                @Nonnull Function<Element, E> exprFunc,
-                                                                @Nonnull Collector<E, ?, L> collector) {
+  @NotNull
+  static <E extends Expression, L extends List<E>> L arrayElems(@NotNull Element element,
+                                                                @NotNull Function<Element, E> exprFunc,
+                                                                @NotNull Collector<E, ?, L> collector) {
     return elements("elements", element).map(exprFunc).collect(collector);
   }
 
-  static <E extends Expression & Tagged & XmlWritable> void arrayElems(@Nonnull Element element,
-                                                                       @Nonnull List<? extends E> elems) {
+  static <E extends Expression & Tagged & XmlWritable> void arrayElems(@NotNull Element element,
+                                                                       @NotNull List<? extends E> elems) {
     if (!elems.isEmpty()) {
       create(element, "elements", is -> elems.forEach(i -> create(is, i.getTag(), i::writeTo)));
     }
   }
 
-  @Nonnull
-  static <E extends Expression, L extends List<E>> L initializers(@Nonnull Element element,
-                                                                  @Nonnull Function<Element, E> exprFunc,
-                                                                  @Nonnull Collector<E, ?, L> collector) {
+  @NotNull
+  static <E extends Expression, L extends List<E>> L initializers(@NotNull Element element,
+                                                                  @NotNull Function<Element, E> exprFunc,
+                                                                  @NotNull Collector<E, ?, L> collector) {
     return elements("initializers", element).map(exprFunc).collect(collector);
   }
 
-  static <E extends Expression & Tagged & XmlWritable> void initializers(@Nonnull Element element,
-                                                                         @Nonnull List<? extends E> list) {
+  static <E extends Expression & Tagged & XmlWritable> void initializers(@NotNull Element element,
+                                                                         @NotNull List<? extends E> list) {
     if (!list.isEmpty()) {
       create(element, "initializers", is -> list.forEach(i -> create(is, i.getTag(), i::writeTo)));
     }

@@ -21,7 +21,7 @@
 
 package org.marid.io;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.io.Closeable;
 import java.io.Flushable;
 import java.io.IOException;
@@ -34,12 +34,12 @@ public class AppendableWriter extends Writer {
 
   private final Appendable appendable;
 
-  public AppendableWriter(@Nonnull Appendable appendable) {
+  public AppendableWriter(@NotNull Appendable appendable) {
     this.appendable = appendable;
   }
 
   @Override
-  public void write(@Nonnull char[] cbuf, int off, int len) throws IOException {
+  public void write(@NotNull char[] cbuf, int off, int len) throws IOException {
     for (int i = 0; i < len; i++) {
       appendable.append(cbuf[i + off]);
     }

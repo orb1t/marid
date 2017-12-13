@@ -24,14 +24,14 @@ package org.marid.idefx.expression;
 import org.marid.expression.generic.ThisExpression;
 import org.w3c.dom.Element;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 public class ThisExpr extends Expr implements ThisExpression {
 
   public ThisExpr() {
   }
 
-  ThisExpr(@Nonnull Element element) {
+  ThisExpr(@NotNull Element element) {
     super(element);
   }
 

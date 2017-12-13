@@ -25,19 +25,19 @@ import org.marid.expression.generic.Expression;
 import org.marid.types.TypeContext;
 import org.marid.types.Types;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Type;
 
 public abstract class BeanTypeContext extends TypeContext {
 
-  @Nonnull
+  @NotNull
   public abstract MaridBean getBean();
 
-  @Nonnull
-  public abstract Type getBeanType(@Nonnull String name);
+  @NotNull
+  public abstract Type getBeanType(@NotNull String name);
 
-  @Nonnull
-  public Type resolve(@Nonnull Type[] formals, @Nonnull Type[] actuals, @Nonnull Expression expr, @Nonnull Type type) {
+  @NotNull
+  public Type resolve(@NotNull Type[] formals, @NotNull Type[] actuals, @NotNull Expression expr, @NotNull Type type) {
     if (type instanceof Class<?>) {
       return type;
     } else {

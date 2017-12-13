@@ -26,30 +26,30 @@ import org.marid.expression.xml.XmlExpression;
 import org.marid.runtime.context.BeanContext;
 import org.w3c.dom.Element;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Type;
 
 public final class ClassExpr extends Expr implements ClassExpression {
 
-  @Nonnull
+  @NotNull
   private final String className;
 
-  public ClassExpr(@Nonnull String className) {
+  public ClassExpr(@NotNull String className) {
     this.className = className;
   }
 
-  ClassExpr(@Nonnull Element element) {
+  ClassExpr(@NotNull Element element) {
     super(element);
     className = XmlExpression.className(element);
   }
 
   @Override
-  protected Class<?> execute(@Nullable Object self, @Nullable Type owner, @Nonnull BeanContext context) {
+  protected Class<?> execute(@Nullable Object self, @Nullable Type owner, @NotNull BeanContext context) {
     return getTargetClass(owner, context).findFirst().orElse(Object.class);
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public String getClassName() {
     return className;

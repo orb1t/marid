@@ -23,32 +23,32 @@ package org.marid.runtime.event;
 
 import org.marid.runtime.context.MaridRuntime;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.util.function.Consumer;
 
 public class BeanPreDestroyEvent extends MaridEvent {
 
-  @Nonnull
+  @NotNull
   private final String name;
 
   @Nullable
   private final Object bean;
 
-  @Nonnull
+  @NotNull
   private final Consumer<Throwable> exceptionConsumer;
 
-  public BeanPreDestroyEvent(@Nonnull MaridRuntime context,
-                             @Nonnull String name,
+  public BeanPreDestroyEvent(@NotNull MaridRuntime context,
+                             @NotNull String name,
                              @Nullable Object bean,
-                             @Nonnull Consumer<Throwable> exceptionConsumer) {
+                             @NotNull Consumer<Throwable> exceptionConsumer) {
     super(context);
     this.name = name;
     this.bean = bean;
     this.exceptionConsumer = exceptionConsumer;
   }
 
-  @Nonnull
+  @NotNull
   public String getName() {
     return name;
   }
@@ -58,7 +58,7 @@ public class BeanPreDestroyEvent extends MaridEvent {
     return bean;
   }
 
-  @Nonnull
+  @NotNull
   public Consumer<Throwable> getExceptionConsumer() {
     return exceptionConsumer;
   }

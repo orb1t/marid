@@ -27,29 +27,29 @@ import org.marid.expression.generic.RefExpression;
 import org.marid.expression.xml.XmlExpression;
 import org.w3c.dom.Element;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 public class RefExpr extends Expr implements RefExpression {
 
   public final StringProperty ref;
 
-  public RefExpr(@Nonnull String ref) {
+  public RefExpr(@NotNull String ref) {
     this.ref = new SimpleStringProperty(ref);
   }
 
-  public RefExpr(@Nonnull Element element) {
+  public RefExpr(@NotNull Element element) {
     super(element);
     this.ref = new SimpleStringProperty(XmlExpression.ref(element));
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public String getReference() {
     return ref.get();
   }
 
   @Override
-  public void writeTo(@Nonnull Element element) {
+  public void writeTo(@NotNull Element element) {
     super.writeTo(element);
     XmlExpression.ref(element, getReference());
   }

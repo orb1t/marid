@@ -24,8 +24,8 @@ package org.marid.expression.generic;
 import org.marid.beans.BeanTypeContext;
 import org.marid.types.Types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -33,17 +33,17 @@ import java.util.stream.Stream;
 
 public interface Expression {
 
-  @Nonnull
+  @NotNull
   List<? extends Expression> getInitializers();
 
-  @Nonnull
-  Type getType(@Nullable Type owner, @Nonnull BeanTypeContext context);
+  @NotNull
+  Type getType(@Nullable Type owner, @NotNull BeanTypeContext context);
 
-  default void resolve(@Nonnull Type type, @Nonnull BeanTypeContext context, @Nonnull BiConsumer<Type, Type> evaluator) {
+  default void resolve(@NotNull Type type, @NotNull BeanTypeContext context, @NotNull BiConsumer<Type, Type> evaluator) {
   }
 
-  @Nonnull
-  default Stream<Class<?>> getTargetClass(@Nullable Type owner, @Nonnull BeanTypeContext context) {
+  @NotNull
+  default Stream<Class<?>> getTargetClass(@Nullable Type owner, @NotNull BeanTypeContext context) {
     return Types.rawClasses(getType(owner, context));
   }
 }

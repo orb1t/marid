@@ -27,18 +27,18 @@ import org.marid.idefx.beans.IdeBean;
 import org.marid.idefx.expression.Expr;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 @Component
 public class BeanActionManager {
 
-  public EventHandler<ActionEvent> editAction(@Nonnull IdeBean bean, @Nonnull Expr expr) {
+  public EventHandler<ActionEvent> editAction(@NotNull IdeBean bean, @NotNull Expr expr) {
     return event -> {
 
     };
   }
 
-  public EventHandler<ActionEvent> initializersEditAction(@Nonnull IdeBean bean, @Nonnull Expr expr) {
+  public EventHandler<ActionEvent> initializersEditAction(@NotNull IdeBean bean, @NotNull Expr expr) {
     return event -> {
 
     };

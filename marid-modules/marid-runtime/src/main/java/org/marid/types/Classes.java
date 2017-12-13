@@ -21,8 +21,8 @@
 
 package org.marid.types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Array;
 import java.lang.reflect.Executable;
@@ -41,9 +41,9 @@ import static java.util.stream.Stream.of;
  */
 public interface Classes {
 
-  static TreeSet<Method> methods(@Nonnull Object bean,
-                                 @Nonnull Predicate<Method> filter,
-                                 @Nonnull Comparator<Method> methodComparator) {
+  static TreeSet<Method> methods(@NotNull Object bean,
+                                 @NotNull Predicate<Method> filter,
+                                 @NotNull Comparator<Method> methodComparator) {
     final TreeSet<Method> methods = new TreeSet<>(methodComparator);
     final Consumer<Class<?>> consumer = c -> of(c.getDeclaredMethods())
         .filter(m -> m.getParameterCount() == 0)
@@ -59,14 +59,14 @@ public interface Classes {
     return methods;
   }
 
-  @Nonnull
-  static Stream<Class<?>> classes(@Nonnull Class<?> type) {
+  @NotNull
+  static Stream<Class<?>> classes(@NotNull Class<?> type) {
     final LinkedHashSet<Class<?>> set = new LinkedHashSet<>();
     addClasses(type, set);
     return set.stream();
   }
 
-  private static void addClasses(@Nonnull Class<?> type, @Nonnull LinkedHashSet<Class<?>> classes) {
+  private static void addClasses(@NotNull Class<?> type, @NotNull LinkedHashSet<Class<?>> classes) {
     if (type.isInterface()) {
       ifAccessible(type, classes::add);
       for (final Class<?> i : type.getInterfaces()) {
@@ -84,7 +84,7 @@ public interface Classes {
     }
   }
 
-  static <T> void ifAccessible(@Nonnull Class<T> type, @Nonnull Consumer<Class<T>> consumer) {
+  static <T> void ifAccessible(@NotNull Class<T> type, @NotNull Consumer<Class<T>> consumer) {
     try {
       MethodHandles.publicLookup().accessClass(type);
       consumer.accept(type);
@@ -93,8 +93,8 @@ public interface Classes {
     }
   }
 
-  @Nonnull
-  static Class<?> wrapper(@Nonnull Class<?> type) {
+  @NotNull
+  static Class<?> wrapper(@NotNull Class<?> type) {
     switch (type.getName()) {
       case "int": return Integer.class;
       case "long": return Long.class;
@@ -109,7 +109,7 @@ public interface Classes {
     }
   }
 
-  static Object value(@Nonnull Class<?> type, @Nullable Object value) {
+  static Object value(@NotNull Class<?> type, @Nullable Object value) {
     if (type.isPrimitive()) {
       if (value == null) {
         switch (type.getName()) {
@@ -140,7 +140,7 @@ public interface Classes {
     }
   }
 
-  static Object[] args(@Nonnull Executable executable, @Nonnull Object[] args) {
+  static Object[] args(@NotNull Executable executable, @NotNull Object[] args) {
     final Class<?>[] types = executable.getParameterTypes();
     final Object[] result = new Object[args.length];
     for (int i = 0; i < types.length; i++) {
@@ -149,8 +149,8 @@ public interface Classes {
     return result;
   }
 
-  @Nonnull
-  static Class<?> loadClass(@Nonnull String name, @Nonnull ClassLoader classLoader) throws ClassNotFoundException {
+  @NotNull
+  static Class<?> loadClass(@NotNull String name, @NotNull ClassLoader classLoader) throws ClassNotFoundException {
     switch (name) {
       case "int": return int.class;
       case "long": return long.class;

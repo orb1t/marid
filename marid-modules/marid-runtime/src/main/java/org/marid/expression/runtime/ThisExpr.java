@@ -25,8 +25,8 @@ import org.marid.expression.generic.ThisExpression;
 import org.marid.runtime.context.BeanContext;
 import org.w3c.dom.Element;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Type;
 
 public final class ThisExpr extends Expr implements ThisExpression {
@@ -39,7 +39,7 @@ public final class ThisExpr extends Expr implements ThisExpression {
   }
 
   @Override
-  protected Object execute(@Nullable Object self, @Nullable Type owner, @Nonnull BeanContext context) {
+  protected Object execute(@Nullable Object self, @Nullable Type owner, @NotNull BeanContext context) {
     return self;
   }
 }

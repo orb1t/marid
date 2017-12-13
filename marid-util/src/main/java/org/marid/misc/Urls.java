@@ -21,7 +21,7 @@
 
 package org.marid.misc;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
@@ -48,8 +48,8 @@ import static org.marid.misc.StringUtils.pathEndsWith;
  */
 public interface Urls {
 
-  @Nonnull
-  static URL url(@Nonnull String url) {
+  @NotNull
+  static URL url(@NotNull String url) {
     try {
       return new URL(url);
     } catch (MalformedURLException x) {
@@ -57,8 +57,8 @@ public interface Urls {
     }
   }
 
-  @Nonnull
-  static URL url(@Nonnull Path path) {
+  @NotNull
+  static URL url(@NotNull Path path) {
     try {
       return path.toUri().toURL();
     } catch (MalformedURLException x) {
@@ -66,8 +66,8 @@ public interface Urls {
     }
   }
 
-  @Nonnull
-  static URI uri(@Nonnull String uri) {
+  @NotNull
+  static URI uri(@NotNull String uri) {
     try {
       return new URI(uri);
     } catch (URISyntaxException x) {
@@ -75,8 +75,8 @@ public interface Urls {
     }
   }
 
-  @Nonnull
-  static String urlEncode(@Nonnull String text) {
+  @NotNull
+  static String urlEncode(@NotNull String text) {
     try {
       return URLEncoder.encode(text, UTF_8.name());
     } catch (UnsupportedEncodingException x) {
@@ -84,8 +84,8 @@ public interface Urls {
     }
   }
 
-  @Nonnull
-  static String urlDecode(@Nonnull String text) {
+  @NotNull
+  static String urlDecode(@NotNull String text) {
     try {
       return URLDecoder.decode(text, UTF_8.name());
     } catch (UnsupportedEncodingException x) {
@@ -93,8 +93,8 @@ public interface Urls {
     }
   }
 
-  @Nonnull
-  static URL[] classpath(@Nonnull Path path, @Nonnull Path... paths) {
+  @NotNull
+  static URL[] classpath(@NotNull Path path, @NotNull Path... paths) {
     final Stream<URL> pathUrls = Stream.of(paths).filter(Files::isDirectory).map(Urls::url);
     try {
       return concat(Files.list(path).filter(pathEndsWith(".jar")).map(Urls::url), pathUrls)
@@ -107,8 +107,8 @@ public interface Urls {
     }
   }
 
-  @Nonnull
-  static SortedSet<Path> jars(@Nonnull Path path) {
+  @NotNull
+  static SortedSet<Path> jars(@NotNull Path path) {
     try {
       try (final Stream<Path> stream = Files.list(path).filter(pathEndsWith(".jar"))) {
         return stream.collect(Collectors.toCollection(TreeSet::new));
@@ -120,8 +120,8 @@ public interface Urls {
     }
   }
 
-  @Nonnull
-  static SortedSet<Path> files(@Nonnull Path path, @Nonnull String ext) {
+  @NotNull
+  static SortedSet<Path> files(@NotNull Path path, @NotNull String ext) {
     try {
       return Files.find(path, 255, (p, a) -> p.getFileName().toString().endsWith("." + ext))
           .collect(Collectors.toCollection(TreeSet::new));
@@ -132,8 +132,8 @@ public interface Urls {
     }
   }
 
-  @Nonnull
-  static Stream<URL> urls(@Nonnull ClassLoader classLoader, @Nonnull String resource) {
+  @NotNull
+  static Stream<URL> urls(@NotNull ClassLoader classLoader, @NotNull String resource) {
     final Stream.Builder<URL> urls = Stream.builder();
     try {
       for (final Enumeration<URL> e = classLoader.getResources(resource); e.hasMoreElements(); ) {
@@ -145,8 +145,8 @@ public interface Urls {
     return urls.build();
   }
 
-  @Nonnull
-  static Stream<String> lines(@Nonnull ClassLoader classLoader, @Nonnull String resource) {
+  @NotNull
+  static Stream<String> lines(@NotNull ClassLoader classLoader, @NotNull String resource) {
     return urls(classLoader, resource)
         .flatMap(url -> {
           try {

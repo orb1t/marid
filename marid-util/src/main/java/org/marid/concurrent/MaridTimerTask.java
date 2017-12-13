@@ -21,7 +21,7 @@
 
 package org.marid.concurrent;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.TimerTask;
 import java.util.function.Consumer;
 
@@ -35,7 +35,7 @@ public final class MaridTimerTask extends TimerTask {
 
   private final Consumer<MaridTimerTask> task;
 
-  public MaridTimerTask(@Nonnull Consumer<MaridTimerTask> task) {
+  public MaridTimerTask(@NotNull Consumer<MaridTimerTask> task) {
     this.task = task;
   }
 

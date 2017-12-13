@@ -26,8 +26,8 @@ import org.marid.jfx.action.SpecialAction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -51,7 +51,7 @@ public class AddDirectoryEditor extends AbstractFileEditor<Path> {
   }
 
   @Override
-  protected void edit(@Nonnull Path file, @Nonnull Path context) {
+  protected void edit(@NotNull Path file, @NotNull Path context) {
     final TextInputDialog dialog = new TextInputDialog();
     dialog.setTitle(s("Add a directory"));
     dialog.setContentText(s("Directory name") + ":");
@@ -67,26 +67,26 @@ public class AddDirectoryEditor extends AbstractFileEditor<Path> {
     }
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public String getName() {
     return "Add a directory";
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public String getIcon() {
     return icon("M_ADD_CIRCLE");
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public String getGroup() {
     return "file";
   }
 
   @Override
-  protected Path editorContext(@Nonnull Path path) {
+  protected Path editorContext(@NotNull Path path) {
     return path;
   }
 

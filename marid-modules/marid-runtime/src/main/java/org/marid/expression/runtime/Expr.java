@@ -27,8 +27,8 @@ import org.marid.function.ToImmutableList;
 import org.marid.runtime.context.BeanContext;
 import org.w3c.dom.Element;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Type;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,7 +37,7 @@ public abstract class Expr implements Expression {
 
   private final List<Expr> initializers;
 
-  public Expr(@Nonnull Element element) {
+  public Expr(@NotNull Element element) {
     initializers = XmlExpression.initializers(element, Expr::of, new ToImmutableList<>());
   }
 
@@ -45,14 +45,14 @@ public abstract class Expr implements Expression {
     initializers = new LinkedList<>();
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public List<Expr> getInitializers() {
     return initializers;
   }
 
   @Nullable
-  public final Object evaluate(@Nullable Object self, @Nullable Type selfType, @Nonnull BeanContext context) {
+  public final Object evaluate(@Nullable Object self, @Nullable Type selfType, @NotNull BeanContext context) {
     final Object v = execute(self, selfType, context);
     final Type newSelf = getType(selfType, context);
     for (final Expr initializer : getInitializers()) {
@@ -61,9 +61,9 @@ public abstract class Expr implements Expression {
     return v;
   }
 
-  protected abstract Object execute(@Nullable Object self, @Nullable Type selfType, @Nonnull BeanContext context);
+  protected abstract Object execute(@Nullable Object self, @Nullable Type selfType, @NotNull BeanContext context);
 
-  public static Expr of(@Nonnull Element element) {
+  public static Expr of(@NotNull Element element) {
     switch (element.getTagName()) {
       case "array": return new ArrayExpr(element);
       case "call": return new CallExpr(element);

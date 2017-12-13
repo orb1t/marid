@@ -26,7 +26,7 @@ import org.marid.expression.runtime.NullExpr;
 import org.marid.function.ToImmutableList;
 import org.w3c.dom.Element;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -39,7 +39,7 @@ public class RuntimeBean implements MaridBean {
   private final Expr factory;
   private final List<RuntimeBean> children;
 
-  private RuntimeBean(RuntimeBean parent, @Nonnull String name, @Nonnull Expr factory, @Nonnull RuntimeBean... children) {
+  private RuntimeBean(RuntimeBean parent, @NotNull String name, @NotNull Expr factory, @NotNull RuntimeBean... children) {
     this.parent = parent;
     this.name = name;
     this.factory = factory;
@@ -48,15 +48,15 @@ public class RuntimeBean implements MaridBean {
         .collect(new ToImmutableList<>());
   }
 
-  public RuntimeBean(@Nonnull RuntimeBean... children) {
+  public RuntimeBean(@NotNull RuntimeBean... children) {
     this("beans", new NullExpr(), children);
   }
 
-  public RuntimeBean(@Nonnull String name, @Nonnull Expr factory, @Nonnull RuntimeBean... children) {
+  public RuntimeBean(@NotNull String name, @NotNull Expr factory, @NotNull RuntimeBean... children) {
     this(null, name, factory, children);
   }
 
-  public RuntimeBean(RuntimeBean parent, @Nonnull Element element) {
+  public RuntimeBean(RuntimeBean parent, @NotNull Element element) {
     this.parent = parent;
     this.name = attribute(element, "name").orElseThrow(() -> new NullPointerException("name"));
     this.factory = element("factory", element).map(Expr::of).orElseGet(NullExpr::new);
@@ -68,19 +68,19 @@ public class RuntimeBean implements MaridBean {
     return parent;
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public String getName() {
     return name;
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public Expr getFactory() {
     return factory;
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public List<RuntimeBean> getChildren() {
     return children;

@@ -26,8 +26,8 @@ import org.marid.ide.project.ProjectManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -45,19 +45,19 @@ public class RemoveProfileEditor extends AbstractFileEditor<Path> {
     this.projectManager = projectManager;
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public String getName() {
     return "Remove profile";
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public String getIcon() {
     return icon("D_FOLDER_REMOVE");
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public String getGroup() {
     return "profile";
@@ -65,12 +65,12 @@ public class RemoveProfileEditor extends AbstractFileEditor<Path> {
 
   @Nullable
   @Override
-  protected Path editorContext(@Nonnull Path path) {
+  protected Path editorContext(@NotNull Path path) {
     return path;
   }
 
   @Override
-  protected void edit(@Nonnull Path path, @Nonnull Path context) {
+  protected void edit(@NotNull Path path, @NotNull Path context) {
     projectManager.getProfiles().stream()
         .filter(p -> p.getName().equals(context.getFileName().toString()))
         .findFirst()

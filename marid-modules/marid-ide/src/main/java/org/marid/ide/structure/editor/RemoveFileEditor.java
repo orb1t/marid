@@ -28,8 +28,8 @@ import org.marid.jfx.action.SpecialAction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
@@ -54,26 +54,26 @@ public class RemoveFileEditor extends AbstractFileEditor<Path> {
     this.removeAction = removeAction;
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public String getName() {
     return "Remove file";
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public String getIcon() {
     return icon("M_REMOVE_CIRCLE");
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public String getGroup() {
     return "file";
   }
 
   @Override
-  protected void edit(@Nonnull Path file, @Nonnull Path path) {
+  protected void edit(@NotNull Path file, @NotNull Path path) {
     try {
       Files.delete(file);
     } catch (Exception x) {
@@ -82,7 +82,7 @@ public class RemoveFileEditor extends AbstractFileEditor<Path> {
   }
 
   @Override
-  protected Path editorContext(@Nonnull Path path) {
+  protected Path editorContext(@NotNull Path path) {
     return path;
   }
 

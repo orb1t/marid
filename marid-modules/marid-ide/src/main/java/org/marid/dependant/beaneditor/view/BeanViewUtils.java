@@ -25,7 +25,7 @@ import javafx.scene.text.Text;
 import org.marid.idefx.expression.*;
 import org.marid.jfx.icons.FontIcons;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,14 +35,14 @@ public class BeanViewUtils {
 
   private static final Pattern QUALIFIED_NAME = compile("((\\w+)[.])*(?<simpleName>\\w+)");
 
-  @Nonnull
-  public static String replaceQualified(@Nonnull String text) {
+  @NotNull
+  public static String replaceQualified(@NotNull String text) {
     final Matcher matcher = QUALIFIED_NAME.matcher(text);
     return matcher.replaceAll(r -> ((Matcher) r).group("simpleName"));
   }
 
-  @Nonnull
-  public static Text icon(@Nonnull Expr expr) {
+  @NotNull
+  public static Text icon(@NotNull Expr expr) {
     if (expr instanceof CallExpr) {
       return FontIcons.glyphIcon("F_CODE");
     } else if (expr instanceof GetExpr) {

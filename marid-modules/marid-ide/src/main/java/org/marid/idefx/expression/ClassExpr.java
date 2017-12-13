@@ -27,29 +27,29 @@ import org.marid.expression.generic.ClassExpression;
 import org.marid.expression.xml.XmlExpression;
 import org.w3c.dom.Element;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 public class ClassExpr extends Expr implements ClassExpression {
 
   public final StringProperty className;
 
-  public ClassExpr(@Nonnull String className) {
+  public ClassExpr(@NotNull String className) {
     this.className = new SimpleStringProperty(className);
   }
 
-  ClassExpr(@Nonnull Element element) {
+  ClassExpr(@NotNull Element element) {
     super(element);
     this.className = new SimpleStringProperty(XmlExpression.className(element));
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public String getClassName() {
     return className.get();
   }
 
   @Override
-  public void writeTo(@Nonnull Element element) {
+  public void writeTo(@NotNull Element element) {
     super.writeTo(element);
     XmlExpression.className(element, getClassName());
   }

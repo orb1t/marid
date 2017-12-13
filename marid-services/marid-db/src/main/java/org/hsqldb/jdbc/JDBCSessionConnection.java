@@ -23,7 +23,7 @@ package org.hsqldb.jdbc;
 
 import org.hsqldb.Database;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.sql.SQLException;
 
 import static java.util.logging.Level.SEVERE;
@@ -34,7 +34,7 @@ import static org.marid.logging.Log.log;
  */
 public class JDBCSessionConnection extends JDBCConnection {
 
-  public JDBCSessionConnection(@Nonnull Database database, @Nonnull String schema) throws SQLException {
+  public JDBCSessionConnection(@NotNull Database database, @NotNull String schema) throws SQLException {
     super(database.getSessionManager().newSysSession());
     setSchema(schema);
   }

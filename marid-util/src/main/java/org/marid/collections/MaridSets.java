@@ -21,7 +21,7 @@
 
 package org.marid.collections;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -29,8 +29,8 @@ import java.util.stream.Stream;
 public interface MaridSets {
 
   @SuppressWarnings("unchecked")
-  @Nonnull
-  static <E> Set<E> add(@Nonnull Set<E> set, @Nonnull E element) {
+  @NotNull
+  static <E> Set<E> add(@NotNull Set<E> set, @NotNull E element) {
     if (set.isEmpty()) {
       return Set.of(element);
     } else if (set.contains(element)) {

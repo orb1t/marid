@@ -21,7 +21,7 @@
 
 package org.marid.db.data;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.beans.ConstructorProperties;
 import java.io.Serializable;
 import java.util.Arrays;
@@ -38,7 +38,7 @@ public final class DataRecord<T extends Serializable> implements Serializable {
   private final T value;
 
   @ConstructorProperties({"tag", "timestamp", "value"})
-  public DataRecord(long tag, long timestamp, @Nonnull T value) {
+  public DataRecord(long tag, long timestamp, @NotNull T value) {
     this.tag = tag;
     this.timestamp = timestamp;
     this.value = value;

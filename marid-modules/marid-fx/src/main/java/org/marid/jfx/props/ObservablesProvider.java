@@ -26,8 +26,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.marid.misc.Calls;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Field;
 import java.util.Comparator;
 import java.util.List;
@@ -38,12 +38,12 @@ import static java.util.stream.Collectors.toCollection;
 
 public interface ObservablesProvider {
 
-  @Nonnull
+  @NotNull
   default Observable[] observables() {
     return ostream().toArray(Observable[]::new);
   }
 
-  @Nonnull
+  @NotNull
   default Stream<Observable> ostream() {
     return Stream.of(getClass().getFields())
         .filter(f -> Observable.class.isAssignableFrom(f.getType()))
@@ -51,27 +51,27 @@ public interface ObservablesProvider {
         .map(f -> Calls.call(() -> (Observable) f.get(this)));
   }
 
-  @Nonnull
+  @NotNull
   static <T extends ObservablesProvider> FxObject<T> object() {
     return new FxObject<>(T::observables);
   }
 
-  @Nonnull
+  @NotNull
   static <T extends ObservablesProvider> FxObject<T> object(@Nullable  T value) {
     return new FxObject<>(T::observables, value);
   }
 
-  @Nonnull
+  @NotNull
   static <T extends ObservablesProvider> ObservableList<T> list() {
     return FXCollections.observableArrayList(T::observables);
   }
 
-  @Nonnull
-  static <T extends ObservablesProvider> ObservableList<T> list(@Nonnull List<T> list) {
+  @NotNull
+  static <T extends ObservablesProvider> ObservableList<T> list(@NotNull List<T> list) {
     return FXCollections.observableList(list, T::observables);
   }
 
-  @Nonnull
+  @NotNull
   static <T extends ObservablesProvider> Collector<T, ?, ObservableList<T>> toObservableList() {
     return toCollection(ObservablesProvider::list);
   }

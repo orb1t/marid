@@ -21,7 +21,7 @@
 
 package org.marid.types;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -68,8 +68,8 @@ final class TypeEvaluator implements BiConsumer<Type, Type> {
     }
   }
 
-  @Nonnull
-  Type eval(@Nonnull Type type) {
+  @NotNull
+  Type eval(@NotNull Type type) {
     final LinkedHashMap<TypeVariable<?>, Type> mapping = new LinkedHashMap<>(typeMappings.size());
     typeMappings.forEach((k, v) -> mapping.put(k, v.stream().reduce(Types::nct).orElse(k)));
     return ground(type, mapping);

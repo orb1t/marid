@@ -24,8 +24,8 @@ package org.marid.ide.structure.editor;
 import org.jetbrains.annotations.PropertyKey;
 import org.marid.jfx.action.SpecialAction;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.nio.file.Path;
 
 /**
@@ -34,15 +34,15 @@ import java.nio.file.Path;
 public interface FileEditor {
 
   @Nullable
-  Runnable getEditAction(@Nonnull Path path);
+  Runnable getEditAction(@NotNull Path path);
 
-  @Nonnull
+  @NotNull
   String getName();
 
-  @Nonnull
+  @NotNull
   String getIcon();
 
-  @Nonnull
+  @NotNull
   String getGroup();
 
   @Nullable

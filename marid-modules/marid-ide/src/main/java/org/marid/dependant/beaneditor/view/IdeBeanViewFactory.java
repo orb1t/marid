@@ -36,7 +36,7 @@ import org.marid.runtime.MaridFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Type;
 
 import static org.marid.collections.MaridIterators.forEach;
@@ -53,8 +53,8 @@ public class IdeBeanViewFactory {
     this.actionManager = actionManager;
   }
 
-  @Nonnull
-  public HBox createView(@Nonnull IdeBean bean, @Nonnull Expr expr) {
+  @NotNull
+  public HBox createView(@NotNull IdeBean bean, @NotNull Expr expr) {
     final HBox tf = new HBox();
     tf.setAlignment(Pos.CENTER_LEFT);
     tf.setFillHeight(true);
@@ -64,8 +64,8 @@ public class IdeBeanViewFactory {
     return tf;
   }
 
-  @Nonnull
-  public Label beanLabel(@Nonnull IdeBean bean) {
+  @NotNull
+  public Label beanLabel(@NotNull IdeBean bean) {
     final Label label = new Label();
     label.setText(bean.getName());
     label.setGraphic(bean.icon());
@@ -73,8 +73,8 @@ public class IdeBeanViewFactory {
     return label;
   }
 
-  @Nonnull
-  public Label typeLabel(@Nonnull IdeBean bean, @Nonnull ProjectProfile profile) {
+  @NotNull
+  public Label typeLabel(@NotNull IdeBean bean, @NotNull ProjectProfile profile) {
     final BeanTypeContext typeContext = new IdeBeanContext(bean, profile.getClassLoader());
     final Type type = bean.getFactory().getType(null, typeContext);
     final String typeText = type.getTypeName();
@@ -84,7 +84,7 @@ public class IdeBeanViewFactory {
     return label;
   }
 
-  private void createView(@Nonnull IdeBean bean, @Nonnull Expr expr, @Nonnull HBox tf) {
+  private void createView(@NotNull IdeBean bean, @NotNull Expr expr, @NotNull HBox tf) {
     if (expr instanceof CallExpr) {
       createView(bean, (CallExpr) expr, tf);
     } else if (expr instanceof GetExpr) {
@@ -104,7 +104,7 @@ public class IdeBeanViewFactory {
     }
   }
 
-  private void createView(@Nonnull IdeBean bean, @Nonnull CallExpr expr, @Nonnull HBox tf) {
+  private void createView(@NotNull IdeBean bean, @NotNull CallExpr expr, @NotNull HBox tf) {
     if (!isShort(expr)) {
       createView(bean, expr.getTarget(), tf);
       tf.getChildren().add(new Label("."));
@@ -119,18 +119,18 @@ public class IdeBeanViewFactory {
     tf.getChildren().add(new Label(")"));
   }
 
-  private void createView(@Nonnull IdeBean bean, @Nonnull GetExpr expr, @Nonnull HBox tf) {
+  private void createView(@NotNull IdeBean bean, @NotNull GetExpr expr, @NotNull HBox tf) {
     createView(bean, expr.getTarget(), tf);
     tf.getChildren().add(new Label("." + expr.getField()));
   }
 
-  private void createView(@Nonnull IdeBean bean, @Nonnull SetExpr expr, @Nonnull HBox tf) {
+  private void createView(@NotNull IdeBean bean, @NotNull SetExpr expr, @NotNull HBox tf) {
     createView(bean, expr.getTarget(), tf);
     tf.getChildren().add(new Label("." + expr.getField() + "="));
     createView(bean, expr.getValue(), tf);
   }
 
-  private void createView(@Nonnull IdeBean bean, @Nonnull ArrayExpr expr, @Nonnull HBox tf) {
+  private void createView(@NotNull IdeBean bean, @NotNull ArrayExpr expr, @NotNull HBox tf) {
     tf.getChildren().add(new Label("["));
     forEach(expr.getElements(), (p, e) -> {
       if (p) {
@@ -141,25 +141,25 @@ public class IdeBeanViewFactory {
     tf.getChildren().add(new Label("]"));
   }
 
-  private void createView(@Nonnull ClassExpr expr, @Nonnull HBox tf) {
+  private void createView(@NotNull ClassExpr expr, @NotNull HBox tf) {
     final Label text = new Label(replaceQualified(expr.getClassName()));
     text.setTooltip(new Tooltip(expr.getClassName()));
     tf.getChildren().add(text);
   }
 
-  private void createView(@Nonnull StringExpr expr, @Nonnull HBox tf) {
+  private void createView(@NotNull StringExpr expr, @NotNull HBox tf) {
     tf.getChildren().add(new Label(expr.getValue()));
   }
 
-  private void createView(@Nonnull RefExpr expr, @Nonnull HBox tf) {
+  private void createView(@NotNull RefExpr expr, @NotNull HBox tf) {
     tf.getChildren().add(new Label(expr.getReference()));
   }
 
-  private void createView(@Nonnull NullExpr expr, @Nonnull HBox tf) {
+  private void createView(@NotNull NullExpr expr, @NotNull HBox tf) {
     tf.getChildren().add(new Label(replaceQualified(expr.getType()), glyphIcon("D_NULL")));
   }
 
-  private static boolean isShort(@Nonnull CallExpr expr) {
+  private static boolean isShort(@NotNull CallExpr expr) {
     final Expr t = expr.getTarget();
     return t instanceof ClassExpr && ((ClassExpr) t).getClassName().equals(MaridFactory.class.getName());
   }

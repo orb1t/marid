@@ -31,7 +31,7 @@ import org.marid.idefx.visitor.Visitor;
 import org.marid.jfx.props.FxObject;
 import org.w3c.dom.Element;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 import static java.util.stream.Collectors.joining;
@@ -45,14 +45,14 @@ public class CallExpr extends Expr implements CallExpression {
   public final StringProperty method;
   public final ObservableList<Expr> args;
 
-  public CallExpr(@Nonnull Expr target, @Nonnull String method, @Nonnull Expr... args) {
+  public CallExpr(@NotNull Expr target, @NotNull String method, @NotNull Expr... args) {
     this.target = new FxObject<>(Expr::observables, target);
     this.method = new SimpleStringProperty(method);
     this.args = observableArrayList(Expr::observables);
     this.args.setAll(args);
   }
 
-  CallExpr(@Nonnull Element element) {
+  CallExpr(@NotNull Element element) {
     super(element);
     target = object(XmlExpression.target(element, Expr::of, ClassExpr::new, RefExpr::new));
     method = new SimpleStringProperty(XmlExpression.method(element));
@@ -60,33 +60,33 @@ public class CallExpr extends Expr implements CallExpression {
   }
 
   @Override
-  Expr[] visit(@Nonnull IdeBean bean, @Nonnull Expr[] parents, @Nonnull Visitor visitor) {
+  Expr[] visit(@NotNull IdeBean bean, @NotNull Expr[] parents, @NotNull Visitor visitor) {
     final Expr[] newParents = super.visit(bean, parents, visitor);
     visitor.visit(bean, newParents, getTarget());
     args.forEach(e -> visitor.visit(bean, newParents, e));
     return newParents;
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public Expr getTarget() {
     return target.get();
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public String getMethod() {
     return method.get();
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public List<Expr> getArgs() {
     return args;
   }
 
   @Override
-  public void writeTo(@Nonnull Element element) {
+  public void writeTo(@NotNull Element element) {
     super.writeTo(element);
     XmlExpression.target(element, getTarget());
     XmlExpression.method(element, getMethod());

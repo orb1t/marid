@@ -21,16 +21,16 @@
 
 package org.marid.types;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Type;
 
 public abstract class Invokable<D extends Executable> {
 
-  @Nonnull
+  @NotNull
   private final D executable;
 
-  Invokable(@Nonnull D executable) {
+  Invokable(@NotNull D executable) {
     this.executable = executable;
   }
 
@@ -38,21 +38,21 @@ public abstract class Invokable<D extends Executable> {
 
   public abstract boolean isStatic();
 
-  @Nonnull
+  @NotNull
   public D getExecutable() {
     return executable;
   }
 
-  @Nonnull
+  @NotNull
   public abstract Type getReturnType();
 
-  @Nonnull
+  @NotNull
   public abstract Type[] getParameterTypes();
 
-  @Nonnull
+  @NotNull
   public abstract Class<?>[] getParameterClasses();
 
-  @Nonnull
+  @NotNull
   public abstract Class<?> getReturnClass();
 
   public int getParameterCount() {

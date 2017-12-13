@@ -23,7 +23,7 @@ package org.marid.idefx.beans;
 
 import org.marid.beans.BeanTypeContext;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,19 +45,19 @@ public class IdeBeanContext extends BeanTypeContext {
   }
 
   @Override
-  public <E extends Throwable> void throwError(@Nonnull E exception) throws E {
+  public <E extends Throwable> void throwError(@NotNull E exception) throws E {
     errors.add(exception);
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public IdeBean getBean() {
     return bean;
   }
 
-  @Nonnull
+  @NotNull
   @Override
-  public Type getBeanType(@Nonnull String name) {
+  public Type getBeanType(@NotNull String name) {
     return bean.matchingCandidates()
         .filter(b -> b.getName().equals(name))
         .findFirst()

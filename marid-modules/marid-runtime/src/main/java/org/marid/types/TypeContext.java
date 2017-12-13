@@ -21,24 +21,24 @@
 
 package org.marid.types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Type;
 import java.util.Optional;
 
 public class TypeContext {
 
-  public <E extends Throwable> void throwError(@Nonnull E exception) throws E {
+  public <E extends Throwable> void throwError(@NotNull E exception) throws E {
     throw exception;
   }
 
-  @Nonnull
+  @NotNull
   public ClassLoader getClassLoader() {
     return Thread.currentThread().getContextClassLoader();
   }
 
-  @Nonnull
-  public Type resolve(@Nullable Type owner, @Nonnull Type type) {
+  @NotNull
+  public Type resolve(@Nullable Type owner, @NotNull Type type) {
     if (owner == null) {
       return type;
     } else {
@@ -46,8 +46,8 @@ public class TypeContext {
     }
   }
 
-  @Nonnull
-  public Optional<Class<?>> getClass(@Nonnull String name) {
+  @NotNull
+  public Optional<Class<?>> getClass(@NotNull String name) {
     try {
       return Optional.of(Classes.loadClass(name, getClassLoader()));
     } catch (ClassNotFoundException x) {

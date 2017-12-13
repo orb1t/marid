@@ -21,12 +21,12 @@
 
 package org.marid.idefx.beans;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.NoSuchElementException;
 
 public interface BeanUtils {
 
-  static IdeBean find(@Nonnull IdeBean root, @Nonnull String name) {
+  static IdeBean find(@NotNull IdeBean root, @NotNull String name) {
     return (IdeBean) root.descendants()
         .filter(b -> name.equals(b.getName()))
         .findFirst()

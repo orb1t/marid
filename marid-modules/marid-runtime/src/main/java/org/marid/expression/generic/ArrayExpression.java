@@ -21,12 +21,12 @@
 
 package org.marid.expression.generic;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.marid.beans.BeanTypeContext;
 import org.marid.types.MaridArrayType;
 import org.marid.types.Types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.lang.reflect.Type;
 import java.util.List;
 
@@ -34,12 +34,12 @@ import static java.lang.reflect.Array.newInstance;
 
 public interface ArrayExpression extends Expression {
 
-  @Nonnull
+  @NotNull
   List<? extends Expression> getElements();
 
-  @Nonnull
+  @NotNull
   @Override
-  default Type getType(@Nullable Type owner, @Nonnull BeanTypeContext context) {
+  default Type getType(@Nullable Type owner, @NotNull BeanTypeContext context) {
     return getElements().stream()
         .map(e -> e.getType(owner, context))
         .distinct()

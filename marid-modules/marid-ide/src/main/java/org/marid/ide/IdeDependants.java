@@ -40,7 +40,7 @@ import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -146,7 +146,7 @@ class Listener extends WeakReference<GenericApplicationContext> implements Appli
   }
 
   @Override
-  public void onApplicationEvent(@Nonnull ApplicationEvent event) {
+  public void onApplicationEvent(@NotNull ApplicationEvent event) {
     final GenericApplicationContext context = get();
     if (context == null || !context.isActive()) {
       close();

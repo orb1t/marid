@@ -26,30 +26,30 @@ import org.marid.expression.xml.XmlExpression;
 import org.marid.runtime.context.BeanContext;
 import org.w3c.dom.Element;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Type;
 
 public final class StringExpr extends Expr implements StringExpression {
 
-  @Nonnull
+  @NotNull
   private final String value;
 
-  public StringExpr(@Nonnull String value) {
+  public StringExpr(@NotNull String value) {
     this.value = value;
   }
 
-  StringExpr(@Nonnull Element element) {
+  StringExpr(@NotNull Element element) {
     super(element);
     value = XmlExpression.string(element);
   }
 
   @Override
-  protected Object execute(@Nullable Object self, @Nullable Type owner, @Nonnull BeanContext context) {
+  protected Object execute(@Nullable Object self, @Nullable Type owner, @NotNull BeanContext context) {
     return context.resolvePlaceholders(getValue());
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public String getValue() {
     return value;

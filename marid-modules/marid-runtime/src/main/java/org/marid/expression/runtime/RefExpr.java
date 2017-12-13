@@ -26,31 +26,31 @@ import org.marid.expression.xml.XmlExpression;
 import org.marid.runtime.context.BeanContext;
 import org.w3c.dom.Element;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Type;
 
 public final class RefExpr extends Expr implements RefExpression {
 
-  @Nonnull
+  @NotNull
   private final String reference;
 
-  public RefExpr(@Nonnull String reference) {
+  public RefExpr(@NotNull String reference) {
     this.reference = reference;
   }
 
-  RefExpr(@Nonnull Element element) {
+  RefExpr(@NotNull Element element) {
     super(element);
     reference = XmlExpression.ref(element);
   }
 
   @Override
-  protected Object execute(@Nullable Object self, @Nullable Type owner, @Nonnull BeanContext context) {
+  protected Object execute(@Nullable Object self, @Nullable Type owner, @NotNull BeanContext context) {
     return context.getBean(getReference());
   }
 
   @Override
-  @Nonnull
+  @NotNull
   public String getReference() {
     return reference;
   }

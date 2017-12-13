@@ -21,26 +21,26 @@
 
 package org.marid.types;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 
 public final class InvokableMethod extends Invokable<Method> {
 
-  @Nonnull
+  @NotNull
   private final Type returnType;
 
-  @Nonnull
+  @NotNull
   private final Class<?> returnClass;
 
-  @Nonnull
+  @NotNull
   private final Type[] parameterTypes;
 
-  @Nonnull
+  @NotNull
   private final Class<?>[] parameterClasses;
 
-  public InvokableMethod(@Nonnull Method executable) {
+  public InvokableMethod(@NotNull Method executable) {
     super(executable);
     returnType = executable.getGenericReturnType();
     returnClass = executable.getReturnType();
@@ -54,13 +54,13 @@ public final class InvokableMethod extends Invokable<Method> {
   }
 
   @Override
-  @Nonnull
+  @NotNull
   public Type getReturnType() {
     return returnType;
   }
 
   @Override
-  @Nonnull
+  @NotNull
   public Type[] getParameterTypes() {
     return parameterTypes;
   }
@@ -71,13 +71,13 @@ public final class InvokableMethod extends Invokable<Method> {
   }
 
   @Override
-  @Nonnull
+  @NotNull
   public Class<?>[] getParameterClasses() {
     return parameterClasses;
   }
 
   @Override
-  @Nonnull
+  @NotNull
   public Class<?> getReturnClass() {
     return returnClass;
   }

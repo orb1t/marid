@@ -37,8 +37,8 @@ import org.marid.jfx.props.FxObject;
 import org.marid.jfx.props.ObservablesProvider;
 import org.w3c.dom.Element;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import javax.xml.transform.stream.StreamResult;
 import java.io.Writer;
 import java.nio.file.Path;
@@ -57,7 +57,7 @@ public class IdeBean implements MaridBean, ObservablesProvider {
   public final FxObject<Expr> factory;
   public final ObservableList<IdeBean> children;
 
-  public IdeBean(@Nullable IdeBean parent, @Nonnull String name, @Nonnull Expr factory) {
+  public IdeBean(@Nullable IdeBean parent, @NotNull String name, @NotNull Expr factory) {
     this.parent = parent;
     this.name = new SimpleStringProperty(name);
     this.factory = object(factory);
@@ -68,14 +68,14 @@ public class IdeBean implements MaridBean, ObservablesProvider {
     this(null, "beans", new NullExpr());
   }
 
-  public IdeBean(@Nullable IdeBean parent, @Nonnull Element element) {
+  public IdeBean(@Nullable IdeBean parent, @NotNull Element element) {
     this.parent = parent;
     this.name = new SimpleStringProperty(attribute(element, "name").orElse(""));
     this.factory = object(element("factory", element).map(Expr::of).orElseGet(NullExpr::new));
     this.children = elements(element, "bean").map(e -> new IdeBean(this, e)).collect(toObservableList());
   }
 
-  public IdeBean(@Nonnull Element element) {
+  public IdeBean(@NotNull Element element) {
     this(null, element);
   }
 
@@ -84,36 +84,36 @@ public class IdeBean implements MaridBean, ObservablesProvider {
     return parent;
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public String getName() {
     return name.get();
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public Expr getFactory() {
     return factory.get();
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public List<IdeBean> getChildren() {
     return children;
   }
 
-  public void visit(@Nonnull Visitor visitor) {
+  public void visit(@NotNull Visitor visitor) {
     visitor.visit(this, new Expr[0], getFactory());
   }
 
-  public void visitDescendants(@Nonnull BeanVisitor visitor) {
+  public void visitDescendants(@NotNull BeanVisitor visitor) {
     children.forEach(b -> {
       visitor.visit(b);
       b.visitDescendants(visitor);
     });
   }
 
-  public void visitSiblings(@Nonnull BeanVisitor visitor) {
+  public void visitSiblings(@NotNull BeanVisitor visitor) {
     if (parent != null) {
       parent.children.forEach(b -> {
         if (b != this) {
@@ -123,7 +123,7 @@ public class IdeBean implements MaridBean, ObservablesProvider {
     }
   }
 
-  public void visitDependants(@Nonnull BeanVisitor visitor) {
+  public void visitDependants(@NotNull BeanVisitor visitor) {
     visitDescendants(visitor);
     visitSiblings(b -> {
       visitor.visit(b);
@@ -132,7 +132,7 @@ public class IdeBean implements MaridBean, ObservablesProvider {
   }
 
   @SafeVarargs
-  public final IdeBean add(@Nonnull String name, @Nonnull Expr factory, @Nonnull Consumer<IdeBean>... consumers) {
+  public final IdeBean add(@NotNull String name, @NotNull Expr factory, @NotNull Consumer<IdeBean>... consumers) {
     final IdeBean child = new IdeBean(this, name, factory);
     children.add(child);
     for (final Consumer<IdeBean> consumer : consumers) {
@@ -141,17 +141,17 @@ public class IdeBean implements MaridBean, ObservablesProvider {
     return this;
   }
 
-  public void writeTo(@Nonnull Element element) {
+  public void writeTo(@NotNull Element element) {
     element.setAttribute("name", getName());
     create(element, "factory", f -> create(f, getFactory().getTag(), getFactory()::writeTo));
     children.forEach(c -> create(element, "bean", c::writeTo));
   }
 
-  public void save(@Nonnull Writer writer) {
+  public void save(@NotNull Writer writer) {
     writeFormatted("bean", this::writeTo, new StreamResult(writer));
   }
 
-  public void save(@Nonnull Path file) {
+  public void save(@NotNull Path file) {
     writeFormatted("bean", this::writeTo, file);
   }
 

@@ -26,13 +26,13 @@ import javafx.event.Event;
 import javafx.scene.control.TreeItem;
 import org.marid.jfx.track.Tracks;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 import static java.util.stream.Collectors.toList;
 
 public class IdeBeanItem extends TreeItem<IdeBean> {
 
-  public IdeBeanItem(@Nonnull IdeBean bean) {
+  public IdeBeanItem(@NotNull IdeBean bean) {
     super(bean);
 
     final ObservableList<TreeItem<IdeBean>> children = getChildren();

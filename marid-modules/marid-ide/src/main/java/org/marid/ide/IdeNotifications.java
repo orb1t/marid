@@ -34,8 +34,8 @@ import org.intellij.lang.annotations.MagicConstant;
 import org.marid.jfx.icons.FontIcons;
 import org.marid.misc.StringUtils;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -52,43 +52,43 @@ import static org.marid.logging.Log.log;
  */
 public class IdeNotifications {
 
-  public static void n(@Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
-                       @Nonnull String message,
-                       @Nonnull Object... args) {
+  public static void n(@NotNull @MagicConstant(valuesFromClass = Level.class) Level level,
+                       @NotNull String message,
+                       @NotNull Object... args) {
     log(4, level, message, null, args);
     n0(level, message, null, null, args);
   }
 
-  public static void n(@Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
-                       @Nonnull String message,
+  public static void n(@NotNull @MagicConstant(valuesFromClass = Level.class) Level level,
+                       @NotNull String message,
                        @Nullable Parent details,
-                       @Nonnull Object... args) {
+                       @NotNull Object... args) {
     log(4, level, message, null, args);
     n0(level, message, details, null, args);
   }
 
-  public static void n(@Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
-                       @Nonnull String message,
+  public static void n(@NotNull @MagicConstant(valuesFromClass = Level.class) Level level,
+                       @NotNull String message,
                        @Nullable Throwable thrown,
-                       @Nonnull Object... args) {
+                       @NotNull Object... args) {
     log(4, level, message, thrown, args);
     n0(level, message, null, thrown, args);
   }
 
-  public static void n(@Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
-                       @Nonnull String message,
+  public static void n(@NotNull @MagicConstant(valuesFromClass = Level.class) Level level,
+                       @NotNull String message,
                        @Nullable Parent details,
                        @Nullable Throwable thrown,
-                       @Nonnull Object... args) {
+                       @NotNull Object... args) {
     log(4, level, message, thrown, args);
     n0(level, message, details, thrown, args);
   }
 
-  private static void n0(@Nonnull @MagicConstant(valuesFromClass = Level.class) Level level,
-                         @Nonnull String message,
+  private static void n0(@NotNull @MagicConstant(valuesFromClass = Level.class) Level level,
+                         @NotNull String message,
                          @Nullable Parent details,
                          @Nullable Throwable thrown,
-                         @Nonnull Object... args) {
+                         @NotNull Object... args) {
     final String text = m(Locale.getDefault(), message, args);
     final List<Action> actions = new ArrayList<>();
     if (details != null) {

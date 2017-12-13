@@ -23,23 +23,23 @@ package org.marid.expression.generic;
 
 import org.marid.beans.BeanTypeContext;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.stream.Stream;
 
 public interface GetExpression extends Expression {
 
-  @Nonnull
+  @NotNull
   Expression getTarget();
 
-  @Nonnull
+  @NotNull
   String getField();
 
-  @Nonnull
+  @NotNull
   @Override
-  default Type getType(@Nullable Type owner, @Nonnull BeanTypeContext context) {
+  default Type getType(@Nullable Type owner, @NotNull BeanTypeContext context) {
     return getTarget().getTargetClass(owner, context)
         .flatMap(c -> Stream.of(c.getFields()))
         .filter(f -> f.getName().equals(getField()))

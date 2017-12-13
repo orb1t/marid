@@ -23,9 +23,9 @@ package org.marid;
 
 import org.w3c.dom.Element;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 public interface XmlWritable {
 
-  void writeTo(@Nonnull Element element);
+  void writeTo(@NotNull Element element);
 }

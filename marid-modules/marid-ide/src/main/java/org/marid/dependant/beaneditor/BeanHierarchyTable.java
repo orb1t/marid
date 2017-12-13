@@ -43,7 +43,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -55,7 +55,7 @@ import static org.marid.jfx.LocalizedStrings.ls;
 public class BeanHierarchyTable extends TreeTableView<IdeBean> {
 
   @Autowired
-  public BeanHierarchyTable(@Nonnull IdeBean root) {
+  public BeanHierarchyTable(@NotNull IdeBean root) {
     super(new IdeBeanItem(root));
     setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
     getRoot().setExpanded(true);

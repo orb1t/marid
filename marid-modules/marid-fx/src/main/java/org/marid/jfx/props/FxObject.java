@@ -26,19 +26,19 @@ import javafx.beans.WeakInvalidationListener;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.util.Callback;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class FxObject<T> extends SimpleObjectProperty<T> {
 
   private final WeakInvalidationListener listener = new WeakInvalidationListener(o -> fireValueChangedEvent());
 
-  public FxObject(@Nonnull Callback<T, Observable[]> observables, @Nullable T value) {
+  public FxObject(@NotNull Callback<T, Observable[]> observables, @Nullable T value) {
     this(observables);
     set(value);
   }
 
-  public FxObject(@Nonnull Callback<T, Observable[]> observables) {
+  public FxObject(@NotNull Callback<T, Observable[]> observables) {
     addListener((o, oV, nV) -> {
       if (oV != null) {
         for (final Observable observable : observables.call(oV)) {

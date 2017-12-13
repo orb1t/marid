@@ -23,28 +23,28 @@ package org.marid.runtime.event;
 
 import org.marid.runtime.context.MaridRuntime;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 public final class ContextFailEvent extends MaridEvent {
 
-  @Nonnull
+  @NotNull
   private final Throwable cause;
 
-  @Nonnull
+  @NotNull
   private final String beanName;
 
-  public ContextFailEvent(@Nonnull MaridRuntime context, @Nonnull String beanName, @Nonnull Throwable cause) {
+  public ContextFailEvent(@NotNull MaridRuntime context, @NotNull String beanName, @NotNull Throwable cause) {
     super(context);
     this.beanName = beanName;
     this.cause = cause;
   }
 
-  @Nonnull
+  @NotNull
   public String getBeanName() {
     return beanName;
   }
 
-  @Nonnull
+  @NotNull
   public Throwable getCause() {
     return cause;
   }

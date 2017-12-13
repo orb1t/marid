@@ -21,7 +21,7 @@
 
 package org.marid.idelib.util;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Map;
@@ -33,16 +33,16 @@ import static java.util.Collections.emptySet;
 
 public class ClassTree {
 
-  @Nonnull
+  @NotNull
   public final String name;
 
-  @Nonnull
+  @NotNull
   public final Class<?>[] classes;
 
-  @Nonnull
+  @NotNull
   public final ClassTree[] children;
 
-  private ClassTree(@Nonnull String prefix, @Nonnull Map<String, Set<Class<?>>> classes) {
+  private ClassTree(@NotNull String prefix, @NotNull Map<String, Set<Class<?>>> classes) {
     this.name = prefix;
     this.classes = classes.getOrDefault(prefix, emptySet()).stream()
         .sorted(Comparator.comparing(Class::getName))
@@ -60,7 +60,7 @@ public class ClassTree {
         .toArray(ClassTree[]::new);
   }
 
-  public ClassTree(@Nonnull Collection<Class<?>> classes) {
+  public ClassTree(@NotNull Collection<Class<?>> classes) {
     this("", groupedClasses(classes));
   }
 
@@ -85,8 +85,8 @@ public class ClassTree {
     }
   }
 
-  @Nonnull
-  private static Map<String, Set<Class<?>>> groupedClasses(@Nonnull Collection<Class<?>> classes) {
+  @NotNull
+  private static Map<String, Set<Class<?>>> groupedClasses(@NotNull Collection<Class<?>> classes) {
     return classes.stream()
         .filter(c -> c.getPackage() != null)
         .collect(Collectors.groupingBy(c -> c.getPackage().getName(), Collectors.toSet()));

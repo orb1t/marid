@@ -21,7 +21,7 @@
 
 package org.marid.misc;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author Dmitry Ovchinnikov.

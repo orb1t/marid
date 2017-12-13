@@ -33,7 +33,7 @@ import org.marid.jfx.props.ObservablesProvider;
 import org.marid.xml.Tagged;
 import org.w3c.dom.Element;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -47,35 +47,35 @@ public abstract class Expr implements Expression, ObservablesProvider, Tagged, X
     initializers = ObservablesProvider.list();
   }
 
-  Expr(@Nonnull Element element) {
+  Expr(@NotNull Element element) {
     initializers = XmlExpression.initializers(element, Expr::of, ObservablesProvider.toObservableList());
   }
 
-  public final void visit(@Nonnull IdeBean bean, @Nonnull Visitor visitor) {
+  public final void visit(@NotNull IdeBean bean, @NotNull Visitor visitor) {
     final Expr[] parents = {};
     visit(bean, parents, visitor);
   }
 
-  Expr[] visit(@Nonnull IdeBean bean, @Nonnull Expr[] parents, @Nonnull Visitor visitor) {
+  Expr[] visit(@NotNull IdeBean bean, @NotNull Expr[] parents, @NotNull Visitor visitor) {
     final Expr[] newParents = ArrayUtils.add(parents, this);
     initializers.forEach(e -> visitor.visit(bean, newParents, e));
     return newParents;
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public ObservableList<Expr> getInitializers() {
     return initializers;
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public String getTag() {
     return getClass().getSimpleName().replace("Expr", "").toLowerCase();
   }
 
   @Override
-  public void writeTo(@Nonnull Element element) {
+  public void writeTo(@NotNull Element element) {
     XmlExpression.initializers(element, getInitializers());
   }
 
@@ -95,7 +95,7 @@ public abstract class Expr implements Expression, ObservablesProvider, Tagged, X
         && deepEquals(stream().toArray(), ((Expr) obj).stream().toArray());
   }
 
-  public static Expr of(@Nonnull Element element) {
+  public static Expr of(@NotNull Element element) {
     switch (element.getTagName()) {
       case "array": return new ArrayExpr(element);
       case "class": return new ClassExpr(element);

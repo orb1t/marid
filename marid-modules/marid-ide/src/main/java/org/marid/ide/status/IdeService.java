@@ -42,7 +42,7 @@ import org.controlsfx.control.PopOver.ArrowLocation;
 import org.marid.jfx.icons.FontIcons;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.time.Duration;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -165,7 +165,7 @@ public abstract class IdeService<V extends Node> extends Service<Duration> {
 
     protected abstract void execute() throws Exception;
 
-    @Nonnull
+    @NotNull
     protected abstract V createGraphic();
 
     protected ContextMenu contextMenu() {

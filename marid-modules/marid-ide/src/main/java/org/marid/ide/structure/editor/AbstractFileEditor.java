@@ -21,8 +21,8 @@
 
 package org.marid.ide.structure.editor;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 
@@ -35,18 +35,18 @@ public abstract class AbstractFileEditor<T> implements FileEditor {
 
   private final PathMatcher pathMatcher;
 
-  public AbstractFileEditor(@Nonnull PathMatcher... pathMatchers) {
+  public AbstractFileEditor(@NotNull PathMatcher... pathMatchers) {
     pathMatcher = of(pathMatchers).reduce((m1, m2) -> p -> m1.matches(p) || m2.matches(p)).orElse(p -> true);
   }
 
   @Nullable
-  protected abstract T editorContext(@Nonnull Path path);
+  protected abstract T editorContext(@NotNull Path path);
 
-  protected abstract void edit(@Nonnull Path path, @Nonnull T context);
+  protected abstract void edit(@NotNull Path path, @NotNull T context);
 
   @Nullable
   @Override
-  public Runnable getEditAction(@Nonnull Path path) {
+  public Runnable getEditAction(@NotNull Path path) {
     if (!pathMatcher.matches(path)) {
       return null;
     } else {

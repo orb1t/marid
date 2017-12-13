@@ -23,15 +23,15 @@ package org.marid.expression.generic;
 
 import org.marid.beans.BeanTypeContext;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Type;
 
 public interface ThisExpression extends Expression {
 
-  @Nonnull
+  @NotNull
   @Override
-  default Type getType(@Nullable Type owner, @Nonnull BeanTypeContext context) {
+  default Type getType(@Nullable Type owner, @NotNull BeanTypeContext context) {
     return owner == null ? void.class : owner;
   }
 }

@@ -28,8 +28,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,7 +42,7 @@ public class WindowAndDialogPostProcessor implements BeanPostProcessor {
   private final List<Window> windows = new ArrayList<>();
   private final AnnotationConfigApplicationContext context;
 
-  public WindowAndDialogPostProcessor(@Nonnull AnnotationConfigApplicationContext context) {
+  public WindowAndDialogPostProcessor(@NotNull AnnotationConfigApplicationContext context) {
     this.context = context;
   }
 

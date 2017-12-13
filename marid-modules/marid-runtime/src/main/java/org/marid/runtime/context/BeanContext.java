@@ -27,8 +27,8 @@ import org.marid.runtime.event.*;
 import org.marid.runtime.exception.MaridBeanNotFoundException;
 import org.marid.beans.BeanTypeContext;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Type;
 import java.util.Deque;
 import java.util.HashSet;
@@ -50,7 +50,7 @@ public final class BeanContext extends BeanTypeContext implements MaridRuntime, 
   private final ConcurrentLinkedDeque<BeanContext> children = new ConcurrentLinkedDeque<>();
   private final HashSet<MaridBean> processing = new HashSet<>();
 
-  public BeanContext(@Nullable BeanContext parent, @Nonnull BeanConfiguration configuration, @Nonnull RuntimeBean bean) {
+  public BeanContext(@Nullable BeanContext parent, @NotNull BeanConfiguration configuration, @NotNull RuntimeBean bean) {
     this.parent = parent;
     this.configuration = configuration;
     this.bean = bean;
@@ -147,14 +147,14 @@ public final class BeanContext extends BeanTypeContext implements MaridRuntime, 
     return configuration.getPlaceholderResolver().getProperties();
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public RuntimeBean getBean() {
     return bean;
   }
 
-  @Nonnull
-  public Type getBeanType(@Nonnull String name) {
+  @NotNull
+  public Type getBeanType(@NotNull String name) {
     final BeanContext context = getContext(name);
     return context.getBean().getFactory().getType(null, context);
   }
@@ -206,7 +206,7 @@ public final class BeanContext extends BeanTypeContext implements MaridRuntime, 
     return children.stream().flatMap(e -> concat(of(e), e.children()));
   }
 
-  public Object findBean(@Nonnull String name) {
+  public Object findBean(@NotNull String name) {
     return children()
         .filter(e -> e.bean.getName().equals(name))
         .findFirst()

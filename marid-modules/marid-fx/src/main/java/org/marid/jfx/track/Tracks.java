@@ -32,7 +32,7 @@ import javafx.scene.control.Control;
 import javafx.scene.control.ScrollToEvent;
 import javafx.scene.control.SelectionModel;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.lang.ref.Cleaner;
 
 /**
@@ -67,17 +67,17 @@ public interface Tracks {
     });
   }
 
-  static <E> void addListener(@Nonnull Object base, @Nonnull ObservableValue<E> value, @Nonnull ChangeListener<E> l) {
+  static <E> void addListener(@NotNull Object base, @NotNull ObservableValue<E> value, @NotNull ChangeListener<E> l) {
     value.addListener(l);
     CLEANER.register(base, () -> Platform.runLater(() -> value.removeListener(l)));
   }
 
-  static void addListener(@Nonnull Object base, @Nonnull Observable observable, @Nonnull InvalidationListener l) {
+  static void addListener(@NotNull Object base, @NotNull Observable observable, @NotNull InvalidationListener l) {
     observable.addListener(l);
     CLEANER.register(base, () -> Platform.runLater(() -> observable.removeListener(l)));
   }
 
-  static <E> void addListListener(@Nonnull Object base, @Nonnull ObservableList<E> list, @Nonnull ListChangeListener<E> l) {
+  static <E> void addListListener(@NotNull Object base, @NotNull ObservableList<E> list, @NotNull ListChangeListener<E> l) {
     list.addListener(l);
     CLEANER.register(base, () -> Platform.runLater(() -> list.removeListener(l)));
   }

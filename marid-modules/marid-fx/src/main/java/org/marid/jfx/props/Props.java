@@ -26,7 +26,7 @@ import javafx.beans.value.WritableObjectValue;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.function.*;
 import java.util.prefs.Preferences;
 
@@ -63,7 +63,7 @@ public interface Props {
     return new WritableValueImpl<>(consumer, supplier);
   }
 
-  static WritableObjectValue<String> string(@Nonnull Preferences node, @Nonnull String key, String defaultValue) {
+  static WritableObjectValue<String> string(@NotNull Preferences node, @NotNull String key, String defaultValue) {
     return value(() -> node.get(key, defaultValue), v -> {
       if (v == null || v.isEmpty()) {
         node.remove(key);

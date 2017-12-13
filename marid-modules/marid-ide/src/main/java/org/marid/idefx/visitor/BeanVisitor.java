@@ -23,9 +23,9 @@ package org.marid.idefx.visitor;
 
 import org.marid.idefx.beans.IdeBean;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 public interface BeanVisitor {
 
-  void visit(@Nonnull IdeBean bean);
+  void visit(@NotNull IdeBean bean);
 }

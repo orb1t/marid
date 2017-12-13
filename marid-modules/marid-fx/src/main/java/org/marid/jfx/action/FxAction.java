@@ -41,7 +41,7 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.text.Text;
 import org.jetbrains.annotations.PropertyKey;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -203,7 +203,7 @@ public class FxAction {
     return createObjectBinding(() -> ofNullable(getIcon()).map(i -> glyphIcon(i, size)).orElse(null), icon);
   }
 
-  public static MenuItem[] grouped(@Nonnull ObservableList<MenuItem> list, @Nonnull Collection<FxAction> actions) {
+  public static MenuItem[] grouped(@NotNull ObservableList<MenuItem> list, @NotNull Collection<FxAction> actions) {
     final Map<String, List<FxAction>> map = actions.stream()
         .collect(Collectors.groupingBy(a -> a.group, TreeMap::new, toList()));
     return map.values().stream()
@@ -222,7 +222,7 @@ public class FxAction {
     return contextMenu;
   }
 
-  public MenuItem menuItem(@Nonnull ObservableList<MenuItem> list) {
+  public MenuItem menuItem(@NotNull ObservableList<MenuItem> list) {
     final MenuItem item;
     if (selected != null) {
       final CheckMenuItem checkMenuItem = new CheckMenuItem();
@@ -258,7 +258,7 @@ public class FxAction {
     return item;
   }
 
-  public ButtonBase button(@Nonnull ObservableList<Node> nodes) {
+  public ButtonBase button(@NotNull ObservableList<Node> nodes) {
     final ButtonBase button;
 
     if (selected != null) {

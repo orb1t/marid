@@ -25,8 +25,6 @@ import org.jetbrains.annotations.NotNull;
 import org.marid.misc.Casts;
 import org.springframework.core.ResolvableType;
 
-import javax.annotation.Nonnull;
-
 /**
  * @author Dmitry Ovchinnikov.
  * @since 0.9
@@ -34,16 +32,13 @@ import javax.annotation.Nonnull;
 public abstract class ModbusCodec<T> {
 
   @NotNull
-  @Nonnull
   public abstract String getName();
 
   @NotNull
-  @Nonnull
-  public abstract byte[] encode(@Nonnull T value);
+  public abstract byte[] encode(@NotNull T value);
 
   @NotNull
-  @Nonnull
-  public abstract T decode(@Nonnull byte[] value);
+  public abstract T decode(@NotNull byte[] value);
 
   public abstract int getSize();
 

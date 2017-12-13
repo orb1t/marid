@@ -26,7 +26,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.input.KeyCombination;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 import static org.marid.jfx.LocalizedStrings.ls;
 
@@ -40,13 +40,13 @@ public class SpecialAction extends FxAction {
   final String icon;
   final String description;
 
-  public SpecialAction(@Nonnull String toolbarGroup,
-                       @Nonnull String group,
-                       @Nonnull String menu,
-                       @Nonnull String text,
-                       @Nonnull KeyCombination accelerator,
-                       @Nonnull String icon,
-                       @Nonnull String description) {
+  public SpecialAction(@NotNull String toolbarGroup,
+                       @NotNull String group,
+                       @NotNull String menu,
+                       @NotNull String text,
+                       @NotNull KeyCombination accelerator,
+                       @NotNull String icon,
+                       @NotNull String description) {
     super(toolbarGroup, group, menu);
 
     super.text = ls(this.text = text);
@@ -69,7 +69,7 @@ public class SpecialAction extends FxAction {
     invalidate();
   }
 
-  void copy(@Nonnull FxAction action) {
+  void copy(@NotNull FxAction action) {
     bindText(action.text);
     bindAccelerator(action.accelerator);
     bindDescription(action.description);

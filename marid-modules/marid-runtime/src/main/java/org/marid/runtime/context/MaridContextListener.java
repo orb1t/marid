@@ -23,7 +23,7 @@ package org.marid.runtime.context;
 
 import org.marid.runtime.event.*;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.EventListener;
 
 /**
@@ -31,22 +31,22 @@ import java.util.EventListener;
  */
 public interface MaridContextListener extends EventListener, Comparable<MaridContextListener> {
 
-  void bootstrap(@Nonnull ContextBootstrapEvent contextBootstrapEvent);
+  void bootstrap(@NotNull ContextBootstrapEvent contextBootstrapEvent);
 
-  void onPostConstruct(@Nonnull BeanPostConstructEvent postConstructEvent);
+  void onPostConstruct(@NotNull BeanPostConstructEvent postConstructEvent);
 
-  void onPreDestroy(@Nonnull BeanPreDestroyEvent preDestroyEvent);
+  void onPreDestroy(@NotNull BeanPreDestroyEvent preDestroyEvent);
 
-  void onStart(@Nonnull ContextStartEvent contextStartEvent);
+  void onStart(@NotNull ContextStartEvent contextStartEvent);
 
-  void onStop(@Nonnull ContextStopEvent contextStopEvent);
+  void onStop(@NotNull ContextStopEvent contextStopEvent);
 
-  void onFail(@Nonnull ContextFailEvent contextFailEvent);
+  void onFail(@NotNull ContextFailEvent contextFailEvent);
 
   int getOrder();
 
   @Override
-  default int compareTo(@Nonnull MaridContextListener o) {
+  default int compareTo(@NotNull MaridContextListener o) {
     return Integer.compare(getOrder(), o.getOrder());
   }
 }

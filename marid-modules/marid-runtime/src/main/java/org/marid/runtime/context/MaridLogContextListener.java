@@ -23,7 +23,7 @@ package org.marid.runtime.context;
 
 import org.marid.runtime.event.*;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 import static java.util.logging.Level.INFO;
 import static org.marid.logging.Log.log;
@@ -34,32 +34,32 @@ import static org.marid.logging.Log.log;
 public class MaridLogContextListener implements MaridContextListener {
 
   @Override
-  public void bootstrap(@Nonnull ContextBootstrapEvent contextBootstrapEvent) {
+  public void bootstrap(@NotNull ContextBootstrapEvent contextBootstrapEvent) {
     log(INFO, "{0}", contextBootstrapEvent);
   }
 
   @Override
-  public void onPostConstruct(@Nonnull BeanPostConstructEvent postConstructEvent) {
+  public void onPostConstruct(@NotNull BeanPostConstructEvent postConstructEvent) {
     log(INFO, "{0}", postConstructEvent);
   }
 
   @Override
-  public void onPreDestroy(@Nonnull BeanPreDestroyEvent preDestroyEvent) {
+  public void onPreDestroy(@NotNull BeanPreDestroyEvent preDestroyEvent) {
     log(INFO, "{0}", preDestroyEvent);
   }
 
   @Override
-  public void onStart(@Nonnull ContextStartEvent contextStartEvent) {
+  public void onStart(@NotNull ContextStartEvent contextStartEvent) {
     log(INFO, "{0}", contextStartEvent);
   }
 
   @Override
-  public void onStop(@Nonnull ContextStopEvent contextStopEvent) {
+  public void onStop(@NotNull ContextStopEvent contextStopEvent) {
     log(INFO, "{0}", contextStopEvent);
   }
 
   @Override
-  public void onFail(@Nonnull ContextFailEvent contextFailEvent) {
+  public void onFail(@NotNull ContextFailEvent contextFailEvent) {
     log(INFO, "{0}", contextFailEvent);
   }
 

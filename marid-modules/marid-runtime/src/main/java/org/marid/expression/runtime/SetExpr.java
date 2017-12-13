@@ -27,8 +27,8 @@ import org.marid.runtime.context.BeanContext;
 import org.marid.types.Classes;
 import org.w3c.dom.Element;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.NoSuchElementException;
@@ -36,22 +36,22 @@ import java.util.stream.Stream;
 
 public final class SetExpr extends Expr implements SetExpression {
 
-  @Nonnull
+  @NotNull
   private final Expr target;
 
-  @Nonnull
+  @NotNull
   private final String field;
 
-  @Nonnull
+  @NotNull
   private final Expr value;
 
-  public SetExpr(@Nonnull Expr target, @Nonnull String field, @Nonnull Expr value) {
+  public SetExpr(@NotNull Expr target, @NotNull String field, @NotNull Expr value) {
     this.target = target;
     this.field = field;
     this.value = value;
   }
 
-  SetExpr(@Nonnull Element element) {
+  SetExpr(@NotNull Element element) {
     super(element);
     target = XmlExpression.target(element, Expr::of, ClassExpr::new, RefExpr::new);
     field = XmlExpression.field(element);
@@ -59,7 +59,7 @@ public final class SetExpr extends Expr implements SetExpression {
   }
 
   @Override
-  protected Object execute(@Nullable Object self, @Nullable Type owner, @Nonnull BeanContext context) {
+  protected Object execute(@Nullable Object self, @Nullable Type owner, @NotNull BeanContext context) {
     final Object target = getTarget().evaluate(self, owner, context);
     final Field field = getTarget().getTargetClass(owner, context)
         .flatMap(c -> Stream.of(c.getFields()))
@@ -76,19 +76,19 @@ public final class SetExpr extends Expr implements SetExpression {
   }
 
   @Override
-  @Nonnull
+  @NotNull
   public Expr getTarget() {
     return target;
   }
 
   @Override
-  @Nonnull
+  @NotNull
   public String getField() {
     return field;
   }
 
   @Override
-  @Nonnull
+  @NotNull
   public Expr getValue() {
     return value;
   }

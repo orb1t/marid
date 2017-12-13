@@ -38,7 +38,7 @@ import org.marid.jfx.track.Tracks;
 import org.marid.idelib.spring.annotation.PrototypeComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UncheckedIOException;
@@ -98,7 +98,7 @@ public class ProjectRunService extends IdeService<HBox> {
       }
     }
 
-    @Nonnull
+    @NotNull
     @Override
     protected HBox createGraphic() {
       return new HBox(5,

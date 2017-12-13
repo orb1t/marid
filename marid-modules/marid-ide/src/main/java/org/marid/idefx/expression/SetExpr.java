@@ -30,7 +30,7 @@ import org.marid.idefx.visitor.Visitor;
 import org.marid.jfx.props.FxObject;
 import org.w3c.dom.Element;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 import static org.marid.jfx.props.ObservablesProvider.object;
 
@@ -40,13 +40,13 @@ public class SetExpr extends Expr implements SetExpression {
   public final StringProperty field;
   public final FxObject<Expr> value;
 
-  public SetExpr(@Nonnull Expr target, @Nonnull String field, @Nonnull Expr value) {
+  public SetExpr(@NotNull Expr target, @NotNull String field, @NotNull Expr value) {
     this.target = new FxObject<>(Expr::observables, target);
     this.field = new SimpleStringProperty(field);
     this.value = new FxObject<>(Expr::observables, value);
   }
 
-  SetExpr(@Nonnull Element element) {
+  SetExpr(@NotNull Element element) {
     super(element);
     this.target = object(XmlExpression.target(element, Expr::of, StringExpr::new, RefExpr::new));
     this.field = new SimpleStringProperty(XmlExpression.field(element));
@@ -54,33 +54,33 @@ public class SetExpr extends Expr implements SetExpression {
   }
 
   @Override
-  Expr[] visit(@Nonnull IdeBean bean, @Nonnull Expr[] parents, @Nonnull Visitor visitor) {
+  Expr[] visit(@NotNull IdeBean bean, @NotNull Expr[] parents, @NotNull Visitor visitor) {
     final Expr[] newParents = super.visit(bean, parents, visitor);
     visitor.visit(bean, newParents, getTarget());
     visitor.visit(bean, newParents, getValue());
     return newParents;
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public Expr getTarget() {
     return target.get();
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public String getField() {
     return field.get();
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public Expr getValue() {
     return value.get();
   }
 
   @Override
-  public void writeTo(@Nonnull Element element) {
+  public void writeTo(@NotNull Element element) {
     super.writeTo(element);
     XmlExpression.target(element, getTarget());
     XmlExpression.field(element, getField());

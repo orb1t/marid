@@ -27,8 +27,8 @@ import org.marid.types.InvokableConstructor;
 import org.marid.types.InvokableMethod;
 import org.marid.types.Types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -38,18 +38,18 @@ import java.util.stream.Stream;
 
 public interface CallExpression extends Expression {
 
-  @Nonnull
+  @NotNull
   Expression getTarget();
 
-  @Nonnull
+  @NotNull
   String getMethod();
 
-  @Nonnull
+  @NotNull
   List<? extends Expression> getArgs();
 
-  @Nonnull
+  @NotNull
   @Override
-  default Type getType(@Nullable Type owner, @Nonnull BeanTypeContext context) {
+  default Type getType(@Nullable Type owner, @NotNull BeanTypeContext context) {
     final Type[] argTypes = getArgs().stream().map(a -> a.getType(owner, context)).toArray(Type[]::new);
     return invokable(this, owner, context, argTypes)
         .map(invokable -> {
@@ -68,7 +68,7 @@ public interface CallExpression extends Expression {
   }
 
   @Override
-  default void resolve(@Nonnull Type type, @Nonnull BeanTypeContext context, @Nonnull BiConsumer<Type, Type> evaluator) {
+  default void resolve(@NotNull Type type, @NotNull BeanTypeContext context, @NotNull BiConsumer<Type, Type> evaluator) {
     if (getTarget() instanceof ThisExpression) {
       final Type[] ats = getArgs().stream().map(a -> a.getType(type, context)).toArray(Type[]::new);
       Types.rawClasses(type).flatMap(c -> Stream.of(c.getMethods()))
@@ -85,11 +85,11 @@ public interface CallExpression extends Expression {
     }
   }
 
-  @Nonnull
-  static Optional<? extends Invokable<?>> invokable(@Nonnull CallExpression e,
+  @NotNull
+  static Optional<? extends Invokable<?>> invokable(@NotNull CallExpression e,
                                                     @Nullable Type owner,
-                                                    @Nonnull BeanTypeContext context,
-                                                    @Nonnull Type... argTypes) {
+                                                    @NotNull BeanTypeContext context,
+                                                    @NotNull Type... argTypes) {
     if ("new".equals(e.getMethod())) {
       return e.getTarget().getTargetClass(owner, context)
           .flatMap(c -> Stream.of(c.getConstructors()))

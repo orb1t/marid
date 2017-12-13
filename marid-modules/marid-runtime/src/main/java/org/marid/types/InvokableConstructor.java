@@ -21,7 +21,7 @@
 
 package org.marid.types;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
@@ -29,19 +29,19 @@ import java.lang.reflect.TypeVariable;
 
 public final class InvokableConstructor extends Invokable<Constructor<?>> {
 
-  @Nonnull
+  @NotNull
   private final Type returnType;
 
-  @Nonnull
+  @NotNull
   private final Class<?> returnClass;
 
-  @Nonnull
+  @NotNull
   private final Type[] parameterTypes;
 
-  @Nonnull
+  @NotNull
   private final Class<?>[] parameterClasses;
 
-  public InvokableConstructor(@Nonnull Constructor<?> constructor) {
+  public InvokableConstructor(@NotNull Constructor<?> constructor) {
     super(constructor);
     final Type type = constructor.getAnnotatedReturnType().getType();
     if (type instanceof Class<?>) {
@@ -88,25 +88,25 @@ public final class InvokableConstructor extends Invokable<Constructor<?>> {
   }
 
   @Override
-  @Nonnull
+  @NotNull
   public Type getReturnType() {
     return returnType;
   }
 
   @Override
-  @Nonnull
+  @NotNull
   public Class<?> getReturnClass() {
     return returnClass;
   }
 
   @Override
-  @Nonnull
+  @NotNull
   public Type[] getParameterTypes() {
     return parameterTypes;
   }
 
   @Override
-  @Nonnull
+  @NotNull
   public Class<?>[] getParameterClasses() {
     return parameterClasses;
   }

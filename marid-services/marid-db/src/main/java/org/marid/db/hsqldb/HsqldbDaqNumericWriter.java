@@ -23,7 +23,7 @@ package org.marid.db.hsqldb;
 
 import org.marid.db.dao.NumericWriter;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import javax.sql.DataSource;
 import java.nio.ByteBuffer;
 import java.sql.PreparedStatement;
@@ -50,7 +50,7 @@ public class HsqldbDaqNumericWriter extends HsqldbDaqAbstractWriter<Double> impl
   }
 
   @Override
-  protected byte[] toByteArray(@Nonnull Double value) {
+  protected byte[] toByteArray(@NotNull Double value) {
     return ByteBuffer.allocate(8).putDouble(0, value).array();
   }
 

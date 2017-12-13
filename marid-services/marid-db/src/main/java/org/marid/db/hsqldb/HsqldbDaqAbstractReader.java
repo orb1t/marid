@@ -26,7 +26,7 @@ import org.marid.db.dao.DaqReader;
 import org.marid.db.data.DataRecord;
 import org.marid.misc.Digests;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import javax.sql.DataSource;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
@@ -163,7 +163,7 @@ public abstract class HsqldbDaqAbstractReader<T extends Serializable> implements
 
   protected abstract T getValue(ResultSet resultSet, int index) throws SQLException;
 
-  protected abstract byte[] toByteArray(@Nonnull T value);
+  protected abstract byte[] toByteArray(@NotNull T value);
 
   protected abstract String getSqlTypeName();
 

@@ -27,29 +27,29 @@ import org.marid.expression.generic.StringExpression;
 import org.marid.expression.xml.XmlExpression;
 import org.w3c.dom.Element;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 public class StringExpr extends Expr implements StringExpression {
 
   public final StringProperty value;
 
-  public StringExpr(@Nonnull String value) {
+  public StringExpr(@NotNull String value) {
     this.value = new SimpleStringProperty(value);
   }
 
-  StringExpr(@Nonnull Element element) {
+  StringExpr(@NotNull Element element) {
     super(element);
     this.value = new SimpleStringProperty(XmlExpression.string(element));
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public String getValue() {
     return value.get();
   }
 
   @Override
-  public void writeTo(@Nonnull Element element) {
+  public void writeTo(@NotNull Element element) {
     super.writeTo(element);
     XmlExpression.string(element, getValue());
   }

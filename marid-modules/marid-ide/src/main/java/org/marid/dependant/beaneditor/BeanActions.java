@@ -34,7 +34,7 @@ import org.marid.jfx.action.SpecialActions;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 
@@ -70,8 +70,8 @@ public class BeanActions {
     };
   }
 
-  @Nonnull
-  private FxAction constructors(@Nonnull IdeBean bean, @Nonnull ClassTree tree) {
+  @NotNull
+  private FxAction constructors(@NotNull IdeBean bean, @NotNull ClassTree tree) {
     final FxAction action = new FxAction("constructor", "Actions");
 
     if (tree.name.isEmpty()) {
@@ -113,8 +113,8 @@ public class BeanActions {
     return action;
   }
 
-  @Nonnull
-  private FxAction staticMethods(@Nonnull IdeBean bean, @Nonnull ClassTree tree) {
+  @NotNull
+  private FxAction staticMethods(@NotNull IdeBean bean, @NotNull ClassTree tree) {
     final FxAction action = new FxAction("static-method", "Actions");
 
     if (tree.name.isEmpty()) {

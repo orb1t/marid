@@ -23,8 +23,8 @@ package org.marid.types;
 
 import org.marid.collections.MaridSets;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -40,12 +40,12 @@ import static org.marid.types.MaridWildcardType.ALL;
 
 public interface Types {
 
-  static boolean isArrayType(@Nonnull Type type) {
+  static boolean isArrayType(@NotNull Type type) {
     return getArrayComponentType(type) != null;
   }
 
   @Nullable
-  static Type getArrayComponentType(@Nonnull Type type) {
+  static Type getArrayComponentType(@NotNull Type type) {
     if (type instanceof Class<?>) {
       return ((Class<?>) type).getComponentType();
     } else if (type instanceof GenericArrayType) {
@@ -67,7 +67,7 @@ public interface Types {
     }
   }
 
-  static boolean isGround(@Nonnull Type type) {
+  static boolean isGround(@NotNull Type type) {
     if (type instanceof Class<?>) {
       return true;
     } else if (type instanceof TypeVariable<?>) {
@@ -85,14 +85,14 @@ public interface Types {
     }
   }
 
-  @Nonnull
-  static Set<TypeVariable<?>> vars(@Nonnull Type type) {
+  @NotNull
+  static Set<TypeVariable<?>> vars(@NotNull Type type) {
     final LinkedHashSet<TypeVariable<?>> vars = new LinkedHashSet<>();
     vars(type, vars);
     return vars;
   }
 
-  private static void vars(@Nonnull Type type, @Nonnull LinkedHashSet<TypeVariable<?>> vars) {
+  private static void vars(@NotNull Type type, @NotNull LinkedHashSet<TypeVariable<?>> vars) {
     if (type instanceof TypeVariable<?>) {
       final TypeVariable<?> v = (TypeVariable<?>) type;
       if (!vars.contains(v)) {
@@ -120,8 +120,8 @@ public interface Types {
     }
   }
 
-  @Nonnull
-  static Stream<Class<?>> rawClasses(@Nonnull Type type) {
+  @NotNull
+  static Stream<Class<?>> rawClasses(@NotNull Type type) {
     final LinkedList<Class<?>> set = new LinkedList<>();
     raw(boxed(type), new HashSet<>(), c -> {
       if (set.stream().noneMatch(c::isAssignableFrom)) {
@@ -153,13 +153,13 @@ public interface Types {
     }
   }
 
-  @Nonnull
-  static Type boxed(@Nonnull Type type) {
+  @NotNull
+  static Type boxed(@NotNull Type type) {
     return type instanceof Class<?> ? Classes.wrapper((Class<?>) type) : type;
   }
 
-  @Nonnull
-  static Type ground(@Nonnull Type type, @Nonnull Map<TypeVariable<?>, Type> map) {
+  @NotNull
+  static Type ground(@NotNull Type type, @NotNull Map<TypeVariable<?>, Type> map) {
     return ground(type, map, emptySet());
   }
 
@@ -201,8 +201,8 @@ public interface Types {
     }
   }
 
-  @Nonnull
-  static  Type resolve(@Nonnull Type type, @Nonnull Map<TypeVariable<?>, Type> map) {
+  @NotNull
+  static  Type resolve(@NotNull Type type, @NotNull Map<TypeVariable<?>, Type> map) {
     return resolve(type, map, emptySet());
   }
 
@@ -241,7 +241,7 @@ public interface Types {
     }
   }
 
-  static boolean isAssignable(@Nonnull Type from, @Nonnull Type to) {
+  static boolean isAssignable(@NotNull Type from, @NotNull Type to) {
     return isAssignable(boxed(from), boxed(to), new HashSet<>());
   }
 
@@ -302,7 +302,7 @@ public interface Types {
     }
   }
 
-  static Map<TypeVariable<?>, Type> resolveVars(@Nonnull Type type) {
+  static Map<TypeVariable<?>, Type> resolveVars(@NotNull Type type) {
     final LinkedHashMap<TypeVariable<?>, Type> map = new LinkedHashMap<>();
     resolveVars(type, map);
     return map;
@@ -343,8 +343,8 @@ public interface Types {
     }
   }
 
-  @Nonnull
-  static Type getType(@Nonnull Class<?> type) {
+  @NotNull
+  static Type getType(@NotNull Class<?> type) {
     final TypeVariable<?>[] vars = type.getTypeParameters();
     if (vars.length == 0) {
       return type;
@@ -353,8 +353,8 @@ public interface Types {
     }
   }
 
-  @Nonnull
-  static Type evaluate(@Nonnull Consumer<BiConsumer<Type, Type>> callback, @Nonnull Type type) {
+  @NotNull
+  static Type evaluate(@NotNull Consumer<BiConsumer<Type, Type>> callback, @NotNull Type type) {
     if (Types.isGround(type)) {
       return type;
     } else {
@@ -364,8 +364,8 @@ public interface Types {
     }
   }
 
-  @Nonnull
-  static Type nct(@Nonnull Type type1, @Nonnull Type type2) {
+  @NotNull
+  static Type nct(@NotNull Type type1, @NotNull Type type2) {
     final Type t1 = boxed(type1), t2 = boxed(type2);
     if (t1.equals(t2)) {
       return t1;
@@ -388,8 +388,8 @@ public interface Types {
     }
   }
 
-  @Nonnull
-  static Stream<? extends Type> types(@Nonnull Type type) {
+  @NotNull
+  static Stream<? extends Type> types(@NotNull Type type) {
     final Map<TypeVariable<?>, Type> map = resolveVars(type = boxed(type));
     return rawClasses(type).flatMap(Classes::classes)
         .distinct()

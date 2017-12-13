@@ -23,7 +23,7 @@ package org.marid.beans;
 
 import org.marid.expression.generic.Expression;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -33,31 +33,31 @@ public interface MaridBean {
 
   MaridBean getParent();
 
-  @Nonnull
+  @NotNull
   String getName();
 
-  @Nonnull
+  @NotNull
   Expression getFactory();
 
-  @Nonnull
+  @NotNull
   List<? extends MaridBean> getChildren();
 
-  @Nonnull
+  @NotNull
   default Stream<? extends MaridBean> ancestors() {
     return ofNullable(getParent()).flatMap(p -> concat(of(p), p.ancestors()));
   }
 
-  @Nonnull
+  @NotNull
   default Stream<? extends MaridBean> descendants() {
     return getChildren().stream().flatMap(b -> concat(of(b), b.descendants()));
   }
 
-  @Nonnull
+  @NotNull
   default Stream<? extends MaridBean> siblings() {
     return ofNullable(getParent()).flatMap(p -> p.getChildren().stream().filter(c -> c != this));
   }
 
-  @Nonnull
+  @NotNull
   default Stream<? extends MaridBean> matchingCandidates() {
     return concat(siblings(), ancestors()
         .filter(p -> p.getParent() != null)

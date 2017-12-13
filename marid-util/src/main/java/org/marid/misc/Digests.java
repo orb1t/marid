@@ -21,7 +21,7 @@
 
 package org.marid.misc;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -30,8 +30,8 @@ import java.security.NoSuchAlgorithmException;
  */
 public interface Digests {
 
-  @Nonnull
-  static MessageDigest digest(@Nonnull String algorithm) {
+  @NotNull
+  static MessageDigest digest(@NotNull String algorithm) {
     try {
       return MessageDigest.getInstance(algorithm);
     } catch (NoSuchAlgorithmException x) {

@@ -28,8 +28,8 @@ import org.marid.runtime.context.BeanContext;
 import org.marid.types.Invokable;
 import org.w3c.dom.Element;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -40,22 +40,22 @@ import static org.marid.types.Classes.value;
 
 public final class CallExpr extends Expr implements CallExpression {
 
-  @Nonnull
+  @NotNull
   private final Expr target;
 
-  @Nonnull
+  @NotNull
   private final String method;
 
-  @Nonnull
+  @NotNull
   private final List<Expr> args;
 
-  public CallExpr(@Nonnull Expr target, @Nonnull String method, @Nonnull Expr... args) {
+  public CallExpr(@NotNull Expr target, @NotNull String method, @NotNull Expr... args) {
     this.target = target;
     this.method = method;
     this.args = List.of(args);
   }
 
-  CallExpr(@Nonnull Element element) {
+  CallExpr(@NotNull Element element) {
     super(element);
     target = XmlExpression.target(element, Expr::of, ClassExpr::new, RefExpr::new);
     method = XmlExpression.method(element);
@@ -63,7 +63,7 @@ public final class CallExpr extends Expr implements CallExpression {
   }
 
   @Override
-  protected Object execute(@Nullable Object self, @Nullable Type owner, @Nonnull BeanContext context) {
+  protected Object execute(@Nullable Object self, @Nullable Type owner, @NotNull BeanContext context) {
     final Type[] argTypes = getArgs().stream().map(a -> a.getType(owner, context)).toArray(Type[]::new);
     final Optional<? extends Invokable<?>> optional = CallExpression.invokable(this, owner, context, argTypes);
     if (optional.isPresent()) {
@@ -90,19 +90,19 @@ public final class CallExpr extends Expr implements CallExpression {
   }
 
   @Override
-  @Nonnull
+  @NotNull
   public Expr getTarget() {
     return target;
   }
 
   @Override
-  @Nonnull
+  @NotNull
   public String getMethod() {
     return method;
   }
 
   @Override
-  @Nonnull
+  @NotNull
   public List<Expr> getArgs() {
     return args;
   }

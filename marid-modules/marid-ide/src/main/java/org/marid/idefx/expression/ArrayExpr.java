@@ -28,7 +28,7 @@ import org.marid.idefx.beans.IdeBean;
 import org.marid.idefx.visitor.Visitor;
 import org.w3c.dom.Element;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,31 +39,31 @@ public class ArrayExpr extends Expr implements ArrayExpression {
 
   public final ObservableList<Expr> elements;
 
-  public ArrayExpr(@Nonnull Expr... elements) {
+  public ArrayExpr(@NotNull Expr... elements) {
     this.elements = observableArrayList(Expr::observables);
     this.elements.setAll(elements);
   }
 
-  ArrayExpr(@Nonnull Element element) {
+  ArrayExpr(@NotNull Element element) {
     super(element);
     this.elements = XmlExpression.arrayElems(element, Expr::of, toObservableList());
   }
 
   @Override
-  Expr[] visit(@Nonnull IdeBean bean, @Nonnull Expr[] parents, @Nonnull Visitor visitor) {
+  Expr[] visit(@NotNull IdeBean bean, @NotNull Expr[] parents, @NotNull Visitor visitor) {
     final Expr[] newParents = super.visit(bean, parents, visitor);
     elements.forEach(e -> visitor.visit(bean, newParents, e));
     return newParents;
   }
 
-  @Nonnull
+  @NotNull
   @Override
   public List<Expr> getElements() {
     return elements;
   }
 
   @Override
-  public void writeTo(@Nonnull Element element) {
+  public void writeTo(@NotNull Element element) {
     super.writeTo(element);
     XmlExpression.arrayElems(element, getElements());
   }

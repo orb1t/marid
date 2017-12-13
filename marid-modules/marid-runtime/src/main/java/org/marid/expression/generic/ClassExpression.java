@@ -24,25 +24,25 @@ package org.marid.expression.generic;
 import org.marid.beans.BeanTypeContext;
 import org.marid.types.MaridParameterizedType;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Type;
 import java.util.stream.Stream;
 
 public interface ClassExpression extends Expression {
 
-  @Nonnull
+  @NotNull
   String getClassName();
 
-  @Nonnull
+  @NotNull
   @Override
-  default Type getType(@Nullable Type owner, @Nonnull BeanTypeContext context) {
+  default Type getType(@Nullable Type owner, @NotNull BeanTypeContext context) {
     return new MaridParameterizedType(null, Class.class, (Type) context.getClass(getClassName()).orElse(Object.class));
   }
 
-  @Nonnull
+  @NotNull
   @Override
-  default Stream<Class<?>> getTargetClass(@Nullable Type owner, @Nonnull BeanTypeContext context) {
+  default Stream<Class<?>> getTargetClass(@Nullable Type owner, @NotNull BeanTypeContext context) {
       return context.getClass(getClassName()).stream();
   }
 }
