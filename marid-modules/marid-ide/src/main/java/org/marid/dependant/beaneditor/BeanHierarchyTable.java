@@ -32,6 +32,7 @@ import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
 import org.apache.commons.lang3.ArrayUtils;
+import org.jetbrains.annotations.NotNull;
 import org.marid.dependant.beaneditor.view.IdeBeanViewFactory;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.idefx.beans.IdeBean;
@@ -43,8 +44,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import org.jetbrains.annotations.NotNull;
-import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -126,14 +126,12 @@ public class BeanHierarchyTable extends TreeTableView<IdeBean> {
   }
 
   @Autowired
-  private void initActions(List<BeanActionProvider> actionProviders,
-                           SpecialActions specialActions,
-                           ProjectProfile profile) {
+  private void initActions(BeanActionProvider[] actionProviders, SpecialActions specialActions, ProjectProfile profile) {
     final ObjectBinding<ObservableList<FxAction>> actions = Bindings.createObjectBinding(() -> {
       final TreeItem<IdeBean> item = getSelectionModel().getSelectedItem();
-      return actionProviders.stream()
+      return Stream.of(actionProviders)
           .map(p -> p.apply(item))
-          .flatMap(Stream::ofNullable)
+          .filter(Objects::nonNull)
           .collect(Collectors.toCollection(FXCollections::observableArrayList));
     }, getSelectionModel().selectedItemProperty(), profile);
     specialActions.assign(focusedProperty(), actions);
