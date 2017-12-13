@@ -1,8 +1,7 @@
 module marid.runtime {
 
   requires java.annotation;
-
-  requires marid.util;
+  requires transitive marid.util;
 
   exports org.marid.beans;
   exports org.marid.expression.generic;

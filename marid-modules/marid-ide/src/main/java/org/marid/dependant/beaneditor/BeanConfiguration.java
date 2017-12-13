@@ -21,9 +21,9 @@
 
 package org.marid.dependant.beaneditor;
 
-import org.marid.idefx.beans.IdeBean;
 import org.marid.ide.project.ProjectFileType;
 import org.marid.ide.project.ProjectProfile;
+import org.marid.idefx.beans.IdeBean;
 import org.marid.io.Xmls;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
