@@ -185,8 +185,7 @@ public class ProjectProfile implements Observable {
     final URLClassLoader old = classLoader;
     try (old) {
       final URL[] urls = Urls.classpath(get(TARGET_LIB), get(TARGET_CLASSES));
-      final ClassLoader parent = Thread.currentThread().getContextClassLoader();
-      classLoader = new URLClassLoader(urls, parent);
+      classLoader = new URLClassLoader(urls, ClassLoader.getSystemClassLoader());
       if (!onUpdate.isEmpty()) {
         Platform.runLater(() -> onUpdate.forEach(c -> {
           try {
