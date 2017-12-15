@@ -80,8 +80,8 @@ public class ProjectPrerequisites {
       final Properties properties = model.getProperties();
       properties.setProperty("project.build.sourceEncoding", "UTF-8");
       properties.setProperty("project.reporting.outputEncoding", "UTF-8");
-      properties.setProperty("maven.compiler.source", "1.8");
-      properties.setProperty("maven.compiler.target", "1.8");
+      properties.setProperty("maven.compiler.source", "1.9");
+      properties.setProperty("maven.compiler.target", "1.9");
       properties.setProperty("marid.version", ideValues.implementationVersion);
     }
 
@@ -108,6 +108,7 @@ public class ProjectPrerequisites {
           addChild(configuration, "showWarnings", "true");
           addChild(configuration, "showDeprecation", "true");
           addChild(configuration, "parameters", "true");
+          addChild(configuration, "release", "9");
         }));
       }));
     }

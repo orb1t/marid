@@ -26,7 +26,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
-import javafx.event.EventType;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -39,12 +38,11 @@ import javafx.scene.layout.BorderPane;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.PopOver.ArrowLocation;
+import org.jetbrains.annotations.NotNull;
 import org.marid.jfx.icons.FontIcons;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import org.jetbrains.annotations.NotNull;
 import java.time.Duration;
-import java.util.Set;
 import java.util.function.Consumer;
 
 import static java.util.logging.Level.INFO;
@@ -59,12 +57,6 @@ import static org.marid.l10n.L10n.s;
  * @author Dmitry Ovchinnikov
  */
 public abstract class IdeService<V extends Node> extends Service<Duration> {
-
-  protected static final Set<EventType<?>> DONE_EVENT_TYPES = Set.of(
-      WORKER_STATE_SUCCEEDED,
-      WORKER_STATE_FAILED,
-      WORKER_STATE_CANCELLED
-  );
 
   private final SimpleObjectProperty<V> graphic = new SimpleObjectProperty<>();
   protected final SimpleObjectProperty<Parent> details = new SimpleObjectProperty<>();

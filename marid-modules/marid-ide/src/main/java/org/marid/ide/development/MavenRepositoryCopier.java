@@ -44,7 +44,7 @@ public class MavenRepositoryCopier {
     final Path m2Repo = directories.getUserHome().resolve(".m2").resolve("repository");
     if (Files.isDirectory(m2Repo)) {
       final Path orgMarid = Paths.get("org", "marid");
-      Files.walkFileTree(m2Repo, new SimpleFileVisitor<Path>() {
+      Files.walkFileTree(m2Repo, new SimpleFileVisitor<>() {
         @Override
         public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
           if (!dir.equals(m2Repo)) {

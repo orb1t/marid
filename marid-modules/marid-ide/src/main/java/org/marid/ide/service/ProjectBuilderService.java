@@ -27,16 +27,16 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Font;
+import org.jetbrains.annotations.NotNull;
 import org.marid.ide.common.IdeShapes;
 import org.marid.ide.project.ProjectMavenBuilder;
 import org.marid.ide.project.ProjectProfile;
 import org.marid.ide.status.IdeService;
-import org.marid.io.ProcessManager;
 import org.marid.idelib.spring.annotation.PrototypeComponent;
+import org.marid.io.ProcessManager;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import org.jetbrains.annotations.NotNull;
 import java.util.function.Consumer;
 
 import static java.lang.System.lineSeparator;
@@ -84,9 +84,12 @@ public class ProjectBuilderService extends IdeService<HBox> {
 
     @Override
     protected void execute() throws Exception {
-      final ProjectMavenBuilder projectBuilder = builder.getObject()
+      final Consumer<String> o = l -> runLater(() -> out.appendText(l + lineSeparator()));
+      final Consumer<String> e = l -> runLater(() -> err.appendText(l + lineSeparator()));
+      final ProcessManager manager = builder.getObject()
           .profile(profile)
-          .goals("clean", "install");
+          .goals("clean", "install")
+          .build(o, e);
       updateGraphic(box -> {
         final Tab outTab = new Tab("Out", out);
         final Tab errTab = new Tab("Err", err);
@@ -94,9 +97,7 @@ public class ProjectBuilderService extends IdeService<HBox> {
         tabPane.setPrefSize(800, 800);
         details.set(tabPane);
       });
-      final Consumer<String> o = l -> runLater(() -> out.appendText(l + lineSeparator()));
-      final Consumer<String> e = l -> runLater(() -> err.appendText(l + lineSeparator()));
-      final ProcessManager manager = projectBuilder.build(o, e);
+
 
       manager.waitFor();
     }
