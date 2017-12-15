@@ -22,6 +22,7 @@
 package org.marid.misc;
 
 import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
@@ -133,21 +134,8 @@ public interface Urls {
   }
 
   @NotNull
-  static Stream<URL> urls(@NotNull ClassLoader classLoader, @NotNull String resource) {
-    final Stream.Builder<URL> urls = Stream.builder();
-    try {
-      for (final Enumeration<URL> e = classLoader.getResources(resource); e.hasMoreElements(); ) {
-        urls.accept(e.nextElement());
-      }
-    } catch (IOException x) {
-      throw new UncheckedIOException(x);
-    }
-    return urls.build();
-  }
-
-  @NotNull
   static Stream<String> lines(@NotNull ClassLoader classLoader, @NotNull String resource) {
-    return urls(classLoader, resource)
+    return classLoader.resources(resource)
         .flatMap(url -> {
           try {
             final Scanner scanner = new Scanner(new InputStreamReader(url.openStream(), UTF_8));
