@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/marid-modules" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/marid-modules/marid-fx" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/marid-modules/marid-ide" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/marid-modules/marid-runtime" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/marid-modules/marid-types" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/marid-services" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/marid-services/marid-api" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/marid-services/marid-db" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/marid-services/marid-proto" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/marid-test" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/marid-util" charset="UTF-8" />
+  </component>
+</project>

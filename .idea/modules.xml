@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/marid.iml" filepath="$PROJECT_DIR$/marid.iml" />
+      <module fileurl="file://$PROJECT_DIR$/marid-services/marid-api/marid-api.iml" filepath="$PROJECT_DIR$/marid-services/marid-api/marid-api.iml" />
+      <module fileurl="file://$PROJECT_DIR$/marid-services/marid-db/marid-db.iml" filepath="$PROJECT_DIR$/marid-services/marid-db/marid-db.iml" />
+      <module fileurl="file://$PROJECT_DIR$/marid-modules/marid-fx/marid-fx.iml" filepath="$PROJECT_DIR$/marid-modules/marid-fx/marid-fx.iml" />
+      <module fileurl="file://$PROJECT_DIR$/marid-modules/marid-ide/marid-ide.iml" filepath="$PROJECT_DIR$/marid-modules/marid-ide/marid-ide.iml" />
+      <module fileurl="file://$PROJECT_DIR$/marid-modules/marid-modules.iml" filepath="$PROJECT_DIR$/marid-modules/marid-modules.iml" />
+      <module fileurl="file://$PROJECT_DIR$/marid-services/marid-proto/marid-proto.iml" filepath="$PROJECT_DIR$/marid-services/marid-proto/marid-proto.iml" />
+      <module fileurl="file://$PROJECT_DIR$/marid-modules/marid-runtime/marid-runtime.iml" filepath="$PROJECT_DIR$/marid-modules/marid-runtime/marid-runtime.iml" />
+      <module fileurl="file://$PROJECT_DIR$/marid-services/marid-services.iml" filepath="$PROJECT_DIR$/marid-services/marid-services.iml" />
+      <module fileurl="file://$PROJECT_DIR$/marid-test/marid-test.iml" filepath="$PROJECT_DIR$/marid-test/marid-test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/marid-util/marid-util.iml" filepath="$PROJECT_DIR$/marid-util/marid-util.iml" />
+    </modules>
+  </component>
+</project>
