@@ -32,6 +32,7 @@ import org.springframework.stereotype.Repository;
 import javax.annotation.PreDestroy;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.lang.reflect.Modifier;
 import java.nio.file.*;
@@ -40,6 +41,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.jar.Manifest;
 import java.util.stream.Stream;
 
 import static java.lang.Integer.MAX_VALUE;
@@ -69,14 +71,21 @@ public class BeanDao {
 
   private ConcurrentLinkedQueue<Class<?>> classes() {
     final ConcurrentLinkedQueue<Class<?>> publicClasses = new ConcurrentLinkedQueue<>();
-    final Path lib = profile.get(TARGET_LIB);
     final ConcurrentLinkedQueue<ClassReader> classReaders = new ConcurrentLinkedQueue<>();
-    try (final DirectoryStream<Path> libStream = Files.newDirectoryStream(lib, "*.jar")) {
+    try (final DirectoryStream<Path> libStream = Files.newDirectoryStream(profile.get(TARGET_LIB), "*.jar")) {
       for (final Path jar : libStream) {
-        try (final FileSystem fileSystem = FileSystems.newFileSystem(jar, getClass().getClassLoader())) {
+        try (final FileSystem fileSystem = FileSystems.newFileSystem(jar, ClassLoader.getSystemClassLoader())) {
           for (final Path root : fileSystem.getRootDirectories()) {
-            try {
-              fillClassReaders(root, classReaders);
+            final Path manifestMf = root.resolve("META-INF").resolve("MANIFEST.MF");
+            if (!Files.isRegularFile(manifestMf)) {
+              continue;
+            }
+            try (final InputStream manifestIn = Files.newInputStream(manifestMf)) {
+              final Manifest manifest = new Manifest(manifestIn);
+              final String maridModuleName = manifest.getMainAttributes().getValue("Marid-Module-Name");
+              if (maridModuleName != null && !"marid-runtime".equals(maridModuleName)) {
+                fillClassReaders(root, classReaders);
+              }
             } catch (Exception x) {
               log(WARNING, "Unable to process {0}", x, root);
             }
