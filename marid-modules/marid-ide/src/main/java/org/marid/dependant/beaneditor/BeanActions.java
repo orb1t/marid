@@ -23,18 +23,19 @@ package org.marid.dependant.beaneditor;
 
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
+import org.jetbrains.annotations.NotNull;
+import org.marid.idefx.beans.IdeBean;
 import org.marid.idefx.expression.CallExpr;
 import org.marid.idefx.expression.ClassExpr;
 import org.marid.idefx.expression.Expr;
 import org.marid.idefx.expression.NullExpr;
-import org.marid.idefx.beans.IdeBean;
 import org.marid.idelib.util.ClassTree;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.SpecialActions;
+import org.marid.types.Classes;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 
@@ -86,6 +87,7 @@ public class BeanActions {
         .toArray(FxAction[]::new);
     final FxAction[] classActions = tree.classStream()
         .filter(c -> !c.isInterface() && !Modifier.isAbstract(c.getModifiers()))
+        .filter(c -> !Classes.allClassMembers(c).allMatch(m -> Modifier.isStatic(m.getModifiers())))
         .map(c -> {
           final FxAction a = new FxAction("class", "Actions").setText(c.getSimpleName());
           final FxAction[] constructors = of(c.getConstructors())

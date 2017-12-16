@@ -21,20 +21,19 @@
 
 package org.marid.runtime.context;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.marid.beans.BeanTypeContext;
 import org.marid.beans.MaridBean;
 import org.marid.beans.RuntimeBean;
 import org.marid.runtime.event.*;
 import org.marid.runtime.exception.MaridBeanNotFoundException;
-import org.marid.beans.BeanTypeContext;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Type;
-import java.util.Deque;
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
@@ -47,7 +46,7 @@ public final class BeanContext extends BeanTypeContext implements MaridRuntime, 
   private final BeanConfiguration configuration;
   private final RuntimeBean bean;
   private final Object instance;
-  private final ConcurrentLinkedDeque<BeanContext> children = new ConcurrentLinkedDeque<>();
+  private final CopyOnWriteArrayList<BeanContext> children = new CopyOnWriteArrayList<>();
   private final HashSet<MaridBean> processing = new HashSet<>();
 
   public BeanContext(@Nullable BeanContext parent, @NotNull BeanConfiguration configuration, @NotNull RuntimeBean bean) {
@@ -85,7 +84,7 @@ public final class BeanContext extends BeanTypeContext implements MaridRuntime, 
     this(null, configuration, root);
   }
 
-  public Deque<BeanContext> getChildren() {
+  public List<BeanContext> getChildren() {
     return children;
   }
 
@@ -133,6 +132,7 @@ public final class BeanContext extends BeanTypeContext implements MaridRuntime, 
   }
 
   @Override
+  @NotNull
   public ClassLoader getClassLoader() {
     return configuration.getPlaceholderResolver().getClassLoader();
   }
@@ -175,8 +175,8 @@ public final class BeanContext extends BeanTypeContext implements MaridRuntime, 
   public void close() {
     final IllegalStateException e = new IllegalStateException("Runtime close exception");
     try {
-      for (final Iterator<BeanContext> i = children.descendingIterator(); i.hasNext(); ) {
-        final BeanContext child = i.next();
+      for (int i = children.size() - 1; i >= 0; i--) {
+        final BeanContext child = children.get(i);
         try {
           child.close();
         } catch (Throwable x) {

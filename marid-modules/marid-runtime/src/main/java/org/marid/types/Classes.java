@@ -23,10 +23,9 @@ package org.marid.types;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
 import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Array;
-import java.lang.reflect.Executable;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.TreeSet;
@@ -163,5 +162,24 @@ public interface Classes {
       case "void": return void.class;
       default: return Class.forName(name, false, classLoader);
     }
+  }
+
+  @NotNull
+  static Stream<Method> allClassMethods(@NotNull Class<?> type) {
+    return type.isInterface() || type == Object.class
+        ? Stream.empty()
+        : Stream.concat(Stream.of(type.getDeclaredMethods()), allClassMethods(type.getSuperclass()));
+  }
+
+  @NotNull
+  static Stream<Field> allClassFields(@NotNull Class<?> type) {
+    return type.isInterface() || type == Object.class
+        ? Stream.empty()
+        : Stream.concat(Stream.of(type.getDeclaredFields()), allClassFields(type.getSuperclass()));
+  }
+
+  @NotNull
+  static Stream<Member> allClassMembers(@NotNull Class<?> type) {
+    return Stream.concat(allClassMethods(type), allClassFields(type));
   }
 }
