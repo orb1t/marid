@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
@@ -34,7 +34,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
-import java.lang.reflect.Modifier;
 import java.nio.file.*;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -71,7 +70,6 @@ public class BeanDao {
 
   private ConcurrentLinkedQueue<Class<?>> classes() {
     final ConcurrentLinkedQueue<Class<?>> publicClasses = new ConcurrentLinkedQueue<>();
-    final ConcurrentLinkedQueue<ClassReader> classReaders = new ConcurrentLinkedQueue<>();
     try (final DirectoryStream<Path> libStream = Files.newDirectoryStream(profile.get(TARGET_LIB), "*.jar")) {
       for (final Path jar : libStream) {
         try (final FileSystem fileSystem = FileSystems.newFileSystem(jar, ClassLoader.getSystemClassLoader())) {
@@ -84,7 +82,7 @@ public class BeanDao {
               final Manifest manifest = new Manifest(manifestIn);
               final String maridModuleName = manifest.getMainAttributes().getValue("Marid-Module-Name");
               if (maridModuleName != null && !"marid-runtime".equals(maridModuleName)) {
-                fillClassReaders(root, classReaders);
+                fillClasses(root, publicClasses);
               }
             } catch (Exception x) {
               log(WARNING, "Unable to process {0}", x, root);
@@ -96,35 +94,10 @@ public class BeanDao {
       log(WARNING, "Unable to enumerate jar files", x);
     }
     try {
-      fillClassReaders(profile.get(TARGET_CLASSES), classReaders);
+      fillClasses(profile.get(TARGET_CLASSES), publicClasses);
     } catch (Exception x) {
       log(WARNING, "Unable to enumerate class files", x);
     }
-    final ConcurrentLinkedQueue<String> classNames = new ConcurrentLinkedQueue<>();
-    classReaders.parallelStream().forEach(r -> r.accept(new ClassVisitor(ASM6) {
-      @Override
-      public void visit(int v, int access, String name, String signature, String superName, String[] interfaces) {
-        if (!name.contains("$") && (access & ACC_PUBLIC) != 0) {
-          classNames.add(name.replace('/', '.'));
-        }
-      }
-    }, SKIP_CODE | SKIP_DEBUG | SKIP_FRAMES));
-    classNames.parallelStream().forEach(c -> {
-      try {
-        final Class<?> type = Class.forName(c, false, profile.getClassLoader());
-        if (type.getConstructors().length > 0) {
-          publicClasses.add(type);
-        } else if (Stream.of(type.getMethods()).anyMatch(m -> Modifier.isStatic(m.getModifiers()))) {
-          publicClasses.add(type);
-        } else if (Stream.of(type.getFields()).anyMatch(f -> Modifier.isStatic(f.getModifiers()))) {
-          publicClasses.add(type);
-        }
-      } catch (NoClassDefFoundError | ClassNotFoundException x) {
-        // skip
-      } catch (Throwable x) {
-        log(WARNING, "Unable to load {0}", x, c);
-      }
-    });
     return publicClasses;
   }
 
@@ -138,16 +111,35 @@ public class BeanDao {
     return publicClasses;
   }
 
-  private void fillClassReaders(Path root, Collection<ClassReader> classReaders) throws Exception {
+  private void fillClasses(Path root, Collection<Class<?>> classes) throws Exception {
     try (final Stream<Path> classStream = find(root, MAX_VALUE, PathMatchers::isClassFile)) {
       classStream.parallel().forEach(path -> {
-        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        try {
-          Files.copy(path, bos);
-        } catch (IOException x) {
-          throw new UncheckedIOException(x);
+        final ClassReader classReader;
+        {
+          final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+          try {
+            Files.copy(path, bos);
+          } catch (IOException x) {
+            throw new UncheckedIOException(x);
+          }
+          classReader = new ClassReader(bos.toByteArray());
         }
-        classReaders.add(new ClassReader(bos.toByteArray()));
+        classReader.accept(new ClassVisitor(ASM6) {
+          @Override
+          public void visit(int v, int access, String name, String signature, String superName, String[] interfaces) {
+            if (!name.contains("$") && (access & ACC_PUBLIC) != 0) {
+              final String className = name.replace('/', '.');
+              try {
+                final Class<?> type = Class.forName(className, false, profile.getClassLoader());
+                classes.add(type);
+              } catch (NoClassDefFoundError | ClassNotFoundException x) {
+                // skip
+              } catch (Throwable x) {
+                log(WARNING, "Unable to load {0}", x, className);
+              }
+            }
+          }
+        }, SKIP_CODE | SKIP_DEBUG | SKIP_FRAMES);
       });
     }
   }
