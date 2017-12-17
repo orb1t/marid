@@ -145,7 +145,9 @@ public class ProjectStructureTree extends TreeTableView<Path> {
 
   private void onAdd(Path path, TreeItem<Path> item) {
     if (path.equals(item.getValue())) {
-      Event.fireEvent(item, new TreeModificationEvent<>(TreeItem.valueChangedEvent(), item));
+      for (TreeItem<Path> i = item; i != null; i = i.getParent()) {
+        Event.fireEvent(i, new TreeModificationEvent<>(TreeItem.valueChangedEvent(), i));
+      }
       return;
     }
     if (!path.startsWith(item.getValue())) {
@@ -192,6 +194,10 @@ public class ProjectStructureTree extends TreeTableView<Path> {
   private void onDelete(Path path, TreeItem<Path> item) {
     if (!item.getChildren().removeIf(i -> i.getValue().equals(path))) {
       item.getChildren().forEach(i -> onDelete(path, i));
+    } else {
+      for (TreeItem<Path> i = item; i != null; i = i.getParent()) {
+        Event.fireEvent(i, new TreeModificationEvent<>(TreeItem.valueChangedEvent(), i));
+      }
     }
   }
 
@@ -202,7 +208,9 @@ public class ProjectStructureTree extends TreeTableView<Path> {
 
   private void onChange(Path path, TreeItem<Path> item) {
     if (path.equals(item.getValue())) {
-      Event.fireEvent(item, new TreeModificationEvent<>(TreeItem.valueChangedEvent(), item));
+      for (TreeItem<Path> i = item; i != null; i = i.getParent()) {
+        Event.fireEvent(i, new TreeModificationEvent<>(TreeItem.valueChangedEvent(), i));
+      }
     } else {
       item.getChildren().forEach(e -> onChange(path, e));
     }

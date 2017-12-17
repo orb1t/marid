@@ -23,15 +23,15 @@ package org.marid.ide.structure.editor;
 
 import org.jetbrains.annotations.NotNull;
 import org.marid.ide.common.Directories;
+import org.marid.ide.project.ProjectFileType;
 import org.marid.ide.project.ProjectManager;
-import org.marid.ide.project.ProjectProfile;
 import org.marid.jfx.action.SpecialAction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.stream.Stream;
+import java.util.EnumSet;
 
 import static java.util.logging.Level.WARNING;
 import static org.marid.ide.IdeNotifications.n;
@@ -46,10 +46,9 @@ public class RemoveFileEditor extends AbstractFileEditor<Path> {
 
   @Autowired
   public RemoveFileEditor(Directories directories, ProjectManager projectManager, SpecialAction removeAction) {
-    super(path -> Stream.concat(
-        Stream.of(directories.getProfiles()),
-        projectManager.getProfiles().stream().map(ProjectProfile::getPath)
-    ).noneMatch(path::equals));
+    super(path -> projectManager.getProfile(path)
+        .map(p -> EnumSet.allOf(ProjectFileType.class).stream().noneMatch(t -> p.get(t).equals(path)))
+        .orElse(false));
     this.removeAction = removeAction;
   }
 

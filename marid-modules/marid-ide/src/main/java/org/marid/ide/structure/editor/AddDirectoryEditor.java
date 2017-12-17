@@ -22,14 +22,16 @@
 package org.marid.ide.structure.editor;
 
 import javafx.scene.control.TextInputDialog;
+import javafx.stage.Modality;
+import javafx.stage.StageStyle;
 import org.jetbrains.annotations.NotNull;
+import org.marid.ide.Ide;
 import org.marid.jfx.action.SpecialAction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Optional;
 
 import static java.util.logging.Level.WARNING;
 import static org.marid.ide.IdeNotifications.n;
@@ -52,18 +54,19 @@ public class AddDirectoryEditor extends AbstractFileEditor<Path> {
   @Override
   protected void edit(@NotNull Path file, @NotNull Path context) {
     final TextInputDialog dialog = new TextInputDialog();
-    dialog.setTitle(s("Add a directory"));
     dialog.setContentText(s("Directory name") + ":");
-    final Optional<String> optionalDirectoryName = dialog.showAndWait();
-    if (optionalDirectoryName.isPresent()) {
-      final String dirName = optionalDirectoryName.get();
+    dialog.setTitle(s("Add a directory"));
+    dialog.initStyle(StageStyle.UTILITY);
+    dialog.initOwner(Ide.primaryStage);
+    dialog.initModality(Modality.WINDOW_MODAL);
+    dialog.showAndWait().ifPresent(dirName -> {
       final Path path = file.resolve(dirName);
       try {
         Files.createDirectory(path);
       } catch (Exception x) {
         n(WARNING, "Unable to create a directory {0}", x, path);
       }
-    }
+    });
   }
 
   @NotNull

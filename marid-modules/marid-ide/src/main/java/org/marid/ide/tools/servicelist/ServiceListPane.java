@@ -122,7 +122,7 @@ public class ServiceListPane extends BorderPane {
     ));
     setTop(toolBar);
 
-    setPrefSize(800, 800);
+    setPrefSize(800, 600);
   }
 
   public void save() {
