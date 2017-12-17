@@ -21,8 +21,12 @@
 
 package org.marid.ide.structure.editor;
 
+import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.marid.jfx.action.FxAction;
+
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 
@@ -57,5 +61,16 @@ public abstract class AbstractFileEditor<T> implements FileEditor {
         return null;
       }
     }
+  }
+
+  protected ObservableValue<ObservableList<FxAction>> children(@NotNull T context) {
+    return null;
+  }
+
+  @Nullable
+  @Override
+  public ObservableValue<ObservableList<FxAction>> getChildren(@NotNull Path path) {
+    final T context = editorContext(path);
+    return context == null ? null : children(context);
   }
 }

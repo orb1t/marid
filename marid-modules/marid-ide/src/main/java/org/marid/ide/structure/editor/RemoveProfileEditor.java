@@ -21,13 +21,14 @@
 
 package org.marid.ide.structure.editor;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.marid.ide.common.Directories;
 import org.marid.ide.project.ProjectManager;
+import org.marid.jfx.action.SpecialAction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -38,11 +39,13 @@ import java.nio.file.Path;
 public class RemoveProfileEditor extends AbstractFileEditor<Path> {
 
   private final ProjectManager projectManager;
+  private final SpecialAction removeAction;
 
   @Autowired
-  public RemoveProfileEditor(Directories directories, ProjectManager projectManager) {
+  public RemoveProfileEditor(Directories directories, ProjectManager projectManager, SpecialAction removeAction) {
     super(p -> Files.isDirectory(p) && p.getParent().equals(directories.getProfiles()));
     this.projectManager = projectManager;
+    this.removeAction = removeAction;
   }
 
   @NotNull
@@ -54,13 +57,13 @@ public class RemoveProfileEditor extends AbstractFileEditor<Path> {
   @NotNull
   @Override
   public String getIcon() {
-    return icon("D_FOLDER_REMOVE");
+    return "D_FOLDER_REMOVE";
   }
 
   @NotNull
   @Override
-  public String getGroup() {
-    return "profile";
+  public SpecialAction getSpecialAction() {
+    return removeAction;
   }
 
   @Nullable

@@ -32,8 +32,6 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.marid.misc.Urls;
-import org.marid.runtime.context.MaridDefaultContextListener;
-import org.marid.runtime.context.MaridLogContextListener;
 import org.springframework.util.FileSystemUtils;
 
 import java.io.IOException;
@@ -47,11 +45,10 @@ import java.nio.file.Path;
 import java.util.EnumMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.nio.file.Files.write;
-import static java.util.Arrays.asList;
 import static java.util.EnumSet.allOf;
+import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.WARNING;
 import static java.util.stream.Collectors.toMap;
 import static org.marid.ide.project.ProjectFileType.*;
@@ -105,8 +102,8 @@ public class ProjectProfile implements Observable {
     updateClassLoader();
   }
 
-  public Path get(ProjectFileType type) {
-    return paths.get(type);
+  public Path get(ProjectFileType type, String... path) {
+    return Stream.of(path).reduce(paths.get(type), Path::resolve, (a1, a2) -> a2);
   }
 
   private Model loadModel() {
@@ -114,14 +111,7 @@ public class ProjectProfile implements Observable {
       final MavenXpp3Reader reader = new MavenXpp3Reader();
       return reader.read(is);
     } catch (NoSuchFileException x) {
-      try {
-        write(get(CONTEXT_LISTENERS), asList(
-            MaridLogContextListener.class.getName(),
-            MaridDefaultContextListener.class.getName()
-        ), UTF_8);
-      } catch (IOException ix) {
-        log(logger, WARNING, "Unable to write default services", ix);
-      }
+      log(logger, INFO, "No pom.xml exists: creating new");
     } catch (IOException x) {
       log(logger, WARNING, "Unable to read pom.xml", x);
     } catch (XmlPullParserException x) {

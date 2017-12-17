@@ -22,6 +22,7 @@
 package org.marid.l10n;
 
 import org.jetbrains.annotations.NotNull;
+
 import java.text.MessageFormat;
 import java.util.Formatter;
 import java.util.Locale;

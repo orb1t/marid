@@ -58,14 +58,17 @@ public class ProjectStructureActions {
         final Path file = item.getValue();
         final Runnable task = editor.getEditAction(file);
         if (task != null) {
-          final FxAction action = editor.getSpecialAction() != null
-              ? new FxAction(editor.getSpecialAction())
-              : new FxAction(name, editor.getGroup(), "Actions");
+          final ObservableValue<ObservableList<FxAction>> children = editor.getChildren(file);
+          final FxAction action = new FxAction(editor.getSpecialAction());
           actions.add(action
               .bindText(ls(editor.getName()))
               .bindIcon(new SimpleStringProperty(editor.getIcon()))
-              .setDisabled(false)
-              .setEventHandler(e -> task.run()));
+              .setDisabled(false));
+          if (children != null) {
+            action.bindChildren(children);
+          } else {
+            action.setEventHandler(event -> task.run());
+          }
         }
       });
       return actions;

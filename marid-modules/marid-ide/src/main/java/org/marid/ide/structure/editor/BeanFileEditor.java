@@ -21,6 +21,7 @@
 
 package org.marid.ide.structure.editor;
 
+import org.jetbrains.annotations.NotNull;
 import org.marid.dependant.beaneditor.BeanConfiguration;
 import org.marid.ide.IdeDependants;
 import org.marid.ide.project.ProjectManager;
@@ -29,8 +30,6 @@ import org.marid.jfx.action.SpecialAction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import java.nio.file.Path;
 
 import static org.marid.ide.project.ProjectFileType.BEANS_XML;
@@ -62,13 +61,7 @@ public class BeanFileEditor extends AbstractFileEditor<ProjectProfile> {
   @NotNull
   @Override
   public String getIcon() {
-    return icon("M_APPS");
-  }
-
-  @NotNull
-  @Override
-  public String getGroup() {
-    return "bean";
+    return "M_APPS";
   }
 
   @Override
@@ -81,7 +74,7 @@ public class BeanFileEditor extends AbstractFileEditor<ProjectProfile> {
     dependants.start(new BeanConfiguration(context));
   }
 
-  @Nullable
+  @NotNull
   @Override
   public SpecialAction getSpecialAction() {
     return editAction;

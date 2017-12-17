@@ -19,36 +19,10 @@
  * #L%
  */
 
-package org.marid.ide.structure.editor;
+package org.marid.ide.tools.servicelist;
 
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.PropertyKey;
-import org.marid.jfx.action.FxAction;
-import org.marid.jfx.action.SpecialAction;
+@FunctionalInterface
+public interface ServiceListProvider {
 
-import java.nio.file.Path;
-
-/**
- * @author Dmitry Ovchinnikov
- */
-public interface FileEditor {
-
-  @Nullable
-  Runnable getEditAction(@NotNull Path path);
-
-  @NotNull
-  String getName();
-
-  @PropertyKey(resourceBundle = "fonts.meta")
-  @NotNull
-  String getIcon();
-
-  @NotNull
-  SpecialAction getSpecialAction();
-
-  @Nullable
-  ObservableValue<ObservableList<FxAction>> getChildren(@NotNull Path path);
+  String getServiceClassName();
 }

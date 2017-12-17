@@ -21,8 +21,6 @@
 
 package org.marid.ide.project;
 
-import org.marid.runtime.context.MaridContextListener;
-
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Stream;
@@ -47,8 +45,7 @@ public enum ProjectFileType {
   APPLICATION_PROPERTIES(SRC_MAIN_RESOURCES, "application.properties"),
   BEANS_XML(META_DIR, "beans.xml"),
   TARGET_LIB(TARGET, "lib"),
-  TARGET_CLASSES(TARGET, "classes"),
-  CONTEXT_LISTENERS(SERVICES, MaridContextListener.class.getName());
+  TARGET_CLASSES(TARGET, "classes");
 
   public final Path relative;
 

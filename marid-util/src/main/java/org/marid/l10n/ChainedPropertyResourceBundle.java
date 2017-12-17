@@ -22,6 +22,7 @@
 package org.marid.l10n;
 
 import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -30,33 +31,35 @@ import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public class ChainedPropertyResourceBundle extends ResourceBundle {
 
-  private final ArrayList<Properties> propertiesList = new ArrayList<>();
+  private final Properties[] properties;
 
-  public void load(URL url, boolean useCaches) throws IOException {
-    final URLConnection connection = url.openConnection();
-    connection.setUseCaches(useCaches);
-    try (final Reader reader = new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8)) {
-      final Properties properties = new Properties();
-      properties.load(reader);
-      propertiesList.add(properties);
+  public ChainedPropertyResourceBundle(URL[] urls, boolean useCaches) throws IOException {
+    properties = new Properties[urls.length];
+    for (int i = 0; i < urls.length; i++) {
+      properties[i] = new Properties();
+      final URLConnection connection = urls[i].openConnection();
+      connection.setUseCaches(useCaches);
+      try (final Reader reader = new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8)) {
+        properties[i].load(reader);
+      }
     }
-    propertiesList.trimToSize();
   }
 
   @Override
   public boolean containsKey(@NotNull String key) {
-    return propertiesList.stream().anyMatch(p -> p.containsKey(key)) || parent != null && parent.containsKey(key);
+    return Stream.of(properties).anyMatch(p -> p.containsKey(key)) || parent != null && parent.containsKey(key);
   }
 
   @Override
   protected String handleGetObject(@NotNull String key) {
-    return propertiesList.stream()
+    return Stream.of(properties)
         .map(p -> p.getProperty(key))
         .filter(Objects::nonNull)
         .findAny()
@@ -66,7 +69,7 @@ public class ChainedPropertyResourceBundle extends ResourceBundle {
   @NotNull
   @Override
   protected Set<String> handleKeySet() {
-    return propertiesList.stream().flatMap(p -> p.stringPropertyNames().stream()).collect(Collectors.toSet());
+    return Stream.of(properties).flatMap(p -> p.stringPropertyNames().stream()).collect(Collectors.toSet());
   }
 
   @NotNull
