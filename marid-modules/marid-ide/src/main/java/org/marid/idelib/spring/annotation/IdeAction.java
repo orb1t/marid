@@ -35,7 +35,7 @@ import static java.lang.annotation.ElementType.*;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({METHOD, TYPE, FIELD, PARAMETER, ANNOTATION_TYPE})
-@Qualifier
 @Bean
+@Qualifier
 public @interface IdeAction {
 }

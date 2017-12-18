@@ -29,11 +29,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Spliterator;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -42,12 +38,8 @@ import java.util.stream.StreamSupport;
 public class ActionConfiguration {
 
   @IdeAction
-  public Supplier<List<FxAction>> ideActions(@IdeAction ObjectFactory<List<FxAction>> actions,
-                                             @IdeAction ObjectFactory<List<Spliterator<FxAction>>> actionQueues) {
-    return () -> Stream.concat(
-        actions.getObject().stream(),
-        actionQueues.getObject().stream().flatMap(s -> StreamSupport.stream(s, false))
-    ).collect(Collectors.toList());
+  public Supplier<List<FxAction>> ideActions(@IdeAction ObjectFactory<List<FxAction>> ideActionLists) {
+    return ideActionLists::getObject;
   }
 
   @Bean

@@ -15,6 +15,7 @@
           <file>file://$MODULE_DIR$/src/main/java/org/marid/dependant/modbus/ModbusSourceConfiguration.java</file>
         </fileset>
         <fileset id="fileset4" name="Project Config" removed="false">
+          <dependency>fileset</dependency>
           <file>file://$MODULE_DIR$/src/main/java/org/marid/dependant/project/config/ProjectConfigConfiguration.java</file>
         </fileset>
         <fileset id="fileset5" name="Settings" removed="false">

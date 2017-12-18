@@ -68,7 +68,7 @@ public class Ide extends Application {
             PREFERENCES.getDouble("width", 800),
             PREFERENCES.getDouble("height", 800)
         ));
-        primaryStage.getIcons().addAll(MaridIconFx.getIcons(24, 32));
+        primaryStage.getIcons().addAll(MaridIconFx.getIcons(22, 24, 32));
         primaryStage.setMaximized(PREFERENCES.getBoolean("maximized", false));
         primaryStage.addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, event -> {
           PREFERENCES.putBoolean("maximized", primaryStage.isMaximized());
