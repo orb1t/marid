@@ -40,6 +40,9 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 
+/**
+ * Runtime creation context.
+ */
 public final class BeanContext extends BeanTypeContext implements MaridRuntime, AutoCloseable {
 
   private final BeanContext parent;
@@ -154,6 +157,7 @@ public final class BeanContext extends BeanTypeContext implements MaridRuntime, 
   }
 
   @NotNull
+  @Override
   public Type getBeanType(@NotNull String name) {
     final BeanContext context = getContext(name);
     return context.getBean().getFactory().getType(null, context);

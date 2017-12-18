@@ -25,6 +25,7 @@ package org.marid.runtime;
 import org.marid.beans.RuntimeBean;
 import org.marid.runtime.context.BeanConfiguration;
 import org.marid.runtime.context.BeanContext;
+import org.marid.runtime.context.MaridContext;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -49,16 +50,13 @@ public class MaridLauncher {
       throw new IllegalStateException("No beans.xml file found");
     }
 
-    final AtomicReference<BeanContext> contextRef = new AtomicReference<>();
+    final AtomicReference<MaridContext> contextRef = new AtomicReference<>();
     daemonThread(contextRef).start();
 
     try (final Reader reader = new InputStreamReader(beansXmlUrl.openStream(), UTF_8)) {
       final BeanConfiguration configuration = new BeanConfiguration(classLoader, System.getProperties());
       final RuntimeBean bean = read(reader, e -> new RuntimeBean(null, e));
-      final BeanContext context = new BeanContext(configuration, bean);
-      contextRef.set(context);
-    } catch (Throwable x) {
-      x.printStackTrace();
+      contextRef.set(new MaridContext(configuration, new BeanContext(configuration, bean)));
     }
   }
 

@@ -21,8 +21,6 @@
 
 package org.marid.runtime.context;
 
-import org.marid.beans.MaridBean;
-
 import java.util.Properties;
 
 /**
@@ -41,6 +39,4 @@ public interface MaridRuntime {
   String resolvePlaceholders(String value);
 
   Properties getApplicationProperties();
-
-  MaridBean getBean();
 }
