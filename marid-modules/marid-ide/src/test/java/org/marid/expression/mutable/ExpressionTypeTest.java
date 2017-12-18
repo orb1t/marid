@@ -28,9 +28,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.marid.beans.BeanTypeContext;
+import org.marid.beans.MaridBean;
 import org.marid.expression.mutable.testclasses.MyComplexBean;
 import org.marid.expression.mutable.testclasses.MyList;
-import org.marid.idefx.beans.BeanUtils;
 import org.marid.idefx.beans.IdeBean;
 import org.marid.idefx.beans.IdeBeanContext;
 import org.marid.io.Xmls;
@@ -42,6 +42,7 @@ import java.lang.reflect.Type;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -85,7 +86,10 @@ class ExpressionTypeTest {
   @ParameterizedTest
   @MethodSource("testData")
   void testBean(String beanName, Type expectedType) {
-    final IdeBean bean = BeanUtils.find(root, beanName);
+    final MaridBean bean = root.descendants()
+        .filter(b -> beanName.equals(b.getName()))
+        .findAny()
+        .orElseThrow(NoSuchElementException::new);
     final BeanTypeContext context = new IdeBeanContext(bean, classLoader);
     final Type type = bean.getFactory().getType(null, context);
     assertEquals(expectedType, type);

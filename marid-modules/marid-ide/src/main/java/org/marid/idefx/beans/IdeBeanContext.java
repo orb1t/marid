@@ -21,24 +21,26 @@
 
 package org.marid.idefx.beans;
 
-import org.marid.beans.BeanTypeContext;
-
 import org.jetbrains.annotations.NotNull;
+import org.marid.beans.BeanTypeContext;
+import org.marid.beans.MaridBean;
+
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
 public class IdeBeanContext extends BeanTypeContext {
 
-  private final IdeBean bean;
+  private final MaridBean bean;
   private final ClassLoader classLoader;
   private final List<Throwable> errors = new ArrayList<>();
 
-  public IdeBeanContext(IdeBean bean, ClassLoader classLoader) {
+  public IdeBeanContext(MaridBean bean, ClassLoader classLoader) {
     this.bean = bean;
     this.classLoader = classLoader;
   }
 
+  @NotNull
   @Override
   public ClassLoader getClassLoader() {
     return classLoader;
@@ -51,7 +53,7 @@ public class IdeBeanContext extends BeanTypeContext {
 
   @NotNull
   @Override
-  public IdeBean getBean() {
+  public MaridBean getBean() {
     return bean;
   }
 
