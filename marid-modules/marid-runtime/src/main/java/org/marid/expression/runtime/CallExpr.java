@@ -21,6 +21,8 @@
 
 package org.marid.expression.runtime;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.marid.expression.generic.CallExpression;
 import org.marid.expression.xml.XmlExpression;
 import org.marid.function.ToImmutableList;
@@ -28,14 +30,13 @@ import org.marid.runtime.context.BeanContext;
 import org.marid.types.Invokable;
 import org.w3c.dom.Element;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static java.util.stream.Collectors.joining;
+import static org.marid.expression.generic.CallExpression.invokable;
 import static org.marid.types.Classes.value;
 
 public final class CallExpr extends Expr implements CallExpression {
@@ -65,7 +66,7 @@ public final class CallExpr extends Expr implements CallExpression {
   @Override
   protected Object execute(@Nullable Object self, @Nullable Type owner, @NotNull BeanContext context) {
     final Type[] argTypes = getArgs().stream().map(a -> a.getType(owner, context)).toArray(Type[]::new);
-    final Optional<? extends Invokable<?>> optional = CallExpression.invokable(this, owner, context, argTypes);
+    final Optional<? extends Invokable<?>> optional = invokable(getTarget(), getMethod(), owner, context, argTypes);
     if (optional.isPresent()) {
       final Invokable<?> invokable = optional.get();
       final Class<?>[] argClasses = invokable.getParameterClasses();

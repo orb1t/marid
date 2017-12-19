@@ -74,6 +74,7 @@ public abstract class Expr implements Expression {
       case "get": return new GetExpr(element);
       case "set": return new SetExpr(element);
       case "null": return new NullExpr(element);
+      case "apply": return new ApplyExpr(element);
       default: throw new IllegalArgumentException(element.getTagName());
     }
   }

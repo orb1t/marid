@@ -51,7 +51,7 @@ public interface CallExpression extends Expression {
   @Override
   default Type getType(@Nullable Type owner, @NotNull BeanTypeContext context) {
     final Type[] argTypes = getArgs().stream().map(a -> a.getType(owner, context)).toArray(Type[]::new);
-    return invokable(this, owner, context, argTypes)
+    return invokable(getTarget(), getMethod(), owner, context, argTypes)
         .map(invokable -> {
           final Type r = context.resolve(invokable.getParameterTypes(), argTypes, this, invokable.getReturnType());
           if (invokable.isStatic()) {
@@ -86,20 +86,21 @@ public interface CallExpression extends Expression {
   }
 
   @NotNull
-  static Optional<? extends Invokable<?>> invokable(@NotNull CallExpression e,
+  static Optional<? extends Invokable<?>> invokable(@NotNull Expression target,
+                                                    @NotNull String method,
                                                     @Nullable Type owner,
                                                     @NotNull BeanTypeContext context,
                                                     @NotNull Type... argTypes) {
-    if ("new".equals(e.getMethod())) {
-      return e.getTarget().getTargetClass(owner, context)
+    if ("new".equals(method)) {
+      return target.getTargetClass(owner, context)
           .flatMap(c -> Stream.of(c.getConstructors()))
           .map(InvokableConstructor::new)
           .filter(c -> matches(c, argTypes))
           .findFirst();
     } else {
-      return e.getTarget().getTargetClass(owner, context)
+      return target.getTargetClass(owner, context)
           .flatMap(c -> Stream.of(c.getMethods()))
-          .filter(m -> m.getName().equals(e.getMethod()))
+          .filter(m -> m.getName().equals(method))
           .map(InvokableMethod::new)
           .filter(m -> matches(m, argTypes))
           .findFirst();

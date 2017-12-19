@@ -1,6 +1,6 @@
 /*-
  * #%L
- * marid-ide
+ * marid-runtime
  * %%
  * Copyright (C) 2012 - 2017 MARID software development group
  * %%
@@ -19,36 +19,19 @@
  * #L%
  */
 
-package org.marid.idefx.beans;
+package org.marid.beans;
 
 import org.jetbrains.annotations.NotNull;
-import org.marid.beans.BeanTypeContext;
-import org.marid.beans.MaridBean;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.NoSuchElementException;
 
-public class IdeBeanContext extends BeanTypeContext {
+public class TestBeanTypeContext extends BeanTypeContext {
 
   private final MaridBean bean;
-  private final ClassLoader classLoader;
-  private final List<Throwable> errors = new ArrayList<>();
 
-  public IdeBeanContext(MaridBean bean, ClassLoader classLoader) {
+  public TestBeanTypeContext(MaridBean bean) {
     this.bean = bean;
-    this.classLoader = classLoader;
-  }
-
-  @NotNull
-  @Override
-  public ClassLoader getClassLoader() {
-    return classLoader;
-  }
-
-  @Override
-  public <E extends Throwable> void throwError(@NotNull E exception) throws E {
-    errors.add(exception);
   }
 
   @NotNull
@@ -63,10 +46,7 @@ public class IdeBeanContext extends BeanTypeContext {
     return bean.matchingCandidates()
         .filter(b -> b.getName().equals(name))
         .findFirst()
-        .map(b -> b.getFactory().getType(null, new IdeBeanContext(b, classLoader)))
-        .orElseGet(() -> {
-          errors.add(new IllegalStateException("Unable to get type of the bean " + name));
-          return Object.class;
-        });
+        .map(b -> b.getFactory().getType(null, new TestBeanTypeContext(b)))
+        .orElseThrow(() -> new NoSuchElementException(name));
   }
 }
