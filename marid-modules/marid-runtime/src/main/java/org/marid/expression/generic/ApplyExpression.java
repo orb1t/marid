@@ -27,10 +27,10 @@ import org.marid.beans.BeanTypeContext;
 import org.marid.types.Types;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 public interface ApplyExpression extends Expression {
@@ -50,12 +50,9 @@ public interface ApplyExpression extends Expression {
   @NotNull
   @Override
   default Type getType(@Nullable Type owner, @NotNull BeanTypeContext context) {
-    final AtomicReference<Class<?>> itf = new AtomicReference<>();
-    final Method[] sams = context.getClass(getType()).stream()
-        .filter(Class::isInterface)
-        .peek(itf::set)
-        .flatMap(c -> Stream.of(c.getMethods()))
-        .filter(m -> !m.isDefault() && m.getDeclaringClass().isInterface())
+    final Class<?> samType = context.getClass(getType()).orElse(void.class);
+    final Method[] sams = Stream.of(samType.getMethods())
+        .filter(m -> !m.isDefault() && m.getDeclaringClass().isInterface() && !Modifier.isStatic(m.getModifiers()))
         .toArray(Method[]::new);
     if (sams.length == 0 || sams.length > 1) {
       context.throwError(new IllegalStateException("SAM method error"));
@@ -71,7 +68,7 @@ public interface ApplyExpression extends Expression {
           .toArray(Type[]::new);
       return CallExpression.invokable(getTarget(), getMethod(), owner, context, argTypes)
           .map(m -> {
-            final Type type = Types.getType(itf.get());
+            final Type type = Types.getType(samType);
             final Type result = Types.evaluate(e -> {
               for (int i = 0; i < getArgs().size(); i++) {
                 final MappedExpression expression = getArgs().get(i);

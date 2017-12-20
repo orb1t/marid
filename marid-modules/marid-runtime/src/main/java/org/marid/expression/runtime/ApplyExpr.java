@@ -29,10 +29,7 @@ import org.marid.function.ToImmutableList;
 import org.marid.runtime.context.BeanContext;
 import org.w3c.dom.Element;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.lang.reflect.Proxy;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
@@ -99,7 +96,7 @@ public class ApplyExpr extends Expr implements ApplyExpression {
         .filter(Class::isInterface)
         .peek(itf::set)
         .flatMap(c -> Stream.of(c.getMethods()))
-        .filter(m -> !m.isDefault() && m.getDeclaringClass().isInterface())
+        .filter(m -> !m.isDefault() && m.getDeclaringClass().isInterface() && !Modifier.isStatic(m.getModifiers()))
         .toArray(Method[]::new);
     if (sams.length == 0 || sams.length > 1) {
       context.throwError(new IllegalStateException("SAM method error"));
@@ -110,7 +107,7 @@ public class ApplyExpr extends Expr implements ApplyExpression {
       final Type targetType = getTarget().getType(selfType, context);
       final Type[] argTypes = getArgs().stream()
           .map(e -> e.getMappedIndex() >= 0
-              ? samParameters[e.getMappedIndex()].getType()
+              ? samParameters[e.getMappedIndex()].getParameterizedType()
               : e.getValue().getType(targetType, context))
           .toArray(Type[]::new);
       return invokable(getTarget(), getMethod(), selfType, context, argTypes)
