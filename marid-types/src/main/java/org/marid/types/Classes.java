@@ -27,45 +27,54 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.*;
 import java.util.LinkedHashSet;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 /**
- * @author Dmitry Ovchinnikov
+ * Utilities for classes.
+ *
+ * @since 0.9.7.
  */
 public interface Classes {
 
-  @NotNull
   static Stream<Class<?>> classes(@NotNull Class<?> type) {
+    return classes(type, true);
+  }
+
+  @NotNull
+  static Stream<Class<?>> classes(@NotNull Class<?> type, boolean accessible) {
     final LinkedHashSet<Class<?>> set = new LinkedHashSet<>();
-    addClasses(type, set);
+    addClasses(type, set, accessible);
     return set.stream();
   }
 
-  private static void addClasses(@NotNull Class<?> type, @NotNull LinkedHashSet<Class<?>> classes) {
+  private static void addClasses(@NotNull Class<?> type, @NotNull LinkedHashSet<Class<?>> classes, boolean accessible) {
     if (type.isInterface()) {
-      ifAccessible(type, classes::add);
+      if (!accessible || isAccessible(type)) {
+        classes.add(type);
+      }
       for (final Class<?> i : type.getInterfaces()) {
-        addClasses(i, classes);
+        addClasses(i, classes, accessible);
       }
     } else {
       for (Class<?> c = type; c != null; c = c.getSuperclass()) {
-        ifAccessible(c, classes::add);
+        if (!accessible || isAccessible(c)) {
+          classes.add(c);
+        }
       }
       for (Class<?> c = type; c != null; c = c.getSuperclass()) {
         for (final Class<?> i : c.getInterfaces()) {
-          addClasses(i, classes);
+          addClasses(i, classes, accessible);
         }
       }
     }
   }
 
-  static <T> void ifAccessible(@NotNull Class<T> type, @NotNull Consumer<Class<T>> consumer) {
+  static boolean isAccessible(@NotNull Class<?> type) {
     try {
       MethodHandles.publicLookup().accessClass(type);
-      consumer.accept(type);
+      return true;
     } catch (IllegalAccessException | SecurityException x) {
-      // do nothing
+      return false;
     }
   }
 
