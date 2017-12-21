@@ -25,7 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.invoke.MethodHandles;
-import java.lang.reflect.*;
+import java.lang.reflect.Array;
 import java.util.LinkedHashSet;
 import java.util.stream.Stream;
 
@@ -36,10 +36,22 @@ import java.util.stream.Stream;
  */
 public interface Classes {
 
+  /**
+   * Enumerates all public accessible classes from the given type (including the argument itself).
+   * @param type A type to enumerate from.
+   * @return All subclasses (classes and interfaces).
+   */
+  @NotNull
   static Stream<Class<?>> classes(@NotNull Class<?> type) {
     return classes(type, true);
   }
 
+  /**
+   * Enumerates classes from the given type (including the argument itself).
+   * @param type type to enumerate from.
+   * @param accessible whether the accessibility check is performed on each class or not.
+   * @return all subclasses (classes and interfaces).
+   */
   @NotNull
   static Stream<Class<?>> classes(@NotNull Class<?> type, boolean accessible) {
     final LinkedHashSet<Class<?>> set = new LinkedHashSet<>();
@@ -69,6 +81,11 @@ public interface Classes {
     }
   }
 
+  /**
+   * Checks whether the given type is accessible or not.
+   * @param type A type.
+   * @return Accessible flag.
+   */
   static boolean isAccessible(@NotNull Class<?> type) {
     try {
       MethodHandles.publicLookup().accessClass(type);
@@ -78,6 +95,11 @@ public interface Classes {
     }
   }
 
+  /**
+   * Returns a boxed type for the given type.
+   * @param type type.
+   * @return Boxed type.
+   */
   @NotNull
   static Class<?> wrapper(@NotNull Class<?> type) {
     switch (type.getName()) {
@@ -94,6 +116,15 @@ public interface Classes {
     }
   }
 
+  /**
+   * Returns a transformed value for the given type. If value is null and type is a primitive class then
+   * returns a default value for the given type. If the type is a primitive array class and value is
+   * not an array of primitives then returns an array where each element is set from the given array
+   * after unboxing. Otherwise, returns the originally passed value.
+   * @param type type.
+   * @param value value to transform.
+   * @return Transformed value.
+   */
   static Object value(@NotNull Class<?> type, @Nullable Object value) {
     if (type.isPrimitive()) {
       if (value == null) {
@@ -114,26 +145,28 @@ public interface Classes {
     } else if (value == null) {
       return null;
     } else if (type.isArray()) {
-      final int len = Array.getLength(value);
-      final Object array = Array.newInstance(type.getComponentType(), len);
-      for (int i = 0; i < len; i++) {
-        Array.set(array, i, value(type.getComponentType(), Array.get(value, i)));
+      if (type.getComponentType() == value.getClass().getComponentType()) {
+        return value;
+      } else {
+        final int len = Array.getLength(value);
+        final Object array = Array.newInstance(type.getComponentType(), len);
+        for (int i = 0; i < len; i++) {
+          Array.set(array, i, value(type.getComponentType(), Array.get(value, i)));
+        }
+        return array;
       }
-      return array;
     } else {
       return value;
     }
   }
 
-  static Object[] args(@NotNull Executable executable, @NotNull Object[] args) {
-    final Class<?>[] types = executable.getParameterTypes();
-    final Object[] result = new Object[args.length];
-    for (int i = 0; i < types.length; i++) {
-      result[i] = value(types[i], args[i]);
-    }
-    return result;
-  }
-
+  /**
+   * Loads a class by name or returns a corresponding primitive type for the given primitive type name.
+   * @param name class name.
+   * @param classLoader class loader.
+   * @return A class loaded by the given name.
+   * @throws ClassNotFoundException if the class cannot be located by the specified class loader.
+   */
   @NotNull
   static Class<?> loadClass(@NotNull String name, @NotNull ClassLoader classLoader) throws ClassNotFoundException {
     switch (name) {
@@ -148,24 +181,5 @@ public interface Classes {
       case "void": return void.class;
       default: return Class.forName(name, false, classLoader);
     }
-  }
-
-  @NotNull
-  static Stream<Method> allClassMethods(@NotNull Class<?> type) {
-    return type.isInterface() || type == Object.class
-        ? Stream.empty()
-        : Stream.concat(Stream.of(type.getDeclaredMethods()), allClassMethods(type.getSuperclass()));
-  }
-
-  @NotNull
-  static Stream<Field> allClassFields(@NotNull Class<?> type) {
-    return type.isInterface() || type == Object.class
-        ? Stream.empty()
-        : Stream.concat(Stream.of(type.getDeclaredFields()), allClassFields(type.getSuperclass()));
-  }
-
-  @NotNull
-  static Stream<Member> allClassMembers(@NotNull Class<?> type) {
-    return Stream.concat(allClassMethods(type), allClassFields(type));
   }
 }
