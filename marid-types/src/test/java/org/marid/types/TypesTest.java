@@ -19,16 +19,15 @@
  * #L%
  */
 
-package org.marid.runtime.types;
+package org.marid.types;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.marid.runtime.types.AuxTypeUtils.I1;
-import org.marid.runtime.types.AuxTypeUtils.Map1;
-import org.marid.types.Types;
+import org.marid.types.AuxTypeUtils.I1;
+import org.marid.types.AuxTypeUtils.Map1;
 
 import java.io.Serializable;
 import java.io.Writer;
@@ -42,8 +41,8 @@ import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Stream.of;
 import static org.apache.commons.lang3.reflect.TypeUtils.parameterize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.marid.runtime.types.AuxTypeUtils.p;
-import static org.marid.runtime.types.AuxTypeUtils.w;
+import static org.marid.types.AuxTypeUtils.p;
+import static org.marid.types.AuxTypeUtils.w;
 import static org.marid.types.Classes.classes;
 
 @Tag("normal")

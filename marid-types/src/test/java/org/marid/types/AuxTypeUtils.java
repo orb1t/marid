@@ -19,11 +19,7 @@
  * #L%
  */
 
-package org.marid.runtime.types;
-
-import org.marid.types.MaridArrayType;
-import org.marid.types.MaridParameterizedType;
-import org.marid.types.MaridWildcardType;
+package org.marid.types;
 
 import java.io.Closeable;
 import java.io.Writer;

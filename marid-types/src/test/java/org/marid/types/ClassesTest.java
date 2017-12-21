@@ -19,7 +19,7 @@
  * #L%
  */
 
-package org.marid.runtime.types;
+package org.marid.types;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.ParameterizedTest;
