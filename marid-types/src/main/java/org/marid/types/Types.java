@@ -21,10 +21,10 @@
 
 package org.marid.types;
 
-import org.marid.collections.MaridSets;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.marid.collections.MaridSets;
+
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -39,10 +39,6 @@ import static java.util.stream.Stream.of;
 import static org.marid.types.MaridWildcardType.ALL;
 
 public interface Types {
-
-  static boolean isArrayType(@NotNull Type type) {
-    return getArrayComponentType(type) != null;
-  }
 
   @Nullable
   static Type getArrayComponentType(@NotNull Type type) {
@@ -248,18 +244,19 @@ public interface Types {
   private static boolean isAssignable(Type from, Type to, HashSet<TypeVariable<?>> passed) {
     if (to.equals(from) || Object.class.equals(to) || void.class.equals(from)) {
       return true;
-    } if (from instanceof WildcardType) {
+    }
+    if (from instanceof WildcardType) {
       final WildcardType w = (WildcardType) from;
       return of(w.getUpperBounds()).anyMatch(t -> isAssignable(to, t, passed));
-    } else if (Types.isArrayType(to)) {
-      if (Types.isArrayType(from)) {
-        final Type fromCt = getArrayComponentType(from);
-        final Type toCt = getArrayComponentType(to);
-        return isAssignable(fromCt, toCt, passed);
-      } else {
-        return false;
+    }
+    {
+      final Type tt = getArrayComponentType(to);
+      if (tt != null) {
+        final Type ft = getArrayComponentType(from);
+        return ft != null && isAssignable(ft, tt, passed);
       }
-    } else if (to instanceof Class<?>) {
+    }
+    if (to instanceof Class<?>) {
       final Class<?> toClass = (Class<?>) to;
       if (from instanceof Class<?>) {
         return Classes.wrapper(toClass).isAssignableFrom(Classes.wrapper((Class<?>) from));
@@ -269,12 +266,15 @@ public interface Types {
       } else {
         return false;
       }
-    } else if (to instanceof TypeVariable<?>) {
+    }
+    if (to instanceof TypeVariable<?>) {
       final TypeVariable<?> v = (TypeVariable<?>) to;
       return passed.add(v) && Arrays.stream(v.getBounds()).allMatch(t -> isAssignable(from, t, passed));
-    } else if (to instanceof WildcardType) {
+    }
+    if (to instanceof WildcardType) {
       return Arrays.stream(((WildcardType) to).getUpperBounds()).allMatch(t -> isAssignable(from, t, passed));
-    } else if (to instanceof ParameterizedType) {
+    }
+    if (to instanceof ParameterizedType) {
       final ParameterizedType t = (ParameterizedType) to;
       if (from instanceof Class<?>) {
         return isAssignable(t.getRawType(), from, passed) && of(t.getActualTypeArguments()).allMatch(ALL::equals);
