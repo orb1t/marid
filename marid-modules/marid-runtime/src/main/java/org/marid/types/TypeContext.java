@@ -23,6 +23,7 @@ package org.marid.types;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
 import java.lang.reflect.Type;
 import java.util.Optional;
 
@@ -50,10 +51,10 @@ public class TypeContext {
   public Optional<Class<?>> getClass(@NotNull String name) {
     try {
       return Optional.of(Classes.loadClass(name, getClassLoader()));
-    } catch (ClassNotFoundException x) {
-      throwError(new IllegalStateException(x));
     } catch (RuntimeException x) {
       throwError(x);
+    } catch (Exception x) {
+      throwError(new IllegalStateException(x));
     }
     return Optional.empty();
   }
