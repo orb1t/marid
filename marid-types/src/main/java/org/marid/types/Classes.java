@@ -145,8 +145,11 @@ public interface Classes {
     } else if (value == null) {
       return null;
     } else if (type.isArray()) {
-      if (type.getComponentType() == value.getClass().getComponentType()) {
+      final Class<?> valueClass = value.getClass();
+      if (type.getComponentType() == valueClass.getComponentType()) {
         return value;
+      } else if (!valueClass.isArray()) {
+        throw new IllegalArgumentException(valueClass.getTypeName() + " is not an array");
       } else {
         final int len = Array.getLength(value);
         final Object array = Array.newInstance(type.getComponentType(), len);
