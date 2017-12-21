@@ -43,7 +43,7 @@ public interface ArrayExpression extends Expression {
     return getElements().stream()
         .map(e -> e.getType(owner, context))
         .distinct()
-        .reduce(Types::nct)
+        .reduce(Types::common)
         .map(e -> e instanceof Class<?> ? newInstance((Class<?>) e, 0).getClass() : new MaridArrayType(e))
         .orElse(Object[].class);
   }

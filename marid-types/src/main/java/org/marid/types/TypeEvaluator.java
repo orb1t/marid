@@ -72,7 +72,7 @@ final class TypeEvaluator implements BiConsumer<Type, Type> {
   @NotNull
   Type eval(@NotNull Type type) {
     final LinkedHashMap<TypeVariable<?>, Type> mapping = new LinkedHashMap<>(typeMappings.size());
-    typeMappings.forEach((k, v) -> mapping.put(k, v.stream().reduce(Types::nct).orElse(k)));
+    typeMappings.forEach((k, v) -> mapping.put(k, v.stream().reduce(Types::common).orElse(k)));
     return ground(type, mapping);
   }
 

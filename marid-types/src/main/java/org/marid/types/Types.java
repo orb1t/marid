@@ -42,21 +42,31 @@ public interface Types {
 
   @Nullable
   static Type getArrayComponentType(@NotNull Type type) {
+    return getArrayComponentType(type, emptySet());
+  }
+
+  private static Type getArrayComponentType(@NotNull Type type, @NotNull Set<TypeVariable<?>> passed) {
     if (type instanceof Class<?>) {
       return ((Class<?>) type).getComponentType();
     } else if (type instanceof GenericArrayType) {
       return ((GenericArrayType) type).getGenericComponentType();
     } else if (type instanceof TypeVariable<?>) {
-      return of(((TypeVariable<?>) type).getBounds())
-          .map(Types::getArrayComponentType)
-          .filter(Objects::nonNull)
-          .findFirst()
-          .orElse(null);
+      final TypeVariable<?> v = (TypeVariable<?>) type;
+      if (passed.contains(v)) {
+        return null;
+      } else {
+        final Set<TypeVariable<?>> newPassed = Sets.add(passed, v);
+        return of(v.getBounds())
+            .map(e -> getArrayComponentType(e, newPassed))
+            .filter(Objects::nonNull)
+            .reduce(Types::common)
+            .orElse(null);
+      }
     } else if (type instanceof WildcardType) {
       return of(((WildcardType) type).getUpperBounds())
-          .map(Types::getArrayComponentType)
+          .map(e -> getArrayComponentType(e, passed))
           .filter(Objects::nonNull)
-          .findFirst()
+          .reduce(Types::common)
           .orElse(null);
     } else {
       return null;
@@ -365,14 +375,14 @@ public interface Types {
   }
 
   @NotNull
-  static Type nct(@NotNull Type type1, @NotNull Type type2) {
+  static Type common(@NotNull Type type1, @NotNull Type type2) {
     final Type t1 = boxed(type1), t2 = boxed(type2);
     if (t1.equals(t2)) {
       return t1;
     } else {
       final Type at1 = getArrayComponentType(t1), at2 = getArrayComponentType(t2);
       if (at1 != null && at2 != null) {
-        final Type c = nct(at1, at2);
+        final Type c = common(at1, at2);
         return c instanceof Class<?> ? Array.newInstance((Class<?>) c, 0).getClass() : new MaridArrayType(c);
       } else {
         final Set<Type> ts = concat(types(t1), types(t2))
