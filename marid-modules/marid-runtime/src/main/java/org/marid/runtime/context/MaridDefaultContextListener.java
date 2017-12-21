@@ -116,6 +116,14 @@ public class MaridDefaultContextListener implements MaridContextListener {
         .filter(filter)
         .filter(m -> m.isDefault() || !Modifier.isStatic(m.getModifiers()) && !Modifier.isAbstract(m.getModifiers()))
         .distinct()
+        .filter(m -> {
+          try {
+            m.setAccessible(true);
+            return true;
+          } catch (Throwable x) {
+            return false;
+          }
+        })
         .reduce(new LinkedList<>(), (a, e) -> {
           if (reversed) {
             a.addFirst(e);
