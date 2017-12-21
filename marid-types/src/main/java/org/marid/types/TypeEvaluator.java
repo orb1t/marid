@@ -48,8 +48,9 @@ final class TypeEvaluator implements BiConsumer<Type, Type> {
       }
       put(typeVariable, actual);
     } else if (passed.add(formal)) {
-      if (Types.isArrayType(formal) && Types.isArrayType(actual)) {
-        accept(getArrayComponentType(formal), getArrayComponentType(actual));
+      final Type fa = Types.getArrayComponentType(formal), aa = Types.getArrayComponentType(actual);
+      if (fa != null && aa != null) {
+        accept(fa, aa);
       } else if (formal instanceof ParameterizedType) {
         final ParameterizedType p = (ParameterizedType) formal;
         final Map<TypeVariable<?>, Type> map = resolveVars(actual);
