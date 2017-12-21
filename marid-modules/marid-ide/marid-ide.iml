@@ -49,6 +49,7 @@
     <orderEntry type="library" name="Maven: eu.hansolo:Medusa:7.9" level="project" />
     <orderEntry type="library" name="Maven: com.github.javaparser:javaparser-core:3.5.2" level="project" />
     <orderEntry type="module" module-name="marid-runtime" />
+    <orderEntry type="module" module-name="marid-types" />
     <orderEntry type="library" name="Maven: org.springframework:spring-context:5.0.2.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-aop:5.0.2.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-beans:5.0.2.RELEASE" level="project" />

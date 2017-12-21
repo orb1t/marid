@@ -23,6 +23,7 @@ module marid.runtime {
 
   requires java.annotation;
   requires transitive marid.util;
+  requires transitive marid.types;
 
   exports org.marid.beans;
   exports org.marid.expression.generic;
@@ -33,5 +34,4 @@ module marid.runtime {
   exports org.marid.runtime.event;
   exports org.marid.runtime.exception;
   exports org.marid.runtime.lambda;
-  exports org.marid.types;
 }

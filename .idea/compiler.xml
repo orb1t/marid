@@ -13,6 +13,7 @@
         <module name="marid-proto" />
         <module name="marid-runtime" />
         <module name="marid-test" />
+        <module name="marid-types" />
         <module name="marid-util" />
       </profile>
     </annotationProcessing>
