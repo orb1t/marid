@@ -40,6 +40,5 @@ module marid.util {
   exports org.marid.misc;
   exports org.marid.xml;
 
-  exports org.intellij.lang.annotations; // remove that after intellij module fix
   exports org.jetbrains.annotations; // remove that after intellij module fix
 }

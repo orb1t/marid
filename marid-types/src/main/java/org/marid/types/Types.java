@@ -29,7 +29,6 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptySet;
@@ -82,10 +81,9 @@ public interface Types {
       return isGround(((GenericArrayType) type).getGenericComponentType());
     } else if (type instanceof WildcardType) {
       final WildcardType wt = (WildcardType) type;
-      final Predicate<Type[]> ground = ts -> Stream.of(ts).allMatch(Types::isGround);
-      return ground.test(wt.getUpperBounds()) && ground.test(wt.getLowerBounds());
+      return concat(of(wt.getUpperBounds()), of(wt.getLowerBounds())).allMatch(Types::isGround);
     } else if (type instanceof ParameterizedType) {
-      return Stream.of(((ParameterizedType) type).getActualTypeArguments()).allMatch(Types::isGround);
+      return of(((ParameterizedType) type).getActualTypeArguments()).allMatch(Types::isGround);
     } else {
       throw new IllegalArgumentException("Unknown type: " + type);
     }
@@ -178,7 +176,7 @@ public interface Types {
       return et instanceof Class<?> ? Array.newInstance((Class<?>) et, 0).getClass() : new MaridArrayType(et);
     } else if (type instanceof ParameterizedType) {
       final ParameterizedType t = (ParameterizedType) type;
-      final Type[] types = Stream.of(t.getActualTypeArguments()).map(e -> ground(e, map, passed)).toArray(Type[]::new);
+      final Type[] types = of(t.getActualTypeArguments()).map(e -> ground(e, map, passed)).toArray(Type[]::new);
       return new MaridParameterizedType(t.getOwnerType(), t.getRawType(), types);
     } else if (type instanceof WildcardType) {
       final WildcardType t = (WildcardType) type;
@@ -190,7 +188,7 @@ public interface Types {
       final Set<TypeVariable<?>> p = MaridSets.add(passed, v);
       final Type t = map.get(v);
       if (t == null || t.equals(v) || p == passed) { // not found or circular reference
-        final Type[] bounds = Stream.of(v.getBounds())
+        final Type[] bounds = of(v.getBounds())
             .filter(e -> !(e instanceof TypeVariable<?>) || !p.contains(e))
             .map(e -> ground(e, map, p))
             .toArray(Type[]::new);
@@ -239,7 +237,7 @@ public interface Types {
       if (t == null) {
         return v;
       } else {
-        final Set<TypeVariable<?>> p = MaridSets.add(passed, v);
+        final Set<TypeVariable<?>> p = Sets.add(passed, v);
         return p == passed ? v : resolve(t, map, p);
       }
     } else {
