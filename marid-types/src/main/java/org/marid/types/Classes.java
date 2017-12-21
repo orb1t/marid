@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 /**
  * Utilities for classes.
  *
- * @since 0.9.7.
+ * @since 0.9.7
  */
 public interface Classes {
 
