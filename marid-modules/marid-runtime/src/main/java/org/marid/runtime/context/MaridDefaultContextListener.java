@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
@@ -70,10 +70,11 @@ public class MaridDefaultContextListener implements MaridContextListener {
 
   @Override
   public void onPreDestroy(@NotNull BeanPreDestroyEvent preDestroyEvent) {
-    if (preDestroyEvent.getBean() == null) {
+    final Object bean = preDestroyEvent.getBean();
+    if (bean == null) {
       return;
     }
-    final LinkedList<Method> methods = getMethods(preDestroyEvent.getBean().getClass(), this::isPreDestroy, false);
+    final LinkedList<Method> methods = getMethods(bean.getClass(), this::isPreDestroy, false);
     final HashSet<String> passed = new HashSet<>();
     for (final Method method : methods) {
       if (passed.add(method.getName())) {
@@ -116,7 +117,6 @@ public class MaridDefaultContextListener implements MaridContextListener {
         .filter(filter)
         .filter(m -> m.isDefault() || !Modifier.isStatic(m.getModifiers()) && !Modifier.isAbstract(m.getModifiers()))
         .distinct()
-        .peek(m -> m.setAccessible(true))
         .reduce(new LinkedList<>(), (a, e) -> {
           if (reversed) {
             a.addFirst(e);
