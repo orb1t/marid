@@ -21,18 +21,19 @@
 
 package org.marid.runtime.context;
 
+import org.jetbrains.annotations.NotNull;
 import org.marid.runtime.event.*;
 import org.marid.runtime.exception.MaridBeanInitializationException;
+import org.marid.types.Classes;
 
-import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Method;
-import java.util.Comparator;
+import java.lang.reflect.Modifier;
 import java.util.HashSet;
-import java.util.TreeSet;
+import java.util.LinkedList;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static java.lang.System.getProperties;
-import static org.marid.types.Classes.methods;
 
 /**
  * @author Dmitry Ovchinnikov
@@ -54,9 +55,7 @@ public class MaridDefaultContextListener implements MaridContextListener {
     if (postConstructEvent.getBean() == null) {
       return;
     }
-    final Comparator<Method> byClass = this::cmp;
-    final Comparator<Method> cmp = byClass.thenComparing(Method::getName);
-    final TreeSet<Method> methods = methods(postConstructEvent.getBean(), this::isPostConstruct, cmp);
+    final LinkedList<Method> methods = getMethods(postConstructEvent.getBean().getClass(), this::isPostConstruct, true);
     final HashSet<String> passed = new HashSet<>();
     for (final Method method : methods) {
       if (passed.add(method.getName())) {
@@ -74,9 +73,7 @@ public class MaridDefaultContextListener implements MaridContextListener {
     if (preDestroyEvent.getBean() == null) {
       return;
     }
-    final Comparator<Method> byClass = this::cmp;
-    final Comparator<Method> cmp = byClass.thenComparing(Method::getName).reversed();
-    final TreeSet<Method> methods = methods(preDestroyEvent.getBean(), this::isPreDestroy, cmp);
+    final LinkedList<Method> methods = getMethods(preDestroyEvent.getBean().getClass(), this::isPreDestroy, false);
     final HashSet<String> passed = new HashSet<>();
     for (final Method method : methods) {
       if (passed.add(method.getName())) {
@@ -113,14 +110,20 @@ public class MaridDefaultContextListener implements MaridContextListener {
     return Integer.MAX_VALUE - 100;
   }
 
-  private int cmp(Method m1, Method m2) {
-    if (m1.getDeclaringClass().equals(m2.getDeclaringClass())) {
-      return 0;
-    } else if (m1.getDeclaringClass().isAssignableFrom(m2.getDeclaringClass())) {
-      return -1;
-    } else {
-      return 1;
-    }
+  private LinkedList<Method> getMethods(Class<?> type, Predicate<Method> filter, boolean reversed) {
+    return Classes.classes(type)
+        .flatMap(t -> Stream.of(t.getDeclaredMethods()))
+        .filter(filter)
+        .filter(m -> m.isDefault() || !Modifier.isStatic(m.getModifiers()) && !Modifier.isAbstract(m.getModifiers()))
+        .distinct()
+        .reduce(new LinkedList<>(), (a, e) -> {
+          if (reversed) {
+            a.addFirst(e);
+          } else {
+            a.addLast(e);
+          }
+          return a;
+        }, (a1, a2) -> a2);
   }
 
   private boolean isPostConstruct(Method method) {

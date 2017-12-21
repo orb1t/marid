@@ -26,37 +26,14 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.*;
-import java.util.Comparator;
 import java.util.LinkedHashSet;
-import java.util.TreeSet;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
-
-import static java.util.stream.Stream.of;
 
 /**
  * @author Dmitry Ovchinnikov
  */
 public interface Classes {
-
-  static TreeSet<Method> methods(@NotNull Object bean,
-                                 @NotNull Predicate<Method> filter,
-                                 @NotNull Comparator<Method> methodComparator) {
-    final TreeSet<Method> methods = new TreeSet<>(methodComparator);
-    final Consumer<Class<?>> consumer = c -> of(c.getDeclaredMethods())
-        .filter(m -> m.getParameterCount() == 0)
-        .filter(filter)
-        .peek(m -> m.setAccessible(true))
-        .forEach(methods::add);
-    for (Class<?> c = bean.getClass(); c != null; c = c.getSuperclass()) {
-      consumer.accept(c);
-    }
-    for (final Class<?> c : bean.getClass().getInterfaces()) {
-      consumer.accept(c);
-    }
-    return methods;
-  }
 
   @NotNull
   static Stream<Class<?>> classes(@NotNull Class<?> type) {
