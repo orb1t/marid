@@ -52,10 +52,11 @@ public class MaridDefaultContextListener implements MaridContextListener {
 
   @Override
   public void onPostConstruct(@NotNull BeanPostConstructEvent postConstructEvent) {
-    if (postConstructEvent.getBean() == null) {
+    final Object bean = postConstructEvent.getBean();
+    if (bean == null) {
       return;
     }
-    final LinkedList<Method> methods = getMethods(postConstructEvent.getBean().getClass(), this::isPostConstruct, true);
+    final LinkedList<Method> methods = getMethods(bean.getClass(), this::isPostConstruct, true);
     final HashSet<String> passed = new HashSet<>();
     for (final Method method : methods) {
       if (passed.add(method.getName())) {
@@ -117,6 +118,7 @@ public class MaridDefaultContextListener implements MaridContextListener {
         .filter(filter)
         .filter(m -> m.isDefault() || !Modifier.isStatic(m.getModifiers()) && !Modifier.isAbstract(m.getModifiers()))
         .distinct()
+        .peek(m -> m.setAccessible(true))
         .reduce(new LinkedList<>(), (a, e) -> {
           if (reversed) {
             a.addFirst(e);
