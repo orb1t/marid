@@ -110,7 +110,7 @@ public interface CallExpression extends Expression {
   static boolean matches(Invokable<?> executable, Type... types) {
     if (executable.getParameterCount() == types.length) {
       for (int i = 0; i < types.length; i++) {
-        if (!Types.isAssignable(types[i], executable.getParameterTypes()[i])) {
+        if (!Types.isAssignable(executable.getParameterTypes()[i], types[i])) {
           return false;
         }
       }

@@ -244,29 +244,29 @@ public interface Types {
     }
   }
 
-  static boolean isAssignable(@NotNull Type from, @NotNull Type to) {
-    return isAssignable(from, to, emptySet(), emptySet());
+  static boolean isAssignable(@NotNull Type to, @NotNull Type from) {
+    return isAssignable(to, from, emptySet(), emptySet());
   }
 
-  private static boolean isAssignable(Type from, Type to, Set<TypeVariable<?>> pf, Set<TypeVariable<?>> pt) {
+  private static boolean isAssignable(Type to, Type from, Set<TypeVariable<?>> pt, Set<TypeVariable<?>> pf) {
     if (to.equals(from) || Object.class.equals(to) || void.class.equals(from)) {
       return true;
     }
     if (to instanceof WildcardType) {
       final WildcardType tw = (WildcardType) to;
-      return of(tw.getUpperBounds()).allMatch(t -> isAssignable(from, t, pf, pt));
+      return of(tw.getUpperBounds()).allMatch(t -> isAssignable(t, from, pt, pf));
     }
     if (to instanceof ParameterizedType) {
       final ParameterizedType tp = (ParameterizedType) to;
       if (from instanceof Class<?>) {
-        if (!isAssignable(from, tp.getRawType(), pf, pt)) {
+        if (!isAssignable(tp.getRawType(), from, pt, pf)) {
           return false;
         }
         final Type[] args = tp.getActualTypeArguments();
         return of(args).allMatch(t -> MaridWildcardType.isAll(t) || t == Object.class);
       } else if (from instanceof ParameterizedType) {
         final ParameterizedType fp = (ParameterizedType) from;
-        if (!isAssignable(fp.getRawType(), tp.getRawType())) {
+        if (!isAssignable(tp.getRawType(), fp.getRawType())) {
           return false;
         }
         final Map<TypeVariable<?>, Type> fVars = resolveVars(from);
@@ -274,7 +274,7 @@ public interface Types {
         for (final TypeVariable<?> v : ((Class<?>) tp.getRawType()).getTypeParameters()) {
           final Type t = resolve(v, tVars);
           final Type f = resolve(v, fVars);
-          if (!isAssignable(f, t, pf, pt)) {
+          if (!isAssignable(t, f, pt, pf)) {
             return false;
           }
         }
@@ -287,7 +287,7 @@ public interface Types {
       final Type ct = getArrayComponentType(to);
       if (ct != null) {
         final Type cf = getArrayComponentType(from);
-        return cf != null && isAssignable(boxed(cf), boxed(ct), pf, pt);
+        return cf != null && isAssignable(boxed(ct), boxed(cf), pt, pf);
       }
     }
     if (to instanceof Class<?>) {
@@ -296,7 +296,7 @@ public interface Types {
         final Class<?> f = Classes.wrapper((Class<?>) from);
         return t.isAssignableFrom(f);
       } else if (from instanceof ParameterizedType) {
-        return isAssignable(to, ((ParameterizedType) from).getRawType(), pf, pt);
+        return isAssignable(((ParameterizedType) from).getRawType(), to, pt, pf);
       } else if (from instanceof GenericArrayType) {
         return false;
       }
@@ -307,12 +307,12 @@ public interface Types {
         return true;
       } else {
         final Set<TypeVariable<?>> npt = Sets.add(pt, tv);
-        return of(tv.getBounds()).allMatch(t -> isAssignable(from, t, pf, npt));
+        return of(tv.getBounds()).allMatch(t -> isAssignable(t, from, npt, pf));
       }
     }
     if (from instanceof WildcardType) {
       final WildcardType fw = (WildcardType) from;
-      return of(fw.getUpperBounds()).anyMatch(f -> isAssignable(f, to, pf, pt));
+      return of(fw.getUpperBounds()).anyMatch(f -> isAssignable(to, f, pt, pf));
     }
     if (from instanceof TypeVariable<?>) {
       final TypeVariable<?> fv = (TypeVariable<?>) from;
@@ -320,7 +320,7 @@ public interface Types {
         return true;
       } else {
         final Set<TypeVariable<?>> npf = Sets.add(pf, fv);
-        return of(fv.getBounds()).anyMatch(f -> isAssignable(f, to, npf, pt));
+        return of(fv.getBounds()).anyMatch(f -> isAssignable(to, f, pt, npf));
       }
     }
     return false;
@@ -400,9 +400,9 @@ public interface Types {
         return c instanceof Class<?> ? Array.newInstance((Class<?>) c, 0).getClass() : new MaridArrayType(c);
       } else {
         final Set<Type> ts = concat(types(t1), types(t2))
-            .filter(t -> Object.class != t && isAssignable(t1, t) && isAssignable(t2, t))
+            .filter(t -> Object.class != t && isAssignable(t, t1) && isAssignable(t, t2))
             .collect(toCollection(LinkedHashSet::new));
-        ts.removeIf(t -> ts.stream().anyMatch(e -> e != t && isAssignable(e, t)));
+        ts.removeIf(t -> ts.stream().anyMatch(e -> e != t && isAssignable(t, e)));
         switch (ts.size()) {
           case 0: return Object.class;
           case 1: return ts.iterator().next();
