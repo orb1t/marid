@@ -27,12 +27,13 @@ import org.marid.collections.MaridSets;
 
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptySet;
-import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 
@@ -350,7 +351,7 @@ public interface Types {
     return map;
   }
 
-  private static void resolveVars(Type type, Map<TypeVariable<?>, Type> map) {
+  private static void resolveVars(Type type, LinkedHashMap<TypeVariable<?>, Type> map) {
     final Class<?> raw;
     if (type instanceof ParameterizedType) {
       final ParameterizedType pt = (ParameterizedType) type;
@@ -417,9 +418,10 @@ public interface Types {
         final Type c = common(at1, at2);
         return c instanceof Class<?> ? Array.newInstance((Class<?>) c, 0).getClass() : new MaridArrayType(c);
       } else {
-        final Set<Type> ts = concat(types(t1), types(t2))
-            .filter(t -> Object.class != t && isAssignable(t, t1) && isAssignable(t, t2))
-            .collect(toCollection(LinkedHashSet::new));
+        final ConcurrentLinkedQueue<Type> ts = concat(types(t1), types(t2))
+            .filter(t -> isAssignable(t, t1) && isAssignable(t, t2))
+            .distinct()
+            .collect(Collectors.toCollection(ConcurrentLinkedQueue::new));
         ts.removeIf(t -> ts.stream().anyMatch(e -> e != t && isAssignable(t, e)));
         switch (ts.size()) {
           case 0: return Object.class;
