@@ -263,7 +263,24 @@ public interface Types {
           return false;
         }
         final Type[] args = tp.getActualTypeArguments();
-        return of(args).allMatch(t -> MaridWildcardType.isAll(t) || t == Object.class);
+        if (of(args).allMatch(MaridWildcardType::isAll)) {
+          return true;
+        }
+        final Class<?> tRaw = (Class<?>) tp.getRawType();
+        final TypeVariable<?>[] tVars = tRaw.getTypeParameters();
+        if (tVars.length == args.length) {
+          final Map<TypeVariable<?>, Type> map = resolveVars(from);
+          for (int i = 0; i < tVars.length; i++) {
+            final TypeVariable<?> var = tVars[i];
+            final Type arg = args[i];
+            final Type resolvedVar = resolve(var, map);
+            if (!isAssignable(arg, resolvedVar)) {
+              return false;
+            }
+          }
+          return true;
+        }
+        return false;
       } else if (from instanceof ParameterizedType) {
         final ParameterizedType fp = (ParameterizedType) from;
         if (!isAssignable(tp.getRawType(), fp.getRawType())) {

@@ -33,14 +33,15 @@ import java.io.Serializable;
 import java.io.Writer;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
-import static java.util.stream.Stream.of;
 import static org.apache.commons.lang3.reflect.TypeUtils.parameterize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.params.provider.Arguments.of;
 import static org.marid.types.AuxTypeUtils.p;
 import static org.marid.types.AuxTypeUtils.w;
 import static org.marid.types.Classes.classes;
@@ -54,7 +55,7 @@ class TypesTest {
 
     final Set<Class<?>> ec = classes(AuxTypeUtils.List2.class).filter(c -> c.getTypeParameters().length > 0).collect(toSet());
     final Set<Class<?>> ac = map.keySet().stream().map(v -> (Class<?>) v.getGenericDeclaration()).collect(toSet());
-    final Set<TypeVariable<?>> expectedVars = ec.stream().flatMap(c -> of(c.getTypeParameters())).collect(toSet());
+    final Set<TypeVariable<?>> expectedVars = ec.stream().flatMap(c -> Stream.of(c.getTypeParameters())).collect(toSet());
 
     assertEquals(ec, ac);
     assertEquals(expectedVars, map.keySet());
@@ -67,7 +68,7 @@ class TypesTest {
 
     final Set<Class<?>> ec = classes(AuxTypeUtils.List1.M.class).filter(c -> c.getTypeParameters().length > 0).collect(toSet());
     final Set<Class<?>> ac = map.keySet().stream().map(v -> (Class<?>) v.getGenericDeclaration()).collect(toSet());
-    final Set<TypeVariable<?>> expectedVars = ec.stream().flatMap(c -> of(c.getTypeParameters())).collect(toSet());
+    final Set<TypeVariable<?>> expectedVars = ec.stream().flatMap(c -> Stream.of(c.getTypeParameters())).collect(toSet());
 
     assertEquals(ec, ac);
     assertEquals(expectedVars, map.keySet());
@@ -82,8 +83,8 @@ class TypesTest {
   }
 
   private static Stream<Arguments> typesData() {
-    return of(
-        Arguments.of(p(ArrayList.class, Integer.class), Arrays.asList(
+    return Stream.of(
+        of(p(ArrayList.class, Integer.class), Arrays.asList(
             p(ArrayList.class, Integer.class),
             p(AbstractList.class, Integer.class),
             p(AbstractCollection.class, Integer.class),
@@ -95,7 +96,7 @@ class TypesTest {
             Cloneable.class,
             Serializable.class
         )),
-        Arguments.of(p(HashMap.class, Integer.class, w(Long.class)), Arrays.asList(
+        of(p(HashMap.class, Integer.class, w(Long.class)), Arrays.asList(
             p(HashMap.class, Integer.class, w(Long.class)),
             p(AbstractMap.class, Integer.class, w(Long.class)),
             Object.class,
@@ -110,6 +111,28 @@ class TypesTest {
   @MethodSource("typesData")
   void types(Type type, List<Type> expected) {
     final List<Type> actual = Types.types(type).collect(toList());
+    assertEquals(expected, actual);
+  }
+
+  private static Stream<Arguments> assignmentsData() {
+    return Stream.of(
+        of(Object.class, int.class, true),
+        of(long.class, int.class, false),
+        of(void.class, int.class, false),
+        of(void.class, void.class, true),
+        of(int.class, void.class, true),
+        of(Integer.class, void.class, true),
+        of(p(Map.class, Integer.class, Number.class), p(Map.class, Integer.class, Number.class), true),
+        of(p(Map.class, Integer.class, Number.class), p(Map.class, Integer.class, BigInteger.class), true),
+        of(p(Map.class, Integer.class, Number.class), p(HashMap.class, Integer.class, BigInteger.class), true),
+        of(p(Map.class, Object.class, Object.class), Properties.class, true)
+    );
+  }
+
+  @ParameterizedTest
+  @MethodSource("assignmentsData")
+  void assignments(Type to, Type from, boolean expected) {
+    final boolean actual = Types.isAssignable(to, from);
     assertEquals(expected, actual);
   }
 }
