@@ -35,7 +35,6 @@ import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
-import static org.marid.types.MaridWildcardType.ALL;
 
 public interface Types {
 
@@ -246,68 +245,85 @@ public interface Types {
   }
 
   static boolean isAssignable(@NotNull Type from, @NotNull Type to) {
-    return isAssignable(boxed(from), boxed(to), new HashSet<>());
+    return isAssignable(from, to, emptySet(), emptySet());
   }
 
-  private static boolean isAssignable(Type from, Type to, HashSet<TypeVariable<?>> passed) {
+  private static boolean isAssignable(Type from, Type to, Set<TypeVariable<?>> pf, Set<TypeVariable<?>> pt) {
     if (to.equals(from) || Object.class.equals(to) || void.class.equals(from)) {
       return true;
     }
-    if (from instanceof WildcardType) {
-      final WildcardType w = (WildcardType) from;
-      return of(w.getUpperBounds()).anyMatch(t -> isAssignable(to, t, passed));
+    if (to instanceof WildcardType) {
+      final WildcardType tw = (WildcardType) to;
+      return of(tw.getUpperBounds()).allMatch(t -> isAssignable(from, t, pf, pt));
+    }
+    if (to instanceof ParameterizedType) {
+      final ParameterizedType tp = (ParameterizedType) to;
+      if (from instanceof Class<?>) {
+        if (!isAssignable(from, tp.getRawType(), pf, pt)) {
+          return false;
+        }
+        final Type[] args = tp.getActualTypeArguments();
+        return of(args).allMatch(t -> MaridWildcardType.isAll(t) || t == Object.class);
+      } else if (from instanceof ParameterizedType) {
+        final ParameterizedType fp = (ParameterizedType) from;
+        if (!isAssignable(fp.getRawType(), tp.getRawType())) {
+          return false;
+        }
+        final Map<TypeVariable<?>, Type> fVars = resolveVars(from);
+        final Map<TypeVariable<?>, Type> tVars = resolveVars(to);
+        for (final TypeVariable<?> v : ((Class<?>) tp.getRawType()).getTypeParameters()) {
+          final Type t = resolve(v, tVars);
+          final Type f = resolve(v, fVars);
+          if (!isAssignable(f, t, pf, pt)) {
+            return false;
+          }
+        }
+        return true;
+      } else if (getArrayComponentType(from) != null) {
+        return false;
+      }
     }
     {
-      final Type tt = getArrayComponentType(to);
-      if (tt != null) {
-        final Type ft = getArrayComponentType(from);
-        return ft != null && isAssignable(ft, tt, passed);
+      final Type ct = getArrayComponentType(to);
+      if (ct != null) {
+        final Type cf = getArrayComponentType(from);
+        return cf != null && isAssignable(boxed(cf), boxed(ct), pf, pt);
       }
     }
     if (to instanceof Class<?>) {
-      final Class<?> toClass = (Class<?>) to;
       if (from instanceof Class<?>) {
-        return Classes.wrapper(toClass).isAssignableFrom(Classes.wrapper((Class<?>) from));
+        final Class<?> t = Classes.wrapper((Class<?>) to);
+        final Class<?> f = Classes.wrapper((Class<?>) from);
+        return t.isAssignableFrom(f);
       } else if (from instanceof ParameterizedType) {
-        final ParameterizedType t = (ParameterizedType) from;
-        return isAssignable(t.getRawType(), toClass, passed);
-      } else {
+        return isAssignable(to, ((ParameterizedType) from).getRawType(), pf, pt);
+      } else if (from instanceof GenericArrayType) {
         return false;
       }
     }
     if (to instanceof TypeVariable<?>) {
-      final TypeVariable<?> v = (TypeVariable<?>) to;
-      return passed.add(v) && Arrays.stream(v.getBounds()).allMatch(t -> isAssignable(from, t, passed));
-    }
-    if (to instanceof WildcardType) {
-      return Arrays.stream(((WildcardType) to).getUpperBounds()).allMatch(t -> isAssignable(from, t, passed));
-    }
-    if (to instanceof ParameterizedType) {
-      final ParameterizedType t = (ParameterizedType) to;
-      if (from instanceof Class<?>) {
-        return isAssignable(t.getRawType(), from, passed) && of(t.getActualTypeArguments()).allMatch(ALL::equals);
-      } else if (from instanceof ParameterizedType) {
-        final ParameterizedType f = (ParameterizedType) from;
-        if (isAssignable(t.getRawType(), f.getRawType(), passed)) {
-          final Map<TypeVariable<?>, Type> mapFrom = resolveVars(from);
-          final Map<TypeVariable<?>, Type> mapTo = resolveVars(to);
-          for (final TypeVariable<?> v : ((Class<?>) t.getRawType()).getTypeParameters()) {
-            final Type resolvedFrom = resolve(v, mapFrom);
-            final Type resolvedTo = resolve(v, mapTo);
-            if (!isAssignable(resolvedFrom, resolvedTo, passed)) {
-              return false;
-            }
-          }
-          return true;
-        } else {
-          return false;
-        }
+      final TypeVariable<?> tv = (TypeVariable<?>) to;
+      if (pt.contains(tv)) {
+        return true;
       } else {
-        return false;
+        final Set<TypeVariable<?>> npt = Sets.add(pt, tv);
+        return of(tv.getBounds()).allMatch(t -> isAssignable(from, t, pf, npt));
       }
-    } else {
-      throw new IllegalArgumentException("Unknown type: " + to);
     }
+    if (from instanceof WildcardType) {
+      final WildcardType fw = (WildcardType) from;
+      return of(fw.getUpperBounds()).anyMatch(f -> isAssignable(f, to, pf, pt));
+    }
+    if (from instanceof TypeVariable<?>) {
+      final TypeVariable<?> fv = (TypeVariable<?>) from;
+      if (pf.contains(fv)) {
+        return true;
+      } else {
+        final Set<TypeVariable<?>> npf = Sets.add(pf, fv);
+        return of(fv.getBounds()).anyMatch(f -> isAssignable(f, to, npf, pt));
+      }
+    }
+    return false;
   }
 
   static Map<TypeVariable<?>, Type> resolveVars(@NotNull Type type) {

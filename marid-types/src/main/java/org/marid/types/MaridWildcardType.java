@@ -28,8 +28,6 @@ import java.util.StringJoiner;
 
 public class MaridWildcardType implements WildcardType {
 
-  public static final MaridWildcardType ALL = new MaridWildcardType(new Type[] {Object.class}, new Type[0]);
-
   private final Type[] upperBounds;
   private final Type[] lowerBounds;
 
@@ -89,5 +87,15 @@ public class MaridWildcardType implements WildcardType {
     sb.append(sj);
 
     return sb.toString();
+  }
+
+  public static boolean isAll(Type type) {
+    if (type instanceof WildcardType) {
+      final WildcardType w = (WildcardType) type;
+      final Type[] uppers = w.getUpperBounds();
+      return uppers.length == 0 || uppers.length == 1 && uppers[0] == Object.class;
+    } else {
+      return false;
+    }
   }
 }
