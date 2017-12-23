@@ -234,12 +234,7 @@ public interface Types {
         }
       }
       final Type t = map.get(v);
-      if (t == null) {
-        return v;
-      } else {
-        final Set<TypeVariable<?>> p = Sets.add(passed, v);
-        return p == passed ? v : resolve(t, map, p);
-      }
+      return t == null || passed.contains(v) ? v : resolve(t, map, Sets.add(passed, v));
     } else {
       throw new IllegalStateException("Unsupported type: " + type);
     }
