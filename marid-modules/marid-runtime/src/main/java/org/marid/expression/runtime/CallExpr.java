@@ -27,7 +27,7 @@ import org.marid.expression.generic.CallExpression;
 import org.marid.expression.xml.XmlExpression;
 import org.marid.function.ToImmutableList;
 import org.marid.runtime.context.BeanContext;
-import org.marid.types.Invokable;
+import org.marid.types.invokable.Invokable;
 import org.w3c.dom.Element;
 
 import java.lang.reflect.Type;

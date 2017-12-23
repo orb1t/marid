@@ -24,4 +24,5 @@ module marid.types {
   requires static marid.util;
 
   exports org.marid.types;
+  exports org.marid.types.invokable;
 }

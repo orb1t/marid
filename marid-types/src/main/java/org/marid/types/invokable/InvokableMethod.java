@@ -19,7 +19,7 @@
  * #L%
  */
 
-package org.marid.types;
+package org.marid.types.invokable;
 
 import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Method;

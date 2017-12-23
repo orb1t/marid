@@ -19,9 +19,11 @@
  * #L%
  */
 
-package org.marid.types;
+package org.marid.types.invokable;
 
 import org.jetbrains.annotations.NotNull;
+import org.marid.types.MaridParameterizedType;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;

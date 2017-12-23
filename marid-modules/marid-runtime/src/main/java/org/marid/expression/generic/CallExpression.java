@@ -22,9 +22,9 @@
 package org.marid.expression.generic;
 
 import org.marid.beans.BeanTypeContext;
-import org.marid.types.Invokable;
-import org.marid.types.InvokableConstructor;
-import org.marid.types.InvokableMethod;
+import org.marid.types.invokable.Invokable;
+import org.marid.types.invokable.InvokableConstructor;
+import org.marid.types.invokable.InvokableMethod;
 import org.marid.types.Types;
 
 import org.jetbrains.annotations.NotNull;
