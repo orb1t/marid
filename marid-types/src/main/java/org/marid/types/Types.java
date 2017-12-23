@@ -279,8 +279,9 @@ public interface Types {
             }
           }
           return true;
+        } else {
+          throw new IllegalArgumentException("Illegal type: " + to.getTypeName());
         }
-        return false;
       } else if (from instanceof ParameterizedType) {
         final ParameterizedType fp = (ParameterizedType) from;
         if (!isAssignable(tp.getRawType(), fp.getRawType())) {
@@ -368,7 +369,7 @@ public interface Types {
           }
         }
       } else {
-        throw new IllegalArgumentException("Illegal type: " + type);
+        throw new IllegalArgumentException("Illegal type: " + type.getTypeName());
       }
     } else if (type instanceof Class<?>) {
       raw = (Class<?>) type;
