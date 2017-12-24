@@ -21,14 +21,14 @@
 
 package org.marid.expression.runtime;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.marid.expression.generic.Expression;
 import org.marid.expression.xml.XmlExpression;
 import org.marid.function.ToImmutableList;
 import org.marid.runtime.context.BeanContext;
 import org.w3c.dom.Element;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Type;
 import java.util.LinkedList;
 import java.util.List;
@@ -71,8 +71,6 @@ public abstract class Expr implements Expression {
       case "this": return new ThisExpr(element);
       case "string": return new StringExpr(element);
       case "ref": return new RefExpr(element);
-      case "get": return new GetExpr(element);
-      case "set": return new SetExpr(element);
       case "null": return new NullExpr(element);
       case "apply": return new ApplyExpr(element);
       default: throw new IllegalArgumentException(element.getTagName());

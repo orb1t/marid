@@ -51,7 +51,7 @@ class BeanContextTest {
   void testOneBean() {
     final BeanConfiguration configuration = new BeanConfiguration(CLASS_LOADER, PROPERTIES);
     final RuntimeBean root = new RuntimeBean(
-        new RuntimeBean("bean1", new GetExpr(new ClassExpr(TimeUnit.class.getName()), "SECONDS"))
+        new RuntimeBean("bean1", new CallExpr(new ClassExpr(TimeUnit.class.getName()), "SECONDS"))
     );
     try (final BeanContext context = new BeanContext(configuration, root)) {
       final Object seconds = context.findBean("bean1");

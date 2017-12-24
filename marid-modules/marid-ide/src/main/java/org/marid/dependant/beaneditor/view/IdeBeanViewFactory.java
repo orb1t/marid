@@ -87,11 +87,7 @@ public class IdeBeanViewFactory {
   private void createView(@NotNull IdeBean bean, @NotNull Expr expr, @NotNull HBox tf) {
     if (expr instanceof CallExpr) {
       createView(bean, (CallExpr) expr, tf);
-    } else if (expr instanceof GetExpr) {
-      createView(bean, (GetExpr) expr, tf);
-    } else if (expr instanceof SetExpr) {
-      createView(bean, (SetExpr) expr, tf);
-    } else if (expr instanceof ArrayExpr) {
+    }else if (expr instanceof ArrayExpr) {
       createView(bean, (ArrayExpr) expr, tf);
     } else if (expr instanceof ClassExpr) {
       createView((ClassExpr) expr, tf);
@@ -117,17 +113,6 @@ public class IdeBeanViewFactory {
       createView(bean, e, tf);
     });
     tf.getChildren().add(new Label(")"));
-  }
-
-  private void createView(@NotNull IdeBean bean, @NotNull GetExpr expr, @NotNull HBox tf) {
-    createView(bean, expr.getTarget(), tf);
-    tf.getChildren().add(new Label("." + expr.getField()));
-  }
-
-  private void createView(@NotNull IdeBean bean, @NotNull SetExpr expr, @NotNull HBox tf) {
-    createView(bean, expr.getTarget(), tf);
-    tf.getChildren().add(new Label("." + expr.getField() + "="));
-    createView(bean, expr.getValue(), tf);
   }
 
   private void createView(@NotNull IdeBean bean, @NotNull ArrayExpr expr, @NotNull HBox tf) {

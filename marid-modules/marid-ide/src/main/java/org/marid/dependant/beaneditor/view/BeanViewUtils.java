@@ -22,10 +22,10 @@
 package org.marid.dependant.beaneditor.view;
 
 import javafx.scene.text.Text;
+import org.jetbrains.annotations.NotNull;
 import org.marid.idefx.expression.*;
 import org.marid.jfx.icons.FontIcons;
 
-import org.jetbrains.annotations.NotNull;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,10 +45,6 @@ public class BeanViewUtils {
   public static Text icon(@NotNull Expr expr) {
     if (expr instanceof CallExpr) {
       return FontIcons.glyphIcon("F_CODE");
-    } else if (expr instanceof GetExpr) {
-      return FontIcons.glyphIcon("F_GET_POCKET");
-    } else if (expr instanceof SetExpr) {
-      return FontIcons.glyphIcon("D_ARROW_RIGHT");
     } else if (expr instanceof ThisExpr) {
       return FontIcons.glyphIcon("D_THERMOMETER");
     } else if (expr instanceof NullExpr) {

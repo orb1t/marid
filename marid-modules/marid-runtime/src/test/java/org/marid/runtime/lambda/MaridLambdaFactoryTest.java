@@ -21,6 +21,7 @@
 
 package org.marid.runtime.lambda;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.PrintWriter;
@@ -29,6 +30,7 @@ import java.util.concurrent.atomic.AtomicStampedReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("normal")
 public class MaridLambdaFactoryTest {
 
   @Test

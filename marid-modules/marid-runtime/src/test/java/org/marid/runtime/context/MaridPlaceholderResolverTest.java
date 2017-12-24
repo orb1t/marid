@@ -21,6 +21,7 @@
 
 package org.marid.runtime.context;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.marid.runtime.exception.MaridCircularPlaceholderException;
 
@@ -32,10 +33,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 /**
  * @author Dmitry Ovchinnikov
  */
-public class MaridPlaceholderResolverTest {
+@Tag("normal")
+class MaridPlaceholderResolverTest {
 
   @Test
-  public void circular1() {
+  void circular1() {
     assertThrows(MaridCircularPlaceholderException.class, () -> {
       final Properties properties = new Properties();
       properties.setProperty("x1", "2");
@@ -47,7 +49,7 @@ public class MaridPlaceholderResolverTest {
   }
 
   @Test
-  public void circular2() {
+  void circular2() {
     assertThrows(MaridCircularPlaceholderException.class, () -> {
       final Properties properties = new Properties();
       properties.setProperty("x1", "2");
@@ -58,7 +60,7 @@ public class MaridPlaceholderResolverTest {
   }
 
   @Test
-  public void defValue() {
+  void defValue() {
     final Properties properties = new Properties();
     properties.setProperty("x1", "2");
     final MaridPlaceholderResolver resolver = new MaridPlaceholderResolver(properties);
@@ -66,7 +68,7 @@ public class MaridPlaceholderResolverTest {
   }
 
   @Test
-  public void unterminated() {
+  void unterminated() {
     final Properties properties = new Properties();
     properties.setProperty("x1", "2");
     final MaridPlaceholderResolver resolver = new MaridPlaceholderResolver(properties);

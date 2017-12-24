@@ -24,16 +24,16 @@ package org.marid.idefx.expression;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import org.apache.commons.lang3.ArrayUtils;
-import org.marid.xml.XmlWritable;
+import org.jetbrains.annotations.NotNull;
 import org.marid.expression.generic.Expression;
 import org.marid.expression.xml.XmlExpression;
 import org.marid.idefx.beans.IdeBean;
 import org.marid.idefx.visitor.Visitor;
 import org.marid.jfx.props.ObservablesProvider;
 import org.marid.xml.Tagged;
+import org.marid.xml.XmlWritable;
 import org.w3c.dom.Element;
 
-import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -102,8 +102,6 @@ public abstract class Expr implements Expression, ObservablesProvider, Tagged, X
       case "this": return new ThisExpr(element);
       case "string": return new StringExpr(element);
       case "ref": return new RefExpr(element);
-      case "get": return new GetExpr(element);
-      case "set": return new SetExpr(element);
       case "null": return new NullExpr(element);
       case "call": return new CallExpr(element);
       default: throw new IllegalArgumentException(element.getTagName());
