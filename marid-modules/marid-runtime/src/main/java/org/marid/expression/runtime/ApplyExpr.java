@@ -110,7 +110,7 @@ public class ApplyExpr extends Expr implements ApplyExpression {
               ? samParameters[e.getMappedIndex()].getParameterizedType()
               : e.getValue().getType(targetType, context))
           .toArray(Type[]::new);
-      return invokable(getTarget(), getMethod(), selfType, context, argTypes)
+      return invokable(getTarget().getTargetClass(selfType, context), getMethod(), argTypes)
           .map(method -> {
             final Object[] params = getArgs().stream()
                 .map(a -> a.getMappedIndex() >= 0 ? null : a.getValue().evaluate(self, selfType, context))

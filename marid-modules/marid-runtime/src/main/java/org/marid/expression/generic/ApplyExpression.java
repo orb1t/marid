@@ -66,7 +66,7 @@ public interface ApplyExpression extends Expression {
               ? samParameters[e.getMappedIndex()].getType()
               : e.getValue().getType(targetType, context))
           .toArray(Type[]::new);
-      return CallExpression.invokable(getTarget(), getMethod(), owner, context, argTypes)
+      return CallExpression.invokable(getTarget().getTargetClass(owner, context), getMethod(), argTypes)
           .map(m -> {
             final Type type = Types.getType(samType);
             final Type result = Types.evaluate(e -> {

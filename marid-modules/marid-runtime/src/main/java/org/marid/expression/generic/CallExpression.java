@@ -25,9 +25,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.marid.beans.BeanTypeContext;
 import org.marid.types.Types;
-import org.marid.types.invokable.InvokableField;
 import org.marid.types.invokable.Invokable;
 import org.marid.types.invokable.InvokableConstructor;
+import org.marid.types.invokable.InvokableField;
 import org.marid.types.invokable.InvokableMethod;
 
 import java.lang.reflect.Type;
@@ -52,7 +52,7 @@ public interface CallExpression extends Expression {
   @Override
   default Type getType(@Nullable Type owner, @NotNull BeanTypeContext context) {
     final Type[] argTypes = getArgs().stream().map(a -> a.getType(owner, context)).toArray(Type[]::new);
-    return invokable(getTarget(), getMethod(), owner, context, argTypes)
+    return invokable(getTarget().getTargetClass(owner, context), getMethod(), argTypes)
         .map(invokable -> {
           final Type r = context.resolve(invokable.getParameterTypes(), argTypes, this, invokable.getReturnType());
           if (invokable.isStatic()) {
@@ -87,12 +87,8 @@ public interface CallExpression extends Expression {
   }
 
   @NotNull
-  static Optional<? extends Invokable> invokable(@NotNull Expression target,
-                                                 @NotNull String method,
-                                                 @Nullable Type owner,
-                                                 @NotNull BeanTypeContext context,
-                                                 @NotNull Type... argTypes) {
-    return target.getTargetClass(owner, context)
+  static Optional<? extends Invokable> invokable(@NotNull Stream<Class<?>> classes, @NotNull String method, @NotNull Type... argTypes) {
+    return classes
         .flatMap(c -> {
           if ("new".equals(method)) {
             return Stream.of(c.getConstructors()).map(InvokableConstructor::new);
