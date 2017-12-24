@@ -22,22 +22,16 @@
 package org.marid.types.invokable;
 
 import org.jetbrains.annotations.NotNull;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 
 public final class InvokableMethod extends AbstractInvokable<Method> {
 
-  @NotNull
   private final Type returnType;
-
-  @NotNull
   private final Class<?> returnClass;
-
-  @NotNull
   private final Type[] parameterTypes;
-
-  @NotNull
   private final Class<?>[] parameterClasses;
 
   public InvokableMethod(@NotNull Method executable) {

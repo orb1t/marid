@@ -31,16 +31,9 @@ import java.lang.reflect.TypeVariable;
 
 public final class InvokableConstructor extends AbstractInvokable<Constructor<?>> {
 
-  @NotNull
   private final Type returnType;
-
-  @NotNull
   private final Class<?> returnClass;
-
-  @NotNull
   private final Type[] parameterTypes;
-
-  @NotNull
   private final Class<?>[] parameterClasses;
 
   public InvokableConstructor(@NotNull Constructor<?> constructor) {
