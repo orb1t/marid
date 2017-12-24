@@ -87,7 +87,7 @@ public interface CallExpression extends Expression {
   }
 
   @NotNull
-  static Optional<? extends Invokable> invokable(@NotNull Stream<Class<?>> classes, @NotNull String method, @NotNull Type... argTypes) {
+  static Optional<Invokable> invokable(@NotNull Stream<Class<?>> classes, @NotNull String method, @NotNull Type... argTypes) {
     return classes
         .flatMap(c -> {
           if ("new".equals(method)) {
