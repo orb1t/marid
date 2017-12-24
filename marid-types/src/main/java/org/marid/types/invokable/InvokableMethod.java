@@ -26,7 +26,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 
-public final class InvokableMethod extends Invokable<Method> {
+public final class InvokableMethod extends AbstractInvokable<Method> {
 
   @NotNull
   private final Type returnType;
@@ -50,7 +50,7 @@ public final class InvokableMethod extends Invokable<Method> {
 
   @Override
   public Object execute(Object self, Object... args) throws ReflectiveOperationException {
-    return getExecutable().invoke(self, args);
+    return executable.invoke(self, args);
   }
 
   @Override
@@ -67,7 +67,7 @@ public final class InvokableMethod extends Invokable<Method> {
 
   @Override
   public boolean isStatic() {
-    return Modifier.isStatic(getExecutable().getModifiers());
+    return Modifier.isStatic(executable.getModifiers());
   }
 
   @Override

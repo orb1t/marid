@@ -21,14 +21,14 @@
 
 package org.marid.expression.generic;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.marid.beans.BeanTypeContext;
+import org.marid.types.Types;
 import org.marid.types.invokable.Invokable;
 import org.marid.types.invokable.InvokableConstructor;
 import org.marid.types.invokable.InvokableMethod;
-import org.marid.types.Types;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -86,11 +86,11 @@ public interface CallExpression extends Expression {
   }
 
   @NotNull
-  static Optional<? extends Invokable<?>> invokable(@NotNull Expression target,
-                                                    @NotNull String method,
-                                                    @Nullable Type owner,
-                                                    @NotNull BeanTypeContext context,
-                                                    @NotNull Type... argTypes) {
+  static Optional<? extends Invokable> invokable(@NotNull Expression target,
+                                                 @NotNull String method,
+                                                 @Nullable Type owner,
+                                                 @NotNull BeanTypeContext context,
+                                                 @NotNull Type... argTypes) {
     if ("new".equals(method)) {
       return target.getTargetClass(owner, context)
           .flatMap(c -> Stream.of(c.getConstructors()))
@@ -107,7 +107,7 @@ public interface CallExpression extends Expression {
     }
   }
 
-  static boolean matches(Invokable<?> executable, Type... types) {
+  static boolean matches(Invokable executable, Type... types) {
     if (executable.getParameterCount() == types.length) {
       for (int i = 0; i < types.length; i++) {
         if (!Types.isAssignable(executable.getParameterTypes()[i], types[i])) {

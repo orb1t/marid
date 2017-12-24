@@ -29,7 +29,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 
-public final class InvokableConstructor extends Invokable<Constructor<?>> {
+public final class InvokableConstructor extends AbstractInvokable<Constructor<?>> {
 
   @NotNull
   private final Type returnType;
@@ -74,18 +74,18 @@ public final class InvokableConstructor extends Invokable<Constructor<?>> {
   @Override
   public Object execute(Object self, Object... args) throws ReflectiveOperationException {
     if (isStatic()) {
-      return getExecutable().newInstance(args);
+      return executable.newInstance(args);
     } else {
       final Object[] newArgs = new Object[args.length + 1];
       newArgs[0] = self;
       System.arraycopy(args, 0, newArgs, 1, args.length);
-      return getExecutable().newInstance(newArgs);
+      return executable.newInstance(newArgs);
     }
   }
 
   @Override
   public boolean isStatic() {
-    final Class<?> dc = getExecutable().getDeclaringClass();
+    final Class<?> dc = executable.getDeclaringClass();
     return dc.getEnclosingClass() == null || Modifier.isStatic(dc.getModifiers());
   }
 

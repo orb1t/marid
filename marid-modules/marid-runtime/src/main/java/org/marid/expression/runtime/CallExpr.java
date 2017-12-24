@@ -66,9 +66,9 @@ public final class CallExpr extends Expr implements CallExpression {
   @Override
   protected Object execute(@Nullable Object self, @Nullable Type owner, @NotNull BeanContext context) {
     final Type[] argTypes = getArgs().stream().map(a -> a.getType(owner, context)).toArray(Type[]::new);
-    final Optional<? extends Invokable<?>> optional = invokable(getTarget(), getMethod(), owner, context, argTypes);
+    final Optional<? extends Invokable> optional = invokable(getTarget(), getMethod(), owner, context, argTypes);
     if (optional.isPresent()) {
-      final Invokable<?> invokable = optional.get();
+      final Invokable invokable = optional.get();
       final Class<?>[] argClasses = invokable.getParameterClasses();
       final Object[] args = new Object[argClasses.length];
       for (int i = 0; i < args.length; i++) {
