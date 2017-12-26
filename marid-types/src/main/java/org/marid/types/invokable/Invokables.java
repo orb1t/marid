@@ -1,6 +1,6 @@
 /*-
  * #%L
- * marid-runtime
+ * marid-types
  * %%
  * Copyright (C) 2012 - 2017 MARID software development group
  * %%
@@ -19,39 +19,23 @@
  * #L%
  */
 
-package org.marid.expression.runtime;
+package org.marid.types.invokable;
 
 import org.jetbrains.annotations.NotNull;
-import org.marid.expression.generic.MappedExpression;
-import org.w3c.dom.Element;
 
-import static org.marid.io.Xmls.attribute;
+import java.util.stream.Stream;
 
-public class MappedExpr implements MappedExpression {
-
-  private final int index;
+public interface Invokables {
 
   @NotNull
-  private final Expr value;
-
-  public MappedExpr(int index, @NotNull Expr value) {
-    this.index = index;
-    this.value = value;
-  }
-
-  public MappedExpr(@NotNull Element element) {
-    this.index = attribute(element, "index").map(Integer::valueOf).orElse(-1);
-    this.value = Expr.of(element);
-  }
-
-  @Override
-  public int getMappedIndex() {
-    return index;
-  }
-
-  @NotNull
-  @Override
-  public Expr getValue() {
-    return value;
+  static Stream<Invokable> invokables(@NotNull Class<?> type, @NotNull String method) {
+    if ("new".equals(method)) {
+      return Stream.of(type.getConstructors()).map(InvokableConstructor::new);
+    } else {
+      return Stream.concat(
+          Stream.of(type.getMethods()).filter(m -> m.getName().equals(method)).map(InvokableMethod::new),
+          Stream.of(type.getFields()).filter(f -> f.getName().equals(method)).flatMap(InvokableField::invokables)
+      );
+    }
   }
 }

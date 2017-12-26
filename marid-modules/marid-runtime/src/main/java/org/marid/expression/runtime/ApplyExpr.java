@@ -29,13 +29,8 @@ import org.marid.function.ToImmutableList;
 import org.marid.runtime.context.BeanContext;
 import org.w3c.dom.Element;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Type;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
-import static org.marid.expression.generic.CallExpression.invokable;
 
 public class ApplyExpr extends Expr implements ApplyExpression {
 
@@ -49,12 +44,20 @@ public class ApplyExpr extends Expr implements ApplyExpression {
   private final String type;
 
   @NotNull
-  private final List<MappedExpr> args;
+  private final int[] indices;
 
-  public ApplyExpr(@NotNull Expr target, @NotNull String method, @NotNull String type, @NotNull MappedExpr... args) {
+  @NotNull
+  private final List<Expr> args;
+
+  public ApplyExpr(@NotNull Expr target,
+                   @NotNull String method,
+                   @NotNull String type,
+                   @NotNull int[] indices,
+                   @NotNull Expr... args) {
     this.target = target;
     this.method = method;
     this.type = type;
+    this.indices = indices;
     this.args = List.of(args);
   }
 
@@ -62,7 +65,8 @@ public class ApplyExpr extends Expr implements ApplyExpression {
     this.target = XmlExpression.target(element, Expr::of, ClassExpr::new, RefExpr::new);
     this.method = XmlExpression.method(element);
     this.type = XmlExpression.type(element);
-    this.args = XmlExpression.mappedArgs(element, Expr::of, MappedExpr::new, new ToImmutableList<>());
+    this.indices = XmlExpression.indices(element);
+    this.args = XmlExpression.args(element, Expr::of, StringExpr::new, new ToImmutableList<>());
   }
 
   @NotNull
@@ -85,63 +89,18 @@ public class ApplyExpr extends Expr implements ApplyExpression {
 
   @NotNull
   @Override
-  public List<MappedExpr> getArgs() {
+  public List<Expr> getArgs() {
     return args;
+  }
+
+  @NotNull
+  @Override
+  public int[] getIndices() {
+    return indices;
   }
 
   @Override
   protected Object execute(@Nullable Object self, @Nullable Type selfType, @NotNull BeanContext context) {
-    final AtomicReference<Class<?>> itf = new AtomicReference<>();
-    final Method[] sams = context.getClass(getType()).stream()
-        .filter(Class::isInterface)
-        .peek(itf::set)
-        .flatMap(c -> Stream.of(c.getMethods()))
-        .filter(m -> !m.isDefault() && m.getDeclaringClass().isInterface() && !Modifier.isStatic(m.getModifiers()))
-        .toArray(Method[]::new);
-    if (sams.length == 0 || sams.length > 1) {
-      context.throwError(new IllegalStateException("SAM method error"));
-      return Object.class;
-    } else {
-      final Method sam = sams[0];
-      final Parameter[] samParameters = sam.getParameters();
-      final Type targetType = getTarget().getType(selfType, context);
-      final Type[] argTypes = getArgs().stream()
-          .map(e -> e.getMappedIndex() >= 0
-              ? samParameters[e.getMappedIndex()].getParameterizedType()
-              : e.getValue().getType(targetType, context))
-          .toArray(Type[]::new);
-      return invokable(getTarget().getTargetClass(selfType, context), getMethod(), argTypes)
-          .map(method -> {
-            final Object[] params = getArgs().stream()
-                .map(a -> a.getMappedIndex() >= 0 ? null : a.getValue().evaluate(self, selfType, context))
-                .toArray();
-            final int[] mapping = IntStream.range(0, getArgs().size())
-                .filter(i -> getArgs().get(i).getMappedIndex() >= 0)
-                .flatMap(i -> IntStream.of(i, getArgs().get(i).getMappedIndex()))
-                .toArray();
-            if (mapping.length == 0) {
-              return Proxy.newProxyInstance(context.getClassLoader(), new Class<?>[]{itf.get()}, (p, m, args) -> {
-                if (m.equals(sam)) {
-                  return method.execute(p, params);
-                } else {
-                  return m.invoke(p, args);
-                }
-              });
-            } else {
-              return Proxy.newProxyInstance(context.getClassLoader(), new Class<?>[]{itf.get()}, (p, m, args) -> {
-                if (m.equals(sam)) {
-                  final Object[] ps = params.clone();
-                  for (int i = 0; i < mapping.length; i += 2) {
-                    ps[mapping[i]] = args[mapping[i + 1]];
-                  }
-                  return method.execute(p, ps);
-                } else {
-                  return m.invoke(p, args);
-                }
-              });
-            }
-          })
-          .orElseThrow(() -> new IllegalStateException("Unable to find an invokable method"));
-    }
+    return null;
   }
 }

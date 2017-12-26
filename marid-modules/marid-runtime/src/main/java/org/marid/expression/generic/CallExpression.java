@@ -26,9 +26,8 @@ import org.jetbrains.annotations.Nullable;
 import org.marid.beans.BeanTypeContext;
 import org.marid.types.Types;
 import org.marid.types.invokable.Invokable;
-import org.marid.types.invokable.InvokableConstructor;
-import org.marid.types.invokable.InvokableField;
 import org.marid.types.invokable.InvokableMethod;
+import org.marid.types.invokable.Invokables;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -75,7 +74,7 @@ public interface CallExpression extends Expression {
       Types.rawClasses(type).flatMap(c -> Stream.of(c.getMethods()))
           .filter(m -> m.getName().equals(getMethod()))
           .map(InvokableMethod::new)
-          .filter(i -> matches(i, ats))
+          .filter(i -> i.matches(ats))
           .findFirst()
           .ifPresent(invokable -> {
             final Type[] ts = invokable.getParameterTypes();
@@ -89,30 +88,8 @@ public interface CallExpression extends Expression {
   @NotNull
   static Optional<Invokable> invokable(@NotNull Stream<Class<?>> classes, @NotNull String method, @NotNull Type... argTypes) {
     return classes
-        .flatMap(c -> {
-          if ("new".equals(method)) {
-            return Stream.of(c.getConstructors()).map(InvokableConstructor::new);
-          } else {
-            return Stream.concat(
-                Stream.of(c.getMethods()).filter(m -> m.getName().equals(method)).map(InvokableMethod::new),
-                Stream.of(c.getFields()).filter(f -> f.getName().equals(method)).flatMap(InvokableField::invokables)
-            );
-          }
-        })
-        .filter(i -> matches(i, argTypes))
+        .flatMap(c -> Invokables.invokables(c, method))
+        .filter(i -> i.matches(argTypes))
         .findFirst();
-  }
-
-  static boolean matches(Invokable invokable, Type... types) {
-    if (invokable.getParameterCount() == types.length) {
-      for (int i = 0; i < types.length; i++) {
-        if (!Types.isAssignable(invokable.getParameterTypes()[i], types[i])) {
-          return false;
-        }
-      }
-      return true;
-    } else {
-      return false;
-    }
   }
 }

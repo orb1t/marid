@@ -54,7 +54,7 @@
         <args>
           <array>
             <elements>
-              <call arg="1"/>
+              <call class="java.lang.Integer" method="valueOf" arg="1"/>
             </elements>
           </array>
         </args>

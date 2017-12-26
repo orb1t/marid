@@ -29,12 +29,14 @@ import org.marid.xml.XmlWritable;
 import org.w3c.dom.Element;
 
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 import java.util.stream.Collector;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.joining;
 import static org.marid.io.Xmls.*;
 
 public interface XmlExpression {
@@ -94,26 +96,6 @@ public interface XmlExpression {
         create(element, "args", is -> args.forEach(i -> create(is, i.getTag(), i::writeTo)));
         break;
     }
-  }
-
-  @NotNull
-  static <E extends Expression, M extends MappedExpression, L extends List<M>>
-  L mappedArgs(@NotNull Element element,
-               @NotNull Function<Element, E> exprFunc,
-               @NotNull BiFunction<Integer, E, M> mappedExprFunc,
-               @NotNull Collector<M, ?, L> collector) {
-    return elements("args", element)
-        .map(e -> {
-          final int index = attribute(e, "index").map(Integer::valueOf).orElse(-1);
-          final E expr = exprFunc.apply(e);
-          return mappedExprFunc.apply(index, expr);
-        })
-        .collect(collector);
-  }
-
-  static <M extends MappedExpression & Tagged & XmlWritable> void mappedArgs(@NotNull Element element,
-                                                                             @NotNull List<? extends M> args) {
-    create(element, "args", is -> args.forEach(i -> create(is, i.getTag(), i::writeTo)));
   }
 
   @NotNull
@@ -220,6 +202,21 @@ public interface XmlExpression {
                                                                          @NotNull List<? extends E> list) {
     if (!list.isEmpty()) {
       create(element, "initializers", is -> list.forEach(i -> create(is, i.getTag(), i::writeTo)));
+    }
+  }
+
+  @NotNull
+  static int[] indices(@NotNull Element element) {
+    return attribute(element, "indices").stream()
+        .flatMap(e -> Pattern.compile(",").splitAsStream(e).map(String::trim))
+        .filter(e -> !e.isEmpty())
+        .mapToInt(Integer::parseInt)
+        .toArray();
+  }
+
+  static void indices(@NotNull Element element, int... indices) {
+    if (indices.length > 0) {
+      element.setAttribute("indices", IntStream.of(indices).mapToObj(Integer::toString).collect(joining(",")));
     }
   }
 }

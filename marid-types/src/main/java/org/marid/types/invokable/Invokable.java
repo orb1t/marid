@@ -22,8 +22,12 @@
 package org.marid.types.invokable;
 
 import org.jetbrains.annotations.NotNull;
+import org.marid.types.Classes;
+import org.marid.types.Types;
 
 import java.lang.reflect.Type;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 public interface Invokable {
 
@@ -44,4 +48,21 @@ public interface Invokable {
   Class<?> getReturnClass();
 
   int getParameterCount();
+
+  default boolean matches(@NotNull Type... types) {
+    if (getParameterCount() == types.length) {
+      final Type[] args = getParameterTypes();
+      final Function<Type, Stream<Class<?>>> boxed = t -> Types.rawClasses(t).map(Classes::wrapper);
+      for (int i = 0; i < args.length; i++) {
+        final Type formal = args[i];
+        final Type actual = types[i];
+        if (!boxed.apply(formal).allMatch(t -> boxed.apply(actual).anyMatch(t::isAssignableFrom))) {
+          return false;
+        }
+      }
+      return true;
+    } else {
+      return false;
+    }
+  }
 }

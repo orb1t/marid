@@ -141,7 +141,8 @@ public interface Types {
     } else if (type instanceof ParameterizedType) {
       v.accept((Class<?>) ((ParameterizedType) type).getRawType());
     } else if (type instanceof GenericArrayType) {
-      v.accept(Object.class);
+      final GenericArrayType a = (GenericArrayType) type;
+      rawClasses(a.getGenericComponentType()).forEach(c -> v.accept(Array.newInstance(c, 0).getClass()));
     } else if (type instanceof TypeVariable<?>) {
       if (passed.add((TypeVariable<?>) type)) {
         for (final Type bound : ((TypeVariable<?>) type).getBounds()) {
