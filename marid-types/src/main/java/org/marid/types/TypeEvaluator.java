@@ -27,55 +27,69 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiConsumer;
 
+import static java.lang.Math.min;
 import static org.marid.types.Types.*;
 
 final class TypeEvaluator implements BiConsumer<Type, Type> {
 
-  private final HashSet<Type> passed = new HashSet<>();
   private final LinkedHashMap<TypeVariable<?>, LinkedHashSet<Type>> typeMappings = new LinkedHashMap<>();
 
   @Override
   public void accept(Type formal, Type actual) {
-    if (actual instanceof WildcardType) {
-      final WildcardType w = (WildcardType) actual;
-      for (final Type a : w.getUpperBounds()) {
-        accept(formal, a);
-      }
-    } else if (formal instanceof WildcardType) {
-      final WildcardType w = (WildcardType) formal;
-      for (final Type f : w.getUpperBounds()) {
-        accept(f, actual);
-      }
-    } else if (formal instanceof TypeVariable<?>) {
-      final TypeVariable<?> v = (TypeVariable<?>) formal;
-      for (final Type bound : v.getBounds()) {
-        accept(bound, actual);
-      }
-      put(v, actual);
-    } else if (passed.add(formal)) {
-      final Type fa = Types.getArrayComponentType(formal), aa = Types.getArrayComponentType(actual);
-      if (fa != null && aa != null) {
-        accept(fa, aa);
-      } else if (formal instanceof ParameterizedType) {
-        final ParameterizedType p = (ParameterizedType) formal;
-        final Map<TypeVariable<?>, Type> map = resolveVars(actual);
-        for (final Type f : p.getActualTypeArguments()) {
-          final Type a = Types.resolve(f, map);
-          accept(f, a);
-        }
-      }
+    if (!Types.isGround(formal)) {
+      accept(formal, actual, Collections.emptySet());
     }
   }
 
-  private void accept(WildcardType formal, WildcardType actual) {
-    if (formal.getUpperBounds().length == 1 && actual.getUpperBounds().length == 1) {
-      accept(formal.getUpperBounds()[0], actual.getUpperBounds()[0]);
+  private void accept(Type formal, Type actual, Set<TypeVariable<?>> vars) {
+    if (formal instanceof WildcardType) {
+      final WildcardType wf = (WildcardType) formal;
+      for (final Type f : wf.getUpperBounds()) {
+        if (actual instanceof WildcardType) {
+          final WildcardType wa = (WildcardType) actual;
+          for (final Type a : wa.getUpperBounds()) {
+            if (Types.isAssignable(f, a)) {
+              accept(f, a, vars);
+            }
+          }
+        } else if (Types.isAssignable(f, actual)) {
+          accept(f, actual, vars);
+        }
+      }
+    } else if (formal instanceof TypeVariable<?>) {
+      final TypeVariable<?> v = (TypeVariable<?>) formal;
+      if (!vars.contains(v)) {
+        for (final Type bound : v.getBounds()) {
+          accept(bound, actual, Sets.add(vars, v));
+        }
+        typeMappings.computeIfAbsent(v, k -> new LinkedHashSet<>()).add(boxed(actual));
+      }
+    } else {
+      final Type fa = Types.getArrayComponentType(formal), aa = Types.getArrayComponentType(actual);
+      if (fa != null && aa != null) {
+        accept(fa, aa, vars);
+      } else if (formal instanceof ParameterizedType) {
+        final ParameterizedType pf = (ParameterizedType) formal;
+        if (actual instanceof ParameterizedType) {
+          final ParameterizedType pa = (ParameterizedType) actual;
+          if (pa.getRawType().equals(pf.getRawType())) {
+            for (int i = 0; i < min(pa.getActualTypeArguments().length, pf.getActualTypeArguments().length); i++) {
+              final Type f = pf.getActualTypeArguments()[i];
+              final Type a = pa.getActualTypeArguments()[i];
+              accept(f, a, vars);
+            }
+            return;
+          }
+        }
+        final Map<TypeVariable<?>, Type> map = resolveVars(actual);
+        for (final Type f : pf.getActualTypeArguments()) {
+          final Type a = Types.resolve(f, map);
+          accept(f, a, vars);
+        }
+      }
     }
   }
 
@@ -84,9 +98,5 @@ final class TypeEvaluator implements BiConsumer<Type, Type> {
     final LinkedHashMap<TypeVariable<?>, Type> mapping = new LinkedHashMap<>(typeMappings.size());
     typeMappings.forEach((k, v) -> mapping.put(k, v.stream().reduce(Types::common).orElse(k)));
     return ground(type, mapping);
-  }
-
-  private void put(TypeVariable<?> variable, Type type) {
-    typeMappings.computeIfAbsent(variable, k -> new LinkedHashSet<>()).add(boxed(type));
   }
 }

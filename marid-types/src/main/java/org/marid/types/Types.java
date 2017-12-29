@@ -417,7 +417,7 @@ public interface Types {
         final Type c = common(at1, at2);
         return c instanceof Class<?> ? Array.newInstance((Class<?>) c, 0).getClass() : new MaridArrayType(c);
       } else {
-        final ConcurrentLinkedQueue<Type> ts = concat(types(t1), types(t2))
+        final ConcurrentLinkedQueue<Type> ts = concat(typesTree(t1), typesTree(t2))
             .filter(t -> isAssignable(t, t1) && isAssignable(t, t2))
             .distinct()
             .collect(Collectors.toCollection(ConcurrentLinkedQueue::new));
@@ -432,7 +432,7 @@ public interface Types {
   }
 
   @NotNull
-  static Stream<? extends Type> types(@NotNull Type type) {
+  static Stream<? extends Type> typesTree(@NotNull Type type) {
     final Map<TypeVariable<?>, Type> map = resolveVars(type = boxed(type));
     return rawClasses(type).flatMap(Classes::classes)
         .distinct()

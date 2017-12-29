@@ -110,7 +110,7 @@ class TypesTest {
   @ParameterizedTest
   @MethodSource("typesData")
   void types(Type type, List<Type> expected) {
-    final List<Type> actual = Types.types(type).collect(toList());
+    final List<Type> actual = Types.typesTree(type).collect(toList());
     assertEquals(expected, actual);
   }
 

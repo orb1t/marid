@@ -45,8 +45,8 @@ class ApplierTest {
     return Stream.of(
         of(Runnable.class, Runnable.class, String.class, "length", EMPTY_INT_ARRAY, new Type[0]),
         of(p(Callable.class, Integer.class), Callable.class, String.class, "length", EMPTY_INT_ARRAY, new Type[0]),
-        of(p(Callable.class, p(ArrayList.class, Object.class)), Callable.class, ArrayList.class, "new", EMPTY_INT_ARRAY, new Type[0])/*,
-        of(p(Callable.class, p(ArrayList.class, Integer.class)), Callable.class, ArrayList.class, "new", EMPTY_INT_ARRAY, new Type[] {p(Collection.class, Integer.class)})*/
+        of(p(Callable.class, p(ArrayList.class, Object.class)), Callable.class, ArrayList.class, "new", EMPTY_INT_ARRAY, new Type[0]),
+        of(p(Callable.class, p(ArrayList.class, Integer.class)), Callable.class, ArrayList.class, "new", EMPTY_INT_ARRAY, new Type[] {p(Collection.class, Integer.class)})
     );
   }
 
