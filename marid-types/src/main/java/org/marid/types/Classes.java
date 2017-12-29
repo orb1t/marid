@@ -26,7 +26,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Array;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -184,5 +187,18 @@ public interface Classes {
       case "void": return void.class;
       default: return Class.forName(name, false, classLoader);
     }
+  }
+
+  /**
+   * Returns a single abstract method of a class.
+   * @param type A type.
+   * @return Single abstract method.
+   */
+  static Optional<Method> getSam(@NotNull Class<?> type) {
+    final Method[] candidates = Stream.of(type.getMethods())
+        .filter(m -> Modifier.isAbstract(m.getModifiers()))
+        .filter(m -> !m.isDefault())
+        .toArray(Method[]::new);
+    return candidates.length == 1 ? Optional.of(candidates[0]) : Optional.empty();
   }
 }

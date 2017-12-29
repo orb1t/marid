@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
@@ -22,6 +22,7 @@
 package org.marid.types;
 
 import org.jetbrains.annotations.NotNull;
+
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -41,12 +42,22 @@ final class TypeEvaluator implements BiConsumer<Type, Type> {
 
   @Override
   public void accept(Type formal, Type actual) {
-    if (formal instanceof TypeVariable<?>) {
-      final TypeVariable<?> typeVariable = (TypeVariable<?>) formal;
-      for (final Type bound : typeVariable.getBounds()) {
+    if (actual instanceof WildcardType) {
+      final WildcardType w = (WildcardType) actual;
+      for (final Type a : w.getUpperBounds()) {
+        accept(formal, a);
+      }
+    } else if (formal instanceof WildcardType) {
+      final WildcardType w = (WildcardType) formal;
+      for (final Type f : w.getUpperBounds()) {
+        accept(f, actual);
+      }
+    } else if (formal instanceof TypeVariable<?>) {
+      final TypeVariable<?> v = (TypeVariable<?>) formal;
+      for (final Type bound : v.getBounds()) {
         accept(bound, actual);
       }
-      put(typeVariable, actual);
+      put(v, actual);
     } else if (passed.add(formal)) {
       final Type fa = Types.getArrayComponentType(formal), aa = Types.getArrayComponentType(actual);
       if (fa != null && aa != null) {
@@ -54,18 +65,17 @@ final class TypeEvaluator implements BiConsumer<Type, Type> {
       } else if (formal instanceof ParameterizedType) {
         final ParameterizedType p = (ParameterizedType) formal;
         final Map<TypeVariable<?>, Type> map = resolveVars(actual);
-        final ParameterizedType resolved = (ParameterizedType) resolve(formal, map);
-        final Type[] formals = p.getActualTypeArguments();
-        final Type[] actuals = resolved.getActualTypeArguments();
-        for (int i = 0; i < formals.length; i++) {
-          accept(formals[i], actuals[i]);
-        }
-      } else if (formal instanceof WildcardType) {
-        final WildcardType wildcardType = (WildcardType) formal;
-        for (final Type bound : wildcardType.getUpperBounds()) {
-          accept(bound, actual);
+        for (final Type f : p.getActualTypeArguments()) {
+          final Type a = Types.resolve(f, map);
+          accept(f, a);
         }
       }
+    }
+  }
+
+  private void accept(WildcardType formal, WildcardType actual) {
+    if (formal.getUpperBounds().length == 1 && actual.getUpperBounds().length == 1) {
+      accept(formal.getUpperBounds()[0], actual.getUpperBounds()[0]);
     }
   }
 
