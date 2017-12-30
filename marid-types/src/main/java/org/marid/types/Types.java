@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
@@ -29,7 +29,6 @@ import org.marid.types.invokable.Invokables;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -210,7 +209,7 @@ public interface Types {
   }
 
   @NotNull
-  static  Type resolve(@NotNull Type type, @NotNull Map<TypeVariable<?>, Type> map) {
+  static Type resolve(@NotNull Type type, @NotNull Map<TypeVariable<?>, Type> map) {
     return resolve(type, map, emptySet());
   }
 
@@ -396,11 +395,11 @@ public interface Types {
   }
 
   @NotNull
-  static Type evaluate(@NotNull Consumer<BiConsumer<Type, Type>> callback, @NotNull Type type) {
+  static Type evaluate(@NotNull Consumer<TypeEvaluator> callback, @NotNull Type type) {
     if (Types.isGround(type)) {
       return type;
     } else {
-      final TypeEvaluator evaluator = new TypeEvaluator();
+      final TypeEvaluatorImpl evaluator = new TypeEvaluatorImpl();
       callback.accept(evaluator);
       return evaluator.eval(type);
     }
@@ -463,17 +462,17 @@ public interface Types {
                     if (index >= 0 && index < i.getParameterCount()) {
                       final Type actual = Types.resolve(i.getParameterTypes()[index], typeVars);
                       final Type formal = samArgs[k];
-                      e.accept(formal, actual);
+                      e.bind(formal, actual);
                     }
                   }
                   IntStream.range(0, i.getParameterCount()).forEach(k -> {
                     if (stream(indices).noneMatch(v -> v != k)) {
                       final Type formal = i.getParameterTypes()[k];
                       final Type actual = args[k];
-                      e.accept(formal, actual);
+                      e.bind(formal, actual);
                     }
                   });
-                  e.accept(m.getGenericReturnType(), Types.resolve(i.getReturnType(), typeVars));
+                  e.bind(m.getGenericReturnType(), Types.resolve(i.getReturnType(), typeVars));
                 }, new MaridParameterizedType(null, type, vars));
               })
           )

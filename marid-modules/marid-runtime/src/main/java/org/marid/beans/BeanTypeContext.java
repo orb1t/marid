@@ -43,7 +43,7 @@ public abstract class BeanTypeContext extends TypeContext {
     } else {
       return Types.evaluate(e -> {
         for (int i = 0; i < formals.length; i++) {
-          e.accept(formals[i], actuals[i]);
+          e.bind(formals[i], actuals[i]);
         }
         for (final Expression i : expr.getInitializers()) {
           i.resolve(type, this, e);

@@ -21,14 +21,14 @@
 
 package org.marid.expression.generic;
 
-import org.marid.beans.BeanTypeContext;
-import org.marid.types.Types;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.marid.beans.BeanTypeContext;
+import org.marid.types.TypeEvaluator;
+import org.marid.types.Types;
+
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 public interface Expression {
@@ -39,7 +39,7 @@ public interface Expression {
   @NotNull
   Type getType(@Nullable Type owner, @NotNull BeanTypeContext context);
 
-  default void resolve(@NotNull Type type, @NotNull BeanTypeContext context, @NotNull BiConsumer<Type, Type> evaluator) {
+  default void resolve(@NotNull Type type, @NotNull BeanTypeContext context, @NotNull TypeEvaluator evaluator) {
   }
 
   @NotNull

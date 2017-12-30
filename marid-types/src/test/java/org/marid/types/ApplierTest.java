@@ -19,18 +19,20 @@
  * #L%
  */
 
-package org.marid.types.apply;
+package org.marid.types;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.marid.types.Types;
+import org.springframework.ui.ModelMap;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_INT_ARRAY;
@@ -43,10 +45,30 @@ class ApplierTest {
 
   private static Stream<Arguments> applyData() {
     return Stream.of(
-        of(Runnable.class, Runnable.class, String.class, "length", EMPTY_INT_ARRAY, new Type[0]),
-        of(p(Callable.class, Integer.class), Callable.class, String.class, "length", EMPTY_INT_ARRAY, new Type[0]),
-        of(p(Callable.class, p(ArrayList.class, Object.class)), Callable.class, ArrayList.class, "new", EMPTY_INT_ARRAY, new Type[0]),
-        of(p(Callable.class, p(ArrayList.class, Integer.class)), Callable.class, ArrayList.class, "new", EMPTY_INT_ARRAY, new Type[] {p(Collection.class, Integer.class)})
+        of(
+            Runnable.class,
+            Runnable.class, String.class, "length", EMPTY_INT_ARRAY, new Type[0]),
+        of(
+            p(Callable.class, Integer.class),
+            Callable.class, String.class, "length", EMPTY_INT_ARRAY, new Type[0]),
+        of(
+            p(Callable.class, p(ArrayList.class, Object.class)),
+            Callable.class, ArrayList.class, "new", EMPTY_INT_ARRAY, new Type[0]),
+        of(
+            p(Callable.class, p(ArrayList.class, Integer.class)),
+            Callable.class, ArrayList.class, "new", EMPTY_INT_ARRAY, new Type[] {p(Collection.class, Integer.class)}),
+        of(
+            p(Consumer.class, Integer.class),
+            Consumer.class, p(ArrayList.class, Integer.class), "add", new int[] {0}, new Type[] {Object.class}
+        ),
+        of(
+            p(Consumer.class, p(Collection.class, Integer.class)),
+            Consumer.class, p(List.class, p(Collection.class, Integer.class)), "add", new int[] {1}, new Type[] {int.class, Object.class}
+        ),
+        of(
+            p(Consumer.class, String.class),
+            Consumer.class, ModelMap.class, "put", new int[] {0}, new Type[] {Object.class, Object.class}
+        )
     );
   }
 

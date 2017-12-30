@@ -24,6 +24,7 @@ package org.marid.expression.generic;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.marid.beans.BeanTypeContext;
+import org.marid.types.TypeEvaluator;
 import org.marid.types.Types;
 import org.marid.types.invokable.Invokable;
 import org.marid.types.invokable.InvokableMethod;
@@ -33,7 +34,6 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 public interface CallExpression extends Expression {
@@ -68,18 +68,17 @@ public interface CallExpression extends Expression {
   }
 
   @Override
-  default void resolve(@NotNull Type type, @NotNull BeanTypeContext context, @NotNull BiConsumer<Type, Type> evaluator) {
+  default void resolve(@NotNull Type type, @NotNull BeanTypeContext context, @NotNull TypeEvaluator evaluator) {
     if (getTarget() instanceof ThisExpression) {
       final Type[] ats = getArgs().stream().map(a -> a.getType(type, context)).toArray(Type[]::new);
-      Types.rawClasses(type).flatMap(c -> Stream.of(c.getMethods()))
-          .filter(m -> m.getName().equals(getMethod()))
+      Types.rawClasses(type).flatMap(c -> Stream.of(c.getMethods()).filter(m -> m.getName().equals(getMethod())))
           .map(InvokableMethod::new)
           .filter(i -> i.matches(ats))
           .findFirst()
           .ifPresent(invokable -> {
             final Type[] ts = invokable.getParameterTypes();
             for (int i = 0; i < ts.length; i++) {
-              evaluator.accept(context.resolve(type, ts[i]), ats[i]);
+              evaluator.bind(context.resolve(type, ts[i]), ats[i]);
             }
           });
     }
