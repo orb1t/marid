@@ -450,8 +450,7 @@ public interface Types {
     } else {
       return Classes.getSam(type)
           .flatMap(m -> Types.rawClasses(target)
-              .flatMap(c -> Invokables.invokables(c, method))
-              .filter(i -> i.matches(args))
+              .flatMap(c -> Invokables.invokables(c, method).filter(i -> i.matches(args)))
               .findFirst()
               .map(i -> {
                 final Type[] samArgs = m.getGenericParameterTypes();

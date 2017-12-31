@@ -25,6 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import org.marid.types.Classes;
 import org.marid.types.Types;
 
+import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Type;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -48,6 +49,8 @@ public interface Invokable {
   Class<?> getReturnClass();
 
   int getParameterCount();
+
+  MethodHandle toMethodHandle();
 
   default boolean matches(@NotNull Type... types) {
     if (getParameterCount() == types.length) {

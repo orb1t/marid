@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
@@ -27,6 +27,9 @@ import org.marid.expression.generic.ApplyExpression;
 import org.marid.expression.xml.XmlExpression;
 import org.marid.function.ToImmutableList;
 import org.marid.runtime.context.BeanContext;
+import org.marid.types.Classes;
+import org.marid.types.Types;
+import org.marid.types.invokable.Invokables;
 import org.w3c.dom.Element;
 
 import java.lang.reflect.Type;
@@ -101,6 +104,19 @@ public class ApplyExpr extends Expr implements ApplyExpression {
 
   @Override
   protected Object execute(@Nullable Object self, @Nullable Type selfType, @NotNull BeanContext context) {
-    return null;
+    final Type t = target.getType(selfType, context);
+    return context.getClass(type)
+        .flatMap(Classes::getSam)
+        .flatMap(m -> {
+              final Type[] types = getArgs().stream().map(a -> a.getType(selfType, context)).toArray(Type[]::new);
+              return Types.rawClasses(t)
+                  .flatMap(c -> Invokables.invokables(c, method).filter(i -> i.matches(types)))
+                  .findFirst()
+                  .map(i -> {
+                    return null;
+                  });
+            }
+        )
+        .orElseThrow(IllegalStateException::new);
   }
 }
