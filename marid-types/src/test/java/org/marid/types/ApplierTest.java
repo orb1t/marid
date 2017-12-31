@@ -32,10 +32,9 @@ import org.springframework.ui.ModelMap;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -47,7 +46,7 @@ import static org.marid.types.AuxTypeUtils.p;
 @Tag("normal")
 class ApplierTest {
 
-  private static Stream<Arguments> applyData() throws ReflectiveOperationException {
+  private static Stream<Arguments> applyTypeData() throws ReflectiveOperationException {
     return Stream.of(
         of(
             Runnable.class,
@@ -79,13 +78,23 @@ class ApplierTest {
             p(Consumer.class, String.class),
             new InvokableMethod(ModelMap.class.getMethod("put", Object.class, Object.class)),
             Consumer.class, ModelMap.class, new int[] {0}, new Type[] {Object.class, Object.class}
+        ),
+        of(
+            p(BiConsumer.class, String.class, Integer.class),
+            new InvokableMethod(LinkedHashMap.class.getMethod("put", Object.class, Object.class)),
+            BiConsumer.class, p(LinkedHashMap.class, String.class, Integer.class), new int[] {0, 1}, new Type[0]
+        ),
+        of(
+            p(BiConsumer.class, String.class, Integer.class),
+            new InvokableMethod(Map.class.getMethod("put", Object.class, Object.class)),
+            BiConsumer.class, p(LinkedHashMap.class, String.class, Integer.class), new int[] {0, 1}, new Type[0]
         )
     );
   }
 
   @ParameterizedTest
-  @MethodSource("applyData")
-  void test(Type expected, Invokable invokable, Class<?> type, Type target, int[] indices, Type[] args) {
+  @MethodSource("applyTypeData")
+  void testType(Type expected, Invokable invokable, Class<?> type, Type target, int[] indices, Type[] args) {
     final Method sam = Classes.getSam(type).orElseThrow(IllegalArgumentException::new);
     final Type actual = invokable.type(target, type, sam, indices, args);
     assertEquals(expected, actual);
