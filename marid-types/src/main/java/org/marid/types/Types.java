@@ -24,17 +24,14 @@ package org.marid.types;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.marid.collections.MaridSets;
-import org.marid.types.invokable.Invokables;
 
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static java.util.Arrays.stream;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
@@ -440,42 +437,5 @@ public interface Types {
           return vars.length == 0 ? c : new MaridParameterizedType(null, c, vars);
         })
         .map(t -> resolve(t, map));
-  }
-
-  @NotNull
-  static Type apply(@NotNull Class<?> type, @NotNull Type target, @NotNull String method, @NotNull int[] indices, @NotNull Type... args) {
-    final TypeVariable<?>[] vars = type.getTypeParameters();
-    if (vars.length == 0) {
-      return type;
-    } else {
-      return Classes.getSam(type)
-          .flatMap(m -> Types.rawClasses(target)
-              .flatMap(c -> Invokables.invokables(c, method).filter(i -> i.matches(args)))
-              .findFirst()
-              .map(i -> {
-                final Type[] samArgs = m.getGenericParameterTypes();
-                final Map<TypeVariable<?>, Type> typeVars = Types.resolveVars(target);
-                return Types.evaluate(e -> {
-                  for (int k = 0; k < indices.length; k++) {
-                    final int index = indices[k];
-                    if (index >= 0 && index < i.getParameterCount()) {
-                      final Type actual = Types.resolve(i.getParameterTypes()[index], typeVars);
-                      final Type formal = samArgs[k];
-                      e.bind(formal, actual);
-                    }
-                  }
-                  IntStream.range(0, i.getParameterCount()).forEach(k -> {
-                    if (stream(indices).noneMatch(v -> v != k)) {
-                      final Type formal = i.getParameterTypes()[k];
-                      final Type actual = args[k];
-                      e.bind(formal, actual);
-                    }
-                  });
-                  e.bind(m.getGenericReturnType(), Types.resolve(i.getReturnType(), typeVars));
-                }, new MaridParameterizedType(null, type, vars));
-              })
-          )
-          .orElse(type);
-    }
   }
 }

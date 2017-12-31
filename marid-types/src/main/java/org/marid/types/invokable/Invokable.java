@@ -23,12 +23,18 @@ package org.marid.types.invokable;
 
 import org.jetbrains.annotations.NotNull;
 import org.marid.types.Classes;
+import org.marid.types.MaridParameterizedType;
 import org.marid.types.Types;
 
 import java.lang.invoke.MethodHandle;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
+
+import static java.util.Arrays.stream;
 
 public interface Invokable {
 
@@ -67,5 +73,33 @@ public interface Invokable {
     } else {
       return false;
     }
+  }
+
+  default Type type(@NotNull Type target, @NotNull Class<?> type, @NotNull Method sam, @NotNull int[] indices, @NotNull Type... args) {
+    final TypeVariable<?>[] vars = type.getTypeParameters();
+    if (vars.length == 0) {
+      return type;
+    }
+    final Type[] samArgs = sam.getGenericParameterTypes();
+    final Map<TypeVariable<?>, Type> typeVars = Types.resolveVars(target);
+    return Types.evaluate(e -> {
+      for (int k = 0; k < indices.length; k++) {
+        final int index = indices[k];
+        if (index >= 0 && index < getParameterCount()) {
+          final Type actual = Types.resolve(getParameterTypes()[index], typeVars);
+          final Type formal = samArgs[k];
+          e.bind(formal, actual);
+        }
+      }
+      for (int k = 0; k < getParameterCount(); k++) {
+        final int index = k;
+        if (stream(indices).noneMatch(v -> v != index)) {
+          final Type formal = getParameterTypes()[index];
+          final Type actual = args[index];
+          e.bind(formal, actual);
+        }
+      }
+      e.bind(sam.getGenericReturnType(), Types.resolve(getReturnType(), typeVars));
+    }, new MaridParameterizedType(null, type, vars));
   }
 }

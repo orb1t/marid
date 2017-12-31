@@ -24,7 +24,9 @@ package org.marid.expression.generic;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.marid.beans.BeanTypeContext;
+import org.marid.types.Classes;
 import org.marid.types.Types;
+import org.marid.types.invokable.Invokables;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -50,11 +52,26 @@ public interface ApplyExpression extends Expression {
   @Override
   default Type getType(@Nullable Type owner, @NotNull BeanTypeContext context) {
     return context.getClass(getType())
-        .map(c -> {
-          final Type target = getTarget().getType(owner, context);
-          final Type[] args = getArgs().stream().map(e -> e.getType(owner, context)).toArray(Type[]::new);
-          return Types.apply(c, target, getMethod(), getIndices(), args);
-        })
-        .orElse(Object.class);
+        .map(c -> Classes.getSam(c)
+            .map(sam -> {
+              final Type target = getTarget().getType(owner, context);
+              final Type[] args = getArgs().stream().map(e -> e.getType(owner, context)).toArray(Type[]::new);
+              return Types.rawClasses(target)
+                  .flatMap(rc -> Invokables.invokables(rc, getMethod()).filter(i -> i.matches(args)))
+                  .map(i -> i.type(target, c, sam, getIndices(), args))
+                  .findFirst()
+                  .orElseGet(() -> {
+                    context.throwError(new IllegalStateException());
+                    return Object.class;
+                  });
+            })
+            .orElseGet(() -> {
+              context.throwError(new IllegalStateException());
+              return Object.class;
+            }))
+        .orElseGet(() -> {
+          context.throwError(new IllegalStateException());
+          return Object.class;
+        });
   }
 }
