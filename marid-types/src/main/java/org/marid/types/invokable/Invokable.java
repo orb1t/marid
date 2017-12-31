@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
@@ -22,16 +22,18 @@
 package org.marid.types.invokable;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.marid.types.Classes;
 import org.marid.types.MaridParameterizedType;
 import org.marid.types.Types;
 
-import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.stream;
@@ -55,8 +57,6 @@ public interface Invokable {
   Class<?> getReturnClass();
 
   int getParameterCount();
-
-  MethodHandle toMethodHandle();
 
   default boolean matches(@NotNull Type... types) {
     if (getParameterCount() == types.length) {
@@ -101,5 +101,27 @@ public interface Invokable {
       }
       e.bind(sam.getGenericReturnType(), Types.resolve(getReturnType(), typeVars));
     }, new MaridParameterizedType(null, type, vars));
+  }
+
+  default Object apply(@NotNull ClassLoader loader, @NotNull Class<?> type, @NotNull int[] indices, @Nullable Object target, @NotNull Object[] args) {
+    final Method sam = Classes.getSam(type).orElseThrow(() -> new IllegalArgumentException("No SAM found: " + type));
+    sam.trySetAccessible();
+    final Function<Object[], Object[]> paramsFunc = IntStream.of(indices).allMatch(i -> i < 0) ? a -> args : a -> {
+      final Object[] params = args.clone();
+      for (int k = 0; k < indices.length; k++) {
+        final int index = indices[k];
+        if (index >= 0) {
+          params[index] = a[k];
+        }
+      }
+      return params;
+    };
+    return Proxy.newProxyInstance(loader, new Class<?>[]{type}, (p, m, a) -> {
+      if (sam.equals(m)) {
+        return sam.invoke(target, paramsFunc.apply(a));
+      } else {
+        return null;
+      }
+    });
   }
 }

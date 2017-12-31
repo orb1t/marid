@@ -23,8 +23,6 @@ package org.marid.types.invokable;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
@@ -76,14 +74,5 @@ public final class InvokableMethod extends AbstractInvokable<Method> {
   @NotNull
   public Class<?> getReturnClass() {
     return returnClass;
-  }
-
-  @Override
-  public MethodHandle toMethodHandle() {
-    try {
-      return MethodHandles.publicLookup().unreflect(executable);
-    } catch (IllegalAccessException x) {
-      throw new IllegalStateException(x);
-    }
   }
 }

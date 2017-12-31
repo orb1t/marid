@@ -23,13 +23,10 @@ package org.marid.types.invokable;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.stream.Stream;
-
-import static java.lang.invoke.MethodHandles.publicLookup;
 
 public class InvokableField implements Invokable {
 
@@ -83,15 +80,6 @@ public class InvokableField implements Invokable {
   @Override
   public int getParameterCount() {
     return setter ? 1 : 0;
-  }
-
-  @Override
-  public MethodHandle toMethodHandle() {
-    try {
-      return setter ? publicLookup().unreflectSetter(field) : publicLookup().unreflectGetter(field);
-    } catch (IllegalAccessException x) {
-      throw new IllegalStateException(x);
-    }
   }
 
   @NotNull
