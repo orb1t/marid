@@ -23,6 +23,7 @@ package org.marid.types;
 
 import org.jetbrains.annotations.NotNull;
 import org.marid.types.util.MappedVars;
+import org.marid.types.util.PassedVars;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -43,11 +44,11 @@ final class TypeEvaluatorImpl implements TypeEvaluator {
   @Override
   public void bind(Type formal, Type actual) {
     if (!Types.isGround(formal)) {
-      accept(formal, actual, emptySet());
+      accept(formal, actual, PassedVars.EMPTY);
     }
   }
 
-  private void accept(Type formal, Type actual, Set<TypeVariable<?>> vars) {
+  private void accept(Type formal, Type actual, PassedVars vars) {
     if (formal instanceof WildcardType) {
       final WildcardType wf = (WildcardType) formal;
       for (final Type f : wf.getUpperBounds()) {
@@ -64,9 +65,10 @@ final class TypeEvaluatorImpl implements TypeEvaluator {
       }
     } else if (formal instanceof TypeVariable<?>) {
       final TypeVariable<?> v = (TypeVariable<?>) formal;
-      if (!vars.contains(v)) {
+      final PassedVars newVars = vars.add(v);
+      if (newVars != vars) {
         for (final Type bound : v.getBounds()) {
-          accept(bound, actual, Sets.add(vars, v));
+          accept(bound, actual, newVars);
         }
         map.computeIfAbsent(v, k -> new LinkedHashSet<>()).add(boxed(actual));
       }

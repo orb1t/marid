@@ -23,17 +23,19 @@ package org.marid.types;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.marid.collections.MaridSets;
 import org.marid.types.util.MappedVars;
+import org.marid.types.util.PassedVars;
 
 import java.lang.reflect.*;
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Collections.emptySet;
 import static java.util.stream.IntStream.range;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
@@ -42,20 +44,20 @@ public interface Types {
 
   @Nullable
   static Type getArrayComponentType(@NotNull Type type) {
-    return getArrayComponentType(type, emptySet());
+    return getArrayComponentType(type, PassedVars.EMPTY);
   }
 
-  private static Type getArrayComponentType(@NotNull Type type, @NotNull Set<TypeVariable<?>> passed) {
+  private static Type getArrayComponentType(@NotNull Type type, @NotNull PassedVars passed) {
     if (type instanceof Class<?>) {
       return ((Class<?>) type).getComponentType();
     } else if (type instanceof GenericArrayType) {
       return ((GenericArrayType) type).getGenericComponentType();
     } else if (type instanceof TypeVariable<?>) {
       final TypeVariable<?> v = (TypeVariable<?>) type;
-      if (passed.contains(v)) {
+      final PassedVars newPassed = passed.add(v);
+      if (newPassed == passed) {
         return null;
       } else {
-        final Set<TypeVariable<?>> newPassed = Sets.add(passed, v);
         return of(v.getBounds())
             .map(e -> getArrayComponentType(e, newPassed))
             .filter(Objects::nonNull)
@@ -100,8 +102,7 @@ public interface Types {
   private static void vars(@NotNull Type type, @NotNull LinkedHashSet<TypeVariable<?>> vars) {
     if (type instanceof TypeVariable<?>) {
       final TypeVariable<?> v = (TypeVariable<?>) type;
-      if (!vars.contains(v)) {
-        vars.add(v);
+      if (vars.add(v)) {
         for (final Type bound : v.getBounds()) {
           vars(bound, vars);
         }
@@ -128,7 +129,7 @@ public interface Types {
   @NotNull
   static Stream<Class<?>> rawClasses(@NotNull Type type) {
     final LinkedList<Class<?>> set = new LinkedList<>();
-    raw(boxed(type), new HashSet<>(), c -> {
+    raw(boxed(type), PassedVars.EMPTY, c -> {
       if (set.stream().noneMatch(c::isAssignableFrom)) {
         set.add(c);
       }
@@ -136,7 +137,7 @@ public interface Types {
     return set.stream();
   }
 
-  private static void raw(Type type, HashSet<TypeVariable<?>> passed, Consumer<Class<?>> v) {
+  private static void raw(Type type, PassedVars passed, Consumer<Class<?>> v) {
     if (type instanceof Class<?>) {
       v.accept((Class<?>) type);
     } else if (type instanceof ParameterizedType) {
@@ -145,7 +146,8 @@ public interface Types {
       final GenericArrayType a = (GenericArrayType) type;
       rawClasses(a.getGenericComponentType()).forEach(c -> v.accept(Array.newInstance(c, 0).getClass()));
     } else if (type instanceof TypeVariable<?>) {
-      if (passed.add((TypeVariable<?>) type)) {
+      final PassedVars newPassed = passed.add((TypeVariable<?>) type);
+      if (newPassed != passed) {
         for (final Type bound : ((TypeVariable<?>) type).getBounds()) {
           raw(bound, passed, v);
         }
@@ -166,10 +168,10 @@ public interface Types {
 
   @NotNull
   static Type ground(@NotNull Type type, @NotNull MappedVars map) {
-    return ground(type, map, emptySet());
+    return ground(type, map, PassedVars.EMPTY);
   }
 
-  private static Type ground(Type type, MappedVars map, Set<TypeVariable<?>> passed) {
+  private static Type ground(Type type, MappedVars map, PassedVars passed) {
     if (type instanceof Class<?> || isGround(type)) {
       return type;
     } else if (type instanceof GenericArrayType) {
@@ -187,11 +189,11 @@ public interface Types {
       return new MaridWildcardType(upper, lower);
     } else if (type instanceof TypeVariable<?>) {
       final TypeVariable<?> v = (TypeVariable<?>) type;
-      final Set<TypeVariable<?>> p = MaridSets.add(passed, v);
+      final PassedVars p = passed.add(v);
       final Type t = map.get(v);
       if (t == null || t.equals(v) || p == passed) { // not found or circular reference
         final Type[] bounds = of(v.getBounds())
-            .filter(e -> !(e instanceof TypeVariable<?>) || !p.contains(e))
+            .filter(e -> !(e instanceof TypeVariable<?>) || !p.contains((TypeVariable<?>) e))
             .map(e -> ground(e, map, p))
             .toArray(Type[]::new);
         switch (bounds.length) {
@@ -209,10 +211,10 @@ public interface Types {
 
   @NotNull
   static Type resolve(@NotNull Type type, @NotNull MappedVars map) {
-    return resolve(type, map, emptySet());
+    return resolve(type, map, PassedVars.EMPTY);
   }
 
-  private static Type resolve(Type type, MappedVars map, Set<TypeVariable<?>> passed) {
+  private static Type resolve(Type type, MappedVars map, PassedVars passed) {
     if (type instanceof Class<?> || vars(type).stream().noneMatch(k -> map.get(k) != null)) {
       return type;
     } else if (type instanceof ParameterizedType) {
@@ -230,23 +232,27 @@ public interface Types {
       return et instanceof Class<?> ? Array.newInstance((Class<?>) et, 0).getClass() : new MaridArrayType(et);
     } else if (type instanceof TypeVariable<?>) {
       final TypeVariable<?> v = (TypeVariable<?>) type;
+      final PassedVars newPassed = passed.add(v);
+      if (newPassed == passed) {
+        return v;
+      }
       for (Type t = map.get(v); t instanceof TypeVariable<?>; t = map.get((TypeVariable<?>) t)) {
         if (t.equals(v)) { // circular reference detected
           return v;
         }
       }
       final Type t = map.get(v);
-      return t == null || passed.contains(v) ? v : resolve(t, map, Sets.add(passed, v));
+      return t == null ? v : resolve(t, map, newPassed);
     } else {
       throw new IllegalStateException("Unsupported type: " + type);
     }
   }
 
   static boolean isAssignable(@NotNull Type to, @NotNull Type from) {
-    return isAssignable(to, from, emptySet(), emptySet());
+    return isAssignable(to, from, PassedVars.EMPTY, PassedVars.EMPTY);
   }
 
-  private static boolean isAssignable(Type to, Type from, Set<TypeVariable<?>> pt, Set<TypeVariable<?>> pf) {
+  private static boolean isAssignable(Type to, Type from, PassedVars pt, PassedVars pf) {
     if (to.equals(from) || Object.class.equals(to) || void.class.equals(from)) {
       return true;
     }
@@ -298,12 +304,8 @@ public interface Types {
     }
     if (to instanceof TypeVariable<?>) {
       final TypeVariable<?> tv = (TypeVariable<?>) to;
-      if (pt.contains(tv)) {
-        return true;
-      } else {
-        final Set<TypeVariable<?>> npt = Sets.add(pt, tv);
-        return of(tv.getBounds()).allMatch(t -> isAssignable(t, from, npt, pf));
-      }
+      final PassedVars npt = pt.add(tv);
+      return npt == pt || of(tv.getBounds()).allMatch(t -> isAssignable(t, from, npt, pf));
     }
     if (from instanceof WildcardType) {
       final WildcardType fw = (WildcardType) from;
@@ -311,12 +313,8 @@ public interface Types {
     }
     if (from instanceof TypeVariable<?>) {
       final TypeVariable<?> fv = (TypeVariable<?>) from;
-      if (pf.contains(fv)) {
-        return true;
-      } else {
-        final Set<TypeVariable<?>> npf = Sets.add(pf, fv);
-        return of(fv.getBounds()).anyMatch(f -> isAssignable(to, f, pt, npf));
-      }
+      final PassedVars npf = pf.add(fv);
+      return npf == pf || of(fv.getBounds()).anyMatch(f -> isAssignable(to, f, pt, npf));
     }
     return false;
   }
