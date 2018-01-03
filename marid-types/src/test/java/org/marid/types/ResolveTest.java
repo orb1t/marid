@@ -22,6 +22,9 @@
 package org.marid.types;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.marid.types.AuxTypeUtils.C0;
 import org.marid.types.AuxTypeUtils.C1;
 import org.marid.types.AuxTypeUtils.C2;
@@ -31,12 +34,11 @@ import org.marid.types.util.MappedVars;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.params.provider.Arguments.of;
 import static org.marid.types.AuxTypeUtils.p;
 import static org.marid.types.Types.evaluate;
 import static org.marid.types.Types.getType;
@@ -68,10 +70,17 @@ class ResolveTest {
     assertEquals(p(List.class, p(List.class, Integer.class)), map.get(c0Var));
   }
 
-  @Test
-  void resolveLinkedHashMap() throws Exception {
-    final Method method = Map.class.getMethod("put", Object.class, Object.class);
-    final Type[] types = method.getGenericParameterTypes();
+  private static Type[][][] resolveLinkedHashMapData() throws Exception {
+    return new Type[][][] {
+        {Map.class.getMethod("put", Object.class, Object.class).getGenericParameterTypes()},
+        {AbstractMap.class.getMethod("put", Object.class, Object.class).getGenericParameterTypes()},
+        {HashMap.class.getMethod("put", Object.class, Object.class).getGenericParameterTypes()}
+    };
+  }
+
+  @ParameterizedTest
+  @MethodSource("resolveLinkedHashMapData")
+  void resolveLinkedHashMap(Type[] types) {
     final Type resolved = evaluate(e -> {
       e.bind(types[0], Long.class);
       e.bind(types[1], float.class);
@@ -79,19 +88,18 @@ class ResolveTest {
     assertEquals(p(LinkedHashMap.class, Long.class, Float.class), resolved);
   }
 
-  @Test
-  void resolveMyListList() throws Exception {
-    final Method method = ArrayList.class.getMethod("add", Object.class);
-    final Type[] types = method.getGenericParameterTypes();
-    final Type resolved = evaluate(e -> e.bind(types[0], p(List.class, Integer.class)), getType(MyList.class));
-    assertEquals(p(MyList.class, Integer.class), resolved);
+  private static Stream<Arguments> resolveMyListData() throws Exception {
+    return Stream.of(
+        of(List.class.getMethod("add", Object.class).getGenericParameterTypes(), p(List.class, Integer.class)),
+        of(ArrayList.class.getMethod("add", Object.class).getGenericParameterTypes(), p(ArrayList.class, Integer.class)),
+        of(Collection.class.getMethod("add", Object.class).getGenericParameterTypes(), p(AbstractList.class, Integer.class))
+    );
   }
 
-  @Test
-  void resolveMyListArrayList() throws Exception {
-    final Method method = ArrayList.class.getMethod("add", Object.class);
-    final Type[] types = method.getGenericParameterTypes();
-    final Type resolved = evaluate(e -> e.bind(types[0], p(ArrayList.class, Integer.class)), getType(MyList.class));
+  @ParameterizedTest
+  @MethodSource("resolveMyListData")
+  void resolveMyListList(Type[] types, Type bindType) {
+    final Type resolved = evaluate(e -> e.bind(types[0], bindType), getType(MyList.class));
     assertEquals(p(MyList.class, Integer.class), resolved);
   }
 }
