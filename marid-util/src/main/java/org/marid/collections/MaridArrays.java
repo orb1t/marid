@@ -22,6 +22,8 @@
 package org.marid.collections;
 
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Arrays;
 import java.util.function.IntFunction;
 import java.util.stream.Stream;
 
@@ -41,5 +43,22 @@ public interface MaridArrays {
     }
 
     return result;
+  }
+
+  @SafeVarargs
+  @NotNull
+  static <T> T[] addLast(@NotNull T[] array, T... values) {
+    final T[] newArray = Arrays.copyOf(array, array.length + values.length);
+    System.arraycopy(values, 0, newArray, array.length, values.length);
+    return newArray;
+  }
+
+  @SafeVarargs
+  @NotNull
+  static <T> T[] addFirst(@NotNull T[] array, T... values) {
+    final T[] newArray = Arrays.copyOf(array, array.length + values.length);
+    System.arraycopy(newArray, 0, newArray, values.length, array.length);
+    System.arraycopy(values, 0, newArray, 0, values.length);
+    return newArray;
   }
 }

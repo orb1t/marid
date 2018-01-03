@@ -28,6 +28,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.marid.types.AuxTypeUtils.I1;
 import org.marid.types.AuxTypeUtils.Map1;
+import org.marid.types.util.MappedVars;
 
 import java.io.Serializable;
 import java.io.Writer;
@@ -51,35 +52,35 @@ class TypesTest {
 
   @Test
   void resolveVars1() {
-    final Map<TypeVariable<?>, Type> map = Types.resolveVars(AuxTypeUtils.List2.class);
+    final MappedVars map = Types.resolveVars(AuxTypeUtils.List2.class);
 
     final Set<Class<?>> ec = classes(AuxTypeUtils.List2.class).filter(c -> c.getTypeParameters().length > 0).collect(toSet());
-    final Set<Class<?>> ac = map.keySet().stream().map(v -> (Class<?>) v.getGenericDeclaration()).collect(toSet());
+    final Set<Class<?>> ac = map.vars().map(v -> (Class<?>) v.getGenericDeclaration()).collect(toSet());
     final Set<TypeVariable<?>> expectedVars = ec.stream().flatMap(c -> Stream.of(c.getTypeParameters())).collect(toSet());
 
     assertEquals(ec, ac);
-    assertEquals(expectedVars, map.keySet());
-    assertEquals(Set.of(Writer.class), new HashSet<>(map.values()));
+    assertEquals(expectedVars, map.vars().collect(toSet()));
+    assertEquals(Set.of(Writer.class), map.types().collect(toSet()));
   }
 
   @Test
   void resolveVars2() {
-    final Map<TypeVariable<?>, Type> map = Types.resolveVars(AuxTypeUtils.List2.M.class);
+    final MappedVars map = Types.resolveVars(AuxTypeUtils.List2.M.class);
 
     final Set<Class<?>> ec = classes(AuxTypeUtils.List1.M.class).filter(c -> c.getTypeParameters().length > 0).collect(toSet());
-    final Set<Class<?>> ac = map.keySet().stream().map(v -> (Class<?>) v.getGenericDeclaration()).collect(toSet());
+    final Set<Class<?>> ac = map.vars().map(v -> (Class<?>) v.getGenericDeclaration()).collect(toSet());
     final Set<TypeVariable<?>> expectedVars = ec.stream().flatMap(c -> Stream.of(c.getTypeParameters())).collect(toSet());
 
     assertEquals(ec, ac);
-    assertEquals(expectedVars, map.keySet());
+    assertEquals(expectedVars, map.vars().collect(toSet()));
   }
 
   @Test
   void resolveVarsStackOverflow() {
-    final Map<TypeVariable<?>, Type> map = Types.resolveVars(AuxTypeUtils.Map2.class);
+    final MappedVars map = Types.resolveVars(AuxTypeUtils.Map2.class);
 
-    assertEquals(Set.of(Map1.class.getTypeParameters()), map.keySet());
-    assertEquals(Set.of(parameterize(I1.class, I1.class)), new HashSet<>(map.values()));
+    assertEquals(Set.of(Map1.class.getTypeParameters()), map.vars().collect(toSet()));
+    assertEquals(Set.of(parameterize(I1.class, I1.class)), map.types().collect(toSet()));
   }
 
   private static Stream<Arguments> typesData() {

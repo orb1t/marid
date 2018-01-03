@@ -22,23 +22,28 @@
 package org.marid.types;
 
 import org.jetbrains.annotations.NotNull;
+import org.marid.types.util.MappedVars;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.stream.IntStream;
 
-import static org.marid.types.Types.*;
+import static java.util.Collections.emptySet;
+import static org.marid.types.Types.boxed;
 
 final class TypeEvaluatorImpl implements TypeEvaluator {
 
-  private final LinkedHashMap<TypeVariable<?>, LinkedHashSet<Type>> map = new LinkedHashMap<>();
+  private final LinkedHashMap<TypeVariable<?>, Set<Type>> map = new LinkedHashMap<>();
 
   @Override
   public void bind(Type formal, Type actual) {
     if (!Types.isGround(formal)) {
-      accept(formal, actual, Collections.emptySet());
+      accept(formal, actual, emptySet());
     }
   }
 
@@ -71,31 +76,31 @@ final class TypeEvaluatorImpl implements TypeEvaluator {
         accept(fa, aa, vars);
       } else if (formal instanceof ParameterizedType) {
         final ParameterizedType pf = (ParameterizedType) formal;
-        if (actual instanceof ParameterizedType) {
-          final ParameterizedType pa = (ParameterizedType) actual;
-          final Type[] fargs = pf.getActualTypeArguments(), aargs = pa.getActualTypeArguments();
-          if (pa.getRawType().equals(pf.getRawType()) && fargs.length == aargs.length) {
-            for (int i = 0; i < fargs.length; i++) {
-              final Type f = fargs[i];
-              final Type a = aargs[i];
-              accept(f, a, vars);
-            }
-            return;
-          }
-        }
-        final Map<TypeVariable<?>, Type> map = resolveVars(actual);
-        for (final Type f : pf.getActualTypeArguments()) {
-          final Type a = Types.resolve(f, map);
-          accept(f, a, vars);
-        }
+        final Type[] fargs = pf.getActualTypeArguments();
+        Types.typesTree(actual)
+            .filter(ParameterizedType.class::isInstance)
+            .map(ParameterizedType.class::cast)
+            .filter(a -> a.getRawType().equals(pf.getRawType()))
+            .map(ParameterizedType::getActualTypeArguments)
+            .filter(aargs -> aargs.length == fargs.length)
+            .findFirst()
+            .ifPresent(aargs -> IntStream.range(0, fargs.length).forEach(i -> accept(fargs[i], aargs[i], vars)));
       }
     }
   }
 
   @NotNull
   Type eval(@NotNull Type type) {
-    final LinkedHashMap<TypeVariable<?>, Type> mapping = new LinkedHashMap<>(map.size());
-    map.forEach((k, v) -> mapping.put(k, v.stream().reduce(Types::common).orElse(k)));
-    return ground(type, mapping);
+    Types.resolveVars(type).forEachReversed((v, in) -> {
+      for (final Type out : map.getOrDefault(v, emptySet())) {
+        bind(in, out);
+      }
+    });
+    final MappedVars mapping = new MappedVars();
+    map.forEach((k, v) -> {
+      final Type commonType = v.stream().reduce(Types::common).orElse(k);
+      mapping.put(k, commonType);
+    });
+    return Types.ground(type, mapping);
   }
 }

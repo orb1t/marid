@@ -24,6 +24,7 @@ package org.marid.types;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.marid.collections.MaridSets;
+import org.marid.types.util.MappedVars;
 
 import java.lang.reflect.*;
 import java.util.*;
@@ -33,6 +34,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptySet;
+import static java.util.stream.IntStream.range;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 
@@ -163,11 +165,11 @@ public interface Types {
   }
 
   @NotNull
-  static Type ground(@NotNull Type type, @NotNull Map<TypeVariable<?>, Type> map) {
+  static Type ground(@NotNull Type type, @NotNull MappedVars map) {
     return ground(type, map, emptySet());
   }
 
-  private static Type ground(Type type, Map<TypeVariable<?>, Type> map, Set<TypeVariable<?>> passed) {
+  private static Type ground(Type type, MappedVars map, Set<TypeVariable<?>> passed) {
     if (type instanceof Class<?> || isGround(type)) {
       return type;
     } else if (type instanceof GenericArrayType) {
@@ -206,12 +208,12 @@ public interface Types {
   }
 
   @NotNull
-  static Type resolve(@NotNull Type type, @NotNull Map<TypeVariable<?>, Type> map) {
+  static Type resolve(@NotNull Type type, @NotNull MappedVars map) {
     return resolve(type, map, emptySet());
   }
 
-  private static Type resolve(Type type, Map<TypeVariable<?>, Type> map, Set<TypeVariable<?>> passed) {
-    if (type instanceof Class<?> || vars(type).stream().noneMatch(map::containsKey)) {
+  private static Type resolve(Type type, MappedVars map, Set<TypeVariable<?>> passed) {
+    if (type instanceof Class<?> || vars(type).stream().noneMatch(k -> map.get(k) != null)) {
       return type;
     } else if (type instanceof ParameterizedType) {
       final ParameterizedType t = (ParameterizedType) type;
@@ -228,7 +230,7 @@ public interface Types {
       return et instanceof Class<?> ? Array.newInstance((Class<?>) et, 0).getClass() : new MaridArrayType(et);
     } else if (type instanceof TypeVariable<?>) {
       final TypeVariable<?> v = (TypeVariable<?>) type;
-      for (Type t = map.get(v); t instanceof TypeVariable<?>; t = map.get(t)) {
+      for (Type t = map.get(v); t instanceof TypeVariable<?>; t = map.get((TypeVariable<?>) t)) {
         if (t.equals(v)) { // circular reference detected
           return v;
         }
@@ -254,48 +256,27 @@ public interface Types {
     }
     if (to instanceof ParameterizedType) {
       final ParameterizedType tp = (ParameterizedType) to;
-      if (from instanceof Class<?>) {
-        if (!isAssignable(tp.getRawType(), from, pt, pf)) {
-          return false;
-        }
-        final Type[] args = tp.getActualTypeArguments();
-        if (of(args).allMatch(MaridWildcardType::isAll)) {
-          return true;
-        }
-        final Class<?> tRaw = (Class<?>) tp.getRawType();
-        final TypeVariable<?>[] tVars = tRaw.getTypeParameters();
-        if (tVars.length == args.length) {
-          final Map<TypeVariable<?>, Type> map = resolveVars(from);
-          for (int i = 0; i < tVars.length; i++) {
-            final TypeVariable<?> var = tVars[i];
-            final Type arg = args[i];
-            final Type resolvedVar = resolve(var, map);
-            if (!isAssignable(arg, resolvedVar)) {
-              return false;
-            }
-          }
-          return true;
-        } else {
-          throw new IllegalArgumentException("Illegal type: " + to.getTypeName());
-        }
-      } else if (from instanceof ParameterizedType) {
-        final ParameterizedType fp = (ParameterizedType) from;
-        if (!isAssignable(tp.getRawType(), fp.getRawType())) {
-          return false;
-        }
-        final Map<TypeVariable<?>, Type> fVars = resolveVars(from);
-        final Map<TypeVariable<?>, Type> tVars = resolveVars(to);
-        for (final TypeVariable<?> v : ((Class<?>) tp.getRawType()).getTypeParameters()) {
-          final Type t = resolve(v, tVars);
-          final Type f = resolve(v, fVars);
-          if (!isAssignable(t, f, pt, pf)) {
+      return typesTree(from).anyMatch(f -> {
+        if (f instanceof Class<?>) {
+          if (!isAssignable(tp.getRawType(), f, pt, pf)) {
             return false;
           }
+          if (tp.getRawType().equals(f)) {
+            return of(tp.getActualTypeArguments()).allMatch(MaridWildcardType::isAll);
+          }
+        } else if (f instanceof ParameterizedType) {
+          final ParameterizedType fp = (ParameterizedType) f;
+          if (!isAssignable(tp.getRawType(), fp.getRawType())) {
+            return false;
+          }
+          if (tp.getRawType().equals(fp.getRawType())) {
+            final Type[] fa = fp.getActualTypeArguments();
+            final Type[] ta = tp.getActualTypeArguments();
+            return fa.length == ta.length && range(0, fa.length).allMatch(i -> isAssignable(ta[i], fa[i], pt, pf));
+          }
         }
-        return true;
-      } else if (getArrayComponentType(from) != null) {
         return false;
-      }
+      });
     }
     {
       final Type ct = getArrayComponentType(to);
@@ -340,32 +321,23 @@ public interface Types {
     return false;
   }
 
-  static Map<TypeVariable<?>, Type> resolveVars(@NotNull Type type) {
-    final LinkedHashMap<TypeVariable<?>, Type> map = new LinkedHashMap<>();
+  static MappedVars resolveVars(@NotNull Type type) {
+    final MappedVars map = new MappedVars();
     resolveVars(type, map);
     return map;
   }
 
-  private static void resolveVars(Type type, LinkedHashMap<TypeVariable<?>, Type> map) {
+  private static void resolveVars(Type type, MappedVars map) {
     final Class<?> raw;
     if (type instanceof ParameterizedType) {
       final ParameterizedType pt = (ParameterizedType) type;
       raw = (Class<?>) pt.getRawType();
       final TypeVariable<?>[] vars = raw.getTypeParameters();
       final Type[] args = pt.getActualTypeArguments();
-      if (args.length == vars.length) {
-        for (int i = 0; i < vars.length; i++) {
-          if (!vars[i].equals(args[i])) {
-            if (args[i] instanceof TypeVariable<?>) {
-              final TypeVariable<?> arg = (TypeVariable<?>) args[i];
-              map.put(vars[i], map.getOrDefault(arg, args[i]));
-            } else {
-              map.put(vars[i], args[i]);
-            }
-          }
+      for (int i = 0; i < vars.length; i++) {
+        if (!vars[i].equals(args[i])) {
+          map.put(vars[i], resolve(args[i], map));
         }
-      } else {
-        throw new IllegalArgumentException("Illegal type: " + type.getTypeName());
       }
     } else if (type instanceof Class<?>) {
       raw = (Class<?>) type;
@@ -429,13 +401,12 @@ public interface Types {
 
   @NotNull
   static Stream<? extends Type> typesTree(@NotNull Type type) {
-    final Map<TypeVariable<?>, Type> map = resolveVars(type = boxed(type));
+    final MappedVars map = resolveVars(type = boxed(type));
     return rawClasses(type).flatMap(Classes::classes)
         .distinct()
         .map(c -> {
           final TypeVariable<?>[] vars = c.getTypeParameters();
-          return vars.length == 0 ? c : new MaridParameterizedType(null, c, vars);
-        })
-        .map(t -> resolve(t, map));
+          return vars.length == 0 ? c : resolve(new MaridParameterizedType(null, c, vars), map);
+        });
   }
 }

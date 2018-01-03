@@ -64,4 +64,16 @@ public interface AuxTypeUtils {
   interface I1<V> extends List<I1<V>> {
 
   }
+
+  class C0<E> extends ArrayList<E> {
+  }
+
+  class C1<E> extends C0<List<E>> {
+  }
+
+  class C2<E> extends C1<List<E>> {
+  }
+
+  class MyList<E> extends ArrayList<List<E>> {
+  }
 }

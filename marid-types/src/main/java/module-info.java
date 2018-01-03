@@ -25,4 +25,5 @@ module marid.types {
 
   exports org.marid.types;
   exports org.marid.types.invokable;
+  exports org.marid.types.util;
 }

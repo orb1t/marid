@@ -26,12 +26,12 @@ import org.jetbrains.annotations.Nullable;
 import org.marid.types.Classes;
 import org.marid.types.MaridParameterizedType;
 import org.marid.types.Types;
+import org.marid.types.util.MappedVars;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
-import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -81,7 +81,7 @@ public interface Invokable {
       return type;
     }
     final Type[] samArgs = sam.getGenericParameterTypes();
-    final Map<TypeVariable<?>, Type> typeVars = Types.resolveVars(target);
+    final MappedVars typeVars = Types.resolveVars(target);
     return Types.evaluate(e -> {
       for (int k = 0; k < indices.length; k++) {
         final int index = indices[k];
