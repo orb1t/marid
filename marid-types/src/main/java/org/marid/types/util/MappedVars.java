@@ -2,10 +2,10 @@ package org.marid.types.util;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.marid.collections.MaridArrays;
 
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.UnaryOperator;
@@ -30,8 +30,10 @@ public class MappedVars {
         return;
       }
     }
-    vars = MaridArrays.addLast(vars, var);
-    types = MaridArrays.addLast(types, mergeOp.apply(null));
+    vars = Arrays.copyOf(vars, vars.length + 1);
+    types = Arrays.copyOf(types, types.length + 1);
+    vars[vars.length - 1] = var;
+    types[types.length - 1] = mergeOp.apply(null);
   }
 
   @Nullable
