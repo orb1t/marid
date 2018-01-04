@@ -121,8 +121,6 @@ class TypesTest {
         of(long.class, int.class, false),
         of(void.class, int.class, false),
         of(void.class, void.class, true),
-        of(int.class, void.class, true),
-        of(Integer.class, void.class, true),
         of(p(Map.class, Integer.class, Number.class), p(Map.class, Integer.class, Number.class), true),
         of(p(Map.class, Integer.class, Number.class), p(Map.class, Integer.class, BigInteger.class), true),
         of(p(Map.class, Integer.class, Number.class), p(HashMap.class, Integer.class, BigInteger.class), true),

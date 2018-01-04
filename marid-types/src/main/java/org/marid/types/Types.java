@@ -253,7 +253,7 @@ public interface Types {
   }
 
   private static boolean isAssignable(Type to, Type from, PassedVars pt, PassedVars pf) {
-    if (to.equals(from) || Object.class.equals(to) || void.class.equals(from)) {
+    if (to.equals(from) || Object.class.equals(to)) {
       return true;
     }
     if (to instanceof WildcardType) {
