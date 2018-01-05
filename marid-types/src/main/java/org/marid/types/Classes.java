@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
@@ -41,34 +41,40 @@ public interface Classes {
 
   /**
    * Enumerates all public accessible classes from the given type (including the argument itself).
+   *
    * @param type A type to enumerate from.
    * @return All subclasses (classes and interfaces).
    */
   @NotNull
   static Stream<Class<?>> classes(@NotNull Class<?> type) {
-    return classes(type, true);
+    return classes(type, true, false);
   }
 
   /**
    * Enumerates classes from the given type (including the argument itself).
-   * @param type type to enumerate from.
-   * @param accessible whether the accessibility check is performed on each class or not.
+   *
+   * @param type       type to enumerate from
+   * @param accessible whether the accessibility check is performed on each class or not
+   * @param array      whether take in account an array type hierarchy or not
    * @return all subclasses (classes and interfaces).
    */
   @NotNull
-  static Stream<Class<?>> classes(@NotNull Class<?> type, boolean accessible) {
+  static Stream<Class<?>> classes(@NotNull Class<?> type, boolean accessible, boolean array) {
     final LinkedHashSet<Class<?>> set = new LinkedHashSet<>();
-    addClasses(type, set, accessible);
+    addClasses(type, set, accessible, array);
     return set.stream();
   }
 
-  private static void addClasses(@NotNull Class<?> type, @NotNull LinkedHashSet<Class<?>> classes, boolean accessible) {
+  private static void addClasses(Class<?> type, LinkedHashSet<Class<?>> classes, boolean accessible, boolean array) {
+    if (array && type.isArray()) {
+      classes(type.getComponentType(), accessible, true).forEach(c -> classes.add(Array.newInstance(c, 0).getClass()));
+    }
     if (type.isInterface()) {
       if (!accessible || isAccessible(type)) {
         classes.add(type);
       }
       for (final Class<?> i : type.getInterfaces()) {
-        addClasses(i, classes, accessible);
+        addClasses(i, classes, accessible, array);
       }
     } else {
       for (Class<?> c = type; c != null; c = c.getSuperclass()) {
@@ -78,7 +84,7 @@ public interface Classes {
       }
       for (Class<?> c = type; c != null; c = c.getSuperclass()) {
         for (final Class<?> i : c.getInterfaces()) {
-          addClasses(i, classes, accessible);
+          addClasses(i, classes, accessible, array);
         }
       }
     }
@@ -86,6 +92,7 @@ public interface Classes {
 
   /**
    * Checks whether the given type is accessible or not.
+   *
    * @param type A type.
    * @return Accessible flag.
    */
@@ -100,6 +107,7 @@ public interface Classes {
 
   /**
    * Returns a boxed type for the given type.
+   *
    * @param type type.
    * @return Boxed type.
    */
@@ -124,7 +132,8 @@ public interface Classes {
    * returns a default value for the given type. If the type is a primitive array class and value is
    * not an array of primitives then returns an array where each element is set from the given array
    * after unboxing. Otherwise, returns the originally passed value.
-   * @param type type.
+   *
+   * @param type  type.
    * @param value value to transform.
    * @return Transformed value.
    */
@@ -168,7 +177,8 @@ public interface Classes {
 
   /**
    * Loads a class by name or returns a corresponding primitive type for the given primitive type name.
-   * @param name class name.
+   *
+   * @param name        class name.
    * @param classLoader class loader.
    * @return A class loaded by the given name.
    * @throws ClassNotFoundException if the class cannot be located by the specified class loader.
@@ -191,6 +201,7 @@ public interface Classes {
 
   /**
    * Returns a single abstract method of a class.
+   *
    * @param type A type.
    * @return Single abstract method.
    */

@@ -113,7 +113,7 @@
               <this/>
             </target>
             <args>
-              <call arg="2"/>
+              <call class="java.lang.Integer" method="valueOf" arg="2"/>
             </args>
           </call>
           <call method="add">
@@ -121,7 +121,7 @@
               <this/>
             </target>
             <args>
-              <call method="int64" arg="2"/>
+              <call class="java.lang.Long" method="valueOf" arg="2"/>
             </args>
           </call>
         </initializers>
@@ -194,7 +194,7 @@
             <args>
               <array>
                 <elements>
-                  <call arg="1"/>
+                  <call class="java.lang.Integer" method="valueOf" arg="1"/>
                 </elements>
               </array>
             </args>
@@ -206,7 +206,7 @@
             <args>
               <array>
                 <elements>
-                  <call method="int64" arg="2"/>
+                  <call class="java.lang.Long" method="valueOf" arg="2"/>
                 </elements>
               </array>
             </args>

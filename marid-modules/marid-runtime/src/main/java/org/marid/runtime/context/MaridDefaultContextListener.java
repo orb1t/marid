@@ -113,7 +113,7 @@ public class MaridDefaultContextListener implements MaridContextListener {
   }
 
   private LinkedList<Method> getMethods(Class<?> type, Predicate<Method> filter, boolean reversed) {
-    return Classes.classes(type, false)
+    return Classes.classes(type, false, false)
         .flatMap(t -> Stream.of(t.getDeclaredMethods()))
         .filter(filter)
         .filter(m -> m.isDefault() || !Modifier.isStatic(m.getModifiers()) && !Modifier.isAbstract(m.getModifiers()))

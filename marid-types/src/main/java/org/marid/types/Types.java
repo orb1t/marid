@@ -36,6 +36,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.lang.reflect.Array.newInstance;
 import static java.util.stream.IntStream.range;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
@@ -144,7 +145,7 @@ public interface Types {
       v.accept((Class<?>) ((ParameterizedType) type).getRawType());
     } else if (type instanceof GenericArrayType) {
       final GenericArrayType a = (GenericArrayType) type;
-      rawClasses(a.getGenericComponentType()).forEach(c -> v.accept(Array.newInstance(c, 0).getClass()));
+      rawClasses(a.getGenericComponentType()).forEach(c -> v.accept(newInstance(c, 0).getClass()));
     } else if (type instanceof TypeVariable<?>) {
       final PassedVars newPassed = passed.add((TypeVariable<?>) type);
       if (newPassed != passed) {
@@ -177,7 +178,7 @@ public interface Types {
     } else if (type instanceof GenericArrayType) {
       final GenericArrayType t = (GenericArrayType) type;
       final Type et = ground(t.getGenericComponentType(), map, passed);
-      return et instanceof Class<?> ? Array.newInstance((Class<?>) et, 0).getClass() : new MaridArrayType(et);
+      return et instanceof Class<?> ? newInstance((Class<?>) et, 0).getClass() : new MaridArrayType(et);
     } else if (type instanceof ParameterizedType) {
       final ParameterizedType t = (ParameterizedType) type;
       final Type[] types = of(t.getActualTypeArguments()).map(e -> ground(e, map, passed)).toArray(Type[]::new);
@@ -229,7 +230,7 @@ public interface Types {
     } else if (type instanceof GenericArrayType) {
       final GenericArrayType t = (GenericArrayType) type;
       final Type et = resolve(t.getGenericComponentType(), map, passed);
-      return et instanceof Class<?> ? Array.newInstance((Class<?>) et, 0).getClass() : new MaridArrayType(et);
+      return et instanceof Class<?> ? newInstance((Class<?>) et, 0).getClass() : new MaridArrayType(et);
     } else if (type instanceof TypeVariable<?>) {
       final TypeVariable<?> v = (TypeVariable<?>) type;
       final PassedVars newPassed = passed.add(v);
@@ -378,29 +379,36 @@ public interface Types {
     if (t1.equals(t2)) {
       return t1;
     } else {
-      final Type at1 = getArrayComponentType(t1), at2 = getArrayComponentType(t2);
-      if (at1 != null && at2 != null) {
-        final Type c = common(at1, at2);
-        return c instanceof Class<?> ? Array.newInstance((Class<?>) c, 0).getClass() : new MaridArrayType(c);
-      } else {
-        final ConcurrentLinkedQueue<Type> ts = concat(typesTree(t1), typesTree(t2))
-            .filter(t -> isAssignable(t, t1) && isAssignable(t, t2))
-            .distinct()
-            .collect(Collectors.toCollection(ConcurrentLinkedQueue::new));
-        ts.removeIf(t -> ts.stream().anyMatch(e -> e != t && isAssignable(t, e)));
-        switch (ts.size()) {
-          case 0: return Object.class;
-          case 1: return ts.iterator().next();
-          default: return new MaridWildcardType(ts.toArray(new Type[ts.size()]), new Type[0]);
-        }
+      final ConcurrentLinkedQueue<Type> ts = concat(typesTree(t1), typesTree(t2))
+          .filter(t -> isAssignable(t, t1) && isAssignable(t, t2))
+          .distinct()
+          .collect(Collectors.toCollection(ConcurrentLinkedQueue::new));
+      ts.removeIf(t -> ts.stream().anyMatch(e -> e != t && isAssignable(t, e)));
+      switch (ts.size()) {
+        case 0: return Object.class;
+        case 1: return ts.iterator().next();
+        default: return new MaridWildcardType(ts.toArray(new Type[ts.size()]), new Type[0]);
       }
     }
   }
 
   @NotNull
-  static Stream<? extends Type> typesTree(@NotNull Type type) {
+  static Stream<Type> typesTree(@NotNull Type type) {
+    final Type componentType = getArrayComponentType(type);
+    if (componentType == null || componentType instanceof Class<?> && ((Class<?>) componentType).isPrimitive()) {
+      return typesTreeNonArray(type);
+    } else {
+      return Stream.concat(
+          typesTree(componentType).map(MaridArrayType::array),
+          typesTreeNonArray(type).skip(1L)
+      );
+    }
+  }
+
+  private static Stream<Type> typesTreeNonArray(Type type) {
     final MappedVars map = resolveVars(type = boxed(type));
-    return rawClasses(type).flatMap(Classes::classes)
+    return rawClasses(type)
+        .flatMap(Classes::classes)
         .distinct()
         .map(c -> {
           final TypeVariable<?>[] vars = c.getTypeParameters();

@@ -26,8 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.marid.types.AuxTypeUtils.I1;
-import org.marid.types.AuxTypeUtils.Map1;
+import org.marid.types.AuxTypeUtils.*;
 import org.marid.types.util.MappedVars;
 
 import java.io.Serializable;
@@ -43,8 +42,7 @@ import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.lang3.reflect.TypeUtils.parameterize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.of;
-import static org.marid.types.AuxTypeUtils.p;
-import static org.marid.types.AuxTypeUtils.w;
+import static org.marid.types.AuxTypeUtils.*;
 import static org.marid.types.Classes.classes;
 
 @Tag("normal")
@@ -102,6 +100,32 @@ class TypesTest {
             p(AbstractMap.class, Integer.class, w(Long.class)),
             Object.class,
             p(Map.class, Integer.class, w(Long.class)),
+            Cloneable.class,
+            Serializable.class
+        )),
+        of(int[].class, Arrays.asList(int[].class, Object.class, Cloneable.class, Serializable.class)),
+        of(Integer[].class, Arrays.asList(
+            Integer[].class,
+            Number[].class,
+            Object[].class,
+            a(p(Comparable.class, Integer.class)),
+            Serializable[].class,
+            Object.class,
+            Cloneable.class,
+            Serializable.class
+        )),
+        of(a(p(ArrayList.class, Long.class)), Arrays.asList(
+            a(p(ArrayList.class, Long.class)),
+            a(p(AbstractList.class, Long.class)),
+            a(p(AbstractCollection.class, Long.class)),
+            Object[].class,
+            a(p(List.class, Long.class)),
+            a(p(Collection.class, Long.class)),
+            a(p(Iterable.class, Long.class)),
+            RandomAccess[].class,
+            Cloneable[].class,
+            Serializable[].class,
+            Object.class,
             Cloneable.class,
             Serializable.class
         ))

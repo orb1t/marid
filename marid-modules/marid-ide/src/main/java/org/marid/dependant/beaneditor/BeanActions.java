@@ -87,7 +87,7 @@ public class BeanActions {
         .toArray(FxAction[]::new);
     final FxAction[] classActions = tree.classStream()
         .filter(c -> !c.isInterface() && !Modifier.isAbstract(c.getModifiers()))
-        .filter(c -> Classes.classes(c, false)
+        .filter(c -> Classes.classes(c, false, false)
             .flatMap(e -> of(e.getDeclaredMethods()))
             .anyMatch(m -> !Modifier.isStatic(m.getModifiers())))
         .map(c -> {

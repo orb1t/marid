@@ -21,6 +21,9 @@
 
 package org.marid.types;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;
@@ -58,5 +61,10 @@ public class MaridArrayType implements GenericArrayType {
       }
     }
     return componentType.getTypeName() + "[]";
+  }
+
+  @NotNull
+  public static Type array(@NotNull Type type) {
+    return type instanceof Class<?> ? Array.newInstance((Class<?>) type, 0).getClass() : new MaridArrayType(type);
   }
 }
