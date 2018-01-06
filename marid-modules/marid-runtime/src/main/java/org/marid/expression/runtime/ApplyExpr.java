@@ -25,7 +25,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.marid.expression.generic.ApplyExpression;
 import org.marid.expression.xml.XmlExpression;
-import org.marid.function.ToImmutableList;
 import org.marid.runtime.context.BeanContext;
 import org.marid.types.Classes;
 import org.marid.types.Types;
@@ -33,15 +32,8 @@ import org.marid.types.invokable.Invokables;
 import org.w3c.dom.Element;
 
 import java.lang.reflect.Type;
-import java.util.List;
 
-public class ApplyExpr extends Expr implements ApplyExpression {
-
-  @NotNull
-  private final Expr target;
-
-  @NotNull
-  private final String method;
+public final class ApplyExpr extends CallExpr implements ApplyExpression {
 
   @NotNull
   private final String type;
@@ -49,39 +41,20 @@ public class ApplyExpr extends Expr implements ApplyExpression {
   @NotNull
   private final int[] indices;
 
-  @NotNull
-  private final List<Expr> args;
-
   public ApplyExpr(@NotNull Expr target,
                    @NotNull String method,
                    @NotNull String type,
                    @NotNull int[] indices,
                    @NotNull Expr... args) {
-    this.target = target;
-    this.method = method;
+    super(target, method, args);
     this.type = type;
     this.indices = indices;
-    this.args = List.of(args);
   }
 
   ApplyExpr(@NotNull Element element) {
-    this.target = XmlExpression.target(element, Expr::of, ClassExpr::new, RefExpr::new);
-    this.method = XmlExpression.method(element);
+    super(element);
     this.type = XmlExpression.type(element);
     this.indices = XmlExpression.indices(element);
-    this.args = XmlExpression.args(element, Expr::of, StringExpr::new, new ToImmutableList<>());
-  }
-
-  @NotNull
-  @Override
-  public Expr getTarget() {
-    return target;
-  }
-
-  @NotNull
-  @Override
-  public String getMethod() {
-    return method;
   }
 
   @NotNull
@@ -92,25 +65,19 @@ public class ApplyExpr extends Expr implements ApplyExpression {
 
   @NotNull
   @Override
-  public List<Expr> getArgs() {
-    return args;
-  }
-
-  @NotNull
-  @Override
   public int[] getIndices() {
     return indices;
   }
 
   @Override
   protected Object execute(@Nullable Object self, @Nullable Type selfType, @NotNull BeanContext context) {
-    final Type t = target.getType(selfType, context);
+    final Type t = getTarget().getType(selfType, context);
     return context.getClass(type)
         .flatMap(Classes::getSam)
         .flatMap(m -> {
               final Type[] types = getArgs().stream().map(a -> a.getType(selfType, context)).toArray(Type[]::new);
               return Types.rawClasses(t)
-                  .flatMap(c -> Invokables.invokables(c, method).filter(i -> i.matches(types)))
+                  .flatMap(c -> Invokables.invokables(c, getMethod()).filter(i -> i.matches(types)))
                   .findFirst()
                   .map(i -> {
                     return null;

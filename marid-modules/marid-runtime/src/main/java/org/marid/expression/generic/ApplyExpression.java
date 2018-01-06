@@ -29,21 +29,11 @@ import org.marid.types.Types;
 import org.marid.types.invokable.Invokables;
 
 import java.lang.reflect.Type;
-import java.util.List;
 
-public interface ApplyExpression extends Expression {
-
-  @NotNull
-  Expression getTarget();
-
-  @NotNull
-  String getMethod();
+public interface ApplyExpression extends CallExpression {
 
   @NotNull
   String getType();
-
-  @NotNull
-  List<? extends Expression> getArgs();
 
   @NotNull
   int[] getIndices();

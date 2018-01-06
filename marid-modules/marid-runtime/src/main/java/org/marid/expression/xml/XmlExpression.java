@@ -110,17 +110,6 @@ public interface XmlExpression {
   }
 
   @NotNull
-  static String field(@NotNull Element element) {
-    return attribute(element, "field").orElse("value");
-  }
-
-  static void field(@NotNull Element element, @NotNull String field) {
-    if (!"value".equals(field)) {
-      element.setAttribute("field", field);
-    }
-  }
-
-  @NotNull
   static <E extends Expression> E value(@NotNull Element element,
                                         @NotNull Function<Element, E> exprFunc,
                                         @NotNull Supplier<E> nullExprFunc) {

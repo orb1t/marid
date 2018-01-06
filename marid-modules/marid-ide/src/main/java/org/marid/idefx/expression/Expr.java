@@ -104,6 +104,7 @@ public abstract class Expr implements Expression, ObservablesProvider, Tagged, X
       case "ref": return new RefExpr(element);
       case "null": return new NullExpr(element);
       case "call": return new CallExpr(element);
+      case "apply": return new ApplyExpr(element);
       default: throw new IllegalArgumentException(element.getTagName());
     }
   }

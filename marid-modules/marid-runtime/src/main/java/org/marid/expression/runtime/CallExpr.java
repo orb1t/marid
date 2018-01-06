@@ -37,7 +37,7 @@ import static java.util.stream.Collectors.joining;
 import static org.marid.expression.generic.CallExpression.invokable;
 import static org.marid.types.Classes.value;
 
-public final class CallExpr extends Expr implements CallExpression {
+public class CallExpr extends Expr implements CallExpression {
 
   @NotNull
   private final Expr target;
