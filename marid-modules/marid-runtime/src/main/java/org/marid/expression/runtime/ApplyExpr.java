@@ -71,19 +71,21 @@ public final class ApplyExpr extends CallExpr implements ApplyExpression {
 
   @Override
   protected Object execute(@Nullable Object self, @Nullable Type selfType, @NotNull BeanContext context) {
-    final Type t = getTarget().getType(selfType, context);
     return context.getClass(type)
-        .flatMap(Classes::getSam)
-        .flatMap(m -> {
+        .map(type -> Classes.getSam(type)
+            .map(m -> {
+              final Type t = getTarget().getType(selfType, context);
               final Type[] types = getArgs().stream().map(a -> a.getType(selfType, context)).toArray(Type[]::new);
               return Types.rawClasses(t)
                   .flatMap(c -> Invokables.invokables(c, getMethod()).filter(i -> i.matches(types)))
                   .findFirst()
                   .map(i -> {
-                    return null;
+                    final Object obj = getTarget().evaluate(self, selfType, context);
+                    final Object[] args = getArgs().stream().map(e -> e.evaluate(self, selfType, context)).toArray();
+                    return i.apply(context.getClassLoader(), type, getIndices(), obj, args);
                   });
-            }
-        )
-        .orElseThrow(IllegalStateException::new);
+            })
+            .orElseThrow(IllegalStateException::new)
+        ).orElseThrow(IllegalStateException::new);
   }
 }
