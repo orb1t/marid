@@ -22,6 +22,7 @@
 package org.marid.collections;
 
 import org.jetbrains.annotations.NotNull;
+
 import java.util.Iterator;
 import java.util.Scanner;
 import java.util.function.BiConsumer;
@@ -58,5 +59,9 @@ public interface MaridIterators {
         hasPrevious = true;
       }
     }
+  }
+
+  static <E> Iterable<E> iterable(Supplier<Iterator<E>> iteratorSupplier) {
+    return iteratorSupplier::get;
   }
 }

@@ -26,14 +26,15 @@ import org.jetbrains.annotations.Nullable;
 import org.marid.beans.BeanTypeContext;
 import org.marid.beans.MaridBean;
 import org.marid.beans.RuntimeBean;
+import org.marid.collections.MaridIterators;
 import org.marid.runtime.event.*;
 import org.marid.runtime.exception.MaridBeanNotFoundException;
 
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
@@ -49,7 +50,7 @@ public final class BeanContext extends BeanTypeContext implements MaridRuntime, 
   private final BeanConfiguration configuration;
   private final RuntimeBean bean;
   private final Object instance;
-  private final CopyOnWriteArrayList<BeanContext> children = new CopyOnWriteArrayList<>();
+  private final ConcurrentLinkedDeque<BeanContext> children = new ConcurrentLinkedDeque<>();
   private final HashSet<MaridBean> processing = new HashSet<>();
 
   public BeanContext(@Nullable BeanContext parent, @NotNull BeanConfiguration configuration, @NotNull RuntimeBean bean) {
@@ -87,7 +88,7 @@ public final class BeanContext extends BeanTypeContext implements MaridRuntime, 
     this(null, configuration, root);
   }
 
-  public List<BeanContext> getChildren() {
+  public Collection<BeanContext> getChildren() {
     return children;
   }
 
@@ -179,8 +180,7 @@ public final class BeanContext extends BeanTypeContext implements MaridRuntime, 
   public void close() {
     final IllegalStateException e = new IllegalStateException("Runtime close exception");
     try {
-      for (int i = children.size() - 1; i >= 0; i--) {
-        final BeanContext child = children.get(i);
+      for (final BeanContext child : MaridIterators.iterable(children::descendingIterator)) {
         try {
           child.close();
         } catch (Throwable x) {
