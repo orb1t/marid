@@ -597,6 +597,15 @@
     </dependencies>
   </dependencyManagement>
 
+  <dependencies>
+    <dependency>
+      <groupId>org.marid</groupId>
+      <artifactId>marid-intellij-annotations</artifactId>
+      <version>1.0</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
   <reporting>
     <plugins>
       <plugin>

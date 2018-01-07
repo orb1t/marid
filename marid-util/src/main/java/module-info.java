@@ -23,6 +23,7 @@ module marid.util {
 
   requires transitive java.logging;
   requires transitive java.xml;
+  requires static transitive marid.intellij.annotations;
 
   requires static java.desktop;
   requires static javafx.base;
@@ -39,6 +40,4 @@ module marid.util {
   exports org.marid.logging;
   exports org.marid.misc;
   exports org.marid.xml;
-
-  exports org.jetbrains.annotations; // remove that after intellij module fix
 }

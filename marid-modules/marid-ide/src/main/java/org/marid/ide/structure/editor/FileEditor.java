@@ -25,7 +25,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.PropertyKey;
 import org.marid.jfx.action.FxAction;
 import org.marid.jfx.action.SpecialAction;
 
@@ -42,7 +41,6 @@ public interface FileEditor {
   @NotNull
   String getName();
 
-  @PropertyKey(resourceBundle = "fonts.meta")
   @NotNull
   String getIcon();
 
