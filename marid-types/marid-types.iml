@@ -16,7 +16,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="marid-util" />
     <orderEntry type="module" module-name="marid-test" scope="TEST" />
     <orderEntry type="library" scope="TEST" name="Maven: com.google.guava:guava:23.6-jre" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: com.google.code.findbugs:jsr305:3.0.2" level="project" />

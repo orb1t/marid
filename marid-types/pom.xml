@@ -12,13 +12,6 @@
   <dependencies>
     <dependency>
       <groupId>org.marid</groupId>
-      <artifactId>marid-util</artifactId>
-      <version>${project.version}</version>
-      <scope>compile</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.marid</groupId>
       <artifactId>marid-test</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>

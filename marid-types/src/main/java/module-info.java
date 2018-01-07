@@ -21,7 +21,7 @@
 
 module marid.types {
 
-  requires static marid.util;
+  requires static marid.intellij.annotations;
 
   exports org.marid.types;
   exports org.marid.types.invokable;
