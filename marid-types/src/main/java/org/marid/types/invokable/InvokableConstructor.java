@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
@@ -32,25 +32,18 @@ import java.lang.reflect.TypeVariable;
 public final class InvokableConstructor extends AbstractInvokable<Constructor<?>> {
 
   private final Type returnType;
-  private final Class<?> returnClass;
   private final Type[] parameterTypes;
   private final Class<?>[] parameterClasses;
 
   public InvokableConstructor(@NotNull Constructor<?> constructor) {
     super(constructor);
-    final Type type = constructor.getAnnotatedReturnType().getType();
-    if (type instanceof Class<?>) {
-      final Class<?> c = (Class<?>) type;
-      final TypeVariable<?>[] variables = c.getTypeParameters();
-      if (variables.length > 0) {
-        returnType = new MaridParameterizedType(c.getEnclosingClass(), c, variables);
-      } else {
-        returnType = type;
-      }
+    final Class<?> c = constructor.getDeclaringClass();
+    final TypeVariable<?>[] variables = c.getTypeParameters();
+    if (variables.length > 0) {
+      returnType = new MaridParameterizedType(c.getEnclosingClass(), c, variables);
     } else {
-      returnType = type;
+      returnType = c;
     }
-    returnClass = constructor.getDeclaringClass();
     if (isStatic()) {
       parameterTypes = constructor.getGenericParameterTypes();
       parameterClasses = constructor.getParameterTypes();
@@ -91,7 +84,7 @@ public final class InvokableConstructor extends AbstractInvokable<Constructor<?>
   @Override
   @NotNull
   public Class<?> getReturnClass() {
-    return returnClass;
+    return executable.getDeclaringClass();
   }
 
   @Override
