@@ -40,7 +40,7 @@ public class LogComponent extends ListView<LogRecord> {
   public LogComponent(ObservableList<LogRecord> records) {
     super(records);
     setCellFactory(p -> {
-      final ListCell<LogRecord> cell = new ListCell<LogRecord>() {
+      final ListCell<LogRecord> cell = new ListCell<>() {
         @Override
         protected void updateItem(LogRecord item, boolean empty) {
           super.updateItem(item, empty);

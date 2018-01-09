@@ -43,16 +43,15 @@ public class LocalizedStrings {
   public static final ObjectProperty<Locale> LOCALE = new SimpleObjectProperty<>(null, "locale", getDefault());
 
   public static ObservableStringValue ls(String text, Object... args) {
-    final Observable[] observables = concat(
-        of(args).filter(Observable.class::isInstance).map(Observable.class::cast),
-        of(LOCALE)
-    ).toArray(Observable[]::new);
     return Bindings.createStringBinding(() -> {
       final Object[] params = of(args)
           .map(o -> o instanceof ObservableValue<?> ? ((ObservableValue<?>) o).getValue() : o)
           .toArray();
       return s(LOCALE.get(), text, params);
-    }, observables);
+    }, concat(
+        of(args).filter(Observable.class::isInstance).map(Observable.class::cast),
+        of(LOCALE)
+    ).toArray(Observable[]::new));
   }
 
   public static ObservableStringValue fls(String format, String text, Object... args) {

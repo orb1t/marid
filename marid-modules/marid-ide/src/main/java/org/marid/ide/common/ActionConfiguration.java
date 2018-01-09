@@ -23,9 +23,7 @@ package org.marid.ide.common;
 
 import org.marid.idelib.spring.annotation.IdeAction;
 import org.marid.jfx.action.FxAction;
-import org.marid.jfx.dnd.DndManager;
 import org.springframework.beans.factory.ObjectFactory;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -40,10 +38,5 @@ public class ActionConfiguration {
   @IdeAction
   public Supplier<List<FxAction>> ideActions(@IdeAction ObjectFactory<List<FxAction>> ideActionLists) {
     return ideActionLists::getObject;
-  }
-
-  @Bean
-  public DndManager dndManager() {
-    return new DndManager();
   }
 }
