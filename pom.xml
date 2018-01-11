@@ -329,6 +329,16 @@
         </plugin>
 
         <plugin>
+          <artifactId>maven-war-plugin</artifactId>
+          <version>3.2.0</version>
+          <configuration>
+            <useJvmChmod>true</useJvmChmod>
+            <useCache>false</useCache>
+            <failOnMissingWebXml>false</failOnMissingWebXml>
+          </configuration>
+        </plugin>
+
+        <plugin>
           <artifactId>maven-dependency-plugin</artifactId>
           <version>3.0.2</version>
           <configuration>

@@ -11,6 +11,7 @@
       <module fileurl="file://$PROJECT_DIR$/marid-services/marid-proto/marid-proto.iml" filepath="$PROJECT_DIR$/marid-services/marid-proto/marid-proto.iml" />
       <module fileurl="file://$PROJECT_DIR$/marid-modules/marid-runtime/marid-runtime.iml" filepath="$PROJECT_DIR$/marid-modules/marid-runtime/marid-runtime.iml" />
       <module fileurl="file://$PROJECT_DIR$/marid-services/marid-services.iml" filepath="$PROJECT_DIR$/marid-services/marid-services.iml" />
+      <module fileurl="file://$PROJECT_DIR$/marid-modules/marid-site/marid-site.iml" filepath="$PROJECT_DIR$/marid-modules/marid-site/marid-site.iml" />
       <module fileurl="file://$PROJECT_DIR$/marid-test/marid-test.iml" filepath="$PROJECT_DIR$/marid-test/marid-test.iml" />
       <module fileurl="file://$PROJECT_DIR$/marid-types/marid-types.iml" filepath="$PROJECT_DIR$/marid-types/marid-types.iml" />
       <module fileurl="file://$PROJECT_DIR$/marid-util/marid-util.iml" filepath="$PROJECT_DIR$/marid-util/marid-util.iml" />

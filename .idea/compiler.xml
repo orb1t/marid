@@ -12,6 +12,7 @@
         <module name="marid-ide" />
         <module name="marid-proto" />
         <module name="marid-runtime" />
+        <module name="marid-site" />
         <module name="marid-test" />
         <module name="marid-types" />
         <module name="marid-util" />
@@ -27,6 +28,7 @@
       <module name="marid-proto" target="1.9" />
       <module name="marid-runtime" target="1.9" />
       <module name="marid-services" target="1.9" />
+      <module name="marid-site" target="1.9" />
       <module name="marid-test" target="1.9" />
       <module name="marid-types" target="1.9" />
       <module name="marid-util" target="1.9" />
