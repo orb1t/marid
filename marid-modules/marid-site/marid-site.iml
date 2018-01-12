@@ -29,6 +29,14 @@
     <orderEntry type="library" name="Maven: com.vaadin:vaadin-themes:8.2.0" level="project" />
     <orderEntry type="library" name="Maven: com.vaadin:vaadin-client-compiled:8.2.0" level="project" />
     <orderEntry type="library" name="Maven: com.vaadin:vaadin-compatibility-themes:8.2.0" level="project" />
+    <orderEntry type="library" name="Maven: com.vaadin:vaadin-push:8.2.0" level="project" />
+    <orderEntry type="library" name="Maven: com.vaadin.external.atmosphere:atmosphere-runtime:2.4.11.vaadin2" level="project" />
+    <orderEntry type="library" name="Maven: com.vaadin.external.slf4j:vaadin-slf4j-jdk14:1.6.1" level="project" />
+    <orderEntry type="library" name="Maven: com.vaadin:vaadin-icons:3.0.1" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: javax.enterprise:cdi-api:2.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: javax.el:javax.el-api:3.0.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: javax.interceptor:javax.interceptor-api:1.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: javax.inject:javax.inject:1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: javax.servlet:javax.servlet-api:4.0.0" level="project" />
     <orderEntry type="module" module-name="marid-test" scope="TEST" />
     <orderEntry type="library" scope="TEST" name="Maven: com.google.guava:guava:23.6-jre" level="project" />
