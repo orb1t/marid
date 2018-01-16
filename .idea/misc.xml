@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="FrameworkDetectionExcludesConfiguration">
+    <file type="gwt" url="file://$PROJECT_DIR$/marid-modules/marid-site" />
+    <file type="web" url="file://$PROJECT_DIR$/marid-modules/marid-site" />
+  </component>
   <component name="MavenProjectsManager">
     <option name="originalFiles">
       <list>

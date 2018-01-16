@@ -30,11 +30,6 @@
 
     <dependency>
       <groupId>com.vaadin</groupId>
-      <artifactId>vaadin-compatibility-themes</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>com.vaadin</groupId>
       <artifactId>vaadin-push</artifactId>
     </dependency>
 
@@ -42,6 +37,12 @@
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-icons</artifactId>
       <version>3.0.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.annotation</groupId>
+      <artifactId>javax.annotation-api</artifactId>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
@@ -64,7 +65,7 @@
       <dependency>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-bom</artifactId>
-        <version>8.2.0</version>
+        <version>8.2.1</version>
         <scope>import</scope>
         <type>pom</type>
       </dependency>
@@ -73,6 +74,22 @@
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>com.vaadin</groupId>
+        <artifactId>vaadin-maven-plugin</artifactId>
+        <version>8.2.1</version>
+
+        <executions>
+          <execution>
+            <goals>
+              <goal>update-theme</goal>
+              <goal>compile-theme</goal>
+            </goals>
+            <phase>generate-resources</phase>
+          </execution>
+        </executions>
+      </plugin>
+
       <plugin>
         <groupId>org.wildfly.plugins</groupId>
         <artifactId>wildfly-maven-plugin</artifactId>
