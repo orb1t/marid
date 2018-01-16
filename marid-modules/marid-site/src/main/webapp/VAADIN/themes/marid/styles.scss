@@ -17,6 +17,8 @@ $v-component-group-spacing: 6px;
 
 @import "../valo/valo";
 
-@mixin yourtheme {
-  ...
+.marid {
+
+  @include valo;
+
 }
