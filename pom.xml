@@ -500,7 +500,7 @@
           <organizeLicensesByDependencies>true</organizeLicensesByDependencies>
           <emptyLineAfterHeader>true</emptyLineAfterHeader>
           <roots>src</roots>
-          <excludes>**/*.properties,**/*.xml</excludes>
+          <excludes>**/*.properties,**/*.xml,**/*.css</excludes>
         </configuration>
       </plugin>
     </plugins>

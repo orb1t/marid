@@ -23,7 +23,6 @@
           <element id="library" level="project" name="Maven: com.vaadin.external.atmosphere:atmosphere-runtime:2.4.11.vaadin2" />
           <element id="library" level="project" name="Maven: com.vaadin.external.slf4j:vaadin-slf4j-jdk14:1.6.1" />
           <element id="library" level="project" name="Maven: com.vaadin:vaadin-icons:3.0.1" />
-          <element id="library" level="project" name="Vaadin Server" />
         </element>
       </element>
       <element id="directory" name="META-INF">
