@@ -3,7 +3,7 @@
   <parent>
     <artifactId>marid-services</artifactId>
     <groupId>org.marid</groupId>
-    <version>0.9.6.7</version>
+    <version>0.9.6.8-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
