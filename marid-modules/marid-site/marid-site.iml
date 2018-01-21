@@ -58,6 +58,11 @@
     <orderEntry type="library" name="Maven: com.vaadin.external.slf4j:vaadin-slf4j-jdk14:1.6.1" level="project" />
     <orderEntry type="library" name="Maven: com.vaadin:vaadin-themes:8.2.1" level="project" />
     <orderEntry type="library" name="Maven: com.vaadin:vaadin-client-compiled:8.2.1" level="project" />
+    <orderEntry type="library" name="Maven: com.vaadin:vaadin-charts:4.0.1" level="project" />
+    <orderEntry type="library" name="Maven: com.vaadin:vaadin-charts-model:4.0.1" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.5.0" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.5.2" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.5.1" level="project" />
     <orderEntry type="library" name="Maven: com.vaadin:vaadin-icons:3.0.1" level="project" />
     <orderEntry type="module" module-name="marid-runtime" />
     <orderEntry type="module" module-name="marid-util" />
