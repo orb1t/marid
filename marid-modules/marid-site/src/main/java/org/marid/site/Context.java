@@ -25,8 +25,12 @@ import com.vaadin.spring.annotation.EnableVaadin;
 import com.vaadin.spring.annotation.EnableVaadinNavigation;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+
+import java.util.Scanner;
 
 @EnableScheduling
 @EnableWebMvc
@@ -34,6 +38,26 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @EnableVaadin
 @SpringBootApplication
 public class Context {
+
+  @Bean(initMethod = "start")
+  public Thread shutdownThread(ConfigurableApplicationContext context) {
+    final Thread thread = new Thread(null, () -> {
+      final Scanner scanner = new Scanner(System.in);
+      while (scanner.hasNextLine()) {
+        final String line = scanner.nextLine().trim();
+        switch (line) {
+          case "exit":
+            SpringApplication.exit(context);
+            break;
+          case "quit":
+            System.exit(0);
+            break;
+        }
+      }
+    }, "shutdownThread", 96L * 1024L, false);
+    thread.setDaemon(true);
+    return thread;
+  }
 
   public static void main(String... args) {
     SpringApplication.run(Context.class, args);
