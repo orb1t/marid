@@ -22,22 +22,21 @@
 package org.marid.site;
 
 import com.vaadin.annotations.Theme;
-import com.vaadin.cdi.CDIUI;
-import com.vaadin.cdi.CDIViewProvider;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.spring.annotation.SpringUI;
+import com.vaadin.spring.navigator.SpringViewProvider;
 import com.vaadin.ui.UI;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.inject.Inject;
-
-@CDIUI("")
+@SpringUI
 @Theme("valo")
 public class MainUI extends UI {
 
-  private final CDIViewProvider viewProvider;
+  private final SpringViewProvider viewProvider;
 
-  @Inject
-  public MainUI(CDIViewProvider viewProvider) {
+  @Autowired
+  public MainUI(SpringViewProvider viewProvider) {
     this.viewProvider = viewProvider;
   }
 

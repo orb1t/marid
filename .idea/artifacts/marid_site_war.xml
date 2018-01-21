@@ -1,7 +1,7 @@
 <component name="ArtifactManager">
   <artifact type="war" name="marid-site:war">
     <output-path>$PROJECT_DIR$/marid-modules/marid-site/target</output-path>
-    <root id="archive" name="marid-site-0.9.6.8-SNAPSHOT.war">
+    <root id="archive" name="marid-site-0.9.6.9-SNAPSHOT.war">
       <element id="artifact" artifact-name="marid-site:war exploded" />
     </root>
   </artifact>

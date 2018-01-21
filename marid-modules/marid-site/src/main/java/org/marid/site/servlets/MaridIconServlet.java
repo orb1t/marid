@@ -19,14 +19,31 @@
  * #L%
  */
 
-package org.marid.site.resources;
+package org.marid.site.servlets;
 
-import javax.servlet.ServletException;
+import org.marid.image.MaridIcon;
+
+import javax.imageio.ImageIO;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.OutputStream;
 
-public interface DynResource {
+@WebServlet(name = "MaridIconServlet", urlPatterns = "/dyn/marid-icon.png")
+public class MaridIconServlet extends HttpServlet {
 
-  void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException;
+  @Override
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    resp.setStatus(HttpServletResponse.SC_OK);
+    resp.setContentType("image/png");
+
+    final BufferedImage icon = MaridIcon.getImage(64, Color.GREEN);
+    try (final OutputStream outputStream = resp.getOutputStream()) {
+      ImageIO.write(icon, "PNG", outputStream);
+    }
+  }
 }

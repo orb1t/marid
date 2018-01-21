@@ -21,13 +21,13 @@
 
 package org.marid.site.mainview;
 
-import com.vaadin.cdi.CDIView;
 import com.vaadin.navigator.View;
+import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.VerticalLayout;
 import org.marid.site.MainUI;
 
-@CDIView(value = "", uis = {MainUI.class})
+@SpringView(name = "", ui = {MainUI.class})
 public class MainView extends VerticalLayout implements View {
 
   public MainView() {

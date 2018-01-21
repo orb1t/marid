@@ -19,33 +19,23 @@
  * #L%
  */
 
-package org.marid.site.resources;
+package org.marid.site;
 
-import org.marid.image.MaridIcon;
-import org.marid.site.annotation.DynRes;
+import com.vaadin.spring.annotation.EnableVaadin;
+import com.vaadin.spring.annotation.EnableVaadinNavigation;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Produces;
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.OutputStream;
+@EnableScheduling
+@EnableWebMvc
+@EnableVaadinNavigation
+@EnableVaadin
+@SpringBootApplication
+public class Context {
 
-@ApplicationScoped
-public class Resources {
-
-  @DynRes("marid-icon.png")
-  @Produces
-  @Dependent
-  public DynResource maridIcon() {
-    return (req, resp) -> {
-      final BufferedImage icon = MaridIcon.getImage(64, Color.GREEN);
-
-      resp.setContentType("image/png");
-      try (final OutputStream outputStream = resp.getOutputStream()) {
-        ImageIO.write(icon, "PNG", outputStream);
-      }
-    };
+  public static void main(String... args) {
+    SpringApplication.run(Context.class, args);
   }
 }
