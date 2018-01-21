@@ -5,7 +5,7 @@
 
   <groupId>org.marid</groupId>
   <artifactId>marid</artifactId>
-  <version>0.9.6.9-SNAPSHOT</version>
+  <version>0.9.6.9</version>
   <packaging>pom</packaging>
 
   <name>marid</name>
@@ -46,7 +46,7 @@
     <connection>scm:git:https://github.com/MaridProject/marid.git</connection>
     <developerConnection>scm:git:https://github.com/MaridProject/marid.git</developerConnection>
     <url>http://sf.net/p/marid/code</url>
-    <tag>HEAD</tag>
+    <tag>marid-0.9.6.9</tag>
   </scm>
 
   <profiles>
