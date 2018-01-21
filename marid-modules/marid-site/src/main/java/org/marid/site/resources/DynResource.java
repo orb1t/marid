@@ -19,11 +19,14 @@
  * #L%
  */
 
-package org.marid.site.servlets;
+package org.marid.site.resources;
 
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
-@WebServlet(urlPatterns = {"/error"})
-public class ErrorServlet extends HttpServlet {
+public interface DynResource {
+
+  void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException;
 }

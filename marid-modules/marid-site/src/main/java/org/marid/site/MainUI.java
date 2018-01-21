@@ -24,27 +24,28 @@ package org.marid.site;
 import com.vaadin.annotations.Theme;
 import com.vaadin.cdi.CDIUI;
 import com.vaadin.cdi.CDIViewProvider;
+import com.vaadin.navigator.Navigator;
 import com.vaadin.server.VaadinRequest;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
 
 import javax.inject.Inject;
 
-@Theme("marid")
 @CDIUI("")
-public class LoginUI extends UI {
+@Theme("valo")
+public class MainUI extends UI {
+
+  private final CDIViewProvider viewProvider;
 
   @Inject
-  private CDIViewProvider viewProvider;
+  public MainUI(CDIViewProvider viewProvider) {
+    this.viewProvider = viewProvider;
+  }
 
   @Override
   protected void init(VaadinRequest vaadinRequest) {
-    final VerticalLayout layout = new VerticalLayout();
-    layout.addComponent(new Button("Add"));
+    final Navigator navigator = new Navigator(this, this);
+    navigator.addProvider(viewProvider);
 
-    System.out.println(viewProvider);
-
-    setContent(layout);
+    getUI().getNavigator().navigateTo("");
   }
 }

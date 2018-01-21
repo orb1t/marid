@@ -16,6 +16,12 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-cdi</artifactId>
+      <version>3.0.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-push</artifactId>
     </dependency>
 
     <dependency>
@@ -30,19 +36,20 @@
 
     <dependency>
       <groupId>com.vaadin</groupId>
-      <artifactId>vaadin-push</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>com.vaadin</groupId>
       <artifactId>vaadin-icons</artifactId>
       <version>3.0.1</version>
     </dependency>
 
     <dependency>
-      <groupId>javax.annotation</groupId>
-      <artifactId>javax.annotation-api</artifactId>
-      <scope>provided</scope>
+      <groupId>org.marid</groupId>
+      <artifactId>marid-runtime</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-web</artifactId>
+      <version>2.10.0</version>
     </dependency>
 
     <dependency>
@@ -66,8 +73,8 @@
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-bom</artifactId>
         <version>8.2.1</version>
-        <scope>import</scope>
         <type>pom</type>
+        <scope>import</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -78,43 +85,23 @@
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-maven-plugin</artifactId>
         <version>8.2.1</version>
-
         <executions>
           <execution>
             <goals>
               <goal>update-theme</goal>
               <goal>compile-theme</goal>
             </goals>
-            <phase>generate-resources</phase>
           </execution>
         </executions>
       </plugin>
 
       <plugin>
-        <groupId>org.wildfly.plugins</groupId>
-        <artifactId>wildfly-maven-plugin</artifactId>
-        <version>1.2.1.Final</version>
-
+        <groupId>org.apache.meecrowave</groupId>
+        <artifactId>meecrowave-maven-plugin</artifactId>
+        <version>1.2.0</version>
         <configuration>
-          <add-user>
-            <users>
-              <user>
-                <username>admin</username>
-                <password>1234</password>
-              </user>
-
-              <user>
-                <username>guest</username>
-                <password>guest</password>
-                <groups>
-                  <group>user</group>
-                </groups>
-                <application-user>true</application-user>
-              </user>
-            </users>
-          </add-user>
-
-          <runtimeName>ROOT.war</runtimeName>
+          <stopPort>9999</stopPort>
+          <http2>true</http2>
         </configuration>
       </plugin>
     </plugins>
