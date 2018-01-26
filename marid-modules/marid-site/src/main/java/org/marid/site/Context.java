@@ -21,21 +21,15 @@
 
 package org.marid.site;
 
-import com.vaadin.spring.annotation.EnableVaadin;
-import com.vaadin.spring.annotation.EnableVaadinNavigation;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import java.util.Scanner;
 
 @EnableScheduling
-@EnableWebMvc
-@EnableVaadinNavigation
-@EnableVaadin
 @SpringBootApplication
 public class Context {
 

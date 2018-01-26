@@ -19,18 +19,18 @@
  * #L%
  */
 
-package org.marid.site.mainview;
+package org.marid.site.controller;
 
-import com.vaadin.navigator.View;
-import com.vaadin.spring.annotation.SpringView;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.VerticalLayout;
-import org.marid.site.MainUI;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
 
-@SpringView(name = "", ui = {MainUI.class})
-public class MainView extends VerticalLayout implements View {
+@Controller
+public class MainController {
 
-  public MainView() {
-    addComponent(new Button("Add"));
+  @RequestMapping(path = "/")
+  public String index(Model model) {
+    model.addAttribute("name", "X");
+    return "index";
   }
 }

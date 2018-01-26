@@ -4,6 +4,9 @@
     <file type="gwt" url="file://$PROJECT_DIR$/marid-modules/marid-site" />
     <file type="web" url="file://$PROJECT_DIR$/marid-modules/marid-site" />
   </component>
+  <component name="JavaScriptSettings">
+    <option name="languageLevel" value="ES6" />
+  </component>
   <component name="MavenProjectsManager">
     <option name="originalFiles">
       <list>

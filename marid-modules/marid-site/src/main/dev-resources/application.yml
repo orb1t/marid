@@ -1,0 +1,10 @@
+server:
+  port: 8443
+  ssl:
+    enabled: true
+    key-alias: marid
+    key-store: classpath:marid.jks
+    key-store-type: JKS
+    key-password: 123456
+    key-store-provider: SUN
+    key-store-password: 123456
