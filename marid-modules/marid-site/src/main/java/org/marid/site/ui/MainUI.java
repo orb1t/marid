@@ -19,19 +19,20 @@
  * #L%
  */
 
-package org.marid.site.controller;
+package org.marid.site.ui;
 
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+import com.vaadin.annotations.Push;
+import com.vaadin.server.VaadinRequest;
+import com.vaadin.shared.ui.ui.Transport;
+import com.vaadin.spring.annotation.SpringUI;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.UI;
 
-@Order(Ordered.HIGHEST_PRECEDENCE)
-@Controller
-public class MainController {
-
-  @GetMapping(path = "/login")
-  public String login() {
-    return "login";
+@SpringUI
+@Push(transport = Transport.LONG_POLLING)
+public class MainUI extends UI {
+  @Override
+  protected void init(VaadinRequest vaadinRequest) {
+    setContent(new Label("ABC"));
   }
 }

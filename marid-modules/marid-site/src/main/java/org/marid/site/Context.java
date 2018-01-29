@@ -21,16 +21,23 @@
 
 package org.marid.site;
 
+import com.vaadin.spring.boot.VaadinAutoConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.util.Scanner;
 
+import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
+
 @EnableScheduling
-@SpringBootApplication
+@SpringBootApplication(exclude = VaadinAutoConfiguration.class)
 public class Context {
 
   @Bean(initMethod = "start")
@@ -51,6 +58,13 @@ public class Context {
     }, "shutdownThread", 96L * 1024L, false);
     thread.setDaemon(true);
     return thread;
+  }
+
+  @Bean
+  @Scope(SCOPE_PROTOTYPE)
+  public static Logger logger(InjectionPoint point) {
+    final Class<?> type = point.getMember().getDeclaringClass();
+    return LoggerFactory.getLogger(type);
   }
 
   public static void main(String... args) {

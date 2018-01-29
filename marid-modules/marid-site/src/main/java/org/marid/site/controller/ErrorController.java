@@ -21,17 +21,22 @@
 
 package org.marid.site.controller;
 
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.slf4j.Logger;
+import org.springframework.http.HttpStatus;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
-@Order(Ordered.HIGHEST_PRECEDENCE)
-@Controller
-public class MainController {
+@ControllerAdvice
+public class ErrorController {
 
-  @GetMapping(path = "/login")
-  public String login() {
-    return "login";
+  @ExceptionHandler(Throwable.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  public String exception(Throwable throwable, Model model, Logger logger) {
+    logger.error("Exception during execution of SpringSecurity application", throwable);
+    final String errorMessage = (throwable != null ? throwable.getMessage() : "Unknown error");
+    model.addAttribute("errorMessage", errorMessage);
+    return "error";
   }
 }
