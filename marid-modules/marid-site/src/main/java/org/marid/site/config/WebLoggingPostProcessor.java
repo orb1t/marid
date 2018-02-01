@@ -21,29 +21,25 @@
 
 package org.marid.site.config;
 
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
-@Order(Ordered.HIGHEST_PRECEDENCE)
 @Component
 public class WebLoggingPostProcessor implements BeanFactoryPostProcessor {
 
   private final Logger logger = LoggerFactory.getLogger("marid");
 
   @Override
-  public void postProcessBeanFactory(@NonNull ConfigurableListableBeanFactory beanFactory) throws BeansException {
+  public void postProcessBeanFactory(@NotNull ConfigurableListableBeanFactory beanFactory) throws BeansException {
     beanFactory.addBeanPostProcessor(new BeanPostProcessor() {
       @Override
-      public Object postProcessBeforeInitialization(@Nullable Object bean, String beanName) throws BeansException {
+      public Object postProcessBeforeInitialization(@NotNull Object bean, String beanName) throws BeansException {
         logger.info("Initializing {}", beanName);
         return bean;
       }

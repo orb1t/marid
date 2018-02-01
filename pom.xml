@@ -555,7 +555,7 @@
         <groupId>org.springframework</groupId>
         <artifactId>spring-framework-bom</artifactId>
         <type>pom</type>
-        <version>5.0.2.RELEASE</version>
+        <version>5.0.3.RELEASE</version>
         <scope>import</scope>
       </dependency>
 

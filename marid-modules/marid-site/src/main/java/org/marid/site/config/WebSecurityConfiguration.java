@@ -27,8 +27,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -37,13 +35,11 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import java.util.Properties;
 
 @Configuration
-@Order(Ordered.HIGHEST_PRECEDENCE)
 public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
     http
-        .csrf().disable()
         .authorizeRequests().anyRequest().authenticated()
         .and()
         .formLogin().loginPage("/login").permitAll()

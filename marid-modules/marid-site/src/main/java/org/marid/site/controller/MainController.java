@@ -21,17 +21,19 @@
 
 package org.marid.site.controller;
 
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
-@Order(Ordered.HIGHEST_PRECEDENCE)
 @Controller
 public class MainController {
 
   @GetMapping(path = "/login")
   public String login() {
     return "login";
+  }
+
+  @GetMapping(path = {"/", "/main"})
+  public String main() {
+    return "main";
   }
 }
