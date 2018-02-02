@@ -24,48 +24,7 @@ function marid_load_main() {
         webix.CustomScroll.init();
     }
 
-    function random_data() {
-        let data = [];
-        for (let i = 0; i < 10; i++)
-            data.push({ind: i + 1, sales: Math.round(Math.random() * 5000)});
-        return data;
-    }
-
-    function cell(month) {
-        return {
-            minWidth: 300,
-            height: 400,
-            rows: [
-                {template: "Report: " + month + " 2016", type: "header"},
-                {
-                    view: "chart", type: "line", preset: "plot",
-                    value: "#sales#", xAxis: {template: "#ind#"}, yAxis: {},
-                    data: random_data()
-                }
-            ]
-        };
-    }
-
-    let flex = {
-        margin: 10, padding: 0, type: "wide",
-        view: "flexlayout",
-        cols: [
-            cell("January"),
-            cell("February"),
-            cell("March"),
-            cell("April"),
-            cell("May"),
-            cell("June"),
-            cell("July"),
-            cell("August"),
-            cell("September"),
-            cell("October"),
-            cell("November"),
-            cell("December")
-        ]
-    };
-
-    let app = webix.ui({
+    webix.ui({
         rows: [
             {
                 view: "tabview",
