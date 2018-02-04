@@ -21,13 +21,13 @@
 
 package org.marid.expression.runtime;
 
-import org.marid.expression.generic.StringExpression;
-import org.marid.expression.xml.XmlExpression;
-import org.marid.runtime.context.BeanContext;
-import org.w3c.dom.Element;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.marid.cellar.ExecutionContext;
+import org.marid.expression.generic.StringExpression;
+import org.marid.expression.xml.XmlExpression;
+import org.w3c.dom.Element;
+
 import java.lang.reflect.Type;
 
 public final class StringExpr extends Expr implements StringExpression {
@@ -45,8 +45,8 @@ public final class StringExpr extends Expr implements StringExpression {
   }
 
   @Override
-  protected Object execute(@Nullable Object self, @Nullable Type owner, @NotNull BeanContext context) {
-    return context.resolvePlaceholders(getValue());
+  protected Object execute(@Nullable Object self, @Nullable Type owner, @NotNull ExecutionContext context) {
+    return value;
   }
 
   @NotNull

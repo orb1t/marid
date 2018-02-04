@@ -2,7 +2,7 @@
  * #%L
  * marid-runtime
  * %%
- * Copyright (C) 2012 - 2017 MARID software development group
+ * Copyright (C) 2012 - 2018 MARID software development group
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -21,107 +21,42 @@
 
 package org.marid.runtime.context;
 
-import org.marid.runtime.event.BeanPreDestroyEvent;
-import org.marid.runtime.event.ContextStopEvent;
-import org.marid.runtime.exception.MaridBeanNotFoundException;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Properties;
+import java.util.Map;
 
-/**
- * Runtime lite context.
- */
-public class MaridContext implements MaridRuntime, AutoCloseable {
+public final class MaridContext {
 
-  private final BeanConfiguration configuration;
+  @Nullable
   private final MaridContext parent;
+
+  @NotNull
   private final String name;
-  private final Object instance;
-  private final MaridContext[] children;
 
-  private MaridContext(BeanConfiguration configuration, MaridContext parent, BeanContext beanContext) {
-    this.configuration = configuration;
+  @NotNull
+  private final Map<@NotNull String, @Nullable Object> barrels;
+
+  public MaridContext(@Nullable MaridContext parent,
+                      @NotNull String name,
+                      @NotNull Map<@NotNull String, @Nullable Object> barrels) {
     this.parent = parent;
-    this.name = beanContext.getName();
-    this.instance = beanContext.getInstance();
-    this.children = beanContext.getChildren().stream()
-        .map(c -> new MaridContext(configuration, this, c))
-        .toArray(MaridContext[]::new);
+    this.name = name;
+    this.barrels = barrels;
   }
 
-  public MaridContext(BeanConfiguration configuration, BeanContext beanContext) {
-    this(configuration, null, beanContext);
-  }
-
-  @Override
-  public String getName() {
-    return name;
-  }
-
-  @Override
+  @Nullable
   public MaridContext getParent() {
     return parent;
   }
 
-  @Override
-  public Object getBean(String name) {
-    if (parent == null) {
-      throw new MaridBeanNotFoundException(name);
-    } else {
-      for (final MaridContext sibling : parent.children) {
-        if (sibling != this && sibling.name.equals(name)) {
-          return sibling.instance;
-        }
-      }
-      if (parent.name.equals(name)) {
-        return parent.instance;
-      }
-      return parent.getBean(name);
-    }
+  @NotNull
+  public String getName() {
+    return name;
   }
 
-  @Override
-  public ClassLoader getClassLoader() {
-    return configuration.getPlaceholderResolver().getClassLoader();
-  }
-
-  @Override
-  public String resolvePlaceholders(String value) {
-    return configuration.getPlaceholderResolver().resolvePlaceholders(value);
-  }
-
-  @Override
-  public Properties getApplicationProperties() {
-    return configuration.getPlaceholderResolver().getProperties();
-  }
-
-  @Override
-  public void close() {
-    final IllegalStateException e = new IllegalStateException("Runtime close exception");
-    try {
-      for (int i = children.length - 1; i >= 0; i--) {
-        final MaridContext child = children[i];
-        try {
-          child.close();
-        } catch (Throwable x) {
-          e.addSuppressed(x);
-        }
-      }
-      final BeanPreDestroyEvent event = new BeanPreDestroyEvent(this, name, instance, e::addSuppressed);
-      configuration.fireEvent(l -> l.onPreDestroy(event), e::addSuppressed);
-      configuration.fireEvent(l -> l.onStop(new ContextStopEvent(this)), e::addSuppressed);
-    } catch (Throwable x) {
-      e.addSuppressed(x);
-    } finally {
-      if (parent != null) {
-        for (int i = 0; i < parent.children.length; i++) {
-          if (parent.children[i] == this) {
-            parent.children[i] = null; // let GC to do its work
-          }
-        }
-      }
-    }
-    if (e.getSuppressed().length > 0) {
-      throw e;
-    }
+  @NotNull
+  public Map<String, Object> getBarrels() {
+    return barrels;
   }
 }

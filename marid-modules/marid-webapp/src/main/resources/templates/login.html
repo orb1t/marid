@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Marid IDE</title>
+    <link rel="stylesheet" href="https://cdn.webix.com/edge/skins/flat.css" type="text/css">
+    <script src="https://cdn.webix.com/edge/webix.js" type="text/javascript"></script>
+</head>
+<body>
+<script th:inline="javascript" type="text/javascript">
+    function login() {//@ sourceURL=Login.js
+        let form = $$("loginForm");
+        webix.ajax().post("/login", form.getValues(), (text, xml, xhr) => {
+            window.location = "/";
+        });
+    }
+
+    let csrfParam = [[${_csrf.parameterName}]];
+    let csrfToken = [[${_csrf.token}]];
+
+    webix.ui({
+        rows: [
+            {
+                cols: [
+                    {
+                        view: "form",
+                        gravity: 2,
+                        borderless: true,
+
+                        elements: [
+                            {
+                                cols: [
+                                    {
+                                        data: {img: '/dyn/marid-icon.png'},
+                                        template: d => "<img src='" + d.img + "' width='64' height='64'/>",
+                                        borderless: true,
+                                        autoheight: true,
+                                        maxWidth: 80
+                                    },
+                                    {
+                                        rows: [
+                                            {
+                                                view: "label",
+                                                label: "<b style='font-size: 24px'>Marid</b>"
+                                            },
+                                            {
+                                                view: "label",
+                                                label: "Free Data Acquisition and Visualization Software"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        rows: [
+                                            {
+                                                view: 'label',
+                                                label: '<small>(c) 2018 Marid Software Development Group</small>',
+                                                align: 'right'
+                                            },
+                                            {
+                                                view: 'label',
+                                                label: '<small>This software is licensed under <a href="https://www.gnu.org/licenses/agpl.html">AGPL v3.0</a></small>',
+                                                align: 'right'
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                cols: [
+                    {
+                        id: "loginForm",
+                        view: "form",
+                        gravity: 2,
+                        borderless: true,
+
+                        elements: [
+                            {view: "text", name: "username", label: "User name"},
+                            {view: "text", name: "password", label: "Password", type: "password"},
+                            {view: "text", name: csrfParam, value: csrfToken, hidden: true},
+                            {
+                                margin: 20, cols: [
+                                    {view: "button", label: "Login", type: "form", click: "login"},
+                                    {view: "button", label: "Cancel"}
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    });
+
+    webix.ui.fullScreen();
+</script>
+</body>
+</html>

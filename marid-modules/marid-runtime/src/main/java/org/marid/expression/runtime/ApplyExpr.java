@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
@@ -23,9 +23,9 @@ package org.marid.expression.runtime;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.marid.cellar.ExecutionContext;
 import org.marid.expression.generic.ApplyExpression;
 import org.marid.expression.xml.XmlExpression;
-import org.marid.runtime.context.BeanContext;
 import org.marid.types.Classes;
 import org.marid.types.Types;
 import org.marid.types.invokable.Invokables;
@@ -70,7 +70,7 @@ public final class ApplyExpr extends CallExpr implements ApplyExpression {
   }
 
   @Override
-  protected Object execute(@Nullable Object self, @Nullable Type selfType, @NotNull BeanContext context) {
+  protected Object execute(@Nullable Object self, @Nullable Type selfType, @NotNull ExecutionContext context) {
     return context.getClass(type)
         .map(type -> Classes.getSam(type)
             .map(m -> {

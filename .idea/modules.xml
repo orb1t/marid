@@ -5,16 +5,14 @@
       <module fileurl="file://$PROJECT_DIR$/marid.iml" filepath="$PROJECT_DIR$/marid.iml" />
       <module fileurl="file://$PROJECT_DIR$/marid-services/marid-api/marid-api.iml" filepath="$PROJECT_DIR$/marid-services/marid-api/marid-api.iml" />
       <module fileurl="file://$PROJECT_DIR$/marid-services/marid-db/marid-db.iml" filepath="$PROJECT_DIR$/marid-services/marid-db/marid-db.iml" />
-      <module fileurl="file://$PROJECT_DIR$/marid-modules/marid-fx/marid-fx.iml" filepath="$PROJECT_DIR$/marid-modules/marid-fx/marid-fx.iml" />
-      <module fileurl="file://$PROJECT_DIR$/marid-modules/marid-ide/marid-ide.iml" filepath="$PROJECT_DIR$/marid-modules/marid-ide/marid-ide.iml" />
       <module fileurl="file://$PROJECT_DIR$/marid-modules/marid-modules.iml" filepath="$PROJECT_DIR$/marid-modules/marid-modules.iml" />
       <module fileurl="file://$PROJECT_DIR$/marid-services/marid-proto/marid-proto.iml" filepath="$PROJECT_DIR$/marid-services/marid-proto/marid-proto.iml" />
       <module fileurl="file://$PROJECT_DIR$/marid-modules/marid-runtime/marid-runtime.iml" filepath="$PROJECT_DIR$/marid-modules/marid-runtime/marid-runtime.iml" />
       <module fileurl="file://$PROJECT_DIR$/marid-services/marid-services.iml" filepath="$PROJECT_DIR$/marid-services/marid-services.iml" />
-      <module fileurl="file://$PROJECT_DIR$/marid-modules/marid-site/marid-site.iml" filepath="$PROJECT_DIR$/marid-modules/marid-site/marid-site.iml" />
       <module fileurl="file://$PROJECT_DIR$/marid-test/marid-test.iml" filepath="$PROJECT_DIR$/marid-test/marid-test.iml" />
       <module fileurl="file://$PROJECT_DIR$/marid-types/marid-types.iml" filepath="$PROJECT_DIR$/marid-types/marid-types.iml" />
       <module fileurl="file://$PROJECT_DIR$/marid-util/marid-util.iml" filepath="$PROJECT_DIR$/marid-util/marid-util.iml" />
+      <module fileurl="file://$PROJECT_DIR$/marid-modules/marid-webapp/marid-webapp.iml" filepath="$PROJECT_DIR$/marid-modules/marid-webapp/marid-webapp.iml" />
     </modules>
   </component>
 </project>

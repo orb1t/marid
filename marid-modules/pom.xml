@@ -12,10 +12,8 @@
   <packaging>pom</packaging>
 
   <modules>
-    <module>marid-ide</module>
-    <module>marid-fx</module>
     <module>marid-runtime</module>
-    <module>marid-site</module>
+    <module>marid-webapp</module>
   </modules>
 
   <dependencies>

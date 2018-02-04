@@ -8,14 +8,13 @@
         <outputRelativeToContentRoot value="true" />
         <module name="marid-api" />
         <module name="marid-db" />
-        <module name="marid-fx" />
-        <module name="marid-ide" />
         <module name="marid-proto" />
         <module name="marid-runtime" />
         <module name="marid-site" />
         <module name="marid-test" />
         <module name="marid-types" />
         <module name="marid-util" />
+        <module name="marid-webapp" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -32,6 +31,7 @@
       <module name="marid-test" target="1.9" />
       <module name="marid-types" target="1.9" />
       <module name="marid-util" target="1.9" />
+      <module name="marid-webapp" target="1.9" />
     </bytecodeTargetLevel>
   </component>
 </project>

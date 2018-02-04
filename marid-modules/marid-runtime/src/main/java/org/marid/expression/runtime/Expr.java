@@ -23,10 +23,10 @@ package org.marid.expression.runtime;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.marid.cellar.ExecutionContext;
 import org.marid.expression.generic.Expression;
 import org.marid.expression.xml.XmlExpression;
 import org.marid.function.ToImmutableList;
-import org.marid.runtime.context.BeanContext;
 import org.w3c.dom.Element;
 
 import java.lang.reflect.Type;
@@ -51,8 +51,7 @@ public abstract class Expr implements Expression {
     return initializers;
   }
 
-  @Nullable
-  public final Object evaluate(@Nullable Object self, @Nullable Type selfType, @NotNull BeanContext context) {
+  public final Object evaluate(@Nullable Object self, @Nullable Type selfType, @NotNull ExecutionContext context) {
     final Object v = execute(self, selfType, context);
     final Type newSelf = getType(selfType, context);
     for (final Expr initializer : getInitializers()) {
@@ -61,7 +60,7 @@ public abstract class Expr implements Expression {
     return v;
   }
 
-  protected abstract Object execute(@Nullable Object self, @Nullable Type selfType, @NotNull BeanContext context);
+  protected abstract Object execute(@Nullable Object self, @Nullable Type selfType, @NotNull ExecutionContext context);
 
   public static Expr of(@NotNull Element element) {
     switch (element.getTagName()) {

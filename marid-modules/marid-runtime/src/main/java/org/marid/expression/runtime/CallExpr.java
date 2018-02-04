@@ -23,10 +23,10 @@ package org.marid.expression.runtime;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.marid.cellar.ExecutionContext;
 import org.marid.expression.generic.CallExpression;
 import org.marid.expression.xml.XmlExpression;
 import org.marid.function.ToImmutableList;
-import org.marid.runtime.context.BeanContext;
 import org.w3c.dom.Element;
 
 import java.lang.reflect.Type;
@@ -62,7 +62,7 @@ public class CallExpr extends Expr implements CallExpression {
   }
 
   @Override
-  protected Object execute(@Nullable Object self, @Nullable Type owner, @NotNull BeanContext context) {
+  protected Object execute(@Nullable Object self, @Nullable Type owner, @NotNull ExecutionContext context) {
     final Type[] argTypes = getArgs().stream().map(a -> a.getType(owner, context)).toArray(Type[]::new);
     return invokable(getTarget().getTargetClass(owner, context), getMethod(), argTypes)
         .map(invokable -> {

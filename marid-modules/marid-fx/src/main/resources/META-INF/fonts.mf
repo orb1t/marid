@@ -1,6 +1,0 @@
-O=/octicons.ttf
-M=/MaterialIcons-Regular.ttf
-D=/materialdesignicons-webfont.ttf
-F=/fontawesome-webfont.ttf
-W=/weathericons-regular-webfont.ttf
-V=/525icons.ttf

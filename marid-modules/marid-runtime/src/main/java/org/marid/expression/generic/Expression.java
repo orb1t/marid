@@ -23,7 +23,7 @@ package org.marid.expression.generic;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.marid.beans.BeanTypeContext;
+import org.marid.cellar.BottleContext;
 import org.marid.types.TypeEvaluator;
 import org.marid.types.Types;
 
@@ -37,13 +37,13 @@ public interface Expression {
   List<? extends Expression> getInitializers();
 
   @NotNull
-  Type getType(@Nullable Type owner, @NotNull BeanTypeContext context);
+  Type getType(@Nullable Type owner, @NotNull BottleContext context);
 
-  default void resolve(@NotNull Type type, @NotNull BeanTypeContext context, @NotNull TypeEvaluator evaluator) {
+  default void resolve(@NotNull Type type, @NotNull BottleContext context, @NotNull TypeEvaluator evaluator) {
   }
 
   @NotNull
-  default Stream<Class<?>> getTargetClass(@Nullable Type owner, @NotNull BeanTypeContext context) {
+  default Stream<Class<?>> getTargetClass(@Nullable Type owner, @NotNull BottleContext context) {
     return Types.rawClasses(getType(owner, context));
   }
 }

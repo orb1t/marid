@@ -1,6 +1,6 @@
 /*-
  * #%L
- * marid-runtime
+ * marid-types
  * %%
  * Copyright (C) 2012 - 2017 MARID software development group
  * %%

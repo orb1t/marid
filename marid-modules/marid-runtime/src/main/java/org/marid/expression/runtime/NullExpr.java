@@ -21,13 +21,13 @@
 
 package org.marid.expression.runtime;
 
-import org.marid.expression.generic.NullExpression;
-import org.marid.expression.xml.XmlExpression;
-import org.marid.runtime.context.BeanContext;
-import org.w3c.dom.Element;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.marid.cellar.ExecutionContext;
+import org.marid.expression.generic.NullExpression;
+import org.marid.expression.xml.XmlExpression;
+import org.w3c.dom.Element;
+
 import java.lang.reflect.Type;
 
 public final class NullExpr extends Expr implements NullExpression {
@@ -49,7 +49,7 @@ public final class NullExpr extends Expr implements NullExpression {
   }
 
   @Override
-  protected Object execute(@Nullable Object self, @Nullable Type owner, @NotNull BeanContext context) {
+  protected Object execute(@Nullable Object self, @Nullable Type owner, @NotNull ExecutionContext context) {
     return null;
   }
 

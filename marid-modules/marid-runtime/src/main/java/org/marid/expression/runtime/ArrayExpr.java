@@ -21,14 +21,14 @@
 
 package org.marid.expression.runtime;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.marid.cellar.ExecutionContext;
 import org.marid.expression.generic.ArrayExpression;
 import org.marid.expression.xml.XmlExpression;
 import org.marid.function.ToImmutableList;
-import org.marid.runtime.context.BeanContext;
 import org.w3c.dom.Element;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Type;
 import java.util.List;
 
@@ -53,7 +53,7 @@ public final class ArrayExpr extends Expr implements ArrayExpression {
   }
 
   @Override
-  protected Object execute(@Nullable Object self, @Nullable Type owner, @NotNull BeanContext context) {
+  protected Object execute(@Nullable Object self, @Nullable Type owner, @NotNull ExecutionContext context) {
     return elements.stream().map(e -> e.evaluate(self, owner, context)).toArray();
   }
 }

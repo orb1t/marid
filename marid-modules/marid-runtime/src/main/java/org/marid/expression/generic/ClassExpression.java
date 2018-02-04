@@ -21,7 +21,7 @@
 
 package org.marid.expression.generic;
 
-import org.marid.beans.BeanTypeContext;
+import org.marid.cellar.BottleContext;
 import org.marid.types.MaridParameterizedType;
 
 import org.jetbrains.annotations.NotNull;
@@ -36,13 +36,13 @@ public interface ClassExpression extends Expression {
 
   @NotNull
   @Override
-  default Type getType(@Nullable Type owner, @NotNull BeanTypeContext context) {
+  default Type getType(@Nullable Type owner, @NotNull BottleContext context) {
     return new MaridParameterizedType(null, Class.class, (Type) context.getClass(getClassName()).orElse(Object.class));
   }
 
   @NotNull
   @Override
-  default Stream<Class<?>> getTargetClass(@Nullable Type owner, @NotNull BeanTypeContext context) {
+  default Stream<Class<?>> getTargetClass(@Nullable Type owner, @NotNull BottleContext context) {
       return context.getClass(getClassName()).stream();
   }
 }

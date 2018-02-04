@@ -23,7 +23,7 @@ package org.marid.expression.generic;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.marid.beans.BeanTypeContext;
+import org.marid.cellar.BottleContext;
 import org.marid.types.Classes;
 import org.marid.types.Types;
 import org.marid.types.invokable.Invokables;
@@ -40,7 +40,7 @@ public interface ApplyExpression extends CallExpression {
 
   @NotNull
   @Override
-  default Type getType(@Nullable Type owner, @NotNull BeanTypeContext context) {
+  default Type getType(@Nullable Type owner, @NotNull BottleContext context) {
     return context.getClass(getType())
         .map(c -> Classes.getSam(c)
             .map(sam -> {

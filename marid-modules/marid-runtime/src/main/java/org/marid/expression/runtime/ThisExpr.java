@@ -21,12 +21,12 @@
 
 package org.marid.expression.runtime;
 
-import org.marid.expression.generic.ThisExpression;
-import org.marid.runtime.context.BeanContext;
-import org.w3c.dom.Element;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.marid.cellar.ExecutionContext;
+import org.marid.expression.generic.ThisExpression;
+import org.w3c.dom.Element;
+
 import java.lang.reflect.Type;
 
 public final class ThisExpr extends Expr implements ThisExpression {
@@ -39,7 +39,7 @@ public final class ThisExpr extends Expr implements ThisExpression {
   }
 
   @Override
-  protected Object execute(@Nullable Object self, @Nullable Type owner, @NotNull BeanContext context) {
+  protected Object execute(@Nullable Object self, @Nullable Type owner, @NotNull ExecutionContext context) {
     return self;
   }
 }

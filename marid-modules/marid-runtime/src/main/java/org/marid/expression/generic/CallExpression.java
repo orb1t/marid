@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
@@ -23,7 +23,7 @@ package org.marid.expression.generic;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.marid.beans.BeanTypeContext;
+import org.marid.cellar.BottleContext;
 import org.marid.types.TypeEvaluator;
 import org.marid.types.Types;
 import org.marid.types.invokable.Invokable;
@@ -49,7 +49,7 @@ public interface CallExpression extends Expression {
 
   @NotNull
   @Override
-  default Type getType(@Nullable Type owner, @NotNull BeanTypeContext context) {
+  default Type getType(@Nullable Type owner, @NotNull BottleContext context) {
     final Type[] argTypes = getArgs().stream().map(a -> a.getType(owner, context)).toArray(Type[]::new);
     return invokable(getTarget().getTargetClass(owner, context), getMethod(), argTypes)
         .map(invokable -> {
@@ -68,7 +68,7 @@ public interface CallExpression extends Expression {
   }
 
   @Override
-  default void resolve(@NotNull Type type, @NotNull BeanTypeContext context, @NotNull TypeEvaluator evaluator) {
+  default void resolve(@NotNull Type type, @NotNull BottleContext context, @NotNull TypeEvaluator evaluator) {
     if (getTarget() instanceof ThisExpression) {
       final Type[] ats = getArgs().stream().map(a -> a.getType(type, context)).toArray(Type[]::new);
       Types.rawClasses(type).flatMap(c -> Stream.of(c.getMethods()).filter(m -> m.getName().equals(getMethod())))

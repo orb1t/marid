@@ -380,6 +380,11 @@
         </plugin>
 
         <plugin>
+          <artifactId>maven-scm-publish-plugin</artifactId>
+          <version>3.0.0</version>
+        </plugin>
+
+        <plugin>
           <artifactId>maven-assembly-plugin</artifactId>
           <version>3.1.0</version>
           <configuration>
@@ -501,6 +506,7 @@
           <emptyLineAfterHeader>true</emptyLineAfterHeader>
           <roots>src</roots>
           <excludes>**/*.properties,**/*.xml,**/*.css,**/*.html</excludes>
+          <canUpdateDescription>true</canUpdateDescription>
         </configuration>
       </plugin>
     </plugins>

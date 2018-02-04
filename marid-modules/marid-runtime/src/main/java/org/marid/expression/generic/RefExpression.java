@@ -21,7 +21,7 @@
 
 package org.marid.expression.generic;
 
-import org.marid.beans.BeanTypeContext;
+import org.marid.cellar.BottleContext;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,7 +34,7 @@ public interface RefExpression extends Expression {
 
   @NotNull
   @Override
-  default Type getType(@Nullable Type owner, @NotNull BeanTypeContext context) {
+  default Type getType(@Nullable Type owner, @NotNull BottleContext context) {
     return context.getBeanType(getReference());
   }
 }

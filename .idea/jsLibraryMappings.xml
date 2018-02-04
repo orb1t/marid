@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="JavaScriptLibraryMappings">
-    <file url="file://$PROJECT_DIR$/marid-modules/marid-site" libraries="{webix, webix_debug}" />
+    <file url="file://$PROJECT_DIR$/marid-modules/marid-webapp" libraries="{webix, webix_debug}" />
   </component>
 </project>

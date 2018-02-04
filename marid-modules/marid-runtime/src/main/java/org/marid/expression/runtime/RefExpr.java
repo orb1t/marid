@@ -21,13 +21,13 @@
 
 package org.marid.expression.runtime;
 
-import org.marid.expression.generic.RefExpression;
-import org.marid.expression.xml.XmlExpression;
-import org.marid.runtime.context.BeanContext;
-import org.w3c.dom.Element;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.marid.cellar.ExecutionContext;
+import org.marid.expression.generic.RefExpression;
+import org.marid.expression.xml.XmlExpression;
+import org.w3c.dom.Element;
+
 import java.lang.reflect.Type;
 
 public final class RefExpr extends Expr implements RefExpression {
@@ -45,8 +45,8 @@ public final class RefExpr extends Expr implements RefExpression {
   }
 
   @Override
-  protected Object execute(@Nullable Object self, @Nullable Type owner, @NotNull BeanContext context) {
-    return context.getBean(getReference());
+  protected Object execute(@Nullable Object self, @Nullable Type owner, @NotNull ExecutionContext context) {
+    return context.getReference(reference);
   }
 
   @Override
