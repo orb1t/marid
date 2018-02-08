@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="css/marid.css" type="text/css">
+    <script src="https://cdn.webix.com/edge/webix.js" type="text/javascript"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.js" type="text/javascript"></script>
+</head>
+<body>
+
+<script>
+    if (webix.CustomScroll && !webix.env.touch) {
+        webix.CustomScroll.init();
+    }
+
+    webix.ready(() => {
+        webix.ui({
+            rows: [
+                {
+                    view: "tabview",
+                    cells: [
+                        {
+                            header: "<i class='material-icons'>widgets</i> Projects",
+                            body: {
+                                template: "X"
+                            },
+                            icon: "envelope"
+                        },
+                        {
+                            header: "<i class='material-icons'>group_work</i> Cellar",
+                            body: {
+                                template: "Y"
+                            }
+                        }
+                    ]
+                },
+                {
+                    template: "Status: all data is saved",
+                    height: 30
+                }
+            ]
+        });
+        webix.ui.fullScreen();
+    });
+</script>
+</body>
+</html>

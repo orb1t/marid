@@ -32,8 +32,8 @@ public class MainController {
     return "login";
   }
 
-  @GetMapping(path = {"/", "/main"})
-  public String main() {
-    return "main";
+  @GetMapping(path = {"/", "/index"})
+  public String index() {
+    return "index";
   }
 }
