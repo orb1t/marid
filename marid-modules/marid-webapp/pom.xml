@@ -7,7 +7,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>marid-site</artifactId>
+  <artifactId>marid-webapp</artifactId>
 
   <dependencies>
     <dependency>

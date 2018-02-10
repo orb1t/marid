@@ -2,92 +2,49 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Marid IDE</title>
-    <link rel="stylesheet" href="https://cdn.webix.com/edge/skins/flat.css" type="text/css">
-    <script src="https://cdn.webix.com/edge/webix.js" type="text/javascript"></script>
-    <style type="text/css">
-        .login-footer {
-            font-size: small;
-        }
-
-        .login-header {
-            font-size: x-large;
-        }
-    </style>
+    <link rel="stylesheet" href="/css/login.css" type="text/css">
+    <link rel="icon" type="image/png" href="/dyn/marid-icon.png?size=24"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-<script th:inline="javascript" type="text/javascript">
-    function login() {//@ sourceURL=Login.js
-        let form = $$("loginForm");
-        webix.ajax().post("/login", form.getValues(), (text, xml, xhr) => {
-            window.location = "/";
-        });
-    }
 
-    let csrfParam = [[${_csrf.parameterName}]];
-    let csrfToken = [[${_csrf.token}]];
+<div class="center-panel">
+    <table width="100%" cellspacing="10px">
+        <tr>
+            <td style="width: 84px"><img src="/dyn/marid-icon.png?size=84" width="84px" height="84px"></td>
+            <td>
+                <div class="header-container">
+                    <div class="login-header">Marid</div>
+                    <div>Spirit Driven Development</div>
+                </div>
+            </td>
+        </tr>
+    </table>
 
-    webix.ui({
-        rows: [
-            {
-                gravity: 2,
-                type: "form",
-                cols: [
-                    {
-                        data: {img: '/dyn/marid-icon.png'},
-                        template: d => "<img src='" + d.img + "' width='64' height='64'/>",
-                        borderless: true,
-                        autoheight: true,
-                        width: 70
-                    },
-                    {
-                        rows: [
-                            {
-                                view: "label",
-                                label: "Marid",
-                                css: "login-header"
-                            },
-                            {
-                                view: "label",
-                                label: "Spirit Driven Development"
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                id: "loginForm",
-                view: "form",
-                gravity: 2,
-                borderless: true,
+    <form method="post" th:action="@{/login}" class="login-form" style="width: 100%">
 
-                elements: [
-                    {view: "text", name: "username", label: "User name"},
-                    {view: "text", name: "password", label: "Password", type: "password"},
-                    {view: "text", name: csrfParam, value: csrfToken, hidden: true},
-                    {
-                        margin: 20, cols: [
-                            {view: "button", label: "Login", type: "form", click: "login"},
-                            {view: "button", label: "Cancel"}
-                        ]
-                    }
-                ]
-            },
-            {
-                type: "form",
-                rows: [
-                    {
-                        view: "template",
-                        gravity: 2,
-                        template: "(c) 2018 Marid Software Development Group. This software is licensed under <a href=\"https://www.gnu.org/licenses/agpl.html\">AGPL v3.0</a>",
-                        css: "login-footer",
-                        borderless: true
-                    }
-                ]
-            }
-        ]
-    });
+        <div class="section">
+            <label for="user" th:text="#{User}"></label>
+            <input id="user" name="username" type="text" th:placeholder="#{User}"/>
+        </div>
 
-    webix.ui.fullScreen();
-</script>
+        <div class="section">
+            <label for="pass" th:text="Password"></label>
+            <input id="pass" name="password" type="password" th:placeholder="#{Password}"/>
+        </div>
+
+        <div class="section">
+            <input type="submit" th:value="#{Submit}"/>
+        </div>
+
+        <div class="section" style="font-size: smaller">
+            <span>
+                Licensed under <a href="https://www.gnu.org/licenses/agpl-3.0.en.html" target="_blank">AGPL v3</a>
+                license.
+            </span>
+        </div>
+    </form>
+</div>
+
 </body>
 </html>

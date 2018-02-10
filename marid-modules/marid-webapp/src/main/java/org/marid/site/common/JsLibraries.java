@@ -21,44 +21,18 @@
 
 package org.marid.site.common;
 
-import org.slf4j.Logger;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import org.marid.site.model.JsLibrary;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 @Component
-public class Directories {
+public class JsLibraries {
 
-  private final Path userHome;
-  private final Path base;
-  private final Path profiles;
-  private final Logger logger;
-
-  public Directories(Logger logger) {
-    this.logger = logger;
-    this.userHome = Paths.get(System.getProperty("user.home"));
-    this.base = userHome.resolve("marid-site");
-    this.profiles = base.resolve("profiles");
-  }
-
-  @PostConstruct
-  private void createDirectoriesIfNecessary() throws IOException {
-    Files.createDirectories(profiles);
-  }
-
-  public Path getUserHome() {
-    return userHome;
-  }
-
-  public Path getBase() {
-    return base;
-  }
-
-  public Path getProfiles() {
-    return profiles;
+  @JsonGetter
+  public JsLibrary getJquery() {
+    return new JsLibrary(
+        "https://code.jquery.com/jquery-3.3.1.js",
+        "sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+    );
   }
 }

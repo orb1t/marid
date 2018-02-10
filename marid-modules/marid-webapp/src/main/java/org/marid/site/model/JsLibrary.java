@@ -19,16 +19,43 @@
  * #L%
  */
 
-package org.marid.site.controller;
+package org.marid.site.model;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.jetbrains.annotations.NotNull;
 
-@Controller
-public class MainController {
+public class JsLibrary {
 
-  @GetMapping(path = "/login")
-  public String login() {
-    return "login";
+  @NotNull
+  private final String src;
+
+  @NotNull
+  private final String integrity;
+
+  @NotNull
+  private final String crossorigin;
+
+  public JsLibrary(@NotNull String src, @NotNull String integrity, @NotNull String crossorigin) {
+    this.src = src;
+    this.integrity = integrity;
+    this.crossorigin = crossorigin;
+  }
+
+  public JsLibrary(@NotNull String src, @NotNull String integrity) {
+    this(src, integrity, "anonymous");
+  }
+
+  @NotNull
+  public String getSrc() {
+    return src;
+  }
+
+  @NotNull
+  public String getIntegrity() {
+    return integrity;
+  }
+
+  @NotNull
+  public String getCrossorigin() {
+    return crossorigin;
   }
 }

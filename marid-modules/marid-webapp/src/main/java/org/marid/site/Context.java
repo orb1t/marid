@@ -1,6 +1,6 @@
 /*-
  * #%L
- * marid-site
+ * marid-webapp
  * %%
  * Copyright (C) 2012 - 2018 MARID software development group
  * %%
@@ -66,6 +66,21 @@ public class Context {
     final Class<?> type = point.getMember().getDeclaringClass();
     return LoggerFactory.getLogger(type);
   }
+
+  /*
+  @Bean
+  public LocaleResolver localeResolver() {
+    final SessionLocaleResolver resolver = new SessionLocaleResolver();
+    resolver.setDefaultLocale(Locale.UK);
+    return resolver;
+  }
+
+  @Bean
+  public LocaleChangeInterceptor localeChangeInterceptor() {
+    final LocaleChangeInterceptor interceptor = new LocaleChangeInterceptor();
+    interceptor.setParamName("l");
+    return interceptor;
+  }*/
 
   public static void main(String... args) {
     SpringApplication.run(Context.class, args);
