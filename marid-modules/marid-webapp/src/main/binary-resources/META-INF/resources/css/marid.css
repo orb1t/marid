@@ -1,6 +1,19 @@
-@import url("https://fonts.googleapis.com/css?family=Roboto");
-
-* {
-    font-family: 'Roboto', sans-serif;
+html {
+    height: 100%;
 }
 
+body {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+main {
+    margin-top: 16px;
+    margin-bottom: auto;
+}
+
+footer {
+    min-height: 24px;
+}

@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <title>Marid IDE</title>
+
     <link rel="stylesheet" href="/css/login.css" type="text/css">
     <link rel="icon" type="image/png" href="/dyn/marid-icon.png?size=24"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
 
@@ -21,7 +24,7 @@
         </tr>
     </table>
 
-    <form method="post" th:action="@{/login}" class="login-form" style="width: 100%">
+    <form method="post" th:action="@{/login}">
 
         <div class="section">
             <label for="user" th:text="#{User}"></label>
@@ -29,7 +32,7 @@
         </div>
 
         <div class="section">
-            <label for="pass" th:text="Password"></label>
+            <label for="pass" th:text="#{Password}"></label>
             <input id="pass" name="password" type="password" th:placeholder="#{Password}"/>
         </div>
 
@@ -37,7 +40,7 @@
             <input type="submit" th:value="#{Submit}"/>
         </div>
 
-        <div class="section" style="font-size: smaller">
+        <div class="section login-footer">
             <span>
                 Licensed under <a href="https://www.gnu.org/licenses/agpl-3.0.en.html" target="_blank">AGPL v3</a>
                 license.

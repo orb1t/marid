@@ -8,11 +8,12 @@ server:
     key-password: 123456
     key-store-provider: SUN
     key-store-password: 123456
-  session:
-    cookie:
-      secure: true
-      http-only: true
-      name: sid
+  servlet:
+    session:
+      cookie:
+        name: sid
+        http-only: true
+        secure: true
 logging:
   level:
     root: info

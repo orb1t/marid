@@ -32,6 +32,18 @@
     </dependency>
 
     <dependency>
+      <groupId>org.webjars</groupId>
+      <artifactId>bootstrap</artifactId>
+      <version>4.0.0</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.webjars.npm</groupId>
+          <artifactId>popper.js</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
       <version>4.0.0</version>
@@ -41,6 +53,12 @@
 
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>org.webjars</groupId>
+        <artifactId>jquery</artifactId>
+        <version>3.3.1</version>
+      </dependency>
+
       <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
@@ -65,36 +83,27 @@
     </pluginRepository>
   </pluginRepositories>
 
-  <profiles>
-    <profile>
-      <id>development</id>
-
-      <activation>
-        <property>
-          <name>!marid.release</name>
-        </property>
-      </activation>
-
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-maven-plugin</artifactId>
-            <version>2.0.0.RC1</version>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>repackage</goal>
-                </goals>
-                <phase>package</phase>
-              </execution>
-            </executions>
-            <configuration>
-              <jvmArguments>--add-opens java.base/jdk.internal.ref=ALL-UNNAMED</jvmArguments>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <version>2.0.0.RC1</version>
+        <executions>
+          <execution>
+            <id>repack</id>
+            <goals>
+              <goal>repackage</goal>
+            </goals>
+            <phase>package</phase>
+          </execution>
+        </executions>
+        <configuration>
+          <jvmArguments>--add-opens java.base/jdk.internal.ref=ALL-UNNAMED</jvmArguments>
+          <attach>false</attach>
+          <finalName>${project.name}</finalName>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

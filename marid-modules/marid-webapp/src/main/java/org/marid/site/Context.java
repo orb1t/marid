@@ -67,21 +67,6 @@ public class Context {
     return LoggerFactory.getLogger(type);
   }
 
-  /*
-  @Bean
-  public LocaleResolver localeResolver() {
-    final SessionLocaleResolver resolver = new SessionLocaleResolver();
-    resolver.setDefaultLocale(Locale.UK);
-    return resolver;
-  }
-
-  @Bean
-  public LocaleChangeInterceptor localeChangeInterceptor() {
-    final LocaleChangeInterceptor interceptor = new LocaleChangeInterceptor();
-    interceptor.setParamName("l");
-    return interceptor;
-  }*/
-
   public static void main(String... args) {
     SpringApplication.run(Context.class, args);
   }
