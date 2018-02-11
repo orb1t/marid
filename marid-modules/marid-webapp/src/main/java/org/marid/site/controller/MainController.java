@@ -21,10 +21,8 @@
 
 package org.marid.site.controller;
 
-import org.marid.site.common.JsLibraries;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 
 @Controller
 public class MainController {
@@ -39,8 +37,8 @@ public class MainController {
     return "index";
   }
 
-  @ModelAttribute(name = "jsLibs")
-  public JsLibraries jsLibs() {
-    return new JsLibraries();
+  @GetMapping(path = {"/projects"})
+  public String x() {
+    return "projects";
   }
 }
