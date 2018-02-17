@@ -21,6 +21,7 @@
 
 package org.marid.app.controller;
 
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -37,13 +38,21 @@ public class MainController {
     return "index";
   }
 
+  @Secured({"ROLE_USER"})
   @GetMapping(path = {"/cellars"})
   public String cellars() {
     return "cellars";
   }
 
+  @Secured({"ROLE_USER"})
   @GetMapping(path = {"/racks"})
   public String racks() {
     return "racks";
+  }
+
+  @Secured({"ROLE_ADMIN"})
+  @GetMapping(path = {"/admin"})
+  public String admin() {
+    return "admin";
   }
 }

@@ -51,7 +51,7 @@ public class MaridUserInfoSerializationTest {
   }
 
   @Test(groups = {NORMAL})
-  void testDeserialization() throws Exception {
+  public void testDeserialization() throws Exception {
     final MaridUserInfo user = new MaridUserInfo("y", true, "2011-01-01", "USER");
 
     final ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();

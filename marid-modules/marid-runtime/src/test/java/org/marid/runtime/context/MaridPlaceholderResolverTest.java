@@ -37,7 +37,7 @@ import static org.testng.Assert.assertThrows;
 public class MaridPlaceholderResolverTest {
 
   @Test(groups = {NORMAL})
-  void circular1() {
+  public void circular1() {
     assertThrows(CircularPlaceholderException.class, () -> {
       final Properties properties = new Properties();
       properties.setProperty("x1", "2");
@@ -49,7 +49,7 @@ public class MaridPlaceholderResolverTest {
   }
 
   @Test(groups = {NORMAL})
-  void circular2() {
+  public void circular2() {
     assertThrows(CircularPlaceholderException.class, () -> {
       final Properties properties = new Properties();
       properties.setProperty("x1", "2");
@@ -60,7 +60,7 @@ public class MaridPlaceholderResolverTest {
   }
 
   @Test(groups = {NORMAL})
-  void defValue() {
+  public void defValue() {
     final Properties properties = new Properties();
     properties.setProperty("x1", "2");
     final MaridPlaceholderResolver resolver = new MaridPlaceholderResolver(properties);
@@ -68,7 +68,7 @@ public class MaridPlaceholderResolverTest {
   }
 
   @Test(groups = {NORMAL})
-  void unterminated() {
+  public void unterminated() {
     final Properties properties = new Properties();
     properties.setProperty("x1", "2");
     final MaridPlaceholderResolver resolver = new MaridPlaceholderResolver(properties);

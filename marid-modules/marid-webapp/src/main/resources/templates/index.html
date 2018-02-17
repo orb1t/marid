@@ -1,6 +1,9 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+
 <head>
+    <title>Marid IDE</title>
     <link rel="icon" type="image/png" href="/dyn/marid-icon.png?size=24"/>
 
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
@@ -12,32 +15,25 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <script src="http://code.jquery.com/jquery-3.3.1.js"
+    <script src="https://code.jquery.com/jquery-3.3.1.js"
             integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
             crossorigin="anonymous"></script>
 
-    <script type="text/javascript">
-        function cellars() {
-            $('main').load('/cellars');
-            $("nav .nav-item.active").removeClass("active");
-            $('#cellars').addClass("active");
-        }
-
-        function racks() {
-            $('main').load("/racks");
-            $("nav .nav-item.active").removeClass("active");
-            $('#racks').addClass("active");
-        }
-    </script>
+    <script src="/js/index.js" type="text/javascript"></script>
 </head>
 <body>
 
 <header>
     <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
 
-        <a class="navbar-brand" href="#">
+        <a class="navbar-brand dropdown-toggle" id="brandDropdown" role="button" data-toggle="dropdown" href="#">
             <img src="/dyn/marid-icon.png?size=32" width="32px" height="32px"/>
         </a>
+        <div class="dropdown-menu">
+            <a class="dropdown-item" href="#">Action</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="/login?logout" th:text="#{Logout}"></a>
+        </div>
 
         <button class="navbar-toggler"
                 type="button"
@@ -51,11 +47,14 @@
 
         <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav mr-auto">
-                <li id="cellars" class="nav-item active">
-                    <a class="nav-link" href="#" onclick="cellars()" th:text="#{Cellars}"></a>
+                <li id="admin" sec:authorize="hasRole('ADMIN')" class="nav-item">
+                    <a class="nav-link" href="#" onclick="selectTab(this)" th:text="#{Admin}"></a>
+                </li>
+                <li id="cellars" class="nav-item">
+                    <a class="nav-link" href="#" onclick="selectTab(this)" th:text="#{Cellars}"></a>
                 </li>
                 <li id="racks" class="nav-item">
-                    <a class="nav-link" href="#" onclick="racks()" th:text="#{Racks}"></a>
+                    <a class="nav-link" href="#" onclick="selectTab(this)" th:text="#{Racks}"></a>
                 </li>
             </ul>
             <form class="form-inline mt-2 mt-md-0">
@@ -90,7 +89,7 @@
         crossorigin="anonymous"></script>
 
 <script type="text/javascript">
-    $("main").load("/cellars");
+    selectTab($("li.nav-item:first a.nav-link"));
 </script>
 
 </body>
