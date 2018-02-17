@@ -22,19 +22,20 @@
 package org.marid.app.model;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Test;
 import org.springframework.boot.json.BasicJsonParser;
+import org.testng.annotations.Test;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.marid.test.TestGroups.NORMAL;
+import static org.testng.Assert.assertEquals;
 
-class MaridUserInfoSerializationTest {
+public class MaridUserInfoSerializationTest {
 
-  @Test
-  void testSerialization() throws Exception {
+  @Test(groups = {NORMAL})
+  public void testSerialization() throws Exception {
     final MaridUserInfo user = new MaridUserInfo("y", true, "2011-01-01", "USER");
 
     final ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
@@ -43,13 +44,13 @@ class MaridUserInfoSerializationTest {
     final BasicJsonParser basicJsonParser = new BasicJsonParser();
     final Map<String, Object> map = basicJsonParser.parseMap(jackson);
 
-    assertEquals("y", map.get("password"));
-    assertEquals("2011-01-01", map.get("expirationDate"));
-    assertEquals(List.of("USER"), map.get("authorities"));
-    assertEquals("true", map.get("enabled"));
+    assertEquals(map.get("password"), "y");
+    assertEquals(map.get("expirationDate"), "2011-01-01");
+    assertEquals(map.get("authorities"), List.of("USER"));
+    assertEquals(map.get("enabled"), "true");
   }
 
-  @Test
+  @Test(groups = {NORMAL})
   void testDeserialization() throws Exception {
     final MaridUserInfo user = new MaridUserInfo("y", true, "2011-01-01", "USER");
 
@@ -58,9 +59,9 @@ class MaridUserInfoSerializationTest {
 
     final MaridUserInfo cloned = mapper.readValue(jackson, MaridUserInfo.class);
 
-    assertEquals("y", cloned.password);
-    assertEquals("2011-01-01", cloned.expirationDate);
-    assertEquals(Set.of("USER"), cloned.authorities);
-    assertEquals(true, cloned.enabled);
+    assertEquals(cloned.password, "y");
+    assertEquals(cloned.expirationDate, "2011-01-01");
+    assertEquals(cloned.authorities, Set.of("USER"));
+    assertEquals(cloned.enabled, true);
   }
 }

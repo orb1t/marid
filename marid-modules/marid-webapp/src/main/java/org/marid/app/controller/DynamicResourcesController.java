@@ -23,28 +23,23 @@ package org.marid.app.controller;
 
 import org.marid.image.MaridIcon;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.imageio.ImageIO;
-import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.OutputStream;
 
+import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
+
+@RequestMapping(path = "/dyn")
 @Controller
 public class DynamicResourcesController {
 
-  @RequestMapping(path = "/dyn/marid-icon.png", method = RequestMethod.GET)
-  public void maridIcon(HttpServletResponse response, @RequestParam(defaultValue = "64") int size) throws IOException {
-    response.setStatus(HttpServletResponse.SC_OK);
-    response.setContentType("image/png");
-
-    final BufferedImage icon = MaridIcon.getImage(size, Color.GREEN);
-    try (final OutputStream outputStream = response.getOutputStream()) {
-      ImageIO.write(icon, "PNG", outputStream);
-    }
+  @GetMapping(path = "/marid-icon.png", produces = {IMAGE_PNG_VALUE})
+  @ResponseBody
+  public BufferedImage maridIcon(@RequestParam(defaultValue = "64") int size) {
+    return MaridIcon.getImage(size, Color.GREEN);
   }
 }

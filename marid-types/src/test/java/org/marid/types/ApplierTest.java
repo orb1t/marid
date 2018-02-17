@@ -21,14 +21,12 @@
 
 package org.marid.types;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.marid.types.invokable.Invokable;
 import org.marid.types.invokable.InvokableConstructor;
 import org.marid.types.invokable.InvokableMethod;
 import org.springframework.ui.ModelMap;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -36,67 +34,69 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.ArrayUtils.EMPTY_INT_ARRAY;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.params.provider.Arguments.of;
+import static org.marid.test.TestGroups.SLOW;
 import static org.marid.types.AuxTypeUtils.p;
+import static org.testng.Assert.assertEquals;
 
-@Tag("normal")
-class ApplierTest {
+public class ApplierTest {
 
-  private static Stream<Arguments> applyTypeData() throws ReflectiveOperationException {
-    return Stream.of(
-        of(
+  @DataProvider
+  private static Object[][] applyTypeData() throws ReflectiveOperationException {
+    return new Object[][] {
+        {
             Runnable.class,
             new InvokableMethod(String.class.getMethod("length")),
-            Runnable.class, String.class, EMPTY_INT_ARRAY, new Type[0]),
-        of(
+            Runnable.class, String.class, EMPTY_INT_ARRAY, new Type[0]
+        },
+        {
             p(Callable.class, Integer.class),
             new InvokableMethod(String.class.getMethod("length")),
-            Callable.class, String.class, EMPTY_INT_ARRAY, new Type[0]),
-        of(
+            Callable.class, String.class, EMPTY_INT_ARRAY, new Type[0]
+        },
+        {
             p(Callable.class, p(ArrayList.class, Object.class)),
             new InvokableConstructor(ArrayList.class.getConstructor()),
-            Callable.class, ArrayList.class, EMPTY_INT_ARRAY, new Type[0]),
-        of(
+            Callable.class, ArrayList.class, EMPTY_INT_ARRAY, new Type[0]
+        },
+        {
             p(Callable.class, p(ArrayList.class, Integer.class)),
             new InvokableConstructor(ArrayList.class.getConstructor(Collection.class)),
-            Callable.class, ArrayList.class, EMPTY_INT_ARRAY, new Type[] {p(Collection.class, Integer.class)}),
-        of(
+            Callable.class, ArrayList.class, EMPTY_INT_ARRAY, new Type[] {p(Collection.class, Integer.class)}
+        },
+        {
             p(Consumer.class, Integer.class),
             new InvokableMethod(ArrayList.class.getMethod("add", Object.class)),
             Consumer.class, p(ArrayList.class, Integer.class), new int[] {0}, new Type[] {Object.class}
-        ),
-        of(
+        },
+        {
             p(Consumer.class, p(Collection.class, Integer.class)),
             new InvokableMethod(List.class.getMethod("add", int.class, Object.class)),
             Consumer.class, p(List.class, p(Collection.class, Integer.class)), new int[] {1}, new Type[] {int.class, Object.class}
-        ),
-        of(
+        },
+        {
             p(Consumer.class, String.class),
             new InvokableMethod(ModelMap.class.getMethod("put", Object.class, Object.class)),
             Consumer.class, ModelMap.class, new int[] {0}, new Type[] {Object.class, Object.class}
-        ),
-        of(
+        },
+        {
             p(BiConsumer.class, String.class, Integer.class),
             new InvokableMethod(LinkedHashMap.class.getMethod("put", Object.class, Object.class)),
             BiConsumer.class, p(LinkedHashMap.class, String.class, Integer.class), new int[] {0, 1}, new Type[0]
-        ),
-        of(
+        },
+        {
             p(BiConsumer.class, String.class, Integer.class),
             new InvokableMethod(Map.class.getMethod("put", Object.class, Object.class)),
             BiConsumer.class, p(LinkedHashMap.class, String.class, Integer.class), new int[] {0, 1}, new Type[0]
-        )
-    );
+        }
+    };
   }
 
-  @ParameterizedTest
-  @MethodSource("applyTypeData")
-  void testType(Type expected, Invokable invokable, Class<?> type, Type target, int[] indices, Type[] args) {
+  @Test(groups = {SLOW}, dataProvider = "applyTypeData")
+  public void testType(Type expected, Invokable invokable, Class<?> type, Type target, int[] indices, Type[] args) {
     final Method sam = Classes.getSam(type).orElseThrow(IllegalArgumentException::new);
     final Type actual = invokable.type(target, type, sam, indices, args);
-    assertEquals(expected, actual);
+    assertEquals(actual, expected);
   }
 }

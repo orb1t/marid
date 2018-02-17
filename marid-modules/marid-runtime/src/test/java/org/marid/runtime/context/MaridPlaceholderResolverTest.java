@@ -21,23 +21,22 @@
 
 package org.marid.runtime.context;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
 import org.marid.runtime.common.MaridPlaceholderResolver;
 import org.marid.runtime.exception.CircularPlaceholderException;
+import org.testng.annotations.Test;
 
 import java.util.Properties;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.marid.test.TestGroups.NORMAL;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertThrows;
 
 /**
  * @author Dmitry Ovchinnikov
  */
-@Tag("normal")
-class MaridPlaceholderResolverTest {
+public class MaridPlaceholderResolverTest {
 
-  @Test
+  @Test(groups = {NORMAL})
   void circular1() {
     assertThrows(CircularPlaceholderException.class, () -> {
       final Properties properties = new Properties();
@@ -49,7 +48,7 @@ class MaridPlaceholderResolverTest {
     });
   }
 
-  @Test
+  @Test(groups = {NORMAL})
   void circular2() {
     assertThrows(CircularPlaceholderException.class, () -> {
       final Properties properties = new Properties();
@@ -60,20 +59,20 @@ class MaridPlaceholderResolverTest {
     });
   }
 
-  @Test
+  @Test(groups = {NORMAL})
   void defValue() {
     final Properties properties = new Properties();
     properties.setProperty("x1", "2");
     final MaridPlaceholderResolver resolver = new MaridPlaceholderResolver(properties);
-    assertEquals("abc zz 2", resolver.resolvePlaceholders("abc ${x2:zz} ${x1}"));
+    assertEquals(resolver.resolvePlaceholders("abc ${x2:zz} ${x1}"), "abc zz 2");
   }
 
-  @Test
+  @Test(groups = {NORMAL})
   void unterminated() {
     final Properties properties = new Properties();
     properties.setProperty("x1", "2");
     final MaridPlaceholderResolver resolver = new MaridPlaceholderResolver(properties);
-    assertEquals("abc zz ${x1", resolver.resolvePlaceholders("abc ${x2:zz} ${x1"));
-    assertEquals("abc  ${x1", resolver.resolvePlaceholders("abc ${x2} ${x1"));
+    assertEquals(resolver.resolvePlaceholders("abc ${x2:zz} ${x1"), "abc zz ${x1");
+    assertEquals(resolver.resolvePlaceholders("abc ${x2} ${x1"), "abc  ${x1");
   }
 }

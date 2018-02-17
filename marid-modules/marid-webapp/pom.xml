@@ -22,20 +22,7 @@
 
     <dependency>
       <groupId>org.apache.maven.resolver</groupId>
-      <artifactId>maven-resolver-transport-wagon</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.maven.wagon</groupId>
-      <artifactId>wagon-file</artifactId>
-      <version>3.0.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.maven.wagon</groupId>
-      <artifactId>wagon-http</artifactId>
-      <classifier>shaded</classifier>
-      <version>3.0.0</version>
+      <artifactId>maven-resolver-transport-http</artifactId>
     </dependency>
 
     <dependency>
@@ -58,58 +45,23 @@
       <artifactId>marid-runtime</artifactId>
       <version>${project.version}</version>
     </dependency>
-
-    <dependency>
-      <groupId>org.webjars</groupId>
-      <artifactId>bootstrap</artifactId>
-      <version>4.0.0</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.webjars.npm</groupId>
-          <artifactId>popper.js</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
-      <version>4.0.0</version>
-      <scope>provided</scope>
-    </dependency>
   </dependencies>
 
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.webjars</groupId>
-        <artifactId>jquery</artifactId>
-        <version>3.3.1</version>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-classic</artifactId>
+        <version>1.2.3</version>
       </dependency>
 
       <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-dependencies</artifactId>
-        <version>2.0.0.RC1</version>
-        <type>pom</type>
-        <scope>import</scope>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
+        <version>2.9.4</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
-
-  <repositories>
-    <repository>
-      <id>spring-milestones</id>
-      <url>http://repo.spring.io/milestone/</url>
-    </repository>
-  </repositories>
-
-  <pluginRepositories>
-    <pluginRepository>
-      <id>spring-milestones</id>
-      <url>http://repo.spring.io/milestone/</url>
-    </pluginRepository>
-  </pluginRepositories>
 
   <build>
     <plugins>

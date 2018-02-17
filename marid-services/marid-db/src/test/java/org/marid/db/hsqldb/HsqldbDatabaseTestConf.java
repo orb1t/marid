@@ -45,7 +45,7 @@ class HsqldbDatabaseTestConf {
   }
 
   @Bean
-  public Closeable directoryCleaner(Path directory) throws IOException {
+  public Closeable directoryCleaner(Path directory) {
     return () -> FileSystemUtils.deleteRecursively(directory.toFile());
   }
 
@@ -62,7 +62,7 @@ class HsqldbDatabaseTestConf {
   }
 
   @Bean
-  public NumericWriter numericWriter(HsqldbDatabase wrapper) throws IOException {
+  public NumericWriter numericWriter(HsqldbDatabase wrapper) {
     return new HsqldbDaqNumericWriter(wrapper.dataSource("NUMERICS"), "NUMERICS");
   }
 }
