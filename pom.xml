@@ -455,13 +455,13 @@
           <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-surefire-provider</artifactId>
-            <version>1.0.2</version>
+            <version>1.0.3</version>
           </dependency>
 
           <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.0.2</version>
+            <version>5.0.3</version>
           </dependency>
         </dependencies>
       </plugin>
@@ -505,7 +505,7 @@
           <organizeLicensesByDependencies>true</organizeLicensesByDependencies>
           <emptyLineAfterHeader>true</emptyLineAfterHeader>
           <roots>src</roots>
-          <excludes>**/*.properties,**/*.xml,**/*.css,**/*.html</excludes>
+          <excludes>**/*.properties,**/*.xml,**/*.css,**/*.html,**/*.svg</excludes>
           <canUpdateDescription>true</canUpdateDescription>
         </configuration>
       </plugin>
@@ -543,6 +543,36 @@
         <groupId>com.google.code.gson</groupId>
         <artifactId>gson</artifactId>
         <version>2.8.2</version>
+      </dependency>
+
+      <dependency>
+        <groupId>commons-codec</groupId>
+        <artifactId>commons-codec</artifactId>
+        <version>1.11</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jsoup</groupId>
+        <artifactId>jsoup</artifactId>
+        <version>1.11.2</version>
+      </dependency>
+
+      <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>2.6</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpcore</artifactId>
+        <version>4.4.9</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpclient</artifactId>
+        <version>4.5.5</version>
       </dependency>
 
       <dependency>

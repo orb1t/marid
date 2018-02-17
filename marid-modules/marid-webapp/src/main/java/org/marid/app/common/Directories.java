@@ -19,9 +19,8 @@
  * #L%
  */
 
-package org.marid.site.common;
+package org.marid.app.common;
 
-import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -35,19 +34,17 @@ public class Directories {
 
   private final Path userHome;
   private final Path base;
-  private final Path profiles;
-  private final Logger logger;
+  private final Path users;
 
-  public Directories(Logger logger) {
-    this.logger = logger;
+  public Directories() {
     this.userHome = Paths.get(System.getProperty("user.home"));
-    this.base = userHome.resolve("marid-site");
-    this.profiles = base.resolve("profiles");
+    this.base = userHome.resolve("marid-app");
+    this.users = base.resolve("users");
   }
 
   @PostConstruct
   private void createDirectoriesIfNecessary() throws IOException {
-    Files.createDirectories(profiles);
+    Files.createDirectories(users);
   }
 
   public Path getUserHome() {
@@ -58,7 +55,7 @@ public class Directories {
     return base;
   }
 
-  public Path getProfiles() {
-    return profiles;
+  public Path getUsers() {
+    return users;
   }
 }

@@ -21,17 +21,17 @@
       <module name="marid" target="1.9" />
       <module name="marid-api" target="1.9" />
       <module name="marid-db" target="1.9" />
-      <module name="marid-fx" target="1.9" />
-      <module name="marid-ide" target="1.9" />
       <module name="marid-modules" target="1.9" />
       <module name="marid-proto" target="1.9" />
       <module name="marid-runtime" target="1.9" />
       <module name="marid-services" target="1.9" />
-      <module name="marid-site" target="1.9" />
       <module name="marid-test" target="1.9" />
       <module name="marid-types" target="1.9" />
       <module name="marid-util" target="1.9" />
       <module name="marid-webapp" target="1.9" />
     </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_STRING" value="-parameters" />
   </component>
 </project>

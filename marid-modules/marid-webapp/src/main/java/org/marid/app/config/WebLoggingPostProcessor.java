@@ -19,7 +19,7 @@
  * #L%
  */
 
-package org.marid.site.config;
+package org.marid.app.config;
 
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;

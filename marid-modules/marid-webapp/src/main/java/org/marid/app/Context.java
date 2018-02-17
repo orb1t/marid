@@ -19,7 +19,7 @@
  * #L%
  */
 
-package org.marid.site;
+package org.marid.app;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

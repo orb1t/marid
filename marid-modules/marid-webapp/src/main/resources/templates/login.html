@@ -36,6 +36,8 @@
             <input id="pass" name="password" type="password" th:placeholder="#{Password}"/>
         </div>
 
+        <div th:if="${param.error}" class="section" th:text="#{${session.SPRING_SECURITY_LAST_EXCEPTION.message}}"></div>
+
         <div class="section">
             <input type="submit" th:value="#{Submit}"/>
         </div>

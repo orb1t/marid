@@ -22,3 +22,5 @@ logging:
 spring:
   thymeleaf:
     enable-spring-el-compiler: true
+  jackson:
+    time-zone: GMT

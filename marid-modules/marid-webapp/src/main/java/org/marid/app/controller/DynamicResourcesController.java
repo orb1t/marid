@@ -19,7 +19,7 @@
  * #L%
  */
 
-package org.marid.site.controller;
+package org.marid.app.controller;
 
 import org.marid.image.MaridIcon;
 import org.springframework.stereotype.Controller;

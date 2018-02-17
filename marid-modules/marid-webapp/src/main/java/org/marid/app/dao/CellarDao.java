@@ -19,9 +19,9 @@
  * #L%
  */
 
-package org.marid.site.dao;
+package org.marid.app.dao;
 
-import org.marid.site.common.Directories;
+import org.marid.app.common.Directories;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -40,33 +40,33 @@ import java.util.stream.Collectors;
 
 @Repository
 @SessionScope
-public class ProjectDao {
+public class CellarDao {
 
-  private final Path profilesDir;
+  private final Path userDir;
   private final Logger logger;
 
   @Autowired
-  public ProjectDao(Directories directories, Logger logger) {
+  public CellarDao(Directories directories, Logger logger) {
     final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
     this.logger = logger;
-    this.profilesDir = directories.getProfiles().resolve(authentication.getName());
+    this.userDir = directories.getUsers().resolve(authentication.getName());
   }
 
   @PostConstruct
   private void createProfilesDirectoryIfNecessary() throws IOException {
-    Files.createDirectories(profilesDir);
+    Files.createDirectories(userDir);
 
-    logger.info("Session profiles: {}", profilesDir);
+    logger.info("Session profiles: {}", userDir);
   }
 
-  public Path getProfilesDir() {
-    return profilesDir;
+  public Path getUserDir() {
+    return userDir;
   }
 
   public NavigableSet<String> profileNames() {
     try {
-      return Files.list(profilesDir)
+      return Files.list(userDir)
           .filter(Files::isDirectory)
           .map(Path::getFileName)
           .map(Path::toString)

@@ -19,7 +19,7 @@
  * #L%
  */
 
-package org.marid.site.controller;
+package org.marid.app.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,8 +37,13 @@ public class MainController {
     return "index";
   }
 
-  @GetMapping(path = {"/projects"})
-  public String x() {
-    return "projects";
+  @GetMapping(path = {"/cellars"})
+  public String cellars() {
+    return "cellars";
+  }
+
+  @GetMapping(path = {"/racks"})
+  public String racks() {
+    return "racks";
   }
 }

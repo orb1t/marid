@@ -19,43 +19,23 @@
  * #L%
  */
 
-package org.marid.site.model;
+package org.marid.app.controller;
 
-import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
-public class JsLibrary {
+@ControllerAdvice
+public class CommonController {
 
-  @NotNull
-  private final String src;
+  private final Logger logger;
 
-  @NotNull
-  private final String integrity;
-
-  @NotNull
-  private final String crossorigin;
-
-  public JsLibrary(@NotNull String src, @NotNull String integrity, @NotNull String crossorigin) {
-    this.src = src;
-    this.integrity = integrity;
-    this.crossorigin = crossorigin;
+  public CommonController(Logger logger) {
+    this.logger = logger;
   }
 
-  public JsLibrary(@NotNull String src, @NotNull String integrity) {
-    this(src, integrity, "anonymous");
-  }
-
-  @NotNull
-  public String getSrc() {
-    return src;
-  }
-
-  @NotNull
-  public String getIntegrity() {
-    return integrity;
-  }
-
-  @NotNull
-  public String getCrossorigin() {
-    return crossorigin;
+  @ExceptionHandler
+  public void processError(Throwable exception) {
+    logger.error("Controller error", exception);
   }
 }

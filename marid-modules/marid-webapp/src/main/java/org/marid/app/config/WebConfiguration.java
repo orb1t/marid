@@ -19,7 +19,7 @@
  * #L%
  */
 
-package org.marid.site.config;
+package org.marid.app.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
