@@ -21,32 +21,34 @@
 
 package org.marid.app.controller;
 
+import org.marid.app.dao.UserDao;
+import org.marid.app.model.MaridUser;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.util.List;
 
 @Controller
-public class MainController {
+@RequestMapping(path = "/admin")
+@Secured({"ROLE_ADMIN"})
+public class AdminController {
 
-  @GetMapping(path = "/login")
-  public String login() {
-    return "login";
+  private final UserDao userDao;
+
+  public AdminController(UserDao userDao) {
+    this.userDao = userDao;
   }
 
-  @GetMapping(path = {"/", "/index"})
-  public String index() {
-    return "index";
+  @GetMapping(path = "/users")
+  public String users() {
+    return "admin/users";
   }
 
-  @Secured({"ROLE_USER"})
-  @GetMapping(path = {"/cellars"})
-  public String cellars() {
-    return "cellars";
-  }
-
-  @Secured({"ROLE_USER"})
-  @GetMapping(path = {"/racks"})
-  public String racks() {
-    return "racks";
+  @ModelAttribute(name = "users")
+  public List<MaridUser> getUsers() {
+    return userDao.getUsers();
   }
 }

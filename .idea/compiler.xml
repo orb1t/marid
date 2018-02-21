@@ -10,7 +10,6 @@
         <module name="marid-db" />
         <module name="marid-proto" />
         <module name="marid-runtime" />
-        <module name="marid-site" />
         <module name="marid-test" />
         <module name="marid-types" />
         <module name="marid-util" />
@@ -30,8 +29,5 @@
       <module name="marid-util" target="1.9" />
       <module name="marid-webapp" target="1.9" />
     </bytecodeTargetLevel>
-  </component>
-  <component name="JavacSettings">
-    <option name="ADDITIONAL_OPTIONS_STRING" value="-parameters" />
   </component>
 </project>

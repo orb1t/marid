@@ -3,8 +3,6 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/marid-modules" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/marid-modules/marid-fx" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/marid-modules/marid-ide" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/marid-modules/marid-runtime" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/marid-modules/marid-webapp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/marid-services" charset="UTF-8" />

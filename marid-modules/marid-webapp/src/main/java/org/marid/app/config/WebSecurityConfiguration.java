@@ -36,7 +36,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
   protected void configure(HttpSecurity http) throws Exception {
     http
         .authorizeRequests()
-        .antMatchers("/dyn/**", "/css/**", "/svg/**")
+        .antMatchers("/dyn/**", "/css/**", "/svg/**", "/webjars/**")
         .permitAll()
         .anyRequest()
         .authenticated();

@@ -25,15 +25,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.marid.app.common.Directories;
 import org.marid.app.model.MaridUser;
 import org.marid.app.model.MaridUserInfo;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Repository;
 
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 @Repository
 public class UserDao implements UserDetailsService {
@@ -47,7 +49,7 @@ public class UserDao implements UserDetailsService {
   }
 
   @Override
-  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+  public MaridUser loadUserByUsername(String username) throws UsernameNotFoundException {
     final Path userDir = directories.getUsers().resolve(username);
     final Path file = userDir.resolve("info.json");
 
@@ -57,5 +59,24 @@ public class UserDao implements UserDetailsService {
     } catch (Exception x) {
       throw new UsernameNotFoundException("User " + username + " is not found", x);
     }
+  }
+
+  public List<MaridUser> getUsers() {
+    final Path usersDir = directories.getUsers();
+
+    final List<MaridUser> users = new ArrayList<>();
+    try (final DirectoryStream<Path> stream = Files.newDirectoryStream(usersDir, Files::isDirectory)) {
+      for (final Path userDir : stream) {
+        final Path file = userDir.resolve("info.json");
+        try (final Reader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
+          final MaridUserInfo userInfo = mapper.readValue(reader, MaridUserInfo.class);
+          users.add(new MaridUser(userDir.getFileName().toString(), userInfo));
+        }
+      }
+    } catch (Exception x) {
+      throw new IllegalStateException(x);
+    }
+
+    return users;
   }
 }
