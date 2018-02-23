@@ -234,11 +234,12 @@
   </licenses>
 
   <modules>
-    <module>marid-modules</module>
     <module>marid-test</module>
     <module>marid-services</module>
     <module>marid-util</module>
     <module>marid-types</module>
+    <module>marid-runtime</module>
+    <module>marid-webapp</module>
   </modules>
 
   <build>
@@ -438,6 +439,12 @@
             <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
           </configuration>
         </plugin>
+
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>license-maven-plugin</artifactId>
+          <version>1.14</version>
+        </plugin>
       </plugins>
     </pluginManagement>
 
@@ -485,7 +492,6 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>license-maven-plugin</artifactId>
-        <version>1.14</version>
         <configuration>
           <licenseName>agpl_v3</licenseName>
           <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
@@ -651,7 +657,7 @@
       <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
-        <version>2.0.0.RC1</version>
+        <version>2.0.0.RC2</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
