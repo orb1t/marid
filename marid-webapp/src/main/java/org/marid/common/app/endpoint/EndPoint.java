@@ -20,6 +20,7 @@ import org.intellij.lang.annotations.MagicConstant;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
+import java.util.function.Supplier;
 
 public class EndPoint {
 
@@ -49,6 +50,11 @@ public class EndPoint {
 
   public EndPoint parameters(Properties properties) {
     properties.stringPropertyNames().forEach(k -> parameters.put(k, properties.getProperty(k)));
+    return this;
+  }
+
+  public EndPoint put(@MagicConstant(valuesFromClass = WebClient.class) String key, Supplier<String> valueSupplier) {
+    parameters.computeIfAbsent(key, k -> valueSupplier.get());
     return this;
   }
 

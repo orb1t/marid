@@ -14,6 +14,7 @@
 
 package org.marid.app.ui.main;
 
+import org.eclipse.rap.rwt.client.service.JavaScriptExecutor;
 import org.eclipse.rap.rwt.client.service.UrlLauncher;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.RowLayout;
@@ -22,6 +23,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.marid.app.ui.UIContext;
 import org.marid.common.app.spring.Roles;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -60,5 +62,10 @@ public class MainConfiguration {
     button.setText("Users...");
     button.addListener(SWT.Selection, event -> urlLauncher.openURL("users.marid"));
     return button;
+  }
+
+  @Autowired
+  public void init(JavaScriptExecutor executor) {
+    executor.execute("document.title = 'XXX'");
   }
 }

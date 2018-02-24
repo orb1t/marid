@@ -17,6 +17,7 @@ package org.marid.app.config;
 import org.eclipse.rap.rwt.application.Application;
 import org.eclipse.rap.rwt.application.ApplicationRunner;
 import org.eclipse.rap.rwt.application.EntryPointFactory;
+import org.eclipse.rap.rwt.client.service.JavaScriptExecutor;
 import org.eclipse.rap.rwt.engine.RWTServlet;
 import org.eclipse.swt.widgets.Shell;
 import org.marid.app.ui.UIBaseConfiguration;
@@ -31,12 +32,16 @@ import org.springframework.context.support.GenericApplicationContext;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import java.util.Map;
+
+import static org.marid.common.app.util.UILocalization.ls;
+import static org.unbescape.javascript.JavaScriptEscape.escapeJavaScript;
 
 @Configuration
 public class ServletConfiguration {
 
   @Bean
-  public ServletContextListener rwtServletContextListener(EndPoint[] endPoints, GenericApplicationContext context) {
+  public ServletContextListener rwtServletContextListener(Map<String, EndPoint> endPoints, GenericApplicationContext context) {
     return new ServletContextListener() {
 
       private ApplicationRunner runner;
@@ -46,7 +51,7 @@ public class ServletConfiguration {
         runner = new ApplicationRunner(application -> {
           application.setOperationMode(Application.OperationMode.JEE_COMPATIBILITY);
 
-          for (final EndPoint endPoint : endPoints) {
+          endPoints.forEach((name, endPoint) -> {
             final EntryPointFactory entryPointFactory = () -> () -> {
               final AnnotationConfigApplicationContext child = new AnnotationConfigApplicationContext();
               child.setParent(context);
@@ -69,8 +74,12 @@ public class ServletConfiguration {
                 } else {
                   shell.pack();
                 }
+
                 shell.addDisposeListener(event -> child.close());
                 shell.open();
+
+                final JavaScriptExecutor jsExecutor = child.getBean(JavaScriptExecutor.class);
+                jsExecutor.execute(String.format("document.title = '%s'", escapeJavaScript(ls(name))));
               } catch (Throwable x) {
                 child.close();
                 throw x;
@@ -79,7 +88,7 @@ public class ServletConfiguration {
             };
 
             application.addEntryPoint(endPoint.getPath(), entryPointFactory, endPoint.getParameters());
-          }
+          });
         }, sce.getServletContext());
         runner.start();
       }

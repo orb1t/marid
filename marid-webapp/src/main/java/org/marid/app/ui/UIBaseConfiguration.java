@@ -15,6 +15,7 @@
 package org.marid.app.ui;
 
 import org.eclipse.rap.rwt.RWT;
+import org.eclipse.rap.rwt.client.service.JavaScriptExecutor;
 import org.eclipse.rap.rwt.client.service.UrlLauncher;
 import org.eclipse.swt.layout.GridLayout;
 import org.jetbrains.annotations.Nullable;
@@ -42,6 +43,12 @@ public class UIBaseConfiguration {
   @Scope(SCOPE_PROTOTYPE)
   public UrlLauncher urlLauncher() {
     return RWT.getClient().getService(UrlLauncher.class);
+  }
+
+  @Bean
+  @Scope(SCOPE_PROTOTYPE)
+  public JavaScriptExecutor jsExecutor() {
+    return RWT.getClient().getService(JavaScriptExecutor.class);
   }
 
   @Bean

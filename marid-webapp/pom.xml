@@ -89,6 +89,11 @@
     </dependency>
 
     <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>org.marid</groupId>
       <artifactId>marid-runtime</artifactId>
       <version>${project.version}</version>
