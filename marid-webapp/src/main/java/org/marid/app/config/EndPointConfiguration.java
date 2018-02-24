@@ -15,8 +15,9 @@
 package org.marid.app.config;
 
 import org.eclipse.rap.rwt.client.WebClient;
-import org.marid.app.endpoints.EndPoint;
 import org.marid.app.ui.main.MainConfiguration;
+import org.marid.app.ui.users.UsersConfiguration;
+import org.marid.common.app.endpoint.EndPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -27,5 +28,11 @@ public class EndPointConfiguration {
   public EndPoint mainEndPoint() {
     return new EndPoint("/menu.marid", MainConfiguration.class)
         .clientProperty(WebClient.PAGE_TITLE, "Marid Menu");
+  }
+
+  @Bean
+  public EndPoint usersEndPoint() {
+    return new EndPoint("/users.marid", UsersConfiguration.class)
+        .clientProperty(WebClient.PAGE_TITLE, "Marid Users");
   }
 }

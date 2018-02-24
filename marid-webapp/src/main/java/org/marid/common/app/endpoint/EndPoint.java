@@ -12,7 +12,7 @@
  * #L%
  */
 
-package org.marid.app.endpoints;
+package org.marid.common.app.endpoint;
 
 import org.eclipse.rap.rwt.client.WebClient;
 import org.intellij.lang.annotations.MagicConstant;

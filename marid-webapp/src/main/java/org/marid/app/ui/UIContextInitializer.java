@@ -12,19 +12,9 @@
  * #L%
  */
 
-package org.marid.app.ui.spring;
+package org.marid.app.ui;
 
-import org.springframework.context.annotation.Conditional;
+public interface UIContextInitializer {
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-@Target({ElementType.METHOD, ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Conditional(RolesCondition.class)
-public @interface Roles {
-
-  String[] value();
+  void initialize(UIContext context);
 }

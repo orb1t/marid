@@ -16,6 +16,7 @@ package org.marid.app.ui;
 
 import org.eclipse.rap.rwt.RWT;
 import org.eclipse.rap.rwt.client.service.UrlLauncher;
+import org.eclipse.swt.layout.GridLayout;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,5 +63,17 @@ public class UIBaseConfiguration {
         }
       }
     };
+  }
+
+  @Bean
+  @ConditionalOnMissingBean
+  public UIContextInitializer uiContextInitializer() {
+    return context -> context.configure(((display, shell) -> {
+      shell.setMaximized(true);
+      final GridLayout layout = new GridLayout(1, false);
+      layout.marginLeft = layout.marginRight = layout.marginTop = layout.marginBottom = 10;
+      layout.verticalSpacing = 10;
+      shell.setLayout(layout);
+    }));
   }
 }

@@ -16,36 +16,19 @@ package org.marid.app.ui.main;
 
 import org.eclipse.rap.rwt.client.service.UrlLauncher;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.marid.app.ui.UIContext;
-import org.marid.app.ui.spring.Roles;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.marid.common.app.spring.Roles;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 
 @Configuration
-@ComponentScan
 public class MainConfiguration {
-
-  @Autowired
-  public void initContext(UIContext context) {
-    context.configure(((display, shell) -> {
-      shell.setMaximized(true);
-
-      final GridLayout layout = new GridLayout(1, false);
-      layout.marginLeft = layout.marginRight = layout.marginTop = layout.marginBottom = 10;
-      layout.verticalSpacing = 10;
-
-      shell.setLayout(layout);
-    }));
-  }
 
   @Bean
   @Order(1)
@@ -75,9 +58,7 @@ public class MainConfiguration {
   public Button users(UIContext context, UrlLauncher urlLauncher) {
     final Button button = new Button(context.getShell(), SWT.NONE);
     button.setText("Users...");
-    button.addListener(SWT.Selection, event -> {
-      urlLauncher.openURL("boo");
-    });
+    button.addListener(SWT.Selection, event -> urlLauncher.openURL("users.marid"));
     return button;
   }
 }

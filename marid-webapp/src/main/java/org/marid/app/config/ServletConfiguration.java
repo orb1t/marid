@@ -19,9 +19,10 @@ import org.eclipse.rap.rwt.application.ApplicationRunner;
 import org.eclipse.rap.rwt.application.EntryPointFactory;
 import org.eclipse.rap.rwt.engine.RWTServlet;
 import org.eclipse.swt.widgets.Shell;
-import org.marid.app.endpoints.EndPoint;
 import org.marid.app.ui.UIBaseConfiguration;
 import org.marid.app.ui.UIContext;
+import org.marid.app.ui.UIContextInitializer;
+import org.marid.common.app.endpoint.EndPoint;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -59,6 +60,8 @@ public class ServletConfiguration {
 
               try {
                 final UIContext uiContext = child.getBean(UIContext.class);
+                child.getBean(UIContextInitializer.class).initialize(uiContext);
+
                 final Shell shell = uiContext.getShell();
 
                 if (shell.getMaximized()) {

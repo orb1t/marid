@@ -12,7 +12,7 @@
  * #L%
  */
 
-package org.marid.app.ui.spring;
+package org.marid.common.app.spring;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Condition;

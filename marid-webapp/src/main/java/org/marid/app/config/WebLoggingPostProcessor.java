@@ -15,12 +15,13 @@
 package org.marid.app.config;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
-import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -30,11 +31,20 @@ public class WebLoggingPostProcessor implements BeanFactoryPostProcessor {
 
   @Override
   public void postProcessBeanFactory(@NotNull ConfigurableListableBeanFactory beanFactory) throws BeansException {
-    beanFactory.addBeanPostProcessor(new BeanPostProcessor() {
+    beanFactory.addBeanPostProcessor(new DestructionAwareBeanPostProcessor() {
       @Override
-      public Object postProcessBeforeInitialization(@NotNull Object bean, String beanName) throws BeansException {
-        logger.info("Initializing {}", beanName);
+      public Object postProcessBeforeInitialization(@Nullable Object bean, @Nullable String beanName) {
+        if (beanName != null) {
+          logger.info("Initializing {}", beanName);
+        }
         return bean;
+      }
+
+      @Override
+      public void postProcessBeforeDestruction(@Nullable Object bean, @Nullable String beanName) {
+        if (beanName != null) {
+          logger.info("Destroyed {}", beanName);
+        }
       }
     });
   }
