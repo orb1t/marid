@@ -74,6 +74,9 @@ public class Context {
   }
 
   public static void main(String... args) {
+    Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+      e.printStackTrace();
+    });
     new SpringApplicationBuilder(Context.class)
         .run(args);
   }

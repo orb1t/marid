@@ -14,6 +14,8 @@
 
 package org.marid.app.ui;
 
+import org.eclipse.rap.rwt.RWT;
+import org.eclipse.rap.rwt.client.service.UrlLauncher;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +23,10 @@ import org.springframework.beans.factory.config.DestructionAwareBeanPostProcesso
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import org.springframework.context.support.GenericApplicationContext;
+
+import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 
 @Configuration
 public class UIBaseConfiguration {
@@ -30,6 +35,12 @@ public class UIBaseConfiguration {
   @ConditionalOnMissingBean
   public UIContext uiContext() {
     return new UIBaseContext();
+  }
+
+  @Bean
+  @Scope(SCOPE_PROTOTYPE)
+  public UrlLauncher urlLauncher() {
+    return RWT.getClient().getService(UrlLauncher.class);
   }
 
   @Bean

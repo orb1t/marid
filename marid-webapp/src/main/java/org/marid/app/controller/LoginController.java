@@ -25,8 +25,13 @@ public class LoginController {
     return "login";
   }
 
+  @GetMapping(path = "/error")
+  public String error() {
+    return "error";
+  }
+
   @GetMapping(path = "/")
   public String root() {
-    return "redirect:/app";
+    return "redirect:/menu.marid";
   }
 }

@@ -12,7 +12,10 @@
  * #L%
  */
 
-package org.marid.app.entrypoints;
+package org.marid.app.endpoints;
+
+import org.eclipse.rap.rwt.client.WebClient;
+import org.intellij.lang.annotations.MagicConstant;
 
 import java.util.Map;
 import java.util.Properties;
@@ -30,6 +33,11 @@ public class EndPoint {
   }
 
   public EndPoint parameter(String key, String value) {
+    parameters.put(key, value);
+    return this;
+  }
+
+  public EndPoint clientProperty(@MagicConstant(valuesFromClass = WebClient.class) String key, String value) {
     parameters.put(key, value);
     return this;
   }

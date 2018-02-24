@@ -19,7 +19,7 @@ import org.eclipse.rap.rwt.application.ApplicationRunner;
 import org.eclipse.rap.rwt.application.EntryPointFactory;
 import org.eclipse.rap.rwt.engine.RWTServlet;
 import org.eclipse.swt.widgets.Shell;
-import org.marid.app.entrypoints.EndPoint;
+import org.marid.app.endpoints.EndPoint;
 import org.marid.app.ui.UIBaseConfiguration;
 import org.marid.app.ui.UIContext;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
@@ -92,12 +92,12 @@ public class ServletConfiguration {
   }
 
   @Bean
-  public ServletRegistrationBean<RWTServlet> rwtServletRegistrationBean() {
+  public ServletRegistrationBean<RWTServlet> rwtServletBean() {
     final RWTServlet servlet = new RWTServlet();
-    final ServletRegistrationBean<RWTServlet> bean = new ServletRegistrationBean<>(servlet, "/app");
+    final ServletRegistrationBean<RWTServlet> bean = new ServletRegistrationBean<>(servlet, "*.marid");
     bean.setName("rwtServlet");
-    bean.setLoadOnStartup(2);
     bean.setAsyncSupported(false);
+    bean.setOrder(1);
     return bean;
   }
 }
