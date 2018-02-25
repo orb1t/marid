@@ -240,6 +240,7 @@
     <module>marid-types</module>
     <module>marid-runtime</module>
     <module>marid-webapp</module>
+    <module>marid-rwt-spring</module>
   </modules>
 
   <build>

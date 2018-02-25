@@ -1,6 +1,6 @@
 /*-
  * #%L
- * marid-webapp
+ * marid-rwt-spring-boot
  * %%
  * Copyright (C) 2012 - 2018 MARID software development group
  * %%
@@ -12,22 +12,35 @@
  * #L%
  */
 
-package org.marid.common.app.spring;
+package org.marid.rwt.spring;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.ConditionContext;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class RolesCondition implements Condition {
+@Target({ElementType.METHOD, ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Conditional(RolesCondition.class)
+public @interface Roles {
+
+  String[] value();
+}
+
+class RolesCondition implements Condition {
   @Override
   public boolean matches(@NotNull ConditionContext context, @NotNull AnnotatedTypeMetadata metadata) {
     final SecurityContext securityContext = SecurityContextHolder.getContext();

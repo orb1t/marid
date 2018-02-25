@@ -1,6 +1,6 @@
 /*-
  * #%L
- * marid-webapp
+ * marid-rwt-spring-boot
  * %%
  * Copyright (C) 2012 - 2018 MARID software development group
  * %%
@@ -12,29 +12,20 @@
  * #L%
  */
 
-package org.marid.app.ui;
+package org.marid.rwt.spring;
 
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-public class UIBaseContext implements UIContext {
+import java.util.function.BiConsumer;
 
-  private final Display display;
-  private final Shell shell;
+public interface UIContext {
 
-  public UIBaseContext() {
-    this.display = new Display();
-    this.shell = new Shell(display, SWT.NO_TRIM);
-  }
+  Display getDisplay();
 
-  @Override
-  public Display getDisplay() {
-    return display;
-  }
+  Shell getShell();
 
-  @Override
-  public Shell getShell() {
-    return shell;
+  default void configure(BiConsumer<Display, Shell> consumer) {
+    consumer.accept(getDisplay(), getShell());
   }
 }

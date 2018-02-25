@@ -1,6 +1,6 @@
 /*-
  * #%L
- * marid-webapp
+ * marid-rwt-spring-boot
  * %%
  * Copyright (C) 2012 - 2018 MARID software development group
  * %%
@@ -12,7 +12,7 @@
  * #L%
  */
 
-package org.marid.common.app.endpoint;
+package org.marid.rwt.spring;
 
 import org.eclipse.rap.rwt.client.WebClient;
 import org.intellij.lang.annotations.MagicConstant;

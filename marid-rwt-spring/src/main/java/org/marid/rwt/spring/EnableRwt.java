@@ -1,6 +1,6 @@
 /*-
  * #%L
- * marid-webapp
+ * marid-rwt-spring-boot
  * %%
  * Copyright (C) 2012 - 2018 MARID software development group
  * %%
@@ -12,46 +12,43 @@
  * #L%
  */
 
-package org.marid.app.config;
+package org.marid.rwt.spring;
 
-import j2html.tags.Tag;
 import org.eclipse.rap.rwt.application.Application;
 import org.eclipse.rap.rwt.application.ApplicationRunner;
 import org.eclipse.rap.rwt.application.EntryPointFactory;
-import org.eclipse.rap.rwt.client.service.JavaScriptExecutor;
 import org.eclipse.rap.rwt.engine.RWTServlet;
-import org.eclipse.rap.rwt.service.ResourceLoader;
 import org.eclipse.swt.widgets.Shell;
-import org.marid.app.ui.UIBaseConfiguration;
-import org.marid.app.ui.UIContext;
-import org.marid.app.ui.UIContextInitializer;
-import org.marid.common.app.endpoint.EndPoint;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.support.GenericApplicationContext;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
-import java.util.Map;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.util.stream.Stream;
 
-import static j2html.TagCreator.join;
-import static org.eclipse.rap.rwt.RWT.DEFAULT_THEME_ID;
-import static org.eclipse.rap.rwt.client.WebClient.HEAD_HTML;
-import static org.marid.common.app.util.UILocalization.ls;
-import static org.unbescape.javascript.JavaScriptEscape.escapeJavaScript;
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Import({RwtConfiguration.class})
+public @interface EnableRwt {
 
-@Configuration
-public class ServletConfiguration {
+  Class<? extends UIBaseConfiguration> value();
+}
+
+class RwtConfiguration {
 
   @Bean
-  public ServletContextListener rwtServletContextListener(Map<String, EndPoint> endPoints,
-                                                          GenericApplicationContext context,
-                                                          @Qualifier("head") Tag<?>[] headTags) {
-    final ResourceLoader resourceLoader = resource -> getClass().getResourceAsStream("/resource/theme/" + resource);
-
+  public ServletContextListener rwtServletContextListener(GenericApplicationContext context) {
+    final EnableRwt rwt = Stream.of(context.getBeanNamesForAnnotation(EnableRwt.class))
+        .map(beanName -> context.findAnnotationOnBean(beanName, EnableRwt.class))
+        .findFirst()
+        .orElseThrow(() -> new IllegalStateException("No beans with annotation " + EnableRwt.class.getName()));
     return new ServletContextListener() {
 
       private ApplicationRunner runner;
@@ -60,26 +57,32 @@ public class ServletConfiguration {
       public void contextInitialized(ServletContextEvent sce) {
         runner = new ApplicationRunner(application -> {
           application.setOperationMode(Application.OperationMode.JEE_COMPATIBILITY);
-          application.addStyleSheet(DEFAULT_THEME_ID, "marid.css", resourceLoader);
-
-          endPoints.forEach((name, endPoint) -> {
+          context.getBeansOfType(ApplicationConfigurer.class).forEach((n, c) -> {
+            try {
+              c.configure(application);
+            } catch (RuntimeException x) {
+              throw new IllegalStateException(String.format("[%s]: Unable to configure application", n), x);
+            }
+          });
+          context.getBeansOfType(EndPoint.class).forEach((name, endPoint) -> {
             final EntryPointFactory entryPointFactory = () -> () -> {
               final AnnotationConfigApplicationContext child = new AnnotationConfigApplicationContext();
 
               child.setParent(context);
-              child.setDisplayName(endPoint.getPath());
-              child.setId(endPoint.getPath());
+              child.setDisplayName(name);
+              child.setId(name);
               child.setAllowBeanDefinitionOverriding(false);
               child.setAllowCircularReferences(false);
-              child.register(UIBaseConfiguration.class, endPoint.getConfigurationClass());
+              child.register(rwt.value(), endPoint.getConfigurationClass());
+              child.getBeanFactory().registerSingleton("endPoint", endPoint);
               child.refresh();
               child.start();
 
               try {
                 final UIContext uiContext = child.getBean(UIContext.class);
-                child.getBean(UIContextInitializer.class).initialize(uiContext);
 
                 final Shell shell = uiContext.getShell();
+                shell.setData("MARID_END_POINT_NAME", name);
 
                 if (shell.getMaximized()) {
                   shell.layout();
@@ -89,9 +92,6 @@ public class ServletConfiguration {
 
                 shell.addDisposeListener(event -> child.close());
                 shell.open();
-
-                final JavaScriptExecutor jsExecutor = child.getBean(JavaScriptExecutor.class);
-                jsExecutor.execute(String.format("document.title = '%s'", escapeJavaScript(ls(name))));
               } catch (Throwable x) {
                 child.close();
                 throw x;
@@ -99,7 +99,13 @@ public class ServletConfiguration {
               return 0;
             };
 
-            endPoint.put(HEAD_HTML, () -> join((Object[]) headTags).render());
+            context.getBeansOfType(EndPointConfigurer.class).forEach((n, c) -> {
+              try {
+                c.configure(name, endPoint);
+              } catch (RuntimeException x) {
+                throw new IllegalStateException(String.format("[%s]: Unable to configure %s", n, name), x);
+              }
+            });
 
             application.addEntryPoint(endPoint.getPath(), entryPointFactory, endPoint.getParameters());
           });

@@ -25,7 +25,7 @@ import org.eclipse.swt.widgets.*;
 import org.marid.app.dao.UserDao;
 import org.marid.app.model.MaridUser;
 import org.marid.app.model.MaridUserInfo;
-import org.marid.app.ui.UIContext;
+import org.marid.rwt.spring.UIContext;
 import org.marid.common.app.l10n.LCommon;
 import org.marid.common.app.l10n.LUsers;
 import org.springframework.context.annotation.Bean;

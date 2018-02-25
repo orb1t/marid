@@ -16,7 +16,9 @@ package org.marid.app;
 
 import j2html.Config;
 import org.marid.app.ui.UIExcludeFilter;
-import org.marid.common.app.spring.PrototypeScoped;
+import org.marid.app.ui.UIMaridConfiguration;
+import org.marid.rwt.spring.EnableRwt;
+import org.marid.rwt.spring.PrototypeScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InjectionPoint;
@@ -34,6 +36,7 @@ import java.util.Scanner;
 import static org.springframework.context.annotation.FilterType.CUSTOM;
 
 @EnableScheduling
+@EnableRwt(UIMaridConfiguration.class)
 @SpringBootApplication
 @ComponentScan(
     excludeFilters = {

@@ -1,6 +1,6 @@
 /*-
  * #%L
- * marid-webapp
+ * marid-rwt-spring-boot
  * %%
  * Copyright (C) 2012 - 2018 MARID software development group
  * %%
@@ -12,9 +12,11 @@
  * #L%
  */
 
-package org.marid.app.ui;
+package org.marid.rwt.spring;
 
-public interface UIContextInitializer {
+import org.eclipse.rap.rwt.application.Application;
 
-  void initialize(UIContext context);
+public interface ApplicationConfigurer {
+
+  void configure(Application application);
 }

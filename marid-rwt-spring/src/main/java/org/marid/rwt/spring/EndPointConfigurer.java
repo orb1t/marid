@@ -1,6 +1,6 @@
 /*-
  * #%L
- * marid-webapp
+ * marid-rwt-spring-boot
  * %%
  * Copyright (C) 2012 - 2018 MARID software development group
  * %%
@@ -12,20 +12,9 @@
  * #L%
  */
 
-package org.marid.app.ui;
+package org.marid.rwt.spring;
 
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
+public interface EndPointConfigurer {
 
-import java.util.function.BiConsumer;
-
-public interface UIContext {
-
-  Display getDisplay();
-
-  Shell getShell();
-
-  default void configure(BiConsumer<Display, Shell> consumer) {
-    consumer.accept(getDisplay(), getShell());
-  }
+  void configure(String beanName, EndPoint endPoint);
 }

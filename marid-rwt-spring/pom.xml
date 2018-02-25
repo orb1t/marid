@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <artifactId>marid</artifactId>
+    <groupId>org.marid</groupId>
+    <version>0.9.6.10-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>marid-rwt-spring-boot</artifactId>
+
+  <properties>
+    <rap.version>3.4.0</rap.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-security</artifactId>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>org.eclipse.rap</groupId>
+      <artifactId>org.eclipse.rap.rwt</artifactId>
+      <optional>true</optional>
+    </dependency>
+  </dependencies>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.eclipse.rap</groupId>
+        <artifactId>org.eclipse.rap.rwt</artifactId>
+        <version>${rap.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.eclipse.rap</groupId>
+        <artifactId>org.eclipse.rap.jface</artifactId>
+        <version>${rap.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.eclipse.rap</groupId>
+        <artifactId>org.eclipse.rap.fileupload</artifactId>
+        <version>${rap.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.eclipse.rap</groupId>
+        <artifactId>org.eclipse.rap.nebula.widgets.grid</artifactId>
+        <version>${rap.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.eclipse.rap</groupId>
+        <artifactId>org.eclipse.rap.jface.databinding</artifactId>
+        <version>${rap.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.eclipse.rap</groupId>
+        <artifactId>org.eclipse.rap.filedialog</artifactId>
+        <version>${rap.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.eclipse.rap</groupId>
+        <artifactId>org.eclipse.rap.nebula.jface.gridviewer</artifactId>
+        <version>${rap.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+        <configuration>
+          <licenseName>epl_v1</licenseName>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <licenses>
+    <license>
+      <name>EPL</name>
+      <url>http://www.eclipse.org/legal/epl-v10.html</url>
+    </license>
+  </licenses>
+</project>

@@ -18,10 +18,14 @@ import j2html.TagCreator;
 import j2html.tags.Tag;
 import org.marid.app.ui.main.MainConfiguration;
 import org.marid.app.ui.users.UsersConfiguration;
-import org.marid.common.app.endpoint.EndPoint;
+import org.marid.rwt.spring.EndPoint;
+import org.marid.rwt.spring.EndPointConfigurer;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import static j2html.TagCreator.join;
+import static org.eclipse.rap.rwt.client.WebClient.HEAD_HTML;
 
 @Configuration
 public class EndPointConfiguration {
@@ -46,5 +50,10 @@ public class EndPointConfiguration {
   @Bean
   public Tag<?> robotoFontTag() {
     return TagCreator.link().withRel("stylesheet").withHref("https://fonts.googleapis.com/css?family=Roboto");
+  }
+
+  @Bean
+  public EndPointConfigurer headEndPointConfigurer(@Qualifier("head") Tag<?>[] tags) {
+    return (beanName, endPoint) -> endPoint.put(HEAD_HTML, () -> join((Object[]) tags).render());
   }
 }
