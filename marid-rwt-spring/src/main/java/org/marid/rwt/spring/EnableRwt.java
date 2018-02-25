@@ -19,11 +19,18 @@ import org.eclipse.rap.rwt.application.ApplicationRunner;
 import org.eclipse.rap.rwt.application.EntryPointFactory;
 import org.eclipse.rap.rwt.engine.RWTServlet;
 import org.eclipse.swt.widgets.Shell;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.core.type.filter.TypeFilter;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -31,11 +38,13 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Import({RwtConfiguration.class})
+@ComponentScan(excludeFilters = {@Filter(type = FilterType.CUSTOM, classes = {UIExcludeFilter.class})})
 public @interface EnableRwt {
 
   Class<? extends UIBaseConfiguration> value();
@@ -45,8 +54,10 @@ class RwtConfiguration {
 
   @Bean
   public ServletContextListener rwtServletContextListener(GenericApplicationContext context) {
-    final EnableRwt rwt = Stream.of(context.getBeanNamesForAnnotation(EnableRwt.class))
+    final Class<? extends UIBaseConfiguration> base = Stream.of(context.getBeanNamesForAnnotation(EnableRwt.class))
         .map(beanName -> context.findAnnotationOnBean(beanName, EnableRwt.class))
+        .filter(Objects::nonNull)
+        .map(EnableRwt::value)
         .findFirst()
         .orElseThrow(() -> new IllegalStateException("No beans with annotation " + EnableRwt.class.getName()));
     return new ServletContextListener() {
@@ -73,7 +84,7 @@ class RwtConfiguration {
               child.setId(name);
               child.setAllowBeanDefinitionOverriding(false);
               child.setAllowCircularReferences(false);
-              child.register(rwt.value(), endPoint.getConfigurationClass());
+              child.register(base, endPoint.getConfigurationClass());
               child.getBeanFactory().registerSingleton("endPoint", endPoint);
               child.refresh();
               child.start();
@@ -131,5 +142,30 @@ class RwtConfiguration {
     bean.setAsyncSupported(false);
     bean.setOrder(1);
     return bean;
+  }
+}
+
+class UIExcludeFilter implements TypeFilter, BeanFactoryAware {
+
+  private String pkg;
+
+  @Override
+  public boolean match(@NotNull MetadataReader metadataReader, @NotNull MetadataReaderFactory metadataReaderFactory) {
+    return pkg != null && metadataReader.getClassMetadata().getClassName().startsWith(pkg);
+  }
+
+  @Override
+  public void setBeanFactory(@NotNull BeanFactory beanFactory) throws BeansException {
+    if (beanFactory instanceof ListableBeanFactory) {
+      final ListableBeanFactory factory = (ListableBeanFactory) beanFactory;
+      pkg = Stream.of(factory.getBeanNamesForAnnotation(EnableRwt.class))
+          .map(beanName -> factory.findAnnotationOnBean(beanName, EnableRwt.class))
+          .filter(Objects::nonNull)
+          .map(EnableRwt::value)
+          .map(Class::getPackage)
+          .map(Package::getName)
+          .findFirst()
+          .orElseThrow(() -> new IllegalStateException("No beans with annotation " + EnableRwt.class.getName()));
+    }
   }
 }

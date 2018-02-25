@@ -14,33 +14,32 @@
 
 package org.marid.app.ui;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
 
-public class UILoggingInitializer implements ApplicationContextInitializer<AnnotationConfigApplicationContext> {
+public class UILoggingInitializer implements DestructionAwareBeanPostProcessor {
+
+  private final Logger logger;
+
+  public UILoggingInitializer(GenericApplicationContext context) {
+    this.logger = LoggerFactory.getLogger(context.getId());
+  }
+
   @Override
-  public void initialize(@NotNull AnnotationConfigApplicationContext context) {
-    final Logger logger = LoggerFactory.getLogger(context.getId());
-    context.getBeanFactory().addBeanPostProcessor(new DestructionAwareBeanPostProcessor() {
-      @Override
-      public Object postProcessBeforeInitialization(@Nullable Object bean, @Nullable String beanName) {
-        if (beanName != null) {
-          logger.info("Initializing {}", beanName);
-        }
-        return bean;
-      }
+  public Object postProcessBeforeInitialization(@Nullable Object bean, @Nullable String beanName) {
+    if (beanName != null) {
+      logger.info("Initializing {}", beanName);
+    }
+    return bean;
+  }
 
-      @Override
-      public void postProcessBeforeDestruction(@Nullable Object bean, @Nullable String beanName) {
-        if (beanName != null) {
-          logger.info("Destroyed {}", beanName);
-        }
-      }
-    });
+  @Override
+  public void postProcessBeforeDestruction(@Nullable Object bean, @Nullable String beanName) {
+    if (beanName != null) {
+      logger.info("Destroyed {}", beanName);
+    }
   }
 }
