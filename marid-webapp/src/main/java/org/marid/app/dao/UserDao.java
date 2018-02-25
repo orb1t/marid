@@ -15,11 +15,13 @@
 package org.marid.app.dao;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.MoreFiles;
 import org.marid.app.common.Directories;
 import org.marid.app.model.MaridUser;
 import org.marid.app.model.MaridUserInfo;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
@@ -83,8 +85,17 @@ public class UserDao implements UserDetailsService {
     try {
       Files.createDirectories(userDir);
       try (final Writer writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8)) {
-        mapper.writeValue(writer, user.toInfo());
+        mapper.writeValue(writer, user.toInfo(new BCryptPasswordEncoder()));
       }
+    } catch (IOException x) {
+      throw new UncheckedIOException(x);
+    }
+  }
+
+  public void removeUser(String name) {
+    final Path userDir = directories.getUsers().resolve(name);
+    try {
+      MoreFiles.deleteRecursively(userDir);
     } catch (IOException x) {
       throw new UncheckedIOException(x);
     }

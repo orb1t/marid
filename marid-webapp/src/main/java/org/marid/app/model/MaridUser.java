@@ -16,6 +16,7 @@ package org.marid.app.model;
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -75,9 +76,9 @@ public class MaridUser implements UserDetails {
     return enabled;
   }
 
-  public MaridUserInfo toInfo() {
+  public MaridUserInfo toInfo(PasswordEncoder passwordEncoder) {
     return new MaridUserInfo(
-        password,
+        "{bcrypt}" + passwordEncoder.encode(password),
         enabled,
         expirationDate.toString(),
         authorities.stream().map(SimpleGrantedAuthority::getAuthority).toArray(String[]::new)

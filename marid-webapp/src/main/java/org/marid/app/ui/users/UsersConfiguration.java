@@ -109,6 +109,11 @@ public class UsersConfiguration {
             final MaridUser user = (MaridUser) item.getData();
             return !authentication.getName().equals(user.getUsername());
           })
+          .peek(i -> {
+            final TableItem item = table.getItem(i);
+            final MaridUser user = (MaridUser) item.getData();
+            dao.removeUser(user.getUsername());
+          })
           .toArray();
       table.remove(toDelete);
     });
