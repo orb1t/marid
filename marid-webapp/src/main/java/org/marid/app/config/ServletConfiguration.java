@@ -14,16 +14,19 @@
 
 package org.marid.app.config;
 
+import j2html.tags.Tag;
 import org.eclipse.rap.rwt.application.Application;
 import org.eclipse.rap.rwt.application.ApplicationRunner;
 import org.eclipse.rap.rwt.application.EntryPointFactory;
 import org.eclipse.rap.rwt.client.service.JavaScriptExecutor;
 import org.eclipse.rap.rwt.engine.RWTServlet;
+import org.eclipse.rap.rwt.service.ResourceLoader;
 import org.eclipse.swt.widgets.Shell;
 import org.marid.app.ui.UIBaseConfiguration;
 import org.marid.app.ui.UIContext;
 import org.marid.app.ui.UIContextInitializer;
 import org.marid.common.app.endpoint.EndPoint;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -34,6 +37,9 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import java.util.Map;
 
+import static j2html.TagCreator.join;
+import static org.eclipse.rap.rwt.RWT.DEFAULT_THEME_ID;
+import static org.eclipse.rap.rwt.client.WebClient.HEAD_HTML;
 import static org.marid.common.app.util.UILocalization.ls;
 import static org.unbescape.javascript.JavaScriptEscape.escapeJavaScript;
 
@@ -41,7 +47,11 @@ import static org.unbescape.javascript.JavaScriptEscape.escapeJavaScript;
 public class ServletConfiguration {
 
   @Bean
-  public ServletContextListener rwtServletContextListener(Map<String, EndPoint> endPoints, GenericApplicationContext context) {
+  public ServletContextListener rwtServletContextListener(Map<String, EndPoint> endPoints,
+                                                          GenericApplicationContext context,
+                                                          @Qualifier("head") Tag<?>[] headTags) {
+    final ResourceLoader resourceLoader = resource -> getClass().getResourceAsStream("/resource/theme/" + resource);
+
     return new ServletContextListener() {
 
       private ApplicationRunner runner;
@@ -50,10 +60,12 @@ public class ServletConfiguration {
       public void contextInitialized(ServletContextEvent sce) {
         runner = new ApplicationRunner(application -> {
           application.setOperationMode(Application.OperationMode.JEE_COMPATIBILITY);
+          application.addStyleSheet(DEFAULT_THEME_ID, "marid.css", resourceLoader);
 
           endPoints.forEach((name, endPoint) -> {
             final EntryPointFactory entryPointFactory = () -> () -> {
               final AnnotationConfigApplicationContext child = new AnnotationConfigApplicationContext();
+
               child.setParent(context);
               child.setDisplayName(endPoint.getPath());
               child.setId(endPoint.getPath());
@@ -86,6 +98,8 @@ public class ServletConfiguration {
               }
               return 0;
             };
+
+            endPoint.put(HEAD_HTML, () -> join((Object[]) headTags).render());
 
             application.addEntryPoint(endPoint.getPath(), entryPointFactory, endPoint.getParameters());
           });

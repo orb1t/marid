@@ -9,6 +9,10 @@
 
   <artifactId>marid-webapp</artifactId>
 
+  <properties>
+    <rwt.fonts>Verdana, "Lucida Sans", Arial, Helvetica, sans-serif</rwt.fonts>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.apache.maven.resolver</groupId>
@@ -91,6 +95,12 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.j2html</groupId>
+      <artifactId>j2html</artifactId>
+      <version>1.2.2</version>
     </dependency>
 
     <dependency>

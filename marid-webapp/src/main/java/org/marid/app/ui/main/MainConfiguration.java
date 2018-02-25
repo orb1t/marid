@@ -14,58 +14,46 @@
 
 package org.marid.app.ui.main;
 
-import org.eclipse.rap.rwt.client.service.JavaScriptExecutor;
 import org.eclipse.rap.rwt.client.service.UrlLauncher;
-import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Group;
 import org.marid.app.ui.UIContext;
+import org.marid.common.app.l10n.LMain;
 import org.marid.common.app.spring.Roles;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 
+import static org.eclipse.swt.SWT.*;
+import static org.marid.misc.Builder.build;
+
 @Configuration
 public class MainConfiguration {
-
-  @Bean
-  @Order(1)
-  public Composite header(UIContext context) {
-    final Composite header = new Composite(context.getShell(), SWT.NONE);
-
-    final RowLayout layout = new RowLayout();
-    layout.spacing = 10;
-
-    header.setLayout(layout);
-
-    return header;
-  }
 
   @Roles({"ROLE_ADMIN"})
   @Bean
   @Order(10)
-  public Label adminSection(UIContext context) {
-    final Label label = new Label(context.getShell(), SWT.NONE);
-    label.setText("Administration");
-    return label;
+  public Group adminSection(UIContext context) {
+    final Group group = new Group(context.getShell(), SHADOW_ETCHED_IN);
+    group.setLayout(new RowLayout());
+    group.setText(LMain.get().admin);
+    group.setLayoutData(build(new GridData(), d -> {
+      d.horizontalAlignment = FILL;
+      d.grabExcessHorizontalSpace = true;
+    }));
+    return group;
   }
 
   @Bean
-  @Order(11)
-  @ConditionalOnBean(name = {"adminSection"})
-  public Button users(UIContext context, UrlLauncher urlLauncher) {
-    final Button button = new Button(context.getShell(), SWT.NONE);
-    button.setText("Users...");
-    button.addListener(SWT.Selection, event -> urlLauncher.openURL("users.marid"));
+  @Order(1)
+  @ConditionalOnBean(name = "adminSection")
+  public Button users(Group adminSection, UrlLauncher urlLauncher) {
+    final Button button = new Button(adminSection, NONE);
+    button.setText(LMain.get().users);
+    button.addListener(Selection, event -> urlLauncher.openURL("users.marid"));
     return button;
-  }
-
-  @Autowired
-  public void init(JavaScriptExecutor executor) {
-    executor.execute("document.title = 'XXX'");
   }
 }

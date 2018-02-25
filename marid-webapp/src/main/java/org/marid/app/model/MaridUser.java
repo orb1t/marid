@@ -74,4 +74,13 @@ public class MaridUser implements UserDetails {
   public boolean isEnabled() {
     return enabled;
   }
+
+  public MaridUserInfo toInfo() {
+    return new MaridUserInfo(
+        password,
+        enabled,
+        expirationDate.toString(),
+        authorities.stream().map(SimpleGrantedAuthority::getAuthority).toArray(String[]::new)
+    );
+  }
 }

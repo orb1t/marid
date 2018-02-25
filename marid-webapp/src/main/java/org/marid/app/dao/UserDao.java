@@ -22,7 +22,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Repository;
 
+import java.io.IOException;
 import java.io.Reader;
+import java.io.UncheckedIOException;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -71,5 +74,19 @@ public class UserDao implements UserDetailsService {
     }
 
     return users;
+  }
+
+  public void saveUser(MaridUser user) {
+    final Path userDir = directories.getUsers().resolve(user.getUsername());
+    final Path file = userDir.resolve("info.json");
+
+    try {
+      Files.createDirectories(userDir);
+      try (final Writer writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8)) {
+        mapper.writeValue(writer, user.toInfo());
+      }
+    } catch (IOException x) {
+      throw new UncheckedIOException(x);
+    }
   }
 }

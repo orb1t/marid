@@ -14,24 +14,23 @@
 
 package org.marid.app;
 
+import j2html.Config;
 import org.marid.app.ui.UIExcludeFilter;
+import org.marid.common.app.spring.PrototypeScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.AutoConfigurationExcludeFilter;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.TypeExcludeFilter;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.util.Scanner;
 
-import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 import static org.springframework.context.annotation.FilterType.CUSTOM;
 
 @EnableScheduling
@@ -67,17 +66,14 @@ public class Context {
   }
 
   @Bean
-  @Scope(SCOPE_PROTOTYPE)
+  @PrototypeScoped
   public static Logger logger(InjectionPoint point) {
     final Class<?> type = point.getMember().getDeclaringClass();
     return LoggerFactory.getLogger(type);
   }
 
   public static void main(String... args) {
-    Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
-      e.printStackTrace();
-    });
-    new SpringApplicationBuilder(Context.class)
-        .run(args);
+    Config.closeEmptyTags = true;
+    SpringApplication.run(Context.class, args);
   }
 }

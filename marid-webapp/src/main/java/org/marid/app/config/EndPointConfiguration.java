@@ -14,9 +14,12 @@
 
 package org.marid.app.config;
 
+import j2html.TagCreator;
+import j2html.tags.Tag;
 import org.marid.app.ui.main.MainConfiguration;
 import org.marid.app.ui.users.UsersConfiguration;
 import org.marid.common.app.endpoint.EndPoint;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -31,5 +34,17 @@ public class EndPointConfiguration {
   @Bean
   public EndPoint usersEndPoint() {
     return new EndPoint("/users.marid", UsersConfiguration.class);
+  }
+
+  @Qualifier("head")
+  @Bean
+  public Tag<?> favIconTag() {
+    return TagCreator.link().withRel("icon").withType("image/png").withHref("/dyn/marid-icon.png?size=24");
+  }
+
+  @Qualifier("head")
+  @Bean
+  public Tag<?> robotoFontTag() {
+    return TagCreator.link().withRel("stylesheet").withHref("https://fonts.googleapis.com/css?family=Roboto");
   }
 }

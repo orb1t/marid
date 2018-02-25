@@ -19,6 +19,7 @@ import org.eclipse.rap.rwt.client.service.JavaScriptExecutor;
 import org.eclipse.rap.rwt.client.service.UrlLauncher;
 import org.eclipse.swt.layout.GridLayout;
 import org.jetbrains.annotations.Nullable;
+import org.marid.common.app.spring.PrototypeScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
@@ -27,6 +28,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 
@@ -82,5 +85,11 @@ public class UIBaseConfiguration {
       layout.verticalSpacing = 10;
       shell.setLayout(layout);
     }));
+  }
+
+  @Bean
+  @PrototypeScoped
+  public Authentication authentication() {
+    return SecurityContextHolder.getContext().getAuthentication();
   }
 }

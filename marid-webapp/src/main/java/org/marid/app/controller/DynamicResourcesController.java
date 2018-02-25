@@ -30,7 +30,7 @@ import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
 @Controller
 public class DynamicResourcesController {
 
-  @GetMapping(path = "/marid-icon.png", produces = {IMAGE_PNG_VALUE})
+  @GetMapping(path = {"/marid-icon.png", "/icon.png"}, produces = {IMAGE_PNG_VALUE})
   @ResponseBody
   public BufferedImage maridIcon(@RequestParam(defaultValue = "64") int size) {
     return MaridIcon.getImage(size, Color.GREEN);
