@@ -20,6 +20,8 @@ public class LMain {
 
   public String admin;
   public String users;
+  public String logout;
+  public String session;
 
   public static LMain get() {
     return RWT.NLS.getUTF8Encoded("res.main", LMain.class);

@@ -28,7 +28,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 
 import static org.eclipse.swt.SWT.*;
-import static org.marid.misc.Builder.build;
+import static org.eclipse.swt.layout.GridData.FILL_HORIZONTAL;
 
 @Configuration
 public class MainConfiguration {
@@ -40,10 +40,17 @@ public class MainConfiguration {
     final Group group = new Group(context.getShell(), SHADOW_ETCHED_IN);
     group.setLayout(new RowLayout());
     group.setText(LMain.get().admin);
-    group.setLayoutData(build(new GridData(), d -> {
-      d.horizontalAlignment = FILL;
-      d.grabExcessHorizontalSpace = true;
-    }));
+    group.setLayoutData(new GridData(FILL_HORIZONTAL));
+    return group;
+  }
+
+  @Bean
+  @Order(20)
+  public Group sessionSection(UIContext context) {
+    final Group group = new Group(context.getShell(), SHADOW_ETCHED_IN);
+    group.setLayout(new RowLayout());
+    group.setText(LMain.get().session);
+    group.setLayoutData(new GridData(FILL_HORIZONTAL));
     return group;
   }
 
@@ -51,9 +58,18 @@ public class MainConfiguration {
   @Order(1)
   @ConditionalOnBean(name = "adminSection")
   public Button users(Group adminSection, UrlLauncher urlLauncher) {
-    final Button button = new Button(adminSection, NONE);
+    final Button button = new Button(adminSection, PUSH);
     button.setText(LMain.get().users);
     button.addListener(Selection, event -> urlLauncher.openURL("users.marid"));
+    return button;
+  }
+
+  @Bean
+  @Order(1)
+  public Button logout(Group sessionSection, UrlLauncher urlLauncher) {
+    final Button button = new Button(sessionSection, PUSH);
+    button.setText(LMain.get().logout);
+    button.addListener(Selection, event -> urlLauncher.openURL("login?logout"));
     return button;
   }
 }
