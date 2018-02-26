@@ -76,6 +76,10 @@ public class MaridUser implements UserDetails {
     return enabled;
   }
 
+  public LocalDate getExpirationDate() {
+    return expirationDate;
+  }
+
   public MaridUserInfo toInfo(PasswordEncoder passwordEncoder) {
     return new MaridUserInfo(
         "{bcrypt}" + passwordEncoder.encode(password),

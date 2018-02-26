@@ -25,15 +25,19 @@ import org.eclipse.swt.widgets.*;
 import org.marid.app.dao.UserDao;
 import org.marid.app.model.MaridUser;
 import org.marid.app.model.MaridUserInfo;
-import org.marid.rwt.spring.UIContext;
 import org.marid.common.app.l10n.LCommon;
 import org.marid.common.app.l10n.LUsers;
+import org.marid.rwt.spring.UIContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.IntStream;
@@ -56,7 +60,8 @@ public class UsersConfiguration {
   @Bean
   @Order(1)
   public Table userTable(SashForm form, UserDao dao) {
-    final Table table = new Table(form, V_SCROLL | H_SCROLL | BORDER | MULTI);
+    final Table table = new Table(form, V_SCROLL | H_SCROLL | BORDER | MULTI) {
+    };
 
     table.setHeaderVisible(true);
     table.setLinesVisible(true);
@@ -65,26 +70,35 @@ public class UsersConfiguration {
     nameColumn.setText(LUsers.get().name);
     nameColumn.setResizable(true);
     nameColumn.setAlignment(LEFT);
-    nameColumn.setWidth(200);
+
+    final TableColumn expirationDateColumn = new TableColumn(table, NONE);
+    expirationDateColumn.setText(LCommon.get().date);
+    expirationDateColumn.setResizable(true);
+    expirationDateColumn.setAlignment(CENTER);
+    expirationDateColumn.setWidth(DEFAULT);
 
     final TableColumn adminColumn = new TableColumn(table, NONE);
     adminColumn.setText(LUsers.get().admin);
     adminColumn.setResizable(true);
     adminColumn.setAlignment(CENTER);
-    adminColumn.setWidth(64);
 
     final TableColumn userColumn = new TableColumn(table, NONE);
     userColumn.setText(LUsers.get().user);
     userColumn.setResizable(true);
     userColumn.setAlignment(CENTER);
-    userColumn.setWidth(64);
 
     for (final MaridUser user: dao.getUsers()) {
       final TableItem item = new TableItem(table, NONE);
       item.setData(user);
       item.setText(0, user.getUsername());
-      item.setText(1, user.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) ? "\u25CF" : "");
-      item.setText(2, user.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_USER")) ? "\u25CF" : "");
+      item.setText(1, user.getExpirationDate().toString());
+      item.setText(2, user.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) ? "\u25CF" : "");
+      item.setText(3, user.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_USER")) ? "\u25CF" : "");
+    }
+
+    for (final TableColumn column : table.getColumns()) {
+      column.pack();
+      column.setWidth(column.getWidth() + 16);
     }
 
     return table;
@@ -138,6 +152,13 @@ public class UsersConfiguration {
           final Text nameField = new Text(shell, BORDER);
           nameField.setLayoutData(new GridData(FILL_HORIZONTAL));
 
+          final Label expirationDateLabel = new Label(shell, NONE);
+          expirationDateLabel.setText(LCommon.get().expirationDate);
+
+          final DateTime expirationDateField = new DateTime(shell, BORDER | DATE);
+          final ZonedDateTime date = Instant.now().atZone(ZoneId.systemDefault()).plus(1L, ChronoUnit.YEARS);
+          expirationDateField.setDate(date.getYear(), date.getMonthValue() - 1, date.getDayOfMonth());
+
           final Label passwordLabel = new Label(shell, NONE);
           passwordLabel.setText(LCommon.get().password);
 
@@ -173,7 +194,7 @@ public class UsersConfiguration {
             final MaridUser user = new MaridUser(nameField.getText(), new MaridUserInfo(
                 passwordField.getText(),
                 true,
-                "2019-01-01",
+                String.format("%04d-%02d-%02d", expirationDateField.getYear(), expirationDateField.getMonth(), expirationDateField.getDay()),
                 authorities.toArray(new String[authorities.size()])
             ));
             dao.saveUser(user);
@@ -182,8 +203,14 @@ public class UsersConfiguration {
             final TableItem item = new TableItem(table, NONE);
             item.setData(user);
             item.setText(0, user.getUsername());
-            item.setText(1, user.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) ? "\u25CF" : "");
-            item.setText(2, user.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_USER")) ? "\u25CF" : "");
+            item.setText(1, user.getExpirationDate().toString());
+            item.setText(2, user.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) ? "\u25CF" : "");
+            item.setText(3, user.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_USER")) ? "\u25CF" : "");
+
+            for (final TableColumn column : table.getColumns()) {
+              column.pack();
+              column.setWidth(column.getWidth() + 16);
+            }
           });
 
           shell.setBounds(computeShellBounds());
@@ -192,8 +219,8 @@ public class UsersConfiguration {
 
         private Rectangle computeShellBounds() {
           final Rectangle d = getParent().getDisplay().getBounds();
-          final Point preferredSize = shell.computeSize((d.width * 2) / 3, DEFAULT);
-          final int w = Math.min( preferredSize.x, 640);
+          final Point preferredSize = shell.computeSize((d.width * 5) / 6, DEFAULT);
+          final int w = Math.min(preferredSize.x, 800);
           final int h = preferredSize.y;
           return new Rectangle((d.width - w) / 2 + d.x, (d.height - h ) / 2 + d.y, w, h);
         }

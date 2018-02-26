@@ -24,6 +24,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.*;
 import org.springframework.context.annotation.ComponentScan.Filter;
@@ -53,6 +54,7 @@ public @interface EnableRwt {
 class RwtConfiguration {
 
   @Bean
+  @ConditionalOnMissingBean
   public ServletContextListener rwtServletContextListener(GenericApplicationContext context) {
     final Class<? extends UIBaseConfiguration> base = Stream.of(context.getBeanNamesForAnnotation(EnableRwt.class))
         .map(beanName -> context.findAnnotationOnBean(beanName, EnableRwt.class))
@@ -135,6 +137,7 @@ class RwtConfiguration {
   }
 
   @Bean
+  @ConditionalOnMissingBean
   public ServletRegistrationBean<RWTServlet> rwtServletBean() {
     final RWTServlet servlet = new RWTServlet();
     final ServletRegistrationBean<RWTServlet> bean = new ServletRegistrationBean<>(servlet, "*.marid");

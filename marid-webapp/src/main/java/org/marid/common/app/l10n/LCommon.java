@@ -23,6 +23,8 @@ public class LCommon {
   public String name;
   public String password;
   public String close;
+  public String expirationDate;
+  public String date;
 
   public static LCommon get() {
     return RWT.NLS.getUTF8Encoded("res.common", LCommon.class);
