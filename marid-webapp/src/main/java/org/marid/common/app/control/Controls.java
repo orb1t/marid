@@ -23,7 +23,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
 import java.util.function.Consumer;
-import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static org.eclipse.swt.SWT.NONE;
 
@@ -55,23 +55,35 @@ public interface Controls {
     return c;
   }
 
-  static void autoResize(Table table, int... weights) {
-    final int sum = IntStream.of(weights).sum();
-    final Runnable resizeTask = () -> {
-      final TableColumn[] columns = table.getColumns();
-      final Rectangle clientArea = table.getClientArea();
+  static void fitColumns(Table table) {
+    final TableColumn[] columns = table.getColumns();
+    if (columns.length == 0) {
+      return;
+    }
 
-      for (int i = 0; i < columns.length; i++) {
-        columns[i].setWidth((clientArea.width * weights[i]) / sum);
-      }
-    };
+    final Rectangle clientArea = table.getClientArea();
+
+    for (final TableColumn column : columns) {
+      column.pack();
+    }
+
+    int sum = Stream.of(columns).mapToInt(TableColumn::getWidth).sum();
+
+    for (int i = 1; i < columns.length && sum + 20 <= clientArea.width; i++, sum += 20) {
+      columns[i].setWidth(columns[i].getWidth() + 20);
+    }
+
+    columns[0].setWidth(clientArea.width - sum + columns[0].getWidth());
+  }
+
+  static void autoFitColumns(Table table) {
     table.addControlListener(new ControlAdapter() {
       @Override
       public void controlResized(ControlEvent e) {
         table.removeControlListener(this);
 
         try {
-          resizeTask.run();
+          fitColumns(table);
         } finally {
           table.addControlListener(this);
         }

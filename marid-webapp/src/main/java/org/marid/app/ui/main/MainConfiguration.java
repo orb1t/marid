@@ -14,6 +14,7 @@
 
 package org.marid.app.ui.main;
 
+import org.eclipse.rap.rwt.client.service.JavaScriptExecutor;
 import org.eclipse.rap.rwt.client.service.UrlLauncher;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.RowLayout;
@@ -66,10 +67,10 @@ public class MainConfiguration {
 
   @Bean
   @Order(1)
-  public Button logout(Group sessionSection, UrlLauncher urlLauncher) {
+  public Button logout(Group sessionSection, JavaScriptExecutor executor) {
     final Button button = new Button(sessionSection, PUSH);
     button.setText(LMain.get().logout);
-    button.addListener(Selection, event -> urlLauncher.openURL("login?logout"));
+    button.addListener(Selection, event -> executor.execute("location.href = 'login?logout'"));
     return button;
   }
 }

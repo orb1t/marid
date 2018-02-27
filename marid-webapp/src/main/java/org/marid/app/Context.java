@@ -30,7 +30,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import java.util.Scanner;
 
 @EnableScheduling
-@EnableRwt(UIMaridConfiguration.class)
+@EnableRwt(baseConfigurationClass = UIMaridConfiguration.class)
 @SpringBootApplication
 public class Context {
 

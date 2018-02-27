@@ -14,7 +14,6 @@
 
 package org.marid.rwt.spring;
 
-import org.eclipse.rap.rwt.application.Application;
 import org.eclipse.rap.rwt.application.ApplicationRunner;
 import org.eclipse.rap.rwt.application.EntryPointFactory;
 import org.eclipse.rap.rwt.engine.RWTServlet;
@@ -48,7 +47,7 @@ import java.util.stream.Stream;
 @ComponentScan(excludeFilters = {@Filter(type = FilterType.CUSTOM, classes = {UIExcludeFilter.class})})
 public @interface EnableRwt {
 
-  Class<? extends UIBaseConfiguration> value();
+  Class<? extends UIBaseConfiguration> baseConfigurationClass();
 }
 
 class RwtConfiguration {
@@ -56,12 +55,12 @@ class RwtConfiguration {
   @Bean
   @ConditionalOnMissingBean
   public ServletContextListener rwtServletContextListener(GenericApplicationContext context) {
-    final Class<? extends UIBaseConfiguration> base = Stream.of(context.getBeanNamesForAnnotation(EnableRwt.class))
+    final EnableRwt enableRwt = Stream.of(context.getBeanNamesForAnnotation(EnableRwt.class))
         .map(beanName -> context.findAnnotationOnBean(beanName, EnableRwt.class))
         .filter(Objects::nonNull)
-        .map(EnableRwt::value)
         .findFirst()
         .orElseThrow(() -> new IllegalStateException("No beans with annotation " + EnableRwt.class.getName()));
+
     return new ServletContextListener() {
 
       private ApplicationRunner runner;
@@ -69,7 +68,6 @@ class RwtConfiguration {
       @Override
       public void contextInitialized(ServletContextEvent sce) {
         runner = new ApplicationRunner(application -> {
-          application.setOperationMode(Application.OperationMode.JEE_COMPATIBILITY);
           context.getBeansOfType(ApplicationConfigurer.class).forEach((n, c) -> {
             try {
               c.configure(application);
@@ -86,7 +84,7 @@ class RwtConfiguration {
               child.setId(name);
               child.setAllowBeanDefinitionOverriding(false);
               child.setAllowCircularReferences(false);
-              child.register(base, endPoint.getConfigurationClass());
+              child.register(enableRwt.baseConfigurationClass(), endPoint.getConfigurationClass());
               child.getBeanFactory().registerSingleton("endPoint", endPoint);
               child.refresh();
               child.start();
@@ -164,7 +162,7 @@ class UIExcludeFilter implements TypeFilter, BeanFactoryAware {
       pkg = Stream.of(factory.getBeanNamesForAnnotation(EnableRwt.class))
           .map(beanName -> factory.findAnnotationOnBean(beanName, EnableRwt.class))
           .filter(Objects::nonNull)
-          .map(EnableRwt::value)
+          .map(EnableRwt::baseConfigurationClass)
           .map(Class::getPackage)
           .map(Package::getName)
           .findFirst()

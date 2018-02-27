@@ -44,7 +44,7 @@ public class UsersTable extends Table {
 
     dao.getUsers().forEach(this::userItem);
 
-    Controls.autoResize(this, 100, 100, 60, 60);
+    Controls.autoFitColumns(this);
   }
 
   TableItem userItem(MaridUser user) {
