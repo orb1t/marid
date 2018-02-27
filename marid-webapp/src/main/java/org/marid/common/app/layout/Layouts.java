@@ -1,6 +1,6 @@
 /*-
  * #%L
- * marid-rwt-spring-boot
+ * marid-webapp
  * %%
  * Copyright (C) 2012 - 2018 MARID software development group
  * %%

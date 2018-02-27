@@ -21,6 +21,7 @@ public class LUsers {
   public String user;
   public String name;
   public String admin;
+  public String addUser;
 
   public static LUsers get() {
     return RWT.NLS.getUTF8Encoded("res.users", LUsers.class);

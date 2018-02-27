@@ -25,6 +25,7 @@ public class LCommon {
   public String close;
   public String expirationDate;
   public String date;
+  public String proceed;
 
   public static LCommon get() {
     return RWT.NLS.getUTF8Encoded("res.common", LCommon.class);

@@ -1,0 +1,62 @@
+/*-
+ * #%L
+ * marid-webapp
+ * %%
+ * Copyright (C) 2012 - 2018 MARID software development group
+ * %%
+ * This program and the accompanying materials are made available under the terms of the Eclipse Public License v1.0
+ * and Eclipse Distribution License v. 1.0 which accompanies this distribution.
+ * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ * and the Eclipse Distribution License is available at
+ * http://www.eclipse.org/org/documents/edl-v10.php.
+ * #L%
+ */
+
+package org.marid.app.ui.users;
+
+import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableItem;
+import org.marid.app.dao.UserDao;
+import org.marid.app.model.MaridUser;
+import org.marid.common.app.control.Controls;
+import org.marid.common.app.l10n.LCommon;
+import org.marid.common.app.l10n.LUsers;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.stereotype.Component;
+
+import static org.eclipse.swt.SWT.*;
+import static org.marid.common.app.control.Controls.FILLED_CIRCLE;
+import static org.marid.common.app.control.Controls.column;
+
+@Component
+public class UsersTable extends Table {
+
+  public UsersTable(SashForm form, UserDao dao) {
+    super(form, V_SCROLL | BORDER | MULTI);
+    setHeaderVisible(true);
+    setLinesVisible(true);
+
+    column(this, LCommon.get().name, c -> c.setAlignment(LEFT));
+    column(this, LCommon.get().date, c -> c.setAlignment(CENTER));
+    column(this, LUsers.get().user, c -> c.setAlignment(CENTER));
+    column(this, LUsers.get().admin, c -> c.setAlignment(CENTER));
+
+    dao.getUsers().forEach(this::userItem);
+
+    Controls.autoResize(this, 100, 100, 60, 60);
+  }
+
+  TableItem userItem(MaridUser user) {
+    final TableItem item = new TableItem(this, NONE);
+
+    item.setData(user);
+
+    item.setText(0, user.getUsername());
+    item.setText(1, user.getExpirationDate().toString());
+    item.setText(2, user.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_USER")) ? FILLED_CIRCLE : "");
+    item.setText(3, user.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) ? FILLED_CIRCLE : "");
+
+    return item;
+  }
+}
