@@ -75,6 +75,7 @@ public class AddUserDialog extends Dialog {
   @Override
   protected Control createDialogArea(Composite parent) {
     final Composite composite = (Composite) super.createDialogArea(parent);
+
     final GridLayout layout = (GridLayout) composite.getLayout();
 
     layout.numColumns = 2;
@@ -88,7 +89,7 @@ public class AddUserDialog extends Dialog {
     passwordField.setLayoutData(new GridData(FILL_HORIZONTAL));
 
     label(composite, LCommon.get().expirationDate);
-    dateField = new DateTime(composite, BORDER | DATE);
+    dateField = new DateTime(composite, BORDER | CALENDAR);
     final ZonedDateTime date = Instant.now().atZone(ZoneId.systemDefault()).plus(1L, ChronoUnit.YEARS);
     dateField.setDate(date.getYear(), date.getMonthValue() - 1, date.getDayOfMonth());
 
