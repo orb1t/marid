@@ -104,29 +104,26 @@ public class AddUserDialog extends Dialog {
 
   @Override
   protected void buttonPressed(int buttonId) {
-    try {
-      switch (buttonId) {
-        case PROCEED_ID:
-          final Set<String> authorities = new TreeSet<>();
-          if (adminButton.getSelection()) {
-            authorities.add("ROLE_ADMIN");
-          }
-          if (userButton.getSelection()) {
-            authorities.add("ROLE_USER");
-          }
-          final MaridUser user = new MaridUser(userField.getText(), new MaridUserInfo(
-              passwordField.getText(),
-              true,
-              String.format("%04d-%02d-%02d", dateField.getYear(), dateField.getMonth(), dateField.getDay()),
-              authorities.toArray(new String[authorities.size()])
-          ));
-          dao.saveUser(user);
-          table.userItem(user);
-          table.layout();
-          break;
-      }
-    } finally {
-      close();
+    switch (buttonId) {
+      case PROCEED_ID:
+        final Set<String> authorities = new TreeSet<>();
+        if (adminButton.getSelection()) {
+          authorities.add("ROLE_ADMIN");
+        }
+        if (userButton.getSelection()) {
+          authorities.add("ROLE_USER");
+        }
+        final MaridUser user = new MaridUser(userField.getText(), new MaridUserInfo(
+            passwordField.getText(),
+            true,
+            String.format("%04d-%02d-%02d", dateField.getYear(), dateField.getMonth() + 1, dateField.getDay()),
+            authorities.toArray(new String[authorities.size()])
+        ));
+        dao.saveUser(user);
+        table.userItem(user);
+        table.layout();
+        break;
     }
+    close();
   }
 }

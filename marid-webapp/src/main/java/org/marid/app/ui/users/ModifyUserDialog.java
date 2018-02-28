@@ -25,10 +25,7 @@ import org.marid.common.app.l10n.LUsers;
 import org.marid.rwt.spring.PrototypeScoped;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
+import java.time.LocalDate;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -79,50 +76,50 @@ public class ModifyUserDialog extends Dialog {
 
     layout.numColumns = 2;
 
+    final MaridUser user = (MaridUser) item.getData();
+
     label(composite, LCommon.get().expirationDate);
     dateField = new DateTime(composite, BORDER | DATE | DROP_DOWN);
-    final ZonedDateTime date = Instant.now().atZone(ZoneId.systemDefault()).plus(1L, ChronoUnit.YEARS);
+    final LocalDate date = user.getExpirationDate();
     dateField.setDate(date.getYear(), date.getMonthValue() - 1, date.getDayOfMonth());
 
     label(composite, LUsers.get().user);
     userButton = new Button(composite, CHECK);
-    userButton.setSelection(true);
+    userButton.setSelection(user.isUser());
 
     label(composite, LUsers.get().admin);
     adminButton = new Button(composite, CHECK);
+    adminButton.setSelection(user.isAdmin());
 
     return composite;
   }
 
   @Override
   protected void buttonPressed(int buttonId) {
-    try {
-      switch (buttonId) {
-        case PROCEED_ID:
-          final Set<String> authorities = new TreeSet<>();
-          if (adminButton.getSelection()) {
-            authorities.add("ROLE_ADMIN");
-          }
-          if (userButton.getSelection()) {
-            authorities.add("ROLE_USER");
-          }
-          final String date = format("%04d-%02d-%02d", dateField.getYear(), dateField.getMonth(), dateField.getDay());
-          final MaridUser user = new MaridUser(item.getText(0), new MaridUserInfo(
-              null,
-              true,
-              date,
-              authorities.toArray(new String[authorities.size()])
-          ));
-          dao.saveUser(user);
-          item.setText(1, date);
-          item.setText(2, user.isUser() ? FILLED_CIRCLE : "");
-          item.setText(3, user.isAdmin() ? FILLED_CIRCLE : "");
+    switch (buttonId) {
+      case PROCEED_ID:
+        final Set<String> authorities = new TreeSet<>();
+        if (adminButton.getSelection()) {
+          authorities.add("ROLE_ADMIN");
+        }
+        if (userButton.getSelection()) {
+          authorities.add("ROLE_USER");
+        }
+        final String date = format("%04d-%02d-%02d", dateField.getYear(), dateField.getMonth() + 1, dateField.getDay());
+        final MaridUser user = new MaridUser(item.getText(0), new MaridUserInfo(
+            null,
+            true,
+            date,
+            authorities.toArray(new String[authorities.size()])
+        ));
+        dao.saveUser(user);
+        item.setText(1, date);
+        item.setText(2, user.isUser() ? FILLED_CIRCLE : "");
+        item.setText(3, user.isAdmin() ? FILLED_CIRCLE : "");
 
-          table.layout();
-          break;
-      }
-    } finally {
-      close();
+        table.layout();
+        break;
     }
+    close();
   }
 }
