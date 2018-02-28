@@ -19,6 +19,7 @@ import com.google.common.io.MoreFiles;
 import org.marid.app.common.Directories;
 import org.marid.app.model.MaridUser;
 import org.marid.app.model.MaridUserInfo;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -83,12 +84,27 @@ public class UserDao implements UserDetailsService {
     final Path file = userDir.resolve("info.json");
 
     try {
-      Files.createDirectories(userDir);
-      try (final Writer writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8)) {
-        mapper.writeValue(writer, user.toInfo(new BCryptPasswordEncoder()));
+      final MaridUserInfo info;
+      if (Files.isRegularFile(file)) {
+        final MaridUserInfo userInfo;
+        try (final Reader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
+          userInfo = mapper.readValue(reader, MaridUserInfo.class);
+        }
+        info = new MaridUserInfo(
+            userInfo.password,
+            user.isEnabled(),
+            user.getExpirationDate().toString(),
+            user.getAuthorities().stream().map(SimpleGrantedAuthority::getAuthority).toArray(String[]::new)
+        );
+      } else {
+        Files.createDirectories(userDir);
+        info = user.toInfo(new BCryptPasswordEncoder());
       }
-    } catch (IOException x) {
-      throw new UncheckedIOException(x);
+      try (final Writer writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8)) {
+        mapper.writeValue(writer, info);
+      }
+    } catch (Exception x) {
+      throw new IllegalStateException(x);
     }
   }
 

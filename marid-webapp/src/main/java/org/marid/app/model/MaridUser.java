@@ -80,6 +80,14 @@ public class MaridUser implements UserDetails {
     return expirationDate;
   }
 
+  public boolean isAdmin() {
+    return getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
+  }
+
+  public boolean isUser() {
+    return getAuthorities().contains(new SimpleGrantedAuthority("ROLE_USER"));
+  }
+
   public MaridUserInfo toInfo(PasswordEncoder passwordEncoder) {
     return new MaridUserInfo(
         "{bcrypt}" + passwordEncoder.encode(password),

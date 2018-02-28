@@ -15,7 +15,6 @@
 package org.marid.app.ui.users;
 
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 import org.marid.app.dao.UserDao;
@@ -34,29 +33,30 @@ import java.time.temporal.ChronoUnit;
 import java.util.Set;
 import java.util.TreeSet;
 
+import static java.lang.String.format;
 import static org.eclipse.jface.dialogs.IDialogConstants.CLOSE_ID;
 import static org.eclipse.jface.dialogs.IDialogConstants.PROCEED_ID;
 import static org.eclipse.swt.SWT.*;
-import static org.eclipse.swt.layout.GridData.FILL_HORIZONTAL;
+import static org.marid.common.app.control.Controls.FILLED_CIRCLE;
 import static org.marid.common.app.control.Controls.label;
 
 @Component
 @PrototypeScoped
-public class AddUserDialog extends Dialog {
+public class ModifyUserDialog extends Dialog {
 
   private final UserDao dao;
   private final UsersTable table;
+  private final TableItem item;
 
-  private Text userField;
-  private Text passwordField;
   private DateTime dateField;
   private Button userButton;
   private Button adminButton;
 
-  public AddUserDialog(UIContext context, UserDao dao, UsersTable table) {
+  public ModifyUserDialog(UIContext context, UserDao dao, UsersTable table) {
     super(context.getShell());
     this.dao = dao;
     this.table = table;
+    this.item = table.getSelection()[0];
     setBlockOnOpen(false);
   }
 
@@ -69,7 +69,7 @@ public class AddUserDialog extends Dialog {
   @Override
   protected void configureShell(Shell newShell) {
     super.configureShell(newShell);
-    newShell.setText(LUsers.get().addUser);
+    newShell.setText(LUsers.get().modifyUser);
   }
 
   @Override
@@ -79,14 +79,6 @@ public class AddUserDialog extends Dialog {
     final GridLayout layout = (GridLayout) composite.getLayout();
 
     layout.numColumns = 2;
-
-    label(composite, LCommon.get().name);
-    userField = new Text(composite, BORDER);
-    userField.setLayoutData(new GridData(FILL_HORIZONTAL));
-
-    label(composite, LCommon.get().password);
-    passwordField = new Text(composite, BORDER | PASSWORD);
-    passwordField.setLayoutData(new GridData(FILL_HORIZONTAL));
 
     label(composite, LCommon.get().expirationDate);
     dateField = new DateTime(composite, BORDER | DATE | DROP_DOWN);
@@ -115,14 +107,18 @@ public class AddUserDialog extends Dialog {
           if (userButton.getSelection()) {
             authorities.add("ROLE_USER");
           }
-          final MaridUser user = new MaridUser(userField.getText(), new MaridUserInfo(
-              passwordField.getText(),
+          final String date = format("%04d-%02d-%02d", dateField.getYear(), dateField.getMonth(), dateField.getDay());
+          final MaridUser user = new MaridUser(item.getText(0), new MaridUserInfo(
+              null,
               true,
-              String.format("%04d-%02d-%02d", dateField.getYear(), dateField.getMonth(), dateField.getDay()),
+              date,
               authorities.toArray(new String[authorities.size()])
           ));
           dao.saveUser(user);
-          table.userItem(user);
+          item.setText(1, date);
+          item.setText(2, user.isUser() ? FILLED_CIRCLE : "");
+          item.setText(3, user.isAdmin() ? FILLED_CIRCLE : "");
+
           table.layout();
           break;
       }
