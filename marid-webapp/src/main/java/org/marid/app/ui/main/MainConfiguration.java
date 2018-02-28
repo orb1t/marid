@@ -20,9 +20,9 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Shell;
 import org.marid.common.app.l10n.LMain;
 import org.marid.rwt.spring.Roles;
-import org.marid.rwt.spring.UIContext;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,8 +37,8 @@ public class MainConfiguration {
   @Roles({"ROLE_ADMIN"})
   @Bean
   @Order(10)
-  public Group adminSection(UIContext context) {
-    final Group group = new Group(context.getShell(), SHADOW_ETCHED_IN);
+  public Group adminSection(Shell mainShellBean) {
+    final Group group = new Group(mainShellBean, SHADOW_ETCHED_IN);
     group.setLayout(new RowLayout());
     group.setText(LMain.get().admin);
     group.setLayoutData(new GridData(FILL_HORIZONTAL));
@@ -47,8 +47,8 @@ public class MainConfiguration {
 
   @Bean
   @Order(20)
-  public Group sessionSection(UIContext context) {
-    final Group group = new Group(context.getShell(), SHADOW_ETCHED_IN);
+  public Group sessionSection(Shell mainShellBean) {
+    final Group group = new Group(mainShellBean, SHADOW_ETCHED_IN);
     group.setLayout(new RowLayout());
     group.setText(LMain.get().session);
     group.setLayoutData(new GridData(FILL_HORIZONTAL));

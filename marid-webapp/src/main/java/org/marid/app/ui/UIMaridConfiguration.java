@@ -19,9 +19,9 @@ import org.eclipse.rap.rwt.client.service.JavaScriptExecutor;
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.marid.rwt.spring.UIBaseConfiguration;
-import org.marid.rwt.spring.UIContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
@@ -33,20 +33,19 @@ import static org.unbescape.javascript.JavaScriptEscape.escapeJavaScript;
 public class UIMaridConfiguration implements UIBaseConfiguration {
 
   @Override
-  public UIContext uiContext() {
-    final UIContext context = UIBaseConfiguration.super.uiContext();
-    final GridLayout layout = (GridLayout) context.getShell().getLayout();
-    layout.marginTop = layout.marginBottom = layout.marginLeft = layout.marginRight = 10;
-    context.getShell().addShellListener(new ShellAdapter() {
+  public Shell shell(Display display) {
+    final Shell shell = UIBaseConfiguration.super.shell(display);
+    final GridLayout layout = (GridLayout) shell.getLayout();
+    layout.marginWidth = layout.marginHeight = 10;
+    shell.addShellListener(new ShellAdapter() {
       @Override
       public void shellActivated(ShellEvent e) {
         final JavaScriptExecutor jsExecutor = RWT.getClient().getService(JavaScriptExecutor.class);
-        final Shell shell = context.getShell();
         final String id = shell.getData("MARID_END_POINT_NAME").toString();
         jsExecutor.execute(String.format("document.title = '%s'", escapeJavaScript(ls(id))));
         shell.removeShellListener(this);
       }
     });
-    return context;
+    return shell;
   }
 }

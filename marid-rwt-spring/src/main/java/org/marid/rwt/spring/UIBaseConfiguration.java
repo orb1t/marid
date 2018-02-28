@@ -17,17 +17,70 @@ package org.marid.rwt.spring;
 import org.eclipse.rap.rwt.RWT;
 import org.eclipse.rap.rwt.client.service.JavaScriptExecutor;
 import org.eclipse.rap.rwt.client.service.UrlLauncher;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+import org.springframework.beans.factory.SmartFactoryBean;
 import org.springframework.context.annotation.Bean;
 
 public interface UIBaseConfiguration {
 
-  default UIContext uiContext() {
-    return new UIBaseContext();
+  default Display display() {
+    return new Display();
+  }
+
+  default Shell shell(Display display) {
+    final Shell shell = new Shell(display, SWT.NO_TRIM);
+    shell.setMaximized(true);
+    shell.setLayout(new GridLayout(1, false));
+    return shell;
   }
 
   @Bean
-  default UIContext uiContextBean() {
-    return uiContext();
+  default SmartFactoryBean<Display> mainDisplayBean() {
+    return new SmartFactoryBean<>() {
+
+      private final Display display = display();
+
+      @Override
+      public Display getObject() {
+        return display;
+      }
+
+      @Override
+      public Class<Display> getObjectType() {
+        return Display.class;
+      }
+
+      @Override
+      public boolean isEagerInit() {
+        return true;
+      }
+    };
+  }
+
+  @Bean
+  default SmartFactoryBean<Shell> mainShellBean(Display mainDisplayBean) {
+    return new SmartFactoryBean<>() {
+
+      private final Shell shell = shell(mainDisplayBean);
+
+      @Override
+      public Shell getObject() {
+        return shell;
+      }
+
+      @Override
+      public Class<Shell> getObjectType() {
+        return Shell.class;
+      }
+
+      @Override
+      public boolean isEagerInit() {
+        return true;
+      }
+    };
   }
 
   @Bean

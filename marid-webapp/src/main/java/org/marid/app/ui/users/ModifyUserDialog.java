@@ -23,7 +23,6 @@ import org.marid.app.model.MaridUserInfo;
 import org.marid.common.app.l10n.LCommon;
 import org.marid.common.app.l10n.LUsers;
 import org.marid.rwt.spring.PrototypeScoped;
-import org.marid.rwt.spring.UIContext;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -52,8 +51,8 @@ public class ModifyUserDialog extends Dialog {
   private Button userButton;
   private Button adminButton;
 
-  public ModifyUserDialog(UIContext context, UserDao dao, UsersTable table) {
-    super(context.getShell());
+  public ModifyUserDialog(Shell mainShellBean, UserDao dao, UsersTable table) {
+    super(mainShellBean);
     this.dao = dao;
     this.table = table;
     this.item = table.getSelection()[0];

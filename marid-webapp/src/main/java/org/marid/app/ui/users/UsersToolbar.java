@@ -16,6 +16,7 @@ package org.marid.app.ui.users;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
@@ -23,7 +24,6 @@ import org.marid.app.dao.UserDao;
 import org.marid.app.model.MaridUser;
 import org.marid.common.app.l10n.LUsers;
 import org.marid.common.app.util.UIImages;
-import org.marid.rwt.spring.UIContext;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
@@ -36,8 +36,8 @@ import static org.eclipse.swt.layout.GridData.FILL_HORIZONTAL;
 @Component
 public class UsersToolbar extends ToolBar {
 
-  public UsersToolbar(UIContext context) {
-    super(context.getShell(), BORDER);
+  public UsersToolbar(Shell mainShellBean) {
+    super(mainShellBean, BORDER);
     setLayoutData(new GridData(FILL_HORIZONTAL));
   }
 

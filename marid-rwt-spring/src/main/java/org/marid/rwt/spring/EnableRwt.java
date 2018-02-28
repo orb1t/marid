@@ -90,9 +90,7 @@ class RwtConfiguration {
               child.start();
 
               try {
-                final UIContext uiContext = child.getBean(UIContext.class);
-
-                final Shell shell = uiContext.getShell();
+                final Shell shell = child.getBean("mainShellBean", Shell.class);
                 shell.setData("MARID_END_POINT_NAME", name);
 
                 if (shell.getMaximized()) {

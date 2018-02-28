@@ -24,7 +24,6 @@ import org.marid.app.model.MaridUserInfo;
 import org.marid.common.app.l10n.LCommon;
 import org.marid.common.app.l10n.LUsers;
 import org.marid.rwt.spring.PrototypeScoped;
-import org.marid.rwt.spring.UIContext;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -53,8 +52,8 @@ public class AddUserDialog extends Dialog {
   private Button userButton;
   private Button adminButton;
 
-  public AddUserDialog(UIContext context, UserDao dao, UsersTable table) {
-    super(context.getShell());
+  public AddUserDialog(Shell mainShellBean, UserDao dao, UsersTable table) {
+    super(mainShellBean);
     this.dao = dao;
     this.table = table;
     setBlockOnOpen(false);

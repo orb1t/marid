@@ -15,6 +15,7 @@
 package org.marid.app.ui.users;
 
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.marid.app.dao.UserDao;
@@ -22,7 +23,6 @@ import org.marid.app.model.MaridUser;
 import org.marid.common.app.control.Controls;
 import org.marid.common.app.l10n.LCommon;
 import org.marid.common.app.l10n.LUsers;
-import org.marid.rwt.spring.UIContext;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
@@ -35,8 +35,8 @@ import static org.marid.common.app.control.Controls.column;
 @DependsOn("usersToolbar")
 public class UsersTable extends Table {
 
-  public UsersTable(UIContext context, UserDao dao) {
-    super(context.getShell(), V_SCROLL | BORDER | SINGLE);
+  public UsersTable(Shell mainShellBean, UserDao dao) {
+    super(mainShellBean, V_SCROLL | BORDER | SINGLE);
     setHeaderVisible(true);
     setLinesVisible(true);
     setTouchEnabled(true);
