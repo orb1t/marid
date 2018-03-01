@@ -138,7 +138,7 @@ class RwtConfiguration {
     final RWTServlet servlet = new RWTServlet();
     final ServletRegistrationBean<RWTServlet> bean = new ServletRegistrationBean<>(servlet, "*.marid");
     bean.setName("rwtServlet");
-    bean.setAsyncSupported(false);
+    bean.setAsyncSupported(true);
     bean.setOrder(1);
     return bean;
   }

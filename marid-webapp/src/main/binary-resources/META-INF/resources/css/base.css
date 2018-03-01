@@ -1,0 +1,13 @@
+:root {
+    font-size: var(--base-size);
+}
+
+html, body {
+    height: 100%;
+    background: var(--main-bg);
+    color: var(--main-fg);
+}
+
+input, button {
+    font-size: var(--base-size);
+}

@@ -1,16 +1,10 @@
-@import url("https://fonts.googleapis.com/css?family=Roboto");
-
-* {
-    font-family: 'Roboto', sans-serif;
-}
+@import "theme/default.css";
+@import "base.css";
 
 html, body {
-    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: white;
-    color: black;
 }
 
 .login-footer {
@@ -22,13 +16,6 @@ html, body {
     font-weight: 900;
 }
 
-.header-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 64px;
-}
-
 .section {
     padding: 10px;
     display: flex;
@@ -36,8 +23,17 @@ html, body {
     align-items: baseline;
 }
 
+.section.header {
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.section.header img {
+    margin-right: 10px;
+}
+
 .section label[for="user"]::before {
-    content: url("/svg/person.svg");
+    content: url("../svg/person.svg");
     display: inline-block;
     vertical-align: middle;
     margin-right: 5px;
@@ -49,7 +45,7 @@ html, body {
 }
 
 .section label[for="pass"]::before {
-    content: url("/svg/key.svg");
+    content: url("../svg/key.svg");
     display: inline-block;
     vertical-align: middle;
     margin-right: 5px;
@@ -62,5 +58,10 @@ html, body {
 
 .center-panel {
     border-radius: 5px;
-    border: 3px solid lightgray;
+    border: 3px solid var(--header);
+}
+
+div.center-panel {
+    display: flex;
+    flex-direction: column;
 }
