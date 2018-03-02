@@ -32,3 +32,7 @@ body > div::before {
     margin-bottom: var(--base-padding);
     font-weight: bold;
 }
+
+body > div > a {
+    margin-left: var(--radius);
+}

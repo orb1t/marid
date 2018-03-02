@@ -11,14 +11,19 @@
     <link rel="stylesheet" href="/css/index.css" type="text/css">
 
     <link rel="icon" type="image/png" href="/dyn/marid-icon.png?size=24">
+
+    <script src="/webjars/jquery/3.3.1/dist/jquery.js" type="text/javascript" async></script>
 </head>
+
+<script src="/webjars/angular/1.6.9/angular.js" type="text/javascript"></script>
+
 <body>
 
-<div sec:authorize="hasRole('ROLE_ADMIN')" title="Administration">
+<div sec:authorize="hasRole('ROLE_ADMIN')" th:title="#{Administration}" title="Administration">
     <a href="/users.marid" th:text="#{Users}">Users</a>
 </div>
 
-<div title="Session">
+<div th:title="#{Session}" title="Session">
     <a href="/login?logout" th:text="#{Logout}">Log out</a>
 </div>
 
