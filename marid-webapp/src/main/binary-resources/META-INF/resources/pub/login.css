@@ -1,5 +1,30 @@
-@import "theme/default.css";
-@import "base.css";
+:root {
+    --main-bg: #f5f7f5;
+    --main-fg: #101010;
+    --header: lightgray;
+    --warning: yellow;
+    --error: lightpink;
+    --info: lightblue;
+
+    --base-size: 14px;
+
+    font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+    font-stretch: condensed;
+}
+
+:root {
+    font-size: var(--base-size);
+}
+
+html, body {
+    height: 100%;
+    background: var(--main-bg);
+    color: var(--main-fg);
+}
+
+input, button {
+    font-size: var(--base-size);
+}
 
 html, body {
     display: flex;
@@ -33,7 +58,7 @@ html, body {
 }
 
 .section label[for="user"]::before {
-    content: url("../svg/person.svg");
+    content: url("/pub/person.svg");
     display: inline-block;
     vertical-align: middle;
     margin-right: 5px;
@@ -45,7 +70,7 @@ html, body {
 }
 
 .section label[for="pass"]::before {
-    content: url("../svg/key.svg");
+    content: url("/pub/key.svg");
     display: inline-block;
     vertical-align: middle;
     margin-right: 5px;

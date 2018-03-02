@@ -1,12 +1,17 @@
 :root {
-    --main-bg: #f5f7f5;
+    --main-bg: #f8faf8;
     --main-fg: #101010;
     --header: lightgray;
+    --shadow: gray;
+    --section: lightgreen;
     --warning: yellow;
     --error: lightpink;
     --info: lightblue;
+    --links: green;
 
     --base-size: 14px;
+    --radius: 7px;
+    --base-padding: 5px;
 
-    font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+    --base-font: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
 }

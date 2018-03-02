@@ -1,0 +1,34 @@
+@import "base.css";
+
+html {
+    justify-content: center;
+    align-items: center;
+}
+
+body {
+    border-radius: var(--radius);
+    border: thick solid var(--header);
+    padding: var(--base-size);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: stretch;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+body > div {
+    padding: var(--base-padding);
+}
+
+body > div::before {
+    padding: var(--base-padding);
+    content: attr(title);
+    align-self: flex-start;
+    display: block;
+    background-color: var(--section);
+    border: thin dotted var(--shadow);
+    border-radius: var(--radius);
+    margin-bottom: var(--base-padding);
+    font-weight: bold;
+}

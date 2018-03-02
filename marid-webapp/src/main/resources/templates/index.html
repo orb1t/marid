@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="google" value="notranslate">
+
+    <title>Marid Menu</title>
+
+    <link rel="stylesheet" href="/css/theme/default.css" type="text/css">
+    <link rel="stylesheet" href="/css/index.css" type="text/css">
+
+    <link rel="icon" type="image/png" href="/dyn/marid-icon.png?size=24">
+</head>
+<body>
+
+<div sec:authorize="hasRole('ROLE_ADMIN')" title="Administration">
+    <a href="/users.marid" th:text="#{Users}">Users</a>
+</div>
+
+<div title="Session">
+    <a href="/login?logout" th:text="#{Logout}">Log out</a>
+</div>
+
+</body>
+</html>

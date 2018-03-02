@@ -27,11 +27,6 @@ public class LoginController {
 
   @GetMapping(path = "/error")
   public String error() {
-    return "error";
-  }
-
-  @GetMapping(path = "/")
-  public String root() {
-    return "redirect:/menu.marid";
+    return "login";
   }
 }
