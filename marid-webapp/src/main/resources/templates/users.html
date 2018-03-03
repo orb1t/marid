@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      sec:authorize="hasRole('ROLE_ADMIN')">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="google" value="notranslate">
+
+    <title>Marid Users</title>
+
+    <link rel="stylesheet" href="/webjars/bootstrap/4.0.0-1/css/bootstrap.css" type="text/css">
+    <link rel="stylesheet" href="/css/users.css" type="text/css">
+
+    <link rel="icon" type="image/png" href="/dyn/marid-icon.png?size=24">
+
+    <script src="/webjars/jquery/3.3.1-1/jquery.js" type="text/javascript"></script>
+    <script src="/webjars/angularjs/1.6.9/angular.js" type="text/javascript"></script>
+</head>
+
+<body>
+
+<header>
+    <p>header</p>
+</header>
+
+<main ng-app="">
+    <table>
+        <thead>
+        <tr>
+            <th th:text="#{Name}">Name</th>
+            <th th:text="#{ExpirationDate}">Expiration date</th>
+            <th th:text="#{Admin}">Admin</th>
+            <th th:text="#{User}">User</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr ng-repeat="v in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]">
+            <td>{{v}}</td>
+            <td>{{v}}</td>
+            <td>{{v}}</td>
+            <td>{{v}}</td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+
+<script src="/webjars/bootstrap/4.0.0-1/js/bootstrap.bundle.js" type="text/javascript"></script>
+</body>
+</html>

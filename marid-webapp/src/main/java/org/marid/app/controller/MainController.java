@@ -22,18 +22,25 @@
 package org.marid.app.controller;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 
 @Controller
-public class LoginController {
+public class MainController {
 
-  @GetMapping(path = "/login")
-  public String login() {
-    return "login";
+  @GetMapping(path = "/users.html")
+  public String users() {
+    return "users";
   }
 
-  @GetMapping(path = "/error")
-  public String error() {
-    return "login";
+  @GetMapping(path = {"/", "/index.html"})
+  public String index() {
+    return "index";
+  }
+
+  @ModelAttribute(name = "theme")
+  public String theme(@CookieValue(name = "themeId", defaultValue = "cosmo") String themeId) {
+    return "/css/theme/" + themeId + ".css";
   }
 }

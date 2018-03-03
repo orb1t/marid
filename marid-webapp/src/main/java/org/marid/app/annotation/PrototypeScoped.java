@@ -19,21 +19,19 @@
  * #L%
  */
 
-package org.marid.app.controller;
+package org.marid.app.annotation;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.context.annotation.Scope;
 
-@Controller
-public class LoginController {
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-  @GetMapping(path = "/login")
-  public String login() {
-    return "login";
-  }
+import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 
-  @GetMapping(path = "/error")
-  public String error() {
-    return "login";
-  }
+@Scope(SCOPE_PROTOTYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE, ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+public @interface PrototypeScoped {
 }

@@ -1,27 +1,10 @@
-:root {
-    font-size: var(--base-size);
-}
-
-* {
-    font-family: var(--base-font);
-    font-stretch: condensed;
-}
-
 html {
     display: flex;
     flex-direction: column;
     height: 100%;
 }
 
-body {
-    background: var(--main-bg);
-    color: var(--main-fg);
-}
-
-input, button {
-    font-size: var(--base-size);
-}
-
-a {
-    color: var(--links);
+html, body {
+    margin: 0;
+    padding: 0;
 }

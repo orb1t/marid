@@ -1,0 +1,28 @@
+@import "base.css";
+
+html {
+    justify-content: space-around;
+    align-items: stretch;
+    overflow: hidden;
+}
+
+body {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: stretch;
+    height: 100%;
+}
+
+header {
+    display: flex;
+    justify-content: space-around;
+    align-items: baseline;
+}
+
+main {
+    flex-grow: 1;
+    overflow-x: hidden;
+    overflow-y: auto;
+}

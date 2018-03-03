@@ -1,29 +1,20 @@
-:root {
-    --main-bg: #f5f7f5;
-    --main-fg: #101010;
-    --header: lightgray;
-    --warning: yellow;
-    --error: lightpink;
-    --info: lightblue;
-
-    --base-size: 14px;
-
+* {
     font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
     font-stretch: condensed;
 }
 
 :root {
-    font-size: var(--base-size);
+    font-size: 14px;
 }
 
 html, body {
     height: 100%;
-    background: var(--main-bg);
-    color: var(--main-fg);
+    background: white;
+    color: black;
 }
 
 input, button {
-    font-size: var(--base-size);
+    font-size: 14px;
 }
 
 html, body {
@@ -83,7 +74,7 @@ html, body {
 
 .center-panel {
     border-radius: 5px;
-    border: 3px solid var(--header);
+    border: 3px solid darkseagreen;
 }
 
 div.center-panel {
