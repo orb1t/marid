@@ -3,17 +3,10 @@
 html {
     justify-content: center;
     align-items: center;
-    overflow: hidden;
 }
 
 body {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    align-items: center;
     overflow-x: hidden;
     overflow-y: auto;
-    border-radius: 1rem;
-    border: solid var(--primary);
     width: auto !important;
 }

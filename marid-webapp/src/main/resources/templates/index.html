@@ -5,34 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="google" value="notranslate">
 
-    <title>Marid Menu</title>
+    <title th:text="#{MaridMenu}">Marid Menu</title>
 
-    <link rel="stylesheet" th:href="${theme}" href="/webjars/bootstrap/4.0.0-1/css/bootstrap.css" type="text/css">
+    <link rel="stylesheet" href="/webjars/bootstrap/4.0.0-1/css/bootstrap.css">
     <link rel="stylesheet" href="/css/index.css" type="text/css">
 
     <link rel="icon" type="image/png" href="/dyn/marid-icon.png?size=24">
-
-    <script src="/webjars/jquery/3.3.1-1/jquery.js" type="text/javascript"></script>
-    <script src="/webjars/angularjs/1.6.9/angular.js" type="text/javascript"></script>
-    <script src="js/index.js" type="text/javascript"></script>
 </head>
 
-<body class="container-fluid">
+<body class="container-fluid pt-2 nav flex-column" onload="indexInit(event)">
 
-<div class="nav flex-column nav-pills" role="tablist" aria-orientation="vertical" id="menu">
-    <!-- Users -->
-    <a class="nav-link"
-       href="/users.html"
-       th:text="#{Users}"
-       sec:authorize="hasRole('ROLE_ADMIN')"
-       target="_blank">Users</a>
-    <!-- Log out -->
-    <a class="nav-link"
-       href="/login?logout"
-       th:text="#{Logout}">Log out</a>
-</div>
+<th:block sec:authorize="hasRole('ADMIN')">
+    <div class="card-header" th:text="#{Administration}">Administration</div>
+    <a class="nav-link" href="/users.html" th:text="#{Users}" target="_blank">Users</a>
+</th:block>
 
+<div class="card-header" th:text="#{Session}">Session</div>
+<a class="nav-link" href="/login?logout" th:text="#{Logout}">Log out</a>
+
+<script src="/webjars/jquery/3.3.1-1/jquery.js" type="text/javascript"></script>
 <script src="/webjars/bootstrap/4.0.0-1/js/bootstrap.bundle.js" type="text/javascript"></script>
-
+<script src="js/index.js" type="text/javascript"></script>
 </body>
 </html>

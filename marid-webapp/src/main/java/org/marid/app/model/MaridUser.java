@@ -23,12 +23,12 @@ package org.marid.app.model;
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.Set;
+import java.util.function.UnaryOperator;
 
 import static java.util.stream.Collectors.toSet;
 
@@ -95,9 +95,9 @@ public class MaridUser implements UserDetails {
     return getAuthorities().contains(new SimpleGrantedAuthority("ROLE_USER"));
   }
 
-  public MaridUserInfo toInfo(PasswordEncoder passwordEncoder) {
+  public MaridUserInfo toInfo(UnaryOperator<String> passwordEncoder) {
     return new MaridUserInfo(
-        "{bcrypt}" + passwordEncoder.encode(password),
+        "{bcrypt}" + passwordEncoder.apply(password),
         enabled,
         expirationDate.toString(),
         authorities.stream().map(SimpleGrantedAuthority::getAuthority).toArray(String[]::new)

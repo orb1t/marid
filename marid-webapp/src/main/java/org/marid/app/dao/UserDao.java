@@ -105,7 +105,7 @@ public class UserDao implements UserDetailsService {
         );
       } else {
         Files.createDirectories(userDir);
-        info = user.toInfo(new BCryptPasswordEncoder());
+        info = user.toInfo(new BCryptPasswordEncoder()::encode);
       }
       try (final Writer writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8)) {
         mapper.writeValue(writer, info);

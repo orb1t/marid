@@ -21,7 +21,6 @@
 
 package org.marid.app;
 
-import j2html.Config;
 import org.marid.app.annotation.PrototypeScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +66,6 @@ public class Context {
   }
 
   public static void main(String... args) {
-    Config.closeEmptyTags = true;
     SpringApplication.run(Context.class, args);
   }
 }

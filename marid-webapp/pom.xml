@@ -9,10 +9,6 @@
 
   <artifactId>marid-webapp</artifactId>
 
-  <properties>
-    <rwt.fonts>Verdana, "Lucida Sans", Arial, Helvetica, sans-serif</rwt.fonts>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>org.apache.maven.resolver</groupId>
@@ -56,15 +52,15 @@
     </dependency>
 
     <dependency>
-      <groupId>org.marid</groupId>
-      <artifactId>marid-runtime</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
       <groupId>com.j2html</groupId>
       <artifactId>j2html</artifactId>
       <version>1.2.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.marid</groupId>
+      <artifactId>marid-runtime</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <!-- webjars -->
@@ -72,12 +68,6 @@
       <groupId>org.webjars</groupId>
       <artifactId>bootstrap</artifactId>
       <version>4.0.0-1</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.webjars</groupId>
-      <artifactId>angularjs</artifactId>
-      <version>1.6.9</version>
     </dependency>
 
     <!-- test -->
@@ -130,6 +120,14 @@
           <jvmArguments>--add-opens java.base/jdk.internal.ref=ALL-UNNAMED</jvmArguments>
           <attach>false</attach>
           <finalName>${project.name}</finalName>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+        <configuration>
+          <roots>src/main/java,src/main/binary-resources/js</roots>
         </configuration>
       </plugin>
     </plugins>
