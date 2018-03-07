@@ -21,21 +21,22 @@
 
 package org.marid.app.controller;
 
+import org.marid.app.dao.UserDao;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
 @Controller
-public class MainController {
+public class UsersController {
 
-  @GetMapping(path = {"/", "/index.html"})
-  public String index() {
-    return "index";
+  @GetMapping(path = "/users.html")
+  public String users() {
+    return "users";
   }
 
-  @ModelAttribute(name = "theme")
-  public String theme(@CookieValue(name = "themeId", defaultValue = "cosmo") String themeId) {
-    return "/css/theme/" + themeId + ".css";
+  @ModelAttribute(name = "dao")
+  public UserDao usersDao(@Autowired UserDao userDao) {
+    return userDao;
   }
 }
