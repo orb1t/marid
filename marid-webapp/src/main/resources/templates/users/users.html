@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      sec:authorize="hasRole('ROLE_ADMIN')">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="google" content="notranslate">
+
+    <title>Marid Users</title>
+
+    <link rel="stylesheet" href="/webjars/bootstrap/4.0.0-1/css/bootstrap.css" type="text/css">
+    <link rel="stylesheet" href="/css/users.css" type="text/css">
+
+    <link rel="icon" type="image/png" href="/dyn/marid-icon.png?size=24">
+</head>
+
+<body class="container-fluid px-1">
+
+<header class="navbar navbar-expand-lg navbar-dark bg-dark my-1">
+    <ul class="navbar-nav mr-auto">
+        <li th:replace="/parts/session.html :: sessionMenu"></li>
+    </ul>
+</header>
+
+<main class="my-1">
+    <div class="mr-1">
+        <table class="table table-hover table-bordered table-striped table-sm" id="usersTable">
+            <tr th:each="user : ${dao.getUsers()}">
+                <td th:text="${user.username}">Name</td>
+            </tr>
+        </table>
+    </div>
+    <form class="container-fluid" id="userContainer">
+
+    </form>
+</main>
+
+<script src="/webjars/jquery/3.3.1-1/jquery.js" type="text/javascript"></script>
+<script src="/webjars/bootstrap/4.0.0-1/js/bootstrap.bundle.js" type="text/javascript"></script>
+<script src="/js/users.js" type="text/javascript"></script>
+</body>
+</html>

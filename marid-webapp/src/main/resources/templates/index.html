@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="google" value="notranslate">
+    <meta name="google" content="notranslate">
 
     <title th:text="#{MaridMenu}">Marid Menu</title>
 
@@ -17,7 +17,7 @@
 
 <th:block sec:authorize="hasRole('ADMIN')">
     <div class="card-header" th:text="#{Administration}">Administration</div>
-    <a class="nav-link" href="/users.html" th:text="#{Users}" target="_blank">Users</a>
+    <a class="nav-link" href="/users/users.html" th:text="#{Users}" target="_blank">Users</a>
 </th:block>
 
 <div class="card-header" th:text="#{Session}">Session</div>

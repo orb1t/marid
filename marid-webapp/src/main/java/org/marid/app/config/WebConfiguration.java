@@ -21,8 +21,12 @@
 
 package org.marid.app.config;
 
+import org.slf4j.Logger;
+import org.springframework.boot.autoconfigure.web.servlet.error.ErrorViewResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -34,11 +38,26 @@ import java.util.Locale;
 @Configuration
 public class WebConfiguration implements WebMvcConfigurer {
 
+  private final Logger logger;
+
+  public WebConfiguration(Logger logger) {
+    this.logger = logger;
+  }
+
   @Bean
   public LocaleResolver localeResolver() {
     final SessionLocaleResolver resolver = new SessionLocaleResolver();
     resolver.setDefaultLocale(Locale.UK);
     return resolver;
+  }
+
+  @Bean
+  @Order(Ordered.HIGHEST_PRECEDENCE)
+  public ErrorViewResolver maridErrorViewResolver() {
+    return (request, status, model) -> {
+      System.out.println(model);
+      return null;
+    };
   }
 
   @Override

@@ -18,3 +18,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+
+function showUser(name) {
+    $("#userContainer").load("/users/user.html?" + $.param({name: name}) + " form > *");
+}
+
+const usersTable = $("#usersTable");
+
+usersTable.find("td").click(e => {
+    usersTable.find("td").removeClass("table-primary");
+    $(e.target).addClass("table-primary");
+    showUser(e.target.textContent);
+});
+
+usersTable.find("td").first().click();

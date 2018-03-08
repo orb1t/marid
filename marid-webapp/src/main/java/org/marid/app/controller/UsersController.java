@@ -22,21 +22,36 @@
 package org.marid.app.controller;
 
 import org.marid.app.dao.UserDao;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
+@RequestMapping(path = "/users")
 public class UsersController {
+
+  private final UserDao userDao;
+
+  public UsersController(UserDao userDao) {
+    this.userDao = userDao;
+  }
 
   @GetMapping(path = "/users.html")
   public String users() {
-    return "users";
+    return "users/users";
+  }
+
+  @GetMapping(path = "/user.html")
+  public String user(@RequestParam String name, Model model) {
+    model.addAttribute("user", userDao.loadUserByUsername(name));
+    return "users/user";
   }
 
   @ModelAttribute(name = "dao")
-  public UserDao usersDao(@Autowired UserDao userDao) {
+  public UserDao usersDao() {
     return userDao;
   }
 }

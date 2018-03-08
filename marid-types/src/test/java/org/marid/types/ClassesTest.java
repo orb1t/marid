@@ -55,7 +55,7 @@ public class ClassesTest {
   }
 
   @Test(groups = {TestGroups.NORMAL}, dataProvider = "classesTestData")
-  void testClasses(Class<?> target, List<Class<?>> expected) {
+  public void testClasses(Class<?> target, List<Class<?>> expected) {
     final List<Class<?>> actual = Classes.classes(target).collect(toList());
 
     assertEquals(actual, expected);

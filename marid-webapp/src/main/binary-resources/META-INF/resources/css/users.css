@@ -28,10 +28,25 @@ header {
 main {
     flex-grow: 1;
     height: 100%;
-    overflow-x: hidden;
-    overflow-y: auto;
+    overflow: hidden;
+
+    display: flex;
+    align-items: stretch;
 }
 
-header, main {
-    margin: 1rem;
+main > div:nth-child(1) {
+    max-width: 30%;
+    height: 100%;
+    overflow: auto;
+}
+
+main > div:nth-child(1) table td {
+    cursor: pointer;
+}
+
+#userContainer {
+    height: 100%;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
 }

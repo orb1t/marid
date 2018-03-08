@@ -31,9 +31,4 @@ public class LoginController {
   public String login() {
     return "login";
   }
-
-  @GetMapping(path = "/error")
-  public String error() {
-    return "login";
-  }
 }

@@ -35,7 +35,7 @@ public class MainController {
   }
 
   @ModelAttribute(name = "theme")
-  public String theme(@CookieValue(name = "themeId", defaultValue = "cosmo") String themeId) {
-    return "/css/theme/" + themeId + ".css";
+  public String theme(@CookieValue(name = "themeId", defaultValue = "cyborg") String themeId) {
+    return "/css/themes/" + themeId + ".css";
   }
 }
