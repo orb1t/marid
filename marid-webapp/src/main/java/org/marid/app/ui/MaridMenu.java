@@ -22,9 +22,11 @@
 package org.marid.app.ui;
 
 import javax.annotation.ManagedBean;
+import javax.faces.view.ViewScoped;
 
 @ManagedBean
-public class HelloWorld {
+@ViewScoped
+public class MaridMenu {
 
   private String firstName = "John";
   private String lastName = "Doe";

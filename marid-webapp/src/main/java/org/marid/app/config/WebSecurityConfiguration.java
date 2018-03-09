@@ -48,6 +48,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     http
         .formLogin()
         .loginPage("/login")
+        .defaultSuccessUrl("/admin/admin.xhtml", true)
         .permitAll();
     http
         .logout()
