@@ -47,6 +47,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         .authenticated();
     http
         .formLogin()
+        .defaultSuccessUrl("/users/users.marid", true)
         .loginPage("/login")
         .permitAll();
     http
