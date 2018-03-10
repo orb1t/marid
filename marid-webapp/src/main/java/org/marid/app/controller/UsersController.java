@@ -22,14 +22,14 @@
 package org.marid.app.controller;
 
 import org.marid.app.dao.UserDao;
+import org.marid.app.model.MaridUser;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
+@PreAuthorize("hasRole('ADMIN')")
 @RequestMapping(path = "/users")
 public class UsersController {
 
@@ -48,6 +48,12 @@ public class UsersController {
   public String user(@RequestParam String name, Model model) {
     model.addAttribute("user", userDao.loadUserByUsername(name));
     return "users/user";
+  }
+
+  @GetMapping(path = "/names")
+  @ResponseBody
+  public String[] usersData() {
+    return userDao.getUsers().stream().map(MaridUser::getUsername).toArray(String[]::new);
   }
 
   @ModelAttribute(name = "dao")

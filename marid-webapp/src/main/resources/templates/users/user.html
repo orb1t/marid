@@ -1,22 +1,22 @@
-<form xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-      sec:authorize="hasRole('ROLE_ADMIN')">
+<form xmlns:th="http://www.thymeleaf.org">
 
-    <div class="form-group">
+    <div class="field">
         <label for="name" th:text="#{Name}">Name</label>
         <input type="text" class="form-control" id="name" disabled th:value="${user.username}">
     </div>
 
-    <div class="form-group">
+    <div class="field">
         <label for="date" th:text="#{ExpirationDate}">Expiration date</label>
         <input type="date" class="form-control" id="date" th:value="${user.expirationDate}">
     </div>
 
-    <div class="form-group">
+    <div class="field">
         <label for="admin" th:text="#{Admin}">Admin</label>
         <input type="checkbox" class="form-check" id="admin" th:checked="${user.isAdmin()}">
     </div>
 
-    <div class="form-group">
+    <div class="field">
         <button type="submit" class="btn btn-primary" th:text="#{Submit}">Submit</button>
     </div>
+
 </form>

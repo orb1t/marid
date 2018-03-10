@@ -26,6 +26,8 @@ function showUser(name) {
 const users = $("#users");
 
 users.find("a").click(e => {
+    users.find("a.active").removeClass("active");
+    $(e.target).addClass("active");
     showUser(e.target.textContent);
 });
 
