@@ -18,11 +18,8 @@ body {
     height: 100%;
 }
 
-header {
-    display: flex;
-    justify-content: space-around;
-    align-items: baseline;
-    height: auto;
+#menu {
+    margin-bottom: 0 !important;
 }
 
 main {
@@ -32,20 +29,25 @@ main {
 
     display: flex;
     align-items: stretch;
+
+    padding: 0.5rem;
 }
 
-main > div:nth-child(1) {
-    max-width: 30%;
-    height: 100%;
+main > * {
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+#users {
+    max-width: 40%;
+    height: auto;
     overflow: auto;
 }
 
-main > div:nth-child(1) table td {
-    cursor: pointer;
-}
-
 #userContainer {
-    height: 100%;
+    height: auto;
     overflow: auto;
     display: flex;
     flex-direction: column;

@@ -19,23 +19,14 @@
  * #L%
  */
 
-package org.marid.app.wicket;
-
-import org.apache.wicket.protocol.http.WicketFilter;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
-@Configuration
-public class WicketConfiguration {
-
-  @Bean
-  public FilterRegistrationBean<WicketFilter> wicketFilterBean(MaridApplication application) {
-    final FilterRegistrationBean<WicketFilter> bean = new FilterRegistrationBean<>();
-    bean.setFilter(new WicketFilter(application));
-    bean.setAsyncSupported(true);
-    bean.addUrlPatterns("*.marid");
-    bean.addInitParameter(WicketFilter.FILTER_MAPPING_PARAM, "/*");
-    return bean;
-  }
+function showUser(name) {
+    $("#userContainer").load("/users/user.html?" + $.param({name: name}) + " form > *");
 }
+
+const users = $("#users");
+
+users.find("a").click(e => {
+    showUser(e.target.textContent);
+});
+
+users.find("a").first().click();

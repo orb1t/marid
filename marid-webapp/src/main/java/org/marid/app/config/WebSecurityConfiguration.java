@@ -47,7 +47,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         .authenticated();
     http
         .formLogin()
-        .defaultSuccessUrl("/users/users.marid", true)
+        .defaultSuccessUrl("/index.html", true)
         .loginPage("/login")
         .permitAll();
     http
@@ -57,20 +57,6 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         .headers()
         .httpStrictTransportSecurity()
         .disable();
-    http
-        .csrf()
-        .requireCsrfProtectionMatcher(r -> {
-          switch (r.getMethod()) {
-            case "GET":
-            case "HEAD":
-            case "TRACE":
-            case "OPTIONS":
-              return false;
-            default: {
-              return !r.getContextPath().endsWith(".marid");
-            }
-          }
-        });
   }
 
   @Autowired

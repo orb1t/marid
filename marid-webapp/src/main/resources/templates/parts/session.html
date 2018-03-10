@@ -1,13 +1,8 @@
-<li class="nav-item dropdown" xmlns:th="http://www.thymeleaf.org" th:fragment="sessionMenu">
-    <a class="nav-link dropdown-toggle"
-       href="#"
-       id="session"
-       role="button"
-       data-toggle="dropdown"
-       th:text="#{Session}">Session</a>
-    <div class="dropdown-menu">
-        <a class="dropdown-item" href="/" th:text="#{Home}">Home</a>
-        <div class="dropdown-divider"></div>
-        <a class="dropdown-item" href="/login?logout" th:text="#{Logout}">Log out</a>
+<div class="ui simple dropdown item" xmlns:th="http://www.thymeleaf.org" th:fragment="sessionMenu">
+    <span th:text="#{Session}"></span>
+    <i class="dropdown icon"></i>
+    <div class="menu">
+        <a class="item" href="/" th:text="#{Home}"></a>
+        <a class="item" href="/login?logout" th:text="#{Logout}">Log out</a>
     </div>
-</li>
+</div>

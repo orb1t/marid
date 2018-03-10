@@ -13,5 +13,6 @@ html {
 body {
     overflow-x: hidden;
     overflow-y: auto;
-    width: auto !important;
+    height: auto;
+    width: auto;
 }
