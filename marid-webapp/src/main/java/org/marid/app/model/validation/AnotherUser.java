@@ -19,29 +19,23 @@
  * #L%
  */
 
-package org.marid.app.controller;
+package org.marid.app.model.validation;
 
-import org.marid.app.common.Emitters;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import javax.validation.Constraint;
+import javax.validation.Payload;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-@Controller
-public class MainController {
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD})
+@Constraint(validatedBy = {AnotherUserConstraint.class})
+public @interface AnotherUser {
 
-  private final Emitters emitters;
+  String message();
 
-  public MainController(Emitters emitters) {
-    this.emitters = emitters;
-  }
+  Class<?>[] groups() default {};
 
-  @GetMapping(path = {"/", "/index.html"})
-  public String index() {
-    return "index";
-  }
-
-  @GetMapping(path = "/events")
-  public SseEmitter emitter() {
-    return emitters.add();
-  }
+  Class<? extends Payload>[] payload() default {};
 }

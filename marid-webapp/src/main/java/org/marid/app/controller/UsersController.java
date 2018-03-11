@@ -22,11 +22,18 @@
 package org.marid.app.controller;
 
 import org.marid.app.dao.UserDao;
-import org.marid.app.model.MaridUser;
+import org.marid.app.model.ModifiedUser;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 
 @Controller
 @PreAuthorize("hasRole('ADMIN')")
@@ -50,10 +57,15 @@ public class UsersController {
     return "users/user";
   }
 
-  @GetMapping(path = "/names")
+  @PostMapping(path = "/userEdit")
   @ResponseBody
-  public String[] usersData() {
-    return userDao.getUsers().stream().map(MaridUser::getUsername).toArray(String[]::new);
+  public List<ObjectError> editUser(@ModelAttribute @Valid ModifiedUser user, BindingResult result) throws IOException {
+    if (result.hasErrors()) {
+      return result.getAllErrors();
+    } else {
+      userDao.saveUser(user);
+      return Collections.emptyList();
+    }
   }
 
   @ModelAttribute(name = "dao")

@@ -23,6 +23,7 @@ package org.marid.app.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 
@@ -49,6 +50,10 @@ public class MaridUserInfo {
     this.enabled = enabled;
     this.expirationDate = expirationDate;
     this.authorities = Set.of(authorities);
+  }
+
+  public MaridUserInfo(@NotNull MaridUserInfo user, @NotNull ModifiedUser modifiedUser) {
+    this(user.password, user.enabled, modifiedUser.date.toString(), modifiedUser.getRoles());
   }
 
   @Override

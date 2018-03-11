@@ -19,29 +19,22 @@
  * #L%
  */
 
-package org.marid.app.controller;
+package org.marid.app.model.validation;
 
-import org.marid.app.common.Emitters;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
-@Controller
-public class MainController {
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
+import java.lang.annotation.Annotation;
 
-  private final Emitters emitters;
+public class AnotherUserConstraint implements ConstraintValidator<Annotation, String> {
 
-  public MainController(Emitters emitters) {
-    this.emitters = emitters;
-  }
-
-  @GetMapping(path = {"/", "/index.html"})
-  public String index() {
-    return "index";
-  }
-
-  @GetMapping(path = "/events")
-  public SseEmitter emitter() {
-    return emitters.add();
+  @Override
+  public boolean isValid(String value, ConstraintValidatorContext context) {
+    final SecurityContext securityContext = SecurityContextHolder.getContext();
+    final Authentication authentication = securityContext.getAuthentication();
+    return !authentication.getName().equals(value);
   }
 }

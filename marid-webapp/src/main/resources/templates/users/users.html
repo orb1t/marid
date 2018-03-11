@@ -24,11 +24,12 @@
     <div class="ui vertical pointing menu" id="users">
         <a class="item" th:each="user: ${dao.users}" th:text="${user.username}">Name</a>
     </div>
-    <form class="ui form segment" id="userContainer"></form>
+    <form class="ui form segment" id="userContainer" method="post" th:action="@{~/users/userEdit}"></form>
 </main>
 
 <script src="/webjars/jquery/3.3.1/dist/jquery.js" type="text/javascript"></script>
 <script src="/webjars/semantic/2.3.0/dist/semantic.js" type="text/javascript"></script>
+<script src="/js/sse.js" type="text/javascript"></script>
 <script src="/js/users.js" type="text/javascript"></script>
 </body>
 </html>

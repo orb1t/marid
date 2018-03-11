@@ -26,22 +26,22 @@ import com.google.common.io.MoreFiles;
 import org.marid.app.common.Directories;
 import org.marid.app.model.MaridUser;
 import org.marid.app.model.MaridUserInfo;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.marid.app.model.ModifiedUser;
+import org.marid.io.IO;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.io.UncheckedIOException;
-import java.io.Writer;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Repository
 public class UserDao implements UserDetailsService {
@@ -59,7 +59,7 @@ public class UserDao implements UserDetailsService {
     final Path userDir = directories.getUsers().resolve(username);
     final Path file = userDir.resolve("info.json");
 
-    try (final Reader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
+    try (final Reader reader = Files.newBufferedReader(file, UTF_8)) {
       final MaridUserInfo userInfo = mapper.readValue(reader, MaridUserInfo.class);
       return new MaridUser(username, userInfo);
     } catch (Exception x) {
@@ -74,7 +74,7 @@ public class UserDao implements UserDetailsService {
     try (final DirectoryStream<Path> stream = Files.newDirectoryStream(usersDir, Files::isDirectory)) {
       for (final Path userDir : stream) {
         final Path file = userDir.resolve("info.json");
-        try (final Reader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
+        try (final Reader reader = Files.newBufferedReader(file, UTF_8)) {
           final MaridUserInfo userInfo = mapper.readValue(reader, MaridUserInfo.class);
           users.add(new MaridUser(userDir.getFileName().toString(), userInfo));
         }
@@ -86,32 +86,18 @@ public class UserDao implements UserDetailsService {
     return users;
   }
 
-  public void saveUser(MaridUser user) {
-    final Path userDir = directories.getUsers().resolve(user.getUsername());
+  public void saveUser(ModifiedUser user) throws IOException {
+    final Path userDir = directories.getUsers().resolve(user.name);
     final Path file = userDir.resolve("info.json");
 
-    try {
-      final MaridUserInfo info;
-      if (Files.isRegularFile(file)) {
-        final MaridUserInfo userInfo;
-        try (final Reader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
-          userInfo = mapper.readValue(reader, MaridUserInfo.class);
-        }
-        info = new MaridUserInfo(
-            userInfo.password,
-            user.isEnabled(),
-            user.getExpirationDate().toString(),
-            user.getAuthorities().stream().map(SimpleGrantedAuthority::getAuthority).toArray(String[]::new)
-        );
-      } else {
-        Files.createDirectories(userDir);
-        info = user.toInfo(new BCryptPasswordEncoder()::encode);
+    if (Files.isRegularFile(file)) {
+      try (final IO io = new IO(file)) {
+        final MaridUserInfo userInfo = mapper.readValue(io.getInput(), MaridUserInfo.class);
+        io.trim();
+        mapper.writeValue(io.getOutput(), new MaridUserInfo(userInfo, user));
       }
-      try (final Writer writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8)) {
-        mapper.writeValue(writer, info);
-      }
-    } catch (Exception x) {
-      throw new IllegalStateException(x);
+    } else {
+      throw new IllegalStateException("No such user " + user.name);
     }
   }
 

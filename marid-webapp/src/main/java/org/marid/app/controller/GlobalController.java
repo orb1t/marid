@@ -21,27 +21,29 @@
 
 package org.marid.app.controller;
 
-import org.marid.app.common.Emitters;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import org.slf4j.Logger;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-@Controller
-public class MainController {
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
-  private final Emitters emitters;
+import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 
-  public MainController(Emitters emitters) {
-    this.emitters = emitters;
+@ControllerAdvice
+public class GlobalController {
+
+  private final Logger logger;
+
+  public GlobalController(Logger logger) {
+    this.logger = logger;
   }
 
-  @GetMapping(path = {"/", "/index.html"})
-  public String index() {
-    return "index";
-  }
-
-  @GetMapping(path = "/events")
-  public SseEmitter emitter() {
-    return emitters.add();
+  @ExceptionHandler
+  @ResponseBody
+  public void onException(Throwable exception, HttpServletResponse response) throws IOException {
+    logger.error("Unexpected exception", exception);
+    response.sendError(SC_INTERNAL_SERVER_ERROR, exception.getMessage());
   }
 }

@@ -1,22 +1,22 @@
-<form xmlns:th="http://www.thymeleaf.org">
+<form xmlns:th="http://www.thymeleaf.org" method="post" th:action="@{~/users/userEdit}">
 
     <div class="field">
         <label for="name" th:text="#{Name}">Name</label>
-        <input type="text" class="form-control" id="name" disabled th:value="${user.username}">
+        <input class="ui input" type="text" id="name" name="name" readonly th:value="${user.username}">
     </div>
 
     <div class="field">
         <label for="date" th:text="#{ExpirationDate}">Expiration date</label>
-        <input type="date" class="form-control" id="date" th:value="${user.expirationDate}">
+        <input class="ui input" type="date" id="date" name="date" th:value="${user.expirationDate}">
     </div>
 
-    <div class="field">
+    <div class="field ui checkbox">
+        <input type="checkbox" name="admin" id="admin" th:checked="${user.isAdmin()}">
         <label for="admin" th:text="#{Admin}">Admin</label>
-        <input type="checkbox" class="form-check" id="admin" th:checked="${user.isAdmin()}">
     </div>
 
     <div class="field">
-        <button type="submit" class="btn btn-primary" th:text="#{Submit}">Submit</button>
+        <button class="ui primary button" type="submit" th:text="#{Submit}">Submit</button>
     </div>
 
 </form>
