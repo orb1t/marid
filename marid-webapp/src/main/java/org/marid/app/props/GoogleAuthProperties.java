@@ -19,29 +19,30 @@
  * #L%
  */
 
-package org.marid.app.controller;
+package org.marid.app.props;
 
-import org.marid.app.common.Emitters;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@Controller
-public class MainController {
+@ConfigurationProperties("google-auth")
+public class GoogleAuthProperties {
 
-  private final Emitters emitters;
+  private String clientId;
 
-  public MainController(Emitters emitters) {
-    this.emitters = emitters;
+  private String secret;
+
+  public String getClientId() {
+    return clientId;
   }
 
-  @GetMapping(path = {"/", "/index.html"})
-  public String index() {
-    return "index";
+  public void setClientId(String clientId) {
+    this.clientId = clientId;
   }
 
-  @GetMapping(path = "/events")
-  public SseEmitter emitter() {
-    return emitters.add();
+  public String getSecret() {
+    return secret;
+  }
+
+  public void setSecret(String secret) {
+    this.secret = secret;
   }
 }

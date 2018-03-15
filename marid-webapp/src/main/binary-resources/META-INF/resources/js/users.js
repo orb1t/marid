@@ -13,4 +13,15 @@ users.find("a").click(e => {
 
 users.find("a").first().click();
 
-initSubmit(userContainer);
+userContainer.submit(e => {
+    const form = userContainer;
+    $.ajax({
+        url: form.attr("action"),
+        type: form.attr("method"),
+        data: form.serialize(),
+        success: data => {
+            userContainer.innerHTML = data;
+        }
+    });
+    return false;
+});

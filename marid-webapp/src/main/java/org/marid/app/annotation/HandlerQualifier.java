@@ -19,23 +19,17 @@
  * #L%
  */
 
-package org.marid.app.model.validation;
+package org.marid.app.annotation;
 
-import javax.validation.Constraint;
-import javax.validation.Payload;
+import org.springframework.beans.factory.annotation.Qualifier;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD})
-@Constraint(validatedBy = {AnotherUserConstraint.class})
-public @interface AnotherUser {
-
-  String message();
-
-  Class<?>[] groups() default {};
-
-  Class<? extends Payload>[] payload() default {};
+@Target({ElementType.ANNOTATION_TYPE, ElementType.PARAMETER, ElementType.FIELD})
+@Qualifier
+public @interface HandlerQualifier {
 }

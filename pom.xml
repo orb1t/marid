@@ -505,7 +505,7 @@
           <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
           <organizeLicensesByDependencies>true</organizeLicensesByDependencies>
           <emptyLineAfterHeader>true</emptyLineAfterHeader>
-          <roots>src/main/java</roots>
+          <roots>src/main/java,src/test/java</roots>
           <canUpdateDescription>true</canUpdateDescription>
         </configuration>
       </plugin>
@@ -537,12 +537,6 @@
         <groupId>org.objenesis</groupId>
         <artifactId>objenesis</artifactId>
         <version>2.6</version>
-      </dependency>
-
-      <dependency>
-        <groupId>com.google.code.gson</groupId>
-        <artifactId>gson</artifactId>
-        <version>2.8.2</version>
       </dependency>
 
       <dependency>
@@ -578,7 +572,7 @@
       <dependency>
         <groupId>org.mockito</groupId>
         <artifactId>mockito-core</artifactId>
-        <version>2.13.0</version>
+        <version>2.15.0</version>
       </dependency>
 
       <dependency>
@@ -590,7 +584,7 @@
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>23.6-jre</version>
+        <version>24.0-jre</version>
       </dependency>
 
       <dependency>
@@ -608,41 +602,21 @@
       <dependency>
         <groupId>org.jboss.logmanager</groupId>
         <artifactId>jboss-logmanager</artifactId>
-        <version>2.0.8.Final</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.apache.maven.resolver</groupId>
-        <artifactId>maven-resolver-transport-http</artifactId>
-        <version>1.1.0</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.apache.maven.resolver</groupId>
-        <artifactId>maven-resolver-transport-file</artifactId>
-        <version>1.1.0</version>
+        <version>2.0.9.Final</version>
       </dependency>
 
       <dependency>
         <groupId>org.apache.maven.resolver</groupId>
         <artifactId>maven-resolver</artifactId>
-        <version>1.1.0</version>
+        <version>1.1.1</version>
         <scope>import</scope>
         <type>pom</type>
-      </dependency>
-
-      <dependency>
-        <groupId>org.apache.maven</groupId>
-        <artifactId>maven</artifactId>
-        <version>3.5.2</version>
-        <type>pom</type>
-        <scope>import</scope>
       </dependency>
 
       <dependency>
         <groupId>org.openjdk.jmh</groupId>
         <artifactId>jmh-generator-annprocess</artifactId>
-        <version>1.19</version>
+        <version>1.20</version>
       </dependency>
 
       <dependency>

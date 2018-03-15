@@ -1,29 +1,11 @@
-server:
-  port: 8443
-  ssl:
-    enabled: true
-    key-alias: marid
-    key-store: classpath:marid.jks
-    key-store-type: JKS
-    key-password: 123456
-    key-store-provider: SUN
-    key-store-password: 123456
-  servlet:
-    session:
-      cookie:
-        name: sid
-        http-only: true
-        secure: true
-  error:
-    include-exception: true
-    include-stacktrace: always
 logging:
   level:
     root: info
   pattern:
     dateformat: HH:mm:ss.SSS
 spring:
-  jackson:
-    time-zone: GMT
-    serialization:
-      write_dates_as_timestamps: false
+  profiles:
+    active: development
+google-auth:
+  client-id: 550447960909-qeraf9lf99aqgrneulucf1knce72t0t4.apps.googleusercontent.com
+  secret: 2KOkcFia7Vmjm13ryJ9E9YZR

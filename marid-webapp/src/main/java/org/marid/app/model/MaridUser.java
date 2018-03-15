@@ -21,64 +21,46 @@
 
 package org.marid.app.model;
 
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import java.util.Collection;
 import java.util.Set;
-import java.util.function.UnaryOperator;
 
-import static java.util.stream.Collectors.toSet;
-
-public class MaridUser implements UserDetails {
+public class MaridUser {
 
   private final String username;
   private final String password;
   private final boolean enabled;
   private final LocalDate expirationDate;
-  private final Set<SimpleGrantedAuthority> authorities;
+  private final Set<String> authorities;
 
-  public MaridUser(String username, MaridUserInfo userInfo) {
+  public MaridUser(String username, String password, boolean enabled, LocalDate expirationDate, Set<String> authorities) {
     this.username = username;
-    this.password = userInfo.password;
-    this.enabled = userInfo.enabled;
-    this.expirationDate = LocalDate.parse(userInfo.expirationDate);
-    this.authorities = userInfo.authorities.stream().map(SimpleGrantedAuthority::new).collect(toSet());
+    this.password = password;
+    this.enabled = enabled;
+    this.expirationDate = expirationDate;
+    this.authorities = authorities;
   }
 
-  @Override
-  public Collection<SimpleGrantedAuthority> getAuthorities() {
+  public Set<String> getAuthorities() {
     return authorities;
   }
 
-  @Override
   public String getPassword() {
     return password;
   }
 
-  @Override
   public String getUsername() {
     return username;
   }
 
-  @Override
   public boolean isAccountNonExpired() {
     return expirationDate.compareTo(LocalDate.now(ZoneOffset.UTC)) >= 0;
   }
 
-  @Override
-  public boolean isAccountNonLocked() {
-    return true;
-  }
-
-  @Override
   public boolean isCredentialsNonExpired() {
     return isAccountNonExpired();
   }
 
-  @Override
   public boolean isEnabled() {
     return enabled;
   }
@@ -88,19 +70,10 @@ public class MaridUser implements UserDetails {
   }
 
   public boolean isAdmin() {
-    return getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
+    return getAuthorities().contains("ROLE_ADMIN");
   }
 
   public boolean isUser() {
-    return getAuthorities().contains(new SimpleGrantedAuthority("ROLE_USER"));
-  }
-
-  public MaridUserInfo toInfo(UnaryOperator<String> passwordEncoder) {
-    return new MaridUserInfo(
-        "{bcrypt}" + passwordEncoder.apply(password),
-        enabled,
-        expirationDate.toString(),
-        authorities.stream().map(SimpleGrantedAuthority::getAuthority).toArray(String[]::new)
-    );
+    return getAuthorities().contains("ROLE_USER");
   }
 }

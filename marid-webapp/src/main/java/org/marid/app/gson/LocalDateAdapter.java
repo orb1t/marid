@@ -19,31 +19,31 @@
  * #L%
  */
 
-package org.marid.app.controller;
+package org.marid.app.gson;
 
-import org.slf4j.Logger;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.JsonWriter;
+import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDate;
 
-import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+@Component
+public class LocalDateAdapter extends TypeAdapter<LocalDate> {
 
-@ControllerAdvice
-public class GlobalController {
-
-  private final Logger logger;
-
-  public GlobalController(Logger logger) {
-    this.logger = logger;
+  @Override
+  public void write(JsonWriter out, LocalDate value) throws IOException {
+    out.value(value == null ? null : value.toString());
   }
 
-  @ExceptionHandler
-  @ResponseBody
-  public void onException(Throwable exception, HttpServletResponse response) throws IOException {
-    logger.error("Unexpected exception", exception);
-    response.sendError(SC_INTERNAL_SERVER_ERROR, exception.getMessage());
+  @Override
+  public LocalDate read(JsonReader in) throws IOException {
+    if (in.peek() == JsonToken.STRING && in.hasNext()) {
+      return LocalDate.parse(in.nextString());
+    } else {
+      return null;
+    }
   }
 }

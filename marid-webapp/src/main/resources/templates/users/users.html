@@ -22,7 +22,7 @@
 
 <main class="ui">
     <div class="ui vertical pointing menu" id="users">
-        <a class="item" th:each="user: ${dao.users}" th:text="${user.username}">Name</a>
+        <a class="item" th:each="user: ${dao.users}" th:text="${user.name}">Name</a>
     </div>
     <form class="ui form segment" id="userContainer" method="post" th:action="@{~/users/userEdit}"></form>
 </main>

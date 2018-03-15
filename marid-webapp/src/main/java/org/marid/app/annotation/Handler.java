@@ -19,16 +19,19 @@
  * #L%
  */
 
-package org.marid.app.controller;
+package org.marid.app.annotation;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-@Controller
-public class LoginController {
+@Target({ElementType.TYPE, ElementType.METHOD, ElementType.PARAMETER, ElementType.FIELD})
+@Retention(RetentionPolicy.RUNTIME)
+@HandlerQualifier
+public @interface Handler {
 
-  @GetMapping(path = "/login")
-  public String login() {
-    return "login";
-  }
+  String path();
+
+  boolean exact() default true;
 }

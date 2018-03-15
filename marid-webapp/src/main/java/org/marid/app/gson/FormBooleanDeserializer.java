@@ -19,22 +19,31 @@
  * #L%
  */
 
-package org.marid.app.model.validation;
+package org.marid.app.gson;
 
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
-import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 
-public class AnotherUserConstraint implements ConstraintValidator<Annotation, String> {
+public class FormBooleanDeserializer implements JsonDeserializer<Boolean> {
 
   @Override
-  public boolean isValid(String value, ConstraintValidatorContext context) {
-    final SecurityContext securityContext = SecurityContextHolder.getContext();
-    final Authentication authentication = securityContext.getAuthentication();
-    return !authentication.getName().equals(value);
+  public Boolean deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+    if (json.isJsonNull()) {
+      return false;
+    } else if (json.isJsonPrimitive()) {
+      switch (json.getAsString()) {
+        case "true":
+        case "on":
+          return true;
+        default:
+          return false;
+      }
+    } else {
+      throw new JsonParseException("Unknown boolean value: " + json);
+    }
   }
 }

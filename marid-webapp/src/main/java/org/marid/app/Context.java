@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.web.embedded.EmbeddedWebServerFactoryCustomizerAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -34,7 +35,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import java.util.Scanner;
 
 @EnableScheduling
-@SpringBootApplication
+@SpringBootApplication(exclude = {
+    EmbeddedWebServerFactoryCustomizerAutoConfiguration.class
+})
 public class Context {
 
   @Bean(initMethod = "start")

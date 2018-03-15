@@ -50,4 +50,8 @@ public interface StringUtils {
     }
     return count;
   }
+
+  static String stringOrNull(Object object) {
+    return object == null ? null : object.toString();
+  }
 }

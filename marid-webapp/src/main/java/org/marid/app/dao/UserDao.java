@@ -21,92 +21,88 @@
 
 package org.marid.app.dao;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.MoreFiles;
+import com.google.gson.Gson;
 import org.marid.app.common.Directories;
 import org.marid.app.model.MaridUser;
-import org.marid.app.model.MaridUserInfo;
-import org.marid.app.model.ModifiedUser;
-import org.marid.io.IO;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.io.UncheckedIOException;
+import java.io.Writer;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Repository
-public class UserDao implements UserDetailsService {
+public class UserDao {
 
   private final Directories directories;
-  private final ObjectMapper mapper;
+  private final Gson gson;
 
-  public UserDao(Directories directories, ObjectMapper mapper) {
+  public UserDao(Directories directories, Gson gson) {
     this.directories = directories;
-    this.mapper = mapper;
+    this.gson = gson;
   }
 
-  @Override
-  public MaridUser loadUserByUsername(String username) throws UsernameNotFoundException {
+  public MaridUser loadUserByUsername(String username) throws IOException {
     final Path userDir = directories.getUsers().resolve(username);
     final Path file = userDir.resolve("info.json");
-
     try (final Reader reader = Files.newBufferedReader(file, UTF_8)) {
-      final MaridUserInfo userInfo = mapper.readValue(reader, MaridUserInfo.class);
-      return new MaridUser(username, userInfo);
-    } catch (Exception x) {
-      throw new UsernameNotFoundException("User " + username + " is not found", x);
+      final MaridUser user = gson.fromJson(reader, MaridUser.class);
+      return new MaridUser(
+          userDir.getFileName().toString(),
+          user.getPassword(),
+          user.isEnabled(),
+          user.getExpirationDate(),
+          user.getAuthorities()
+      );
     }
   }
 
-  public List<MaridUser> getUsers() {
+  public List<MaridUser> getUsers() throws IOException {
     final Path usersDir = directories.getUsers();
 
     final List<MaridUser> users = new ArrayList<>();
     try (final DirectoryStream<Path> stream = Files.newDirectoryStream(usersDir, Files::isDirectory)) {
       for (final Path userDir : stream) {
-        final Path file = userDir.resolve("info.json");
-        try (final Reader reader = Files.newBufferedReader(file, UTF_8)) {
-          final MaridUserInfo userInfo = mapper.readValue(reader, MaridUserInfo.class);
-          users.add(new MaridUser(userDir.getFileName().toString(), userInfo));
-        }
+        users.add(loadUserByUsername(userDir.getFileName().toString()));
       }
-    } catch (Exception x) {
-      throw new IllegalStateException(x);
     }
 
     return users;
   }
 
-  public void saveUser(ModifiedUser user) throws IOException {
-    final Path userDir = directories.getUsers().resolve(user.name);
+  public void saveUser(String username, LocalDate expirationDate, boolean admin, boolean enabled) throws IOException {
+    final Path userDir = directories.getUsers().resolve(username);
     final Path file = userDir.resolve("info.json");
 
-    if (Files.isRegularFile(file)) {
-      try (final IO io = new IO(file)) {
-        final MaridUserInfo userInfo = mapper.readValue(io.getInput(), MaridUserInfo.class);
-        io.trim();
-        mapper.writeValue(io.getOutput(), new MaridUserInfo(userInfo, user));
+    final MaridUser user;
+    try (final Reader reader = Files.newBufferedReader(file, UTF_8)) {
+      user = gson.fromJson(reader, MaridUser.class);
+    }
+
+    try (final Writer writer = Files.newBufferedWriter(file, UTF_8)) {
+      final Set<String> authorities;
+      if (admin) {
+        authorities = new HashSet<>(user.getAuthorities());
+        authorities.add("ROLE_ADMIN");
+      } else {
+        authorities = user.getAuthorities();
       }
-    } else {
-      throw new IllegalStateException("No such user " + user.name);
+      gson.toJson(new MaridUser(username, user.getPassword(), enabled, expirationDate, authorities), writer);
     }
   }
 
-  public void removeUser(String name) {
+  public void removeUser(String name) throws IOException {
     final Path userDir = directories.getUsers().resolve(name);
-    try {
-      MoreFiles.deleteRecursively(userDir);
-    } catch (IOException x) {
-      throw new UncheckedIOException(x);
-    }
+    MoreFiles.deleteRecursively(userDir);
   }
 }
