@@ -35,9 +35,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import java.util.Scanner;
 
 @EnableScheduling
-@SpringBootApplication(exclude = {
-    EmbeddedWebServerFactoryCustomizerAutoConfiguration.class
-})
+@SpringBootApplication(exclude = {EmbeddedWebServerFactoryCustomizerAutoConfiguration.class})
 public class Context {
 
   @Bean(initMethod = "start")

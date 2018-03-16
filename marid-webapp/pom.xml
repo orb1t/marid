@@ -87,21 +87,29 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>ch.qos.logback</groupId>
-        <artifactId>logback-classic</artifactId>
-        <version>1.2.3</version>
-      </dependency>
-
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-annotations</artifactId>
-        <version>2.9.4</version>
-      </dependency>
-
-      <dependency>
         <groupId>cglib</groupId>
         <artifactId>cglib</artifactId>
         <version>3.2.6</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jboss.logging</groupId>
+        <artifactId>jboss-logging</artifactId>
+        <version>3.3.2.Final</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jboss.threads</groupId>
+        <artifactId>jboss-threads</artifactId>
+        <version>2.3.1.Final</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jboss.xnio</groupId>
+        <artifactId>xnio-all</artifactId>
+        <version>3.6.2.Final</version>
+        <scope>import</scope>
+        <type>pom</type>
       </dependency>
 
       <dependency>
@@ -117,6 +125,20 @@
   <build>
     <plugins>
       <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifestEntries>
+              <Add-Opens>
+                java.base/java.lang
+                java.base/sun.nio.ch
+              </Add-Opens>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+
+      <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
         <version>2.0.0.RELEASE</version>
@@ -130,7 +152,6 @@
           </execution>
         </executions>
         <configuration>
-          <jvmArguments>--add-opens java.base/jdk.internal.ref=ALL-UNNAMED</jvmArguments>
           <attach>false</attach>
           <finalName>${project.name}</finalName>
         </configuration>
