@@ -19,9 +19,12 @@
  * #L%
  */
 
-package org.marid.app.auth;
+package org.marid.app.config;
 
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod;
 import org.marid.app.props.GoogleAuthProperties;
+import org.marid.app.props.UndertowProperties;
 import org.pac4j.core.authorization.authorizer.RequireAnyRoleAuthorizer;
 import org.pac4j.core.client.Client;
 import org.pac4j.core.client.Clients;
@@ -43,14 +46,16 @@ public class AuthClientConfiguration {
     conf.setSecret(properties.getSecret());
     conf.addCustomParam("prompt", "consent");
     conf.setUseNonce(true);
+    conf.setPreferredJwsAlgorithm(JWSAlgorithm.RS256);
+    conf.setClientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST);
 
-    final GoogleOidcClient client = new GoogleOidcClient(conf);
-    return client;
+    return new GoogleOidcClient(conf);
   }
 
   @Bean
-  public Clients authClients(Client<?, ?>[] clients, GoogleOidcClient googleOidcClient) {
-    final Clients authClients = new Clients("/callback", clients);
+  public Clients authClients(Client<?, ?>[] clients, GoogleOidcClient googleOidcClient, UndertowProperties properties) {
+    final String callback = String.format("https://%s:%d/callback", properties.getHost(), properties.getPort());
+    final Clients authClients = new Clients(callback, clients);
     authClients.setDefaultClient(googleOidcClient);
     authClients.addAuthorizationGenerator((context, profile) -> {
       profile.addRole("ROLE_USER");

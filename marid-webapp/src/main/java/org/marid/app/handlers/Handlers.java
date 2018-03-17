@@ -22,11 +22,16 @@
 package org.marid.app.handlers;
 
 import io.undertow.server.HttpHandler;
+import io.undertow.server.handlers.CanonicalPathHandler;
+import io.undertow.server.handlers.PathHandler;
+import io.undertow.server.handlers.resource.ClassPathResourceManager;
+import io.undertow.server.handlers.resource.ResourceHandler;
 import io.undertow.util.HttpString;
 import org.marid.app.annotation.Handler;
 import org.marid.app.http.HttpExecutor;
 import org.marid.xml.HtmlBuilder;
 import org.pac4j.core.config.Config;
+import org.pac4j.undertow.handler.CallbackHandler;
 import org.pac4j.undertow.handler.SecurityHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
@@ -38,6 +43,18 @@ import static java.net.HttpURLConnection.HTTP_OK;
 
 @Component
 public class Handlers {
+
+  @Bean
+  @Handler(path = "/callback")
+  public HttpHandler callbackHandler(Config authConfig) {
+    return CallbackHandler.build(authConfig, null, true);
+  }
+
+  @Bean
+  @Handler(path = "/pub", exact = false)
+  public HttpHandler pubResources(ClassPathResourceManager classPathResourceManager) {
+    return new CanonicalPathHandler(new ResourceHandler());
+  }
 
   @Bean
   @Handler(path = "/")

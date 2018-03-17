@@ -25,6 +25,7 @@ import io.undertow.Undertow;
 import io.undertow.UndertowOptions;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.PathHandler;
+import io.undertow.server.handlers.resource.ClassPathResourceManager;
 import io.undertow.server.session.*;
 import org.marid.app.annotation.Handler;
 import org.marid.app.annotation.HandlerQualifier;
@@ -73,6 +74,7 @@ public class UndertowConfiguration {
   @Bean
   public PathHandler rootHandler(@HandlerQualifier Map<String, HttpHandler> handlers, GenericApplicationContext ctx) {
     final PathHandler pathHandler = new PathHandler();
+
     final BiConsumer<AnnotatedTypeMetadata, HttpHandler> processor = (metadata, handler) -> {
       if (metadata == null) {
         return;
@@ -106,6 +108,12 @@ public class UndertowConfiguration {
   @Bean
   public SessionAttachmentHandler handler(PathHandler rootHandler, SessionManager sessionManager, SessionConfig config) {
     return new SessionAttachmentHandler(rootHandler, sessionManager, config);
+  }
+
+  @Bean
+  public ClassPathResourceManager classPathResourceManager(GenericApplicationContext context) {
+    final ClassLoader classLoader = context.getClassLoader();
+    return new ClassPathResourceManager(classLoader, "/META-INF/resources/");
   }
 }
 
