@@ -25,10 +25,12 @@ import io.undertow.Undertow;
 import io.undertow.UndertowOptions;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.PathHandler;
-import io.undertow.server.handlers.resource.ClassPathResourceManager;
+import io.undertow.server.handlers.resource.ResourceManager;
 import io.undertow.server.session.*;
 import org.marid.app.annotation.Handler;
 import org.marid.app.annotation.HandlerQualifier;
+import org.marid.app.http.BowerResourceManager;
+import org.marid.app.http.MaridResourceManager;
 import org.marid.app.props.UndertowProperties;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -47,11 +49,11 @@ import java.util.function.BiConsumer;
 public class UndertowConfiguration {
 
   @Bean(initMethod = "start", destroyMethod = "stop")
-  public Undertow undertow(SSLContext sslContext, UndertowProperties properties, HttpHandler handler) {
+  public Undertow undertow(SSLContext sslContext, UndertowProperties properties, HttpHandler rootHandler) {
     return Undertow.builder()
         .setServerOption(UndertowOptions.ENABLE_HTTP2, true)
         .setServerOption(UndertowOptions.HTTP2_SETTINGS_ENABLE_PUSH, true)
-        .addHttpsListener(properties.getPort(), properties.getHost(), sslContext, handler)
+        .addHttpsListener(properties.getPort(), properties.getHost(), sslContext, rootHandler)
         .build();
   }
 
@@ -72,7 +74,7 @@ public class UndertowConfiguration {
   }
 
   @Bean
-  public PathHandler rootHandler(@HandlerQualifier Map<String, HttpHandler> handlers, GenericApplicationContext ctx) {
+  public PathHandler pathHandler(@HandlerQualifier Map<String, HttpHandler> handlers, GenericApplicationContext ctx) {
     final PathHandler pathHandler = new PathHandler();
 
     final BiConsumer<AnnotatedTypeMetadata, HttpHandler> processor = (metadata, handler) -> {
@@ -106,14 +108,30 @@ public class UndertowConfiguration {
   }
 
   @Bean
-  public SessionAttachmentHandler handler(PathHandler rootHandler, SessionManager sessionManager, SessionConfig config) {
-    return new SessionAttachmentHandler(rootHandler, sessionManager, config);
+  public HttpHandler rootHandler(PathHandler pathHandler, SessionManager sessionManager, SessionConfig config) {
+    return new SessionAttachmentHandler(pathHandler, sessionManager, config);
   }
 
   @Bean
-  public ClassPathResourceManager classPathResourceManager(GenericApplicationContext context) {
-    final ClassLoader classLoader = context.getClassLoader();
-    return new ClassPathResourceManager(classLoader, "/META-INF/resources/");
+  public BowerResourceManager bowerResourceManager() {
+    return new BowerResourceManager("semantic", "jquery");
+  }
+
+  @Bean
+  public ResourceManager pubResourceManager() {
+    return new MaridResourceManager("/public/");
+  }
+
+  @Bean
+  public ResourceManager userResourceManager(BowerResourceManager bower) {
+    return new MaridResourceManager("/user/")
+        .addParent(bower);
+  }
+
+  @Bean
+  public ResourceManager adminResourceManager(ResourceManager userResourceManager) {
+    return new MaridResourceManager("/admin/")
+        .addParent(userResourceManager);
   }
 }
 

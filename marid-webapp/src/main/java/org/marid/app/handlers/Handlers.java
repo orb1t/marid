@@ -23,10 +23,8 @@ package org.marid.app.handlers;
 
 import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.CanonicalPathHandler;
-import io.undertow.server.handlers.PathHandler;
-import io.undertow.server.handlers.resource.ClassPathResourceManager;
 import io.undertow.server.handlers.resource.ResourceHandler;
-import io.undertow.util.HttpString;
+import io.undertow.server.handlers.resource.ResourceManager;
 import org.marid.app.annotation.Handler;
 import org.marid.app.http.HttpExecutor;
 import org.marid.xml.HtmlBuilder;
@@ -39,8 +37,6 @@ import org.springframework.stereotype.Component;
 import javax.xml.transform.stream.StreamResult;
 import java.util.Map;
 
-import static java.net.HttpURLConnection.HTTP_OK;
-
 @Component
 public class Handlers {
 
@@ -52,40 +48,42 @@ public class Handlers {
 
   @Bean
   @Handler(path = "/pub", exact = false)
-  public HttpHandler pubResources(ClassPathResourceManager classPathResourceManager) {
-    return new CanonicalPathHandler(new ResourceHandler());
+  public HttpHandler pubResourcesHandler(ResourceManager pubResourceManager) {
+    return new CanonicalPathHandler(new ResourceHandler(pubResourceManager));
+  }
+
+  @Bean
+  @Handler(path = "/user", exact = false)
+  public HttpHandler userResourcesHandler(ResourceManager userResourceManager, Config authConfig) {
+    return SecurityHandler.build(new ResourceHandler(userResourceManager), authConfig, null, "user");
+  }
+
+  @Bean
+  @Handler(path = "/admin", exact = false)
+  public HttpHandler adminResourceHandler(ResourceManager adminResourceManager, Config authConfig) {
+    return SecurityHandler.build(new ResourceHandler(adminResourceManager), authConfig, null, "admin");
   }
 
   @Bean
   @Handler(path = "/")
   public HttpHandler loginPage(HttpExecutor executor) {
-    return exchange -> {
-      exchange.getResponseHeaders().add(new HttpString("Content-Type"), "text/html");
-      exchange.setStatusCode(HTTP_OK);
-
-      executor.with(exchange, (i, o) -> new HtmlBuilder()
-          .child("head")
-          .child("body", b -> {
-            b.child("a", Map.of("href", "/google.html"), bb -> bb.text("Google"));
-            b.child("a", Map.of("href", "/facebook.html"), bb -> bb.text("Facebook"));
-          })
-          .write(new StreamResult(o)));
-    };
+    return exchange -> executor.html(exchange).with(exchange, (i, o) -> new HtmlBuilder()
+        .child("head")
+        .child("body", b -> {
+          b.child("a", Map.of("href", "/google.html"), bb -> bb.text("Google"));
+          b.child("a", Map.of("href", "/facebook.html"), bb -> bb.text("Facebook"));
+        })
+        .write(new StreamResult(o)));
   }
 
   @Bean
   @Handler(path = "/google.html")
   public HttpHandler googlePage(Config authConfig, HttpExecutor executor) {
-    return SecurityHandler.build(exchange -> {
-      exchange.getResponseHeaders().add(new HttpString("Content-Type"), "text/html");
-      exchange.setStatusCode(HTTP_OK);
-
-      executor.with(exchange, (i, o) -> new HtmlBuilder()
-          .child("head")
-          .child("body", b -> {
-            b.child("p", bb -> bb.text("Done!"));
-          })
-          .write(new StreamResult(o)));
-    }, authConfig, "GoogleOidcClient");
+    return SecurityHandler.build(exchange -> executor.html(exchange).with(exchange, (i, o) -> new HtmlBuilder()
+        .child("head")
+        .child("body", b -> {
+          b.child("p", bb -> bb.text("Done!"));
+        })
+        .write(new StreamResult(o))), authConfig, "GoogleOidcClient");
   }
 }

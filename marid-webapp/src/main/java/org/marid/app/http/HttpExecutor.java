@@ -22,38 +22,38 @@
 package org.marid.app.http;
 
 import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HttpString;
 import org.marid.io.IOBiConsumer;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.net.HttpURLConnection;
 
 @Component
 public class HttpExecutor {
 
-  private final ThreadPoolExecutor executor;
   private final Logger logger;
 
   public HttpExecutor(Logger logger) {
     this.logger = logger;
-    final AtomicInteger threadId = new AtomicInteger();
-    final ThreadFactory threadFactory = r -> new Thread(null, r, "rndr-" + threadId.incrementAndGet(), 128L * 1024L);
-    executor = new ThreadPoolExecutor(0, 128, 1L, TimeUnit.MINUTES, new SynchronousQueue<>(), threadFactory);
+  }
+
+  public HttpExecutor html(HttpServerExchange exchange) {
+    exchange.getResponseHeaders().add(new HttpString("Content-Type"), "text/html; charset=UTF-8");
+    return this;
   }
 
   public void with(HttpServerExchange exchange, IOBiConsumer<InputStream, OutputStream> consumer) {
-    exchange.dispatch(executor, () -> {
+    exchange.dispatch(() -> {
       exchange.startBlocking();
       try {
         consumer.ioAccept(exchange.getInputStream(), exchange.getOutputStream());
+        exchange.setStatusCode(HttpURLConnection.HTTP_OK);
       } catch (Exception x) {
         logger.warn("Unable to process {}", exchange, x);
+        exchange.setStatusCode(HttpURLConnection.HTTP_INTERNAL_ERROR);
       } finally {
         exchange.endExchange();
       }
