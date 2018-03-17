@@ -19,29 +19,16 @@
  * #L%
  */
 
-package org.marid.app.annotation;
+package org.marid.app.util;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import io.undertow.server.HttpServerExchange;
 
-@Target({ElementType.TYPE, ElementType.METHOD, ElementType.PARAMETER, ElementType.FIELD})
-@Retention(RetentionPolicy.RUNTIME)
-@HandlerQualifier
-public @interface Handler {
+import java.util.Collection;
+import java.util.stream.Stream;
 
-  String path();
+public interface ExchangeHelper {
 
-  boolean exact() default true;
-
-  String authorizer() default "";
-
-  String client() default "";
-
-  boolean secure() default true;
-
-  boolean processUnauthorized() default false;
-
-  boolean safePath() default false;
+  static Stream<String> queryParams(HttpServerExchange exchange, String name) {
+    return Stream.ofNullable(exchange.getQueryParameters().get(name)).flatMap(Collection::stream);
+  }
 }

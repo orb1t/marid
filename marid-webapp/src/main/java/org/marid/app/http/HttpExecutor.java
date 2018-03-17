@@ -45,12 +45,12 @@ public class HttpExecutor {
     return this;
   }
 
-  public void with(HttpServerExchange exchange, IOBiConsumer<InputStream, OutputStream> consumer) {
+  public void with(HttpServerExchange exchange, IOBiConsumer<InputStream, OutputStream> consumer, int code) {
     exchange.dispatch(() -> {
       exchange.startBlocking();
       try {
+        exchange.setStatusCode(code);
         consumer.ioAccept(exchange.getInputStream(), exchange.getOutputStream());
-        exchange.setStatusCode(HttpURLConnection.HTTP_OK);
       } catch (Exception x) {
         logger.warn("Unable to process {}", exchange, x);
         exchange.setStatusCode(HttpURLConnection.HTTP_INTERNAL_ERROR);
@@ -58,5 +58,9 @@ public class HttpExecutor {
         exchange.endExchange();
       }
     });
+  }
+
+  public void with(HttpServerExchange exchange, IOBiConsumer<InputStream, OutputStream> consumer) {
+    with(exchange, consumer, HttpURLConnection.HTTP_OK);
   }
 }

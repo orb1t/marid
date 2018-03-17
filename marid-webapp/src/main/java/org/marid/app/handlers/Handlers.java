@@ -27,63 +27,86 @@ import io.undertow.server.handlers.resource.ResourceHandler;
 import io.undertow.server.handlers.resource.ResourceManager;
 import org.marid.app.annotation.Handler;
 import org.marid.app.http.HttpExecutor;
+import org.marid.image.MaridIcon;
 import org.marid.xml.HtmlBuilder;
-import org.pac4j.core.config.Config;
-import org.pac4j.undertow.handler.CallbackHandler;
-import org.pac4j.undertow.handler.SecurityHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
+import javax.imageio.ImageIO;
 import javax.xml.transform.stream.StreamResult;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.net.HttpURLConnection;
+import java.nio.ByteBuffer;
 import java.util.Map;
+
+import static org.marid.app.util.ExchangeHelper.queryParams;
 
 @Component
 public class Handlers {
 
   @Bean
-  @Handler(path = "/callback")
-  public HttpHandler callbackHandler(Config authConfig) {
-    return CallbackHandler.build(authConfig, null, true);
-  }
-
-  @Bean
-  @Handler(path = "/pub", exact = false)
   public HttpHandler pubResourcesHandler(ResourceManager pubResourceManager) {
     return new CanonicalPathHandler(new ResourceHandler(pubResourceManager));
   }
 
   @Bean
-  @Handler(path = "/user", exact = false)
-  public HttpHandler userResourcesHandler(ResourceManager userResourceManager, Config authConfig) {
-    return SecurityHandler.build(new ResourceHandler(userResourceManager), authConfig, null, "user");
+  @Handler(path = "/user", exact = false, authorizer = "user", safePath = true)
+  public HttpHandler userResourcesHandler(ResourceManager userResourceManager) {
+    return new ResourceHandler(userResourceManager);
   }
 
   @Bean
-  @Handler(path = "/admin", exact = false)
-  public HttpHandler adminResourceHandler(ResourceManager adminResourceManager, Config authConfig) {
-    return SecurityHandler.build(new ResourceHandler(adminResourceManager), authConfig, null, "admin");
+  @Handler(path = "/admin", exact = false, authorizer = "admin", safePath = true)
+  public HttpHandler adminResourceHandler(ResourceManager adminResourceManager) {
+    return new ResourceHandler(adminResourceManager);
   }
 
   @Bean
-  @Handler(path = "/")
+  @Handler(path = "/marid-icon.gif", secure = false)
+  public HttpHandler maridIconHandler() {
+    return exchange -> {
+      try {
+        final int size = queryParams(exchange, "size").mapToInt(Integer::parseInt).findFirst().orElse(32);
+        final BufferedImage image = MaridIcon.getImage(size, Color.GREEN);
+
+        final ByteArrayOutputStream stream = new ByteArrayOutputStream(16384);
+        try (stream) {
+          ImageIO.write(image, "GIF", stream);
+        }
+
+        exchange.setStatusCode(HttpURLConnection.HTTP_OK);
+        exchange.getResponseSender().send(ByteBuffer.wrap(stream.toByteArray()));
+      } catch (Exception x) {
+        exchange.setStatusCode(HttpURLConnection.HTTP_INTERNAL_ERROR);
+        exchange.endExchange();
+      }
+    };
+  }
+
+  @Bean
+  @Handler(path = "/", processUnauthorized = true)
   public HttpHandler loginPage(HttpExecutor executor) {
-    return exchange -> executor.html(exchange).with(exchange, (i, o) -> new HtmlBuilder()
-        .child("head")
-        .child("body", b -> {
-          b.child("a", Map.of("href", "/google.html"), bb -> bb.text("Google"));
-          b.child("a", Map.of("href", "/facebook.html"), bb -> bb.text("Facebook"));
-        })
-        .write(new StreamResult(o)));
+    return exchange -> {
+      executor.html(exchange).with(exchange, (i, o) -> new HtmlBuilder()
+          .child("head")
+          .child("body", b -> {
+            b.child("a", Map.of("href", "/google.html"), bb -> bb.text("Google"));
+            b.child("a", Map.of("href", "/facebook.html"), bb -> bb.text("Facebook"));
+          })
+          .write(new StreamResult(o)));
+    };
   }
 
   @Bean
-  @Handler(path = "/google.html")
-  public HttpHandler googlePage(Config authConfig, HttpExecutor executor) {
-    return SecurityHandler.build(exchange -> executor.html(exchange).with(exchange, (i, o) -> new HtmlBuilder()
+  @Handler(path = "/google.html", client = "GoogleOidcClient")
+  public HttpHandler googlePage(HttpExecutor executor) {
+    return exchange -> executor.html(exchange).with(exchange, (i, o) -> new HtmlBuilder()
         .child("head")
         .child("body", b -> {
           b.child("p", bb -> bb.text("Done!"));
         })
-        .write(new StreamResult(o))), authConfig, "GoogleOidcClient");
+        .write(new StreamResult(o)));
   }
 }

@@ -67,8 +67,8 @@ public class AuthClientConfiguration {
   @Bean
   public Config authConfig(Clients authClients) {
     final Config config = new Config(authClients);
-    config.addAuthorizer("admin", new RequireAnyRoleAuthorizer("ROLE_ADMIN"));
-    config.addAuthorizer("user", new RequireAnyRoleAuthorizer("ROLE_USER"));
+    config.addAuthorizer("admin", new RequireAnyRoleAuthorizer<>("ROLE_ADMIN"));
+    config.addAuthorizer("user", new RequireAnyRoleAuthorizer<>("ROLE_USER"));
     return config;
   }
 }
