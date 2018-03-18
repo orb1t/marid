@@ -178,14 +178,48 @@
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>wagon-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>stop</id>
+                <goals>
+                  <goal>sshexec</goal>
+                </goals>
+                <configuration>
+                  <commands>
+                    <command>service webapp stop</command>
+                  </commands>
+                  <failOnError>false</failOnError>
+                </configuration>
+              </execution>
+
+              <execution>
+                <id>deploy</id>
+                <goals>
+                  <goal>upload-single</goal>
+                </goals>
+                <configuration>
+                  <fromFile>${project.build.directory}/${project.artifactId}.${project.packaging}</fromFile>
+                </configuration>
+              </execution>
+
+              <execution>
+                <id>start</id>
+                <goals>
+                  <goal>sshexec</goal>
+                </goals>
+                <configuration>
+                  <commands>
+                    <command>chmod 500 /home/site/app/${project.artifactId}.${project.packaging}</command>
+                    <command>service webapp start</command>
+                  </commands>
+                </configuration>
+              </execution>
+            </executions>
+
             <configuration>
               <serverId>marid.org</serverId>
-              <fromFile>${project.build.directory}/${project.artifactId}.${project.packaging}</fromFile>
               <url>scp://marid.org/home/site/app</url>
               <displayCommandOutputs>true</displayCommandOutputs>
-              <commands>
-                <command>service webapp restart</command>
-              </commands>
             </configuration>
           </plugin>
 
