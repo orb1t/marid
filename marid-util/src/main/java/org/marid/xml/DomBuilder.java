@@ -248,6 +248,7 @@ public class DomBuilder {
     return this;
   }
 
+  @SafeVarargs
   public final DomBuilder when(BooleanSupplier conditionSupplier, Consumer<DomBuilder>... configurers) {
     if (conditionSupplier.getAsBoolean()) {
       for (final Consumer<DomBuilder> configurer : configurers) {
@@ -257,6 +258,7 @@ public class DomBuilder {
     return this;
   }
 
+  @SafeVarargs
   public final DomBuilder when(boolean condition, Consumer<DomBuilder>... configurers) {
     if (condition) {
       for (final Consumer<DomBuilder> configurer : configurers) {

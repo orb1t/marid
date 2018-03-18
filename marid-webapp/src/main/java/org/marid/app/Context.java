@@ -30,12 +30,14 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.web.embedded.EmbeddedWebServerFactoryCustomizerAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.util.Scanner;
 
 @EnableScheduling
 @SpringBootApplication(exclude = {EmbeddedWebServerFactoryCustomizerAutoConfiguration.class})
+@PropertySource(value = {"classpath:additional.properties"}, ignoreResourceNotFound = true)
 public class Context {
 
   @Bean(initMethod = "start")
