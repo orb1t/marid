@@ -187,6 +187,7 @@
                 <configuration>
                   <commands>
                     <command>service webapp stop</command>
+                    <command>chmod 666 /home/site/app/${project.artifactId}.${project.packaging}</command>
                   </commands>
                   <failOnError>false</failOnError>
                 </configuration>
