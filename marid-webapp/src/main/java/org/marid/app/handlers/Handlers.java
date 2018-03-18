@@ -21,27 +21,20 @@
 
 package org.marid.app.handlers;
 
+import io.undertow.attribute.ConstantExchangeAttribute;
+import io.undertow.security.api.SecurityContext;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.CanonicalPathHandler;
+import io.undertow.server.handlers.RedirectHandler;
 import io.undertow.server.handlers.resource.ResourceHandler;
 import io.undertow.server.handlers.resource.ResourceManager;
 import org.marid.app.annotation.Handler;
 import org.marid.app.http.HttpExecutor;
-import org.marid.image.MaridIcon;
-import org.marid.xml.HtmlBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import javax.imageio.ImageIO;
-import javax.xml.transform.stream.StreamResult;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.net.HttpURLConnection;
-import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.Map;
-
-import static org.marid.app.util.ExchangeHelper.queryParams;
 
 @Component
 public class Handlers {
@@ -64,49 +57,46 @@ public class Handlers {
   }
 
   @Bean
-  @Handler(path = "/marid-icon.gif", secure = false)
-  public HttpHandler maridIconHandler() {
+  public HttpHandler authListHandler(HttpExecutor executor) {
+    return exchange -> executor.html(exchange, (c, builder) -> builder
+        .e("head", head -> head
+            .e("title", c.s("maridIde"))
+            .e("link", c.icon())
+            .meta("google", "notranslate")
+            .meta("viewport", "width=device-width, initial-scale=1")
+            .stylesheet("/public/login.css")
+        )
+        .e("body", body -> body
+            .e("img", Map.of("src", "/marid-icon.gif?size=100", "width", 100, "height", 100))
+            .e("div", Map.of("id", "adBody"), list -> list
+                .e("div", Map.of("id", "header"), p -> p.t(c.s("maridIde")))
+                .e("div", Map.of("id", "ad"), p -> p.t(c.s("spiritDrivenDevelopment")))
+                .e("div", Map.of("id", "auth"), auth -> auth
+                    .es("a", List.of("google", "facebook", "twitter"), (e, b) -> b.bc(e)
+                        .a("href", "/" + e + ".html")
+                        .e("img", Map.of("src", "/public/" + e + ".svg", "width", 32, "height", 32))
+                    )
+                )
+            )
+        ));
+  }
+
+  @Bean
+  @Handler(path = "/", processUnauthorized = true)
+  public HttpHandler loginPage(HttpHandler authListHandler) {
     return exchange -> {
-      try {
-        final int size = queryParams(exchange, "size").mapToInt(Integer::parseInt).findFirst().orElse(32);
-        final BufferedImage image = MaridIcon.getImage(size, Color.GREEN);
+      final SecurityContext context = exchange.getSecurityContext();
+      if (context == null) {
+        authListHandler.handleRequest(exchange);
+      } else {
 
-        final ByteArrayOutputStream stream = new ByteArrayOutputStream(16384);
-        try (stream) {
-          ImageIO.write(image, "GIF", stream);
-        }
-
-        exchange.setStatusCode(HttpURLConnection.HTTP_OK);
-        exchange.getResponseSender().send(ByteBuffer.wrap(stream.toByteArray()));
-      } catch (Exception x) {
-        exchange.setStatusCode(HttpURLConnection.HTTP_INTERNAL_ERROR);
-        exchange.endExchange();
       }
     };
   }
 
   @Bean
-  @Handler(path = "/", processUnauthorized = true)
-  public HttpHandler loginPage(HttpExecutor executor) {
-    return exchange -> {
-      executor.html(exchange).with(exchange, (i, o) -> new HtmlBuilder()
-          .child("head")
-          .child("body", b -> {
-            b.child("a", Map.of("href", "/google.html"), bb -> bb.text("Google"));
-            b.child("a", Map.of("href", "/facebook.html"), bb -> bb.text("Facebook"));
-          })
-          .write(new StreamResult(o)));
-    };
-  }
-
-  @Bean
   @Handler(path = "/google.html", client = "GoogleOidcClient")
-  public HttpHandler googlePage(HttpExecutor executor) {
-    return exchange -> executor.html(exchange).with(exchange, (i, o) -> new HtmlBuilder()
-        .child("head")
-        .child("body", b -> {
-          b.child("p", bb -> bb.text("Done!"));
-        })
-        .write(new StreamResult(o)));
+  public HttpHandler googlePage() {
+    return new RedirectHandler(new ConstantExchangeAttribute("/"));
   }
 }

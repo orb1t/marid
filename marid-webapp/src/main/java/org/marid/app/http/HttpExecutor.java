@@ -23,13 +23,14 @@ package org.marid.app.http;
 
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HttpString;
-import org.marid.io.IOBiConsumer;
+import org.marid.io.IOConsumer;
+import org.marid.xml.HtmlBuilder;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
-import java.io.InputStream;
-import java.io.OutputStream;
+import javax.xml.transform.stream.StreamResult;
 import java.net.HttpURLConnection;
+import java.util.function.BiConsumer;
 
 @Component
 public class HttpExecutor {
@@ -45,12 +46,24 @@ public class HttpExecutor {
     return this;
   }
 
-  public void with(HttpServerExchange exchange, IOBiConsumer<InputStream, OutputStream> consumer, int code) {
+  public void html(HttpServerExchange exchange, BiConsumer<HttpContext, HtmlBuilder> html, int code) {
+    html(exchange).with(exchange, c -> {
+      final HtmlBuilder builder = new HtmlBuilder();
+      html.accept(c, builder);
+      builder.write(new StreamResult(c.getOut()));
+    }, code);
+  }
+
+  public void html(HttpServerExchange exchange, BiConsumer<HttpContext, HtmlBuilder> html) {
+    html(exchange, html, HttpURLConnection.HTTP_OK);
+  }
+
+  public void with(HttpServerExchange exchange, IOConsumer<HttpContext> consumer, int code) {
     exchange.dispatch(() -> {
       exchange.startBlocking();
       try {
         exchange.setStatusCode(code);
-        consumer.ioAccept(exchange.getInputStream(), exchange.getOutputStream());
+        consumer.ioAccept(new HttpContext(exchange));
       } catch (Exception x) {
         logger.warn("Unable to process {}", exchange, x);
         exchange.setStatusCode(HttpURLConnection.HTTP_INTERNAL_ERROR);
@@ -60,7 +73,7 @@ public class HttpExecutor {
     });
   }
 
-  public void with(HttpServerExchange exchange, IOBiConsumer<InputStream, OutputStream> consumer) {
+  public void with(HttpServerExchange exchange, IOConsumer<HttpContext> consumer) {
     with(exchange, consumer, HttpURLConnection.HTTP_OK);
   }
 }

@@ -22,13 +22,33 @@
 package org.marid.app.util;
 
 import io.undertow.server.HttpServerExchange;
+import io.undertow.util.LocaleUtils;
+import org.marid.app.auth.MaridSecurityHandler;
+import org.pac4j.undertow.context.UndertowWebContext;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.stream.Stream;
 
 public interface ExchangeHelper {
 
+  String USER_LOCALE_SESSION_KEY = "userLocale";
+
   static Stream<String> queryParams(HttpServerExchange exchange, String name) {
     return Stream.ofNullable(exchange.getQueryParameters().get(name)).flatMap(Collection::stream);
+  }
+
+  static Locale locale(HttpServerExchange exchange) {
+    final UndertowWebContext context = exchange.getAttachment(MaridSecurityHandler.WEB_CONTEXT_KEY);
+    if (context != null) {
+      final Locale locale = (Locale) context.getSessionAttribute(USER_LOCALE_SESSION_KEY);
+      if (locale != null) {
+        return locale;
+      }
+    }
+    return LocaleUtils.getLocalesFromHeader(exchange.getRequestHeaders().getFirst("Accept-Language"))
+        .stream()
+        .findFirst()
+        .orElse(Locale.US);
   }
 }

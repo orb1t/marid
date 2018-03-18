@@ -21,12 +21,10 @@
 
 package org.marid.xml;
 
-import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.util.Collections;
 import java.util.Map;
 
@@ -34,8 +32,19 @@ import static org.marid.misc.StringUtils.stringOrNull;
 
 public class HtmlBuilder extends DomBuilder {
 
+  private static final DocumentBuilder DOCUMENT_BUILDER;
+
+  static {
+    final DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newDefaultInstance();
+    try {
+      DOCUMENT_BUILDER = documentBuilderFactory.newDocumentBuilder();
+    } catch (Exception impossibleException) {
+      throw new IllegalStateException(impossibleException);
+    }
+  }
+
   public HtmlBuilder(Map<String, ?> attributes) {
-    super(newDocument().createElement("html"));
+    super(DOCUMENT_BUILDER.newDocument().createElement("html"));
     getDocument().appendChild(getElement());
     attributes.forEach((k, v) -> getElement().setAttribute(k, stringOrNull(v)));
   }
@@ -47,15 +56,5 @@ public class HtmlBuilder extends DomBuilder {
   @Override
   public Node getNodeToTransform() {
     return getDocument();
-  }
-
-  private static Document newDocument() {
-    final DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newDefaultInstance();
-    try {
-      final DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-      return documentBuilder.newDocument();
-    } catch (ParserConfigurationException x) {
-      throw new IllegalStateException(x);
-    }
   }
 }

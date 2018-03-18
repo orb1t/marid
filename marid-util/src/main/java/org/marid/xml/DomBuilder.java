@@ -29,6 +29,7 @@ import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.Collections;
 import java.util.Map;
 import java.util.function.*;
 import java.util.stream.Stream;
@@ -36,6 +37,25 @@ import java.util.stream.Stream;
 import static org.marid.misc.StringUtils.stringOrNull;
 
 public class DomBuilder {
+
+  private static final ThreadLocal<Transformer> TRANSFORMER_TL = ThreadLocal.withInitial(() -> {
+    final TransformerFactory transformerFactory = TransformerFactory.newDefaultInstance();
+    transformerFactory.setAttribute("indent-number", 2);
+
+    try {
+      final Transformer transformer = transformerFactory.newTransformer();
+
+      transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+      transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+      transformer.setOutputProperty(OutputKeys.METHOD, "html");
+      transformer.setOutputProperty(OutputKeys.VERSION, "5.0");
+      transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "about:legacy-compat");
+
+      return transformer;
+    } catch (Exception impossibleException) {
+      throw new IllegalStateException(impossibleException);
+    }
+  });
 
   private final Element element;
 
@@ -55,27 +75,87 @@ public class DomBuilder {
     return element;
   }
 
-  public DomBuilder text(String text) {
+  public DomBuilder t(String text) {
     element.setTextContent(text);
     return this;
   }
 
-  public DomBuilder text(Supplier<String> text) {
-    element.setTextContent(text.get());
+  public DomBuilder t(String text, Object... args) {
+    return t(String.format(text, args));
+  }
+
+  public DomBuilder a(String attr, Object value) {
+    element.setAttribute(attr, stringOrNull(value));
     return this;
   }
 
-  public DomBuilder attrs(Map<String, ?> attrs) {
-    attrs.forEach((k, v) -> element.setAttribute(k, stringOrNull(v)));
+  public DomBuilder a(Map<String, ?> attrs) {
+    attrs.forEach(this::a);
     return this;
+  }
+
+  public DomBuilder c(String commentText) {
+    element.appendChild(getDocument().createComment(commentText));
+    return this;
+  }
+
+  public DomBuilder c(String commentText, Object... args) {
+    return c(String.format(commentText, args));
+  }
+
+  public DomBuilder bc(String commentText) {
+    element.getParentNode().insertBefore(getDocument().createComment(commentText), element);
+    return this;
+  }
+
+  public DomBuilder bc(String commentText, Object... args) {
+    return bc(String.format(commentText, args));
+  }
+
+  public DomBuilder ac(String commentText) {
+    element.getParentNode().appendChild(getDocument().createComment(commentText));
+    return this;
+  }
+
+  public DomBuilder ac(String commentText, Object... args) {
+    return ac(String.format(commentText, args));
+  }
+
+  public DomBuilder i(String text) {
+    element.appendChild(getDocument().createTextNode(text));
+    return this;
+  }
+
+  public DomBuilder i(String text, Object... args) {
+    return i(String.format(text, args));
   }
 
   @SafeVarargs
-  public final DomBuilder child(String tag, Map<String, ?> attrs, Consumer<DomBuilder>... childConfigurers) {
+  public final DomBuilder e(String tag, String text, Map<String, ?> attrs, Consumer<DomBuilder>... childConfigurers) {
+    return e(tag, attrs, e -> {
+      e.t(text);
+      for (final Consumer<DomBuilder> childConfigurer : childConfigurers) {
+        childConfigurer.accept(e);
+      }
+    });
+  }
+
+  @SafeVarargs
+  public final DomBuilder e(String tag, String text, Consumer<DomBuilder>... childConfigurers) {
+    return e(tag, Collections.emptyMap(), e -> {
+      e.t(text);
+      for (final Consumer<DomBuilder> childConfigurer : childConfigurers) {
+        childConfigurer.accept(e);
+      }
+    });
+  }
+
+  @SafeVarargs
+  public final DomBuilder e(String tag, Map<String, ?> attrs, Consumer<DomBuilder>... childConfigurers) {
     final Element child = getDocument().createElement(tag);
     element.appendChild(child);
 
-    final DomBuilder domBuilder = new DomBuilder(child).attrs(attrs);
+    final DomBuilder domBuilder = new DomBuilder(child).a(attrs);
     for (final Consumer<DomBuilder> childConfigurer : childConfigurers) {
       childConfigurer.accept(domBuilder);
     }
@@ -83,7 +163,7 @@ public class DomBuilder {
   }
 
   @SafeVarargs
-  public final DomBuilder child(String tag, Consumer<DomBuilder>... childConfigurers) {
+  public final DomBuilder e(String tag, Consumer<DomBuilder>... childConfigurers) {
     final Element child = getDocument().createElement(tag);
     element.appendChild(child);
 
@@ -95,56 +175,79 @@ public class DomBuilder {
   }
 
   @SafeVarargs
-  public final <E> DomBuilder children(String tag, Stream<E> stream, BiConsumer<DomBuilder, E>... configurers) {
+  public final <E> DomBuilder es(String tag, Stream<E> stream, BiConsumer<E, DomBuilder>... configurers) {
     stream.forEach(e -> {
       final Element child = getDocument().createElement(tag);
       element.appendChild(child);
 
       final DomBuilder domBuilder = new DomBuilder(child);
-      for (final BiConsumer<DomBuilder, E> configurer : configurers) {
-        configurer.accept(domBuilder, e);
+      for (final BiConsumer<E, DomBuilder> configurer : configurers) {
+        configurer.accept(e, domBuilder);
       }
     });
     return this;
   }
 
   @SafeVarargs
-  public final <E> DomBuilder with(E e, BiConsumer<DomBuilder, E>... configurers) {
-    for (final BiConsumer<DomBuilder, E> configurer : configurers) {
-      configurer.accept(this, e);
+  public final <E> DomBuilder es(String tag, Iterable<E> iterable, BiConsumer<E, DomBuilder>... configurers) {
+    for (final E e : iterable) {
+      final Element child = getDocument().createElement(tag);
+      element.appendChild(child);
+
+      final DomBuilder domBuilder = new DomBuilder(child);
+      for (final BiConsumer<E, DomBuilder> configurer : configurers) {
+        configurer.accept(e, domBuilder);
+      }
     }
     return this;
   }
 
   @SafeVarargs
-  public final <E> DomBuilder with(E e, Predicate<E> filter, BiConsumer<DomBuilder, E>... configurers) {
+  public final <E> DomBuilder $(E e, BiConsumer<E, DomBuilder>... configurers) {
+    for (final BiConsumer<E, DomBuilder> configurer : configurers) {
+      configurer.accept(e, this);
+    }
+    return this;
+  }
+
+  @SafeVarargs
+  public final <E> DomBuilder $(E e, Predicate<E> filter, BiConsumer<E, DomBuilder>... configurers) {
     if (filter.test(e)) {
-      return with(e, configurers);
+      return $(e, configurers);
     } else {
       return this;
     }
   }
 
   @SafeVarargs
-  public final <E> DomBuilder with(Supplier<E> supplier, BiConsumer<DomBuilder, E>... configurers) {
+  public final <E> DomBuilder $(Supplier<E> supplier, BiConsumer<E, DomBuilder>... configurers) {
     final E e = supplier.get();
-    for (final BiConsumer<DomBuilder, E> configurer : configurers) {
-      configurer.accept(this, e);
+    for (final BiConsumer<E, DomBuilder> configurer : configurers) {
+      configurer.accept(e, this);
     }
     return this;
   }
 
   @SafeVarargs
-  public final <E> DomBuilder with(Supplier<E> supplier, Predicate<E> filter, BiConsumer<DomBuilder, E>... configurers) {
+  public final <E> DomBuilder $(Supplier<E> supplier, Predicate<E> filter, BiConsumer<E, DomBuilder>... configurers) {
     final E e = supplier.get();
     if (filter.test(e)) {
-      return with(e, configurers);
+      return $(e, configurers);
     } else {
       return this;
     }
   }
 
-  @SafeVarargs
+  public final DomBuilder $(Runnable action) {
+    action.run();
+    return this;
+  }
+
+  public final DomBuilder $(Consumer<DomBuilder> configurer) {
+    configurer.accept(this);
+    return this;
+  }
+
   public final DomBuilder when(BooleanSupplier conditionSupplier, Consumer<DomBuilder>... configurers) {
     if (conditionSupplier.getAsBoolean()) {
       for (final Consumer<DomBuilder> configurer : configurers) {
@@ -154,7 +257,6 @@ public class DomBuilder {
     return this;
   }
 
-  @SafeVarargs
   public final DomBuilder when(boolean condition, Consumer<DomBuilder>... configurers) {
     if (condition) {
       for (final Consumer<DomBuilder> configurer : configurers) {
@@ -164,21 +266,22 @@ public class DomBuilder {
     return this;
   }
 
+  public DomBuilder stylesheet(String href) {
+    return e("link", Map.of("type", "text/css", "rel", "stylesheet", "href", href));
+  }
+
+  public DomBuilder script(String src) {
+    return e("script", Map.of("type", "text/javascript", "src", src));
+  }
+
+  public DomBuilder meta(String name, String content) {
+    return e("meta", Map.of("name", name, "content", content));
+  }
+
   public DomBuilder write(Result result) throws IOException {
-    final TransformerFactory transformerFactory = TransformerFactory.newDefaultInstance();
-    transformerFactory.setAttribute("indent-number", 2);
-
     try {
-      final Transformer transformer = transformerFactory.newTransformer();
-
-      transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-      transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-      transformer.setOutputProperty(OutputKeys.METHOD, "html");
-      transformer.setOutputProperty(OutputKeys.VERSION, "5.0");
-      transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "about:legacy-compat");
-
+      final Transformer transformer = TRANSFORMER_TL.get();
       transformer.transform(new DOMSource(getNodeToTransform()), result);
-
       return this;
     } catch (TransformerException x) {
       if (x.getCause() instanceof IOException) {
