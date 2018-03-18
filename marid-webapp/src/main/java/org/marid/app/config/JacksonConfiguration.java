@@ -21,29 +21,35 @@
 
 package org.marid.app.config;
 
-import com.google.gson.*;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.MappingJsonFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import org.springframework.boot.jackson.JsonComponentModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.ResolvableType;
-
-import java.util.List;
 
 @Configuration
-public class GsonConfiguration {
+public class JacksonConfiguration {
 
   @Bean
-  public Gson gson(List<TypeAdapter<?>> typeAdapters) {
-    final GsonBuilder builder = new GsonBuilder()
-        .setPrettyPrinting()
-        .setVersion(1.0)
-        .setFieldNamingPolicy(FieldNamingPolicy.IDENTITY)
-        .setLongSerializationPolicy(LongSerializationPolicy.DEFAULT);
+  public JsonComponentModule module() {
+    return new JsonComponentModule();
+  }
 
-    typeAdapters.forEach(adapter -> {
-      final ResolvableType type = ResolvableType.forClass(TypeAdapter.class, adapter.getClass());
-      builder.registerTypeAdapter(type.getGeneric(0).getType(), adapter);
-    });
+  @Bean
+  public JsonFactory jsonFactory() {
+    return new MappingJsonFactory()
+        .configure(JsonParser.Feature.ALLOW_MISSING_VALUES, true)
+        .configure(JsonParser.Feature.ALLOW_TRAILING_COMMA, true);
+  }
 
-    return builder.create();
+  @Bean
+  public ObjectMapper mapper(JsonFactory jsonFactory, JsonComponentModule module) {
+    return new ObjectMapper(jsonFactory)
+        .findAndRegisterModules()
+        .registerModule(module)
+        .enable(SerializationFeature.INDENT_OUTPUT);
   }
 }

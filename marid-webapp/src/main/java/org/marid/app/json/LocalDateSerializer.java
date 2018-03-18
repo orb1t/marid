@@ -1,8 +1,8 @@
 /*-
  * #%L
- * marid-types
+ * marid-webapp
  * %%
- * Copyright (C) 2012 - 2017 MARID software development group
+ * Copyright (C) 2012 - 2018 MARID software development group
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -19,11 +19,25 @@
  * #L%
  */
 
-module marid.types {
+package org.marid.app.json;
 
-  requires static marid.intellij.annotations;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import org.springframework.stereotype.Component;
 
-  exports org.marid.types;
-  exports org.marid.types.invokable;
-  exports org.marid.types.util;
+import java.io.IOException;
+import java.time.LocalDate;
+
+@Component
+public class LocalDateSerializer extends StdSerializer<LocalDate> {
+
+  public LocalDateSerializer() {
+    super(LocalDate.class);
+  }
+
+  @Override
+  public void serialize(LocalDate value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    gen.writeString(value.toString());
+  }
 }

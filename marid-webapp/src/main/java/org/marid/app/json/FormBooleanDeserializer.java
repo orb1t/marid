@@ -19,31 +19,34 @@
  * #L%
  */
 
-package org.marid.app.gson;
+package org.marid.app.json;
 
-import com.google.gson.TypeAdapter;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonToken;
-import com.google.gson.stream.JsonWriter;
-import org.springframework.stereotype.Component;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.deser.std.FromStringDeserializer;
 
 import java.io.IOException;
-import java.time.LocalDate;
 
-@Component
-public class LocalDateAdapter extends TypeAdapter<LocalDate> {
+public class FormBooleanDeserializer extends FromStringDeserializer<Boolean> {
 
-  @Override
-  public void write(JsonWriter out, LocalDate value) throws IOException {
-    out.value(value == null ? null : value.toString());
+  public FormBooleanDeserializer() {
+    super(Boolean.class);
   }
 
   @Override
-  public LocalDate read(JsonReader in) throws IOException {
-    if (in.peek() == JsonToken.STRING && in.hasNext()) {
-      return LocalDate.parse(in.nextString());
-    } else {
-      return null;
+  protected Boolean _deserialize(String value, DeserializationContext ctxt) throws IOException {
+    switch (value) {
+      case "on":
+      case "ON":
+      case "true":
+      case "TRUE":
+        return true;
+      case "off":
+      case "OFF":
+      case "false":
+      case "FALSE":
+        return false;
+      default:
+        throw ctxt.weirdStringException(value, _valueClass, "Unexpected boolean value");
     }
   }
 }

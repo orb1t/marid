@@ -21,7 +21,7 @@
 
 package org.marid.app.dao;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.marid.app.common.Directories;
 import org.marid.app.model.MaridUser;
 import org.springframework.stereotype.Repository;
@@ -45,18 +45,18 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class UserDao {
 
   private final Directories directories;
-  private final Gson gson;
+  private final ObjectMapper mapper;
 
-  public UserDao(Directories directories, Gson gson) {
+  public UserDao(Directories directories, ObjectMapper mapper) {
     this.directories = directories;
-    this.gson = gson;
+    this.mapper = mapper;
   }
 
   public MaridUser loadUserByUsername(String username) throws IOException {
     final Path userDir = directories.getUsers().resolve(username);
     final Path file = userDir.resolve("info.json");
     try (final Reader reader = Files.newBufferedReader(file, UTF_8)) {
-      final MaridUser user = gson.fromJson(reader, MaridUser.class);
+      final MaridUser user = mapper.readValue(reader, MaridUser.class);
       return new MaridUser(
           userDir.getFileName().toString(),
           user.getPassword(),
@@ -86,7 +86,7 @@ public class UserDao {
 
     final MaridUser user;
     try (final Reader reader = Files.newBufferedReader(file, UTF_8)) {
-      user = gson.fromJson(reader, MaridUser.class);
+      user = mapper.readValue(reader, MaridUser.class);
     }
 
     try (final Writer writer = Files.newBufferedWriter(file, UTF_8)) {
@@ -97,7 +97,8 @@ public class UserDao {
       } else {
         authorities = user.getAuthorities();
       }
-      gson.toJson(new MaridUser(username, user.getPassword(), enabled, expirationDate, authorities), writer);
+
+      mapper.writeValue(writer, new MaridUser(username, user.getPassword(), enabled, expirationDate, authorities));
     }
   }
 

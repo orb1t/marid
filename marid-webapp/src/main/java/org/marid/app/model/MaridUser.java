@@ -21,18 +21,34 @@
 
 package org.marid.app.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.marid.app.json.FormBooleanDeserializer;
+
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Set;
 
 public class MaridUser {
 
+  @JsonProperty
   private final String username;
+
+  @JsonProperty
   private final String password;
+
+  @JsonProperty
+  @JsonDeserialize(using = FormBooleanDeserializer.class)
   private final boolean enabled;
+
+  @JsonProperty
   private final LocalDate expirationDate;
+
+  @JsonProperty
   private final Set<String> authorities;
 
+  @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
   public MaridUser(String username, String password, boolean enabled, LocalDate expirationDate, Set<String> authorities) {
     this.username = username;
     this.password = password;
