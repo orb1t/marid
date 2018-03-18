@@ -23,25 +23,17 @@ package org.marid.app.props;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties("google-auth")
-public class GoogleAuthProperties {
+@ConfigurationProperties("ssl")
+public class SslProperties {
 
-  private String clientId;
-  private String secret;
+  private String password = "123456";
 
-  public String getClientId() {
-    return clientId;
+  public String getPassword() {
+    return password;
   }
 
-  public void setClientId(String clientId) {
-    this.clientId = clientId;
-  }
-
-  public String getSecret() {
-    return secret;
-  }
-
-  public void setSecret(String secret) {
-    this.secret = secret;
+  public SslProperties setPassword(String password) {
+    this.password = password;
+    return this;
   }
 }

@@ -21,11 +21,11 @@
 
 package org.marid.app.dao;
 
-import com.google.common.io.MoreFiles;
 import com.google.gson.Gson;
 import org.marid.app.common.Directories;
 import org.marid.app.model.MaridUser;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.FileSystemUtils;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -103,6 +103,6 @@ public class UserDao {
 
   public void removeUser(String name) throws IOException {
     final Path userDir = directories.getUsers().resolve(name);
-    MoreFiles.deleteRecursively(userDir);
+    FileSystemUtils.deleteRecursively(userDir);
   }
 }

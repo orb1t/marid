@@ -77,11 +77,6 @@
     </dependency>
 
     <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-    </dependency>
-
-    <dependency>
       <groupId>org.marid</groupId>
       <artifactId>marid-runtime</artifactId>
       <version>${project.version}</version>
@@ -189,8 +184,7 @@
               <url>scp://marid.org/home/site/app</url>
               <displayCommandOutputs>true</displayCommandOutputs>
               <commands>
-                <command>cd /home/site/app</command>
-                <command>java -jar app/${project.artifactId}.${project.packaging}</command>
+                <command>service webapp restart</command>
               </commands>
             </configuration>
           </plugin>
@@ -211,6 +205,7 @@
             <configuration>
               <attach>false</attach>
               <finalName>${project.artifactId}</finalName>
+              <executable>true</executable>
             </configuration>
           </plugin>
         </plugins>
