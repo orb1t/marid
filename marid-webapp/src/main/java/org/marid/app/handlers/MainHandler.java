@@ -39,8 +39,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
-import static org.apache.commons.lang3.StringUtils.stripToNull;
-
 @Component
 public class MainHandler extends PathHandler {
 
@@ -76,7 +74,9 @@ public class MainHandler extends PathHandler {
 
         if (h.secure()) {
           final MaridSecurityLogic logic = new MaridSecurityLogic(handler, config, h.processUnauthorized());
-          handler = new MaridSecurityHandler(logic, stripToNull(h.authorizer()), stripToNull(h.client()));
+          final String authorizer = h.authorizer().isEmpty() ? null : h.authorizer();
+          final String client = h.client().isEmpty() ? null : h.client();
+          handler = new MaridSecurityHandler(logic, authorizer, client);
         }
 
         if (h.exact()) {

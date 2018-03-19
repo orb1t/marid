@@ -95,7 +95,7 @@ public class Handlers {
   }
 
   @Bean
-  @Handler(path = "/google.html", client = "GoogleOidcClient")
+  @Handler(path = "/google.html", client = "Google2Client")
   public HttpHandler googlePage() {
     return new RedirectHandler(new ConstantExchangeAttribute("/"));
   }
