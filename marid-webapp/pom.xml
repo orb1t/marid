@@ -27,19 +27,14 @@
     </dependency>
 
     <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-configuration-processor</artifactId>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
     </dependency>
 
     <dependency>
       <groupId>io.undertow</groupId>
       <artifactId>undertow-core</artifactId>
-      <version>2.0.1.Final</version>
+      <version>2.0.2.Final</version>
     </dependency>
 
     <dependency>
@@ -51,6 +46,16 @@
     <dependency>
       <groupId>org.pac4j</groupId>
       <artifactId>pac4j-oauth</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-jdk14</artifactId>
     </dependency>
 
     <dependency>
@@ -147,21 +152,6 @@
   <build>
     <plugins>
       <plugin>
-        <artifactId>maven-jar-plugin</artifactId>
-        <configuration>
-          <archive>
-            <manifestEntries>
-              <Class-Path>ext/</Class-Path>
-              <Add-Opens>
-                java.base/java.lang
-                java.base/sun.nio.ch
-              </Add-Opens>
-            </manifestEntries>
-          </archive>
-        </configuration>
-      </plugin>
-
-      <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>license-maven-plugin</artifactId>
         <configuration>
@@ -183,6 +173,43 @@
 
       <build>
         <plugins>
+          <plugin>
+            <artifactId>maven-jar-plugin</artifactId>
+            <configuration>
+              <archive>
+                <manifest>
+                  <addClasspath>true</addClasspath>
+                  <mainClass>org.marid.app.Context</mainClass>
+                  <classpathPrefix>lib</classpathPrefix>
+                </manifest>
+                <manifestEntries>
+                  <Class-Path>ext/</Class-Path>
+                  <Add-Opens>
+                    java.base/java.lang
+                    java.base/sun.nio.ch
+                  </Add-Opens>
+                </manifestEntries>
+              </archive>
+            </configuration>
+          </plugin>
+
+          <plugin>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>copy-deps</id>
+                <goals>
+                  <goal>copy-dependencies</goal>
+                </goals>
+                <phase>package</phase>
+                <configuration>
+                  <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                  <includeScope>runtime</includeScope>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>wagon-maven-plugin</artifactId>
@@ -229,26 +256,6 @@
               <serverId>marid.org</serverId>
               <url>scp://marid.org/home/site/app</url>
               <displayCommandOutputs>true</displayCommandOutputs>
-            </configuration>
-          </plugin>
-
-          <plugin>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-maven-plugin</artifactId>
-            <version>2.0.0.RELEASE</version>
-            <executions>
-              <execution>
-                <id>repack</id>
-                <goals>
-                  <goal>repackage</goal>
-                </goals>
-                <phase>package</phase>
-              </execution>
-            </executions>
-            <configuration>
-              <attach>false</attach>
-              <finalName>${project.artifactId}</finalName>
-              <executable>true</executable>
             </configuration>
           </plugin>
         </plugins>

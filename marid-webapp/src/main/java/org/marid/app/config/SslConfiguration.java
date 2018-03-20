@@ -22,7 +22,6 @@
 package org.marid.app.config;
 
 import org.marid.app.props.SslProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -33,7 +32,6 @@ import java.io.InputStream;
 import java.security.KeyStore;
 
 @Configuration
-@EnableConfigurationProperties({SslProperties.class})
 public class SslConfiguration {
 
   @Bean

@@ -23,10 +23,9 @@ package org.marid.app.config;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.MappingJsonFactory;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import org.springframework.boot.jackson.JsonComponentModule;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import org.marid.misc.Casts;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -34,8 +33,18 @@ import org.springframework.context.annotation.Configuration;
 public class JacksonConfiguration {
 
   @Bean
-  public JsonComponentModule module() {
-    return new JsonComponentModule();
+  public SimpleModule module(JsonSerializer<?>[] serializers, JsonDeserializer<?>[] deserializers) {
+    final SimpleModule module = new SimpleModule();
+
+    for (final JsonSerializer<?> serializer : serializers) {
+      module.addSerializer(Casts.cast(serializer.handledType()), serializer);
+    }
+
+    for (final JsonDeserializer<?> deserializer : deserializers) {
+      module.addDeserializer(Casts.cast(deserializer.handledType()), deserializer);
+    }
+
+    return module;
   }
 
   @Bean
@@ -46,7 +55,7 @@ public class JacksonConfiguration {
   }
 
   @Bean
-  public ObjectMapper mapper(JsonFactory jsonFactory, JsonComponentModule module) {
+  public ObjectMapper mapper(JsonFactory jsonFactory, SimpleModule module) {
     return new ObjectMapper(jsonFactory)
         .findAndRegisterModules()
         .registerModule(module)

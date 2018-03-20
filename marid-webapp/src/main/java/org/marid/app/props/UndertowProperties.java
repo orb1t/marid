@@ -21,16 +21,20 @@
 
 package org.marid.app.props;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
-@ConfigurationProperties("undertow")
+@Component
 public class UndertowProperties {
 
-  private String host = "localhost";
+  @Value("${undertow.host:localhost}")
+  private String host;
 
-  private int port = 8443;
+  @Value("${undertow.port:8443}")
+  private int port;
 
-  private int sessionTimeout = 1800;
+  @Value("${undertow.session-timeout:1800}")
+  private int sessionTimeout;
 
   public int getSessionTimeout() {
     return sessionTimeout;

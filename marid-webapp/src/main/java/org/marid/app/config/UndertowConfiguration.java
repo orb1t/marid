@@ -30,14 +30,12 @@ import org.marid.app.handlers.MainHandler;
 import org.marid.app.http.BowerResourceManager;
 import org.marid.app.http.MaridResourceManager;
 import org.marid.app.props.UndertowProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.net.ssl.SSLContext;
 
 @Configuration
-@EnableConfigurationProperties(UndertowProperties.class)
 public class UndertowConfiguration {
 
   @Bean(initMethod = "start", destroyMethod = "stop")

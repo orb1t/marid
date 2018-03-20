@@ -25,18 +25,19 @@ import org.marid.app.annotation.PrototypeScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InjectionPoint;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.web.embedded.EmbeddedWebServerFactoryCustomizerAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.util.Scanner;
 
 @EnableScheduling
-@SpringBootApplication(exclude = {EmbeddedWebServerFactoryCustomizerAutoConfiguration.class})
+@ComponentScan
+@PropertySource(value = {"classpath:application.properties"})
 @PropertySource(value = {"classpath:additional.properties"}, ignoreResourceNotFound = true)
 public class Context {
 
@@ -48,8 +49,11 @@ public class Context {
         final String line = scanner.nextLine().trim();
         switch (line) {
           case "exit":
-            SpringApplication.exit(context);
-            break;
+            try {
+              context.close();
+            } catch (Exception x) {
+              x.printStackTrace();
+            }
           case "quit":
           case "q":
             System.exit(0);
@@ -68,7 +72,24 @@ public class Context {
     return LoggerFactory.getLogger(type);
   }
 
+  @Bean
+  public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
+    final PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
+    configurer.setFileEncoding("UTF-8");
+    configurer.setNullValue("@null");
+    configurer.setIgnoreResourceNotFound(true);
+    configurer.setIgnoreUnresolvablePlaceholders(false);
+    return configurer;
+  }
+
   public static void main(String... args) {
-    SpringApplication.run(Context.class, args);
+    final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+    context.setId("marid");
+    context.setDisplayName("Marid Web Application");
+    context.setAllowCircularReferences(false);
+    context.setAllowBeanDefinitionOverriding(false);
+    context.register(Context.class);
+    context.refresh();
+    context.start();
   }
 }

@@ -21,12 +21,14 @@
 
 package org.marid.app.props;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
-@ConfigurationProperties("ssl")
+@Component
 public class SslProperties {
 
-  private String password = "123456";
+  @Value("${ssl.password:123456}")
+  private String password;
 
   public String getPassword() {
     return password;
