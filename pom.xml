@@ -64,12 +64,6 @@
     <profile>
       <id>development</id>
 
-      <activation>
-        <property>
-          <name>!marid.release</name>
-        </property>
-      </activation>
-
       <properties>
         <spring.profile>development</spring.profile>
       </properties>

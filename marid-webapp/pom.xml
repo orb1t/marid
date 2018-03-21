@@ -158,108 +158,94 @@
           <roots>src/main/java,src/test/java</roots>
         </configuration>
       </plugin>
+
+      <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <index>false</index>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <mainClass>org.marid.app.Context</mainClass>
+              <classpathPrefix>lib</classpathPrefix>
+            </manifest>
+            <manifestEntries>
+              <Class-Path>ext/</Class-Path>
+              <Add-Opens>
+                java.base/java.lang
+                java.base/sun.nio.ch
+              </Add-Opens>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-deps</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <outputDirectory>${project.build.directory}/lib</outputDirectory>
+              <includeScope>runtime</includeScope>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>wagon-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>stop</id>
+            <goals>
+              <goal>sshexec</goal>
+            </goals>
+            <configuration>
+              <commands>
+                <command>service webapp stop</command>
+              </commands>
+              <failOnError>false</failOnError>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>deploy</id>
+            <goals>
+              <goal>upload</goal>
+            </goals>
+            <configuration>
+              <fromDir>${project.build.directory}</fromDir>
+              <includes>marid-webapp*.jar,lib/**</includes>
+              <toDir>home/site/app</toDir>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>start</id>
+            <goals>
+              <goal>sshexec</goal>
+            </goals>
+            <configuration>
+              <commands>
+                <command>service webapp start</command>
+              </commands>
+            </configuration>
+          </execution>
+        </executions>
+
+        <configuration>
+          <serverId>marid.org</serverId>
+          <url>scp://marid.org</url>
+          <displayCommandOutputs>true</displayCommandOutputs>
+        </configuration>
+      </plugin>
+
     </plugins>
   </build>
-
-  <profiles>
-    <profile>
-      <id>development</id>
-
-      <activation>
-        <property>
-          <name>!marid.release</name>
-        </property>
-      </activation>
-
-      <build>
-        <plugins>
-          <plugin>
-            <artifactId>maven-jar-plugin</artifactId>
-            <configuration>
-              <archive>
-                <manifest>
-                  <addClasspath>true</addClasspath>
-                  <mainClass>org.marid.app.Context</mainClass>
-                  <classpathPrefix>lib</classpathPrefix>
-                </manifest>
-                <manifestEntries>
-                  <Class-Path>ext/</Class-Path>
-                  <Add-Opens>
-                    java.base/java.lang
-                    java.base/sun.nio.ch
-                  </Add-Opens>
-                </manifestEntries>
-              </archive>
-            </configuration>
-          </plugin>
-
-          <plugin>
-            <artifactId>maven-dependency-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>copy-deps</id>
-                <goals>
-                  <goal>copy-dependencies</goal>
-                </goals>
-                <phase>package</phase>
-                <configuration>
-                  <outputDirectory>${project.build.directory}/lib</outputDirectory>
-                  <includeScope>runtime</includeScope>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>wagon-maven-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>stop</id>
-                <goals>
-                  <goal>sshexec</goal>
-                </goals>
-                <configuration>
-                  <commands>
-                    <command>service webapp stop</command>
-                    <command>chmod 666 /home/site/app/${project.artifactId}.${project.packaging}</command>
-                  </commands>
-                  <failOnError>false</failOnError>
-                </configuration>
-              </execution>
-
-              <execution>
-                <id>deploy</id>
-                <goals>
-                  <goal>upload-single</goal>
-                </goals>
-                <configuration>
-                  <fromFile>${project.build.directory}/${project.artifactId}.${project.packaging}</fromFile>
-                </configuration>
-              </execution>
-
-              <execution>
-                <id>start</id>
-                <goals>
-                  <goal>sshexec</goal>
-                </goals>
-                <configuration>
-                  <commands>
-                    <command>chmod 500 /home/site/app/${project.artifactId}.${project.packaging}</command>
-                    <command>service webapp start</command>
-                  </commands>
-                </configuration>
-              </execution>
-            </executions>
-
-            <configuration>
-              <serverId>marid.org</serverId>
-              <url>scp://marid.org/home/site/app</url>
-              <displayCommandOutputs>true</displayCommandOutputs>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 </project>

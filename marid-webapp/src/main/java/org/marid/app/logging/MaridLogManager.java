@@ -19,28 +19,19 @@
  * #L%
  */
 
-package org.marid.app.props;
+package org.marid.app.logging;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.LogManager;
 
-@Component
-public class SslProperties {
+public class MaridLogManager extends LogManager {
 
-  @Value("${ssl.password:123456}")
-  private String password;
-
-  public String getPassword() {
-    return password;
-  }
-
-  public SslProperties setPassword(String password) {
-    this.password = password;
-    return this;
-  }
+  private final AtomicBoolean firstReset = new AtomicBoolean(true);
 
   @Override
-  public String toString() {
-    return String.format("%s(%s)", getClass().getSimpleName(), password);
+  public void reset() throws SecurityException {
+    if (firstReset.compareAndSet(true, false)) {
+      super.reset();
+    }
   }
 }

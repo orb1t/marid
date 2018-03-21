@@ -48,4 +48,9 @@ public class GoogleAuthProperties {
   public void setSecret(String secret) {
     this.secret = secret;
   }
+
+  @Override
+  public String toString() {
+    return String.format("%s(%s,%s)", getClass().getSimpleName(), clientId, secret);
+  }
 }

@@ -59,4 +59,9 @@ public class UndertowProperties {
   public void setHost(String host) {
     this.host = host;
   }
+
+  @Override
+  public String toString() {
+    return String.format("%s(%s:%s,%s)", getClass().getSimpleName(), host, port, sessionTimeout);
+  }
 }

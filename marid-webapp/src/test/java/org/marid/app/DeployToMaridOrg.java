@@ -34,12 +34,17 @@ public class DeployToMaridOrg {
     final CodeSource codeSource = protectionDomain.getCodeSource();
     final URL location = codeSource.getLocation();
     final Path path = Paths.get(location.toURI()).getParent().getParent();
-    final Process process = new ProcessBuilder(
+
+    final String[] params = {
         "mvn",
+        "clean",
+        "install",
         "wagon:sshexec@stop",
-        "wagon:upload-single@deploy",
+        "wagon:upload@deploy",
         "wagon:sshexec@start"
-    )
+    };
+
+    final Process process = new ProcessBuilder(params)
         .inheritIO()
         .directory(path.toFile())
         .start();
