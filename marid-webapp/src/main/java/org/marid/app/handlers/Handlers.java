@@ -29,6 +29,7 @@ import io.undertow.server.handlers.RedirectHandler;
 import io.undertow.server.handlers.resource.ResourceHandler;
 import io.undertow.server.handlers.resource.ResourceManager;
 import org.marid.app.annotation.Handler;
+import org.marid.app.html.StdLib;
 import org.marid.app.http.HttpExecutor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
@@ -61,7 +62,7 @@ public class Handlers {
     return exchange -> executor.html(exchange, (c, builder) -> builder
         .e("head", head -> head
             .e("title", c.s("maridIde"))
-            .e("link", c.icon())
+            .e("link", Map.of("rel", "icon", "href", "/marid-icon.gif", "type", "image/gif"))
             .meta("google", "notranslate")
             .meta("viewport", "width=device-width, initial-scale=1")
             .stylesheet("/public/login.css")
@@ -78,18 +79,29 @@ public class Handlers {
                     )
                 )
             )
-        ));
+        )
+    );
+  }
+
+  @Bean
+  public HttpHandler mainMenuHandler(HttpExecutor executor, StdLib stdLib) {
+    return exchange -> executor.html(exchange, (c, builder) ->
+        stdLib.stdHead(builder, c.s("maridMenu"))
+        .e("body", body -> body
+            .$(v -> stdLib.scripts(v))
+        )
+    );
   }
 
   @Bean
   @Handler(path = "/", processUnauthorized = true)
-  public HttpHandler loginPage(HttpHandler authListHandler) {
+  public HttpHandler loginPage(HttpHandler authListHandler, HttpHandler mainMenuHandler) {
     return exchange -> {
       final SecurityContext context = exchange.getSecurityContext();
       if (context == null) {
         authListHandler.handleRequest(exchange);
       } else {
-
+        mainMenuHandler.handleRequest(exchange);
       }
     };
   }

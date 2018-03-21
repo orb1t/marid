@@ -52,7 +52,7 @@ public class BowerResourceManager implements ResourceManager {
 
               final String version = properties.getProperty("version");
               if (version != null) {
-                return Stream.of(Map.entry(library, "/META-INF/resources/webjars/" + version + "/dist/"));
+                return Stream.of(Map.entry(library, "/META-INF/resources/webjars/%s/" + version + "/dist/%s"));
               }
             }
           } catch (IOException x) {
@@ -66,14 +66,15 @@ public class BowerResourceManager implements ResourceManager {
 
   @Override
   public Resource getResource(String path) {
-    if (path.length() > 6) {
-      final int index = path.indexOf('/', 5);
+    if (path.length() > 2) {
+      final int index = path.indexOf('/', 2);
       if (index >= 0) {
-        final String library = path.substring(5, index);
+        final String library = path.substring(1, index);
+        final String file = path.substring(index + 1);
 
         final String entry = entries.get(library);
         if (entry != null) {
-          final URL url = getClass().getResource(entry + path.substring(index + 1));
+          final URL url = getClass().getResource(String.format(entry, library, file));
           if (url != null) {
             return new URLResource(url, path);
           }

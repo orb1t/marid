@@ -46,9 +46,13 @@ public interface ExchangeHelper {
         return locale;
       }
     }
-    return LocaleUtils.getLocalesFromHeader(exchange.getRequestHeaders().getFirst("Accept-Language"))
+    final Locale locale = LocaleUtils.getLocalesFromHeader(exchange.getRequestHeaders().getFirst("Accept-Language"))
         .stream()
         .findFirst()
         .orElse(Locale.US);
+    if (context != null) {
+      context.setSessionAttribute(USER_LOCALE_SESSION_KEY, locale);
+    }
+    return locale;
   }
 }

@@ -28,14 +28,8 @@ import org.marid.l10n.L10n;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
-
-import static java.util.concurrent.atomic.AtomicReferenceFieldUpdater.newUpdater;
 
 public final class HttpContext {
-
-  private static final AtomicReferenceFieldUpdater<HttpContext, Locale> LOCALE = newUpdater(HttpContext.class, Locale.class, "locale");
 
   private final HttpServerExchange exchange;
 
@@ -54,18 +48,10 @@ public final class HttpContext {
   }
 
   public String s(String pattern, Object... args) {
-    return L10n.s(getLocale(), pattern, args);
+    return L10n.s(ExchangeHelper.locale(exchange), pattern, args);
   }
 
   public String m(String pattern, Object... args) {
-    return L10n.m(getLocale(), pattern, args);
-  }
-
-  public Locale getLocale() {
-    return LOCALE.updateAndGet(this, old -> old != null ? old : ExchangeHelper.locale(exchange));
-  }
-
-  public Map<String, ?> icon() {
-    return Map.of("rel", "icon", "href", "/marid-icon.gif", "type", "image/gif");
+    return L10n.m(ExchangeHelper.locale(exchange), pattern, args);
   }
 }
