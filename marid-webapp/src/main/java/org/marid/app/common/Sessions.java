@@ -25,8 +25,10 @@ import io.undertow.server.HttpServerExchange;
 import io.undertow.server.session.Session;
 import io.undertow.server.session.SessionListener;
 import io.undertow.server.session.SessionManager;
+import org.marid.app.spring.ContextUtils;
 import org.marid.app.spring.LoggingPostProcessor;
 import org.marid.appcontext.session.SessionConfiguration;
+import org.pac4j.core.context.Pac4jConstants;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -41,9 +43,11 @@ public class Sessions {
 
   private final ConcurrentHashMap<Session, GenericApplicationContext> sessionContexts = new ConcurrentHashMap<>();
   private final Logger logger;
+  private final GenericApplicationContext parent;
 
-  public Sessions(Logger logger) {
+  public Sessions(Logger logger, GenericApplicationContext parent) {
     this.logger = logger;
+    this.parent = parent;
   }
 
   @Autowired
@@ -51,30 +55,12 @@ public class Sessions {
     sessionManager.registerSessionListener(new SessionListener() {
       @Override
       public void sessionCreated(Session session, HttpServerExchange exchange) {
-        sessionContexts.computeIfAbsent(session, s -> {
-          try {
-            final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-            context.setAllowBeanDefinitionOverriding(false);
-            context.setAllowCircularReferences(false);
-            context.setId(s.getId());
-            context.setDisplayName(s.getId() + " (" + Instant.ofEpochMilli(s.getCreationTime()) + ")");
-            context.getBeanFactory().addBeanPostProcessor(new LoggingPostProcessor());
-            context.registerBean(SessionConfiguration.class, () -> new SessionConfiguration(s));
-            context.refresh();
-            context.start();
-            logger.info("Created session {}", s.getId());
-            return context;
-          } catch (Exception x) {
-            logger.warn("Unable to create session {} context", s.getId(), x);
-            return null;
-          }
-        });
       }
 
       @Override
       public void sessionDestroyed(Session session, HttpServerExchange exchange, SessionDestroyedReason reason) {
-        logger.info("Destroyed session {}", session.getId());
         sessionContexts.computeIfPresent(session, (s, old) -> {
+          logger.info("Destroyed session {}", session.getId());
           try (old) {
             logger.info("Closing {}", s.getId());
           } catch (Exception x) {
@@ -82,6 +68,30 @@ public class Sessions {
           }
           return null;
         });
+      }
+
+      @Override
+      public void attributeAdded(Session session, String name, Object value) {
+        switch (name) {
+          case Pac4jConstants.USER_PROFILES:
+            sessionContexts.computeIfAbsent(session, s -> {
+              try {
+                final AnnotationConfigApplicationContext context = ContextUtils.context(parent);
+                context.setId(s.getId());
+                context.setDisplayName(s.getId() + " (" + Instant.ofEpochMilli(s.getCreationTime()) + ")");
+                context.getBeanFactory().addBeanPostProcessor(new LoggingPostProcessor());
+                context.registerBean(SessionConfiguration.class, () -> new SessionConfiguration(s));
+                context.refresh();
+                context.start();
+                logger.info("Created session {}", s.getId());
+                return context;
+              } catch (Exception x) {
+                logger.warn("Unable to create session {} context", s.getId(), x);
+                return null;
+              }
+            });
+            break;
+        }
       }
     });
   }

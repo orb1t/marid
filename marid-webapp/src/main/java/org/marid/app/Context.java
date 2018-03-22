@@ -22,8 +22,8 @@
 package org.marid.app;
 
 import org.marid.app.annotation.PrototypeScoped;
-import org.marid.app.logging.MaridLogging;
 import org.marid.app.spring.LoggingPostProcessor;
+import org.marid.logging.MaridLogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InjectionPoint;
@@ -38,9 +38,11 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Scanner;
+import java.util.logging.LogManager;
 
 @EnableScheduling
 @ComponentScan
@@ -85,7 +87,12 @@ public class Context {
   }
 
   public static void main(String... args) throws Exception {
-    MaridLogging.initLogging();
+    System.setProperty("java.util.logging.manager", MaridLogManager.class.getName());
+
+    final LogManager logManager = LogManager.getLogManager();
+    try (final InputStream inputStream = Context.class.getResourceAsStream("/logging.properties")) {
+      logManager.readConfiguration(inputStream);
+    }
 
     final File pidFile = new File("marid-webapp.pid");
     pidFile.deleteOnExit();
