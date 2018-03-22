@@ -27,19 +27,25 @@ import org.marid.app.spring.LoggingPostProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InjectionPoint;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.SimpleCommandLinePropertySource;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Scanner;
 
 @EnableScheduling
-@ComponentScan(basePackageClasses = {Context.class})
+@ComponentScan
 @PropertySource(value = {"classpath:application.properties"})
-@Configuration
+@Component
 public class Context {
 
   @Bean
@@ -59,6 +65,25 @@ public class Context {
     return configurer;
   }
 
+  @Bean(initMethod = "start")
+  public static Thread quitter(GenericApplicationContext context) {
+    final Thread thread = new Thread(null, () -> {
+      try (final Scanner scanner = new Scanner(System.in)) {
+        while (scanner.hasNextLine()) {
+          switch (scanner.nextLine().trim()) {
+            case "q":
+            case "quit":
+              context.close();
+              System.exit(0);
+              break;
+          }
+        }
+      }
+    }, "quitter", 64L * 1024L, false);
+    thread.setDaemon(true);
+    return thread;
+  }
+
   public static void main(String... args) throws Exception {
     MaridLogging.initLogging();
 
@@ -71,6 +96,7 @@ public class Context {
     context.setDisplayName("Marid Web Application");
     context.setAllowCircularReferences(false);
     context.setAllowBeanDefinitionOverriding(false);
+    context.getEnvironment().setDefaultProfiles("release");
     context.getBeanFactory().addBeanPostProcessor(new LoggingPostProcessor());
     context.registerShutdownHook();
     context.register(Context.class);

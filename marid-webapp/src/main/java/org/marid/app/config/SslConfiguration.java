@@ -23,7 +23,7 @@ package org.marid.app.config;
 
 import org.marid.app.props.SslProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -31,7 +31,7 @@ import javax.net.ssl.TrustManagerFactory;
 import java.io.InputStream;
 import java.security.KeyStore;
 
-@Configuration
+@Component
 public class SslConfiguration {
 
   @Bean

@@ -1,6 +1,6 @@
 /*-
  * #%L
- * marid-webapp
+ * marid-util
  * %%
  * Copyright (C) 2012 - 2018 MARID software development group
  * %%
@@ -19,19 +19,32 @@
  * #L%
  */
 
-package org.marid.app.logging;
+package org.marid.logging;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.LogManager;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
 
-public class MaridLogManager extends LogManager {
-
-  private final AtomicBoolean firstReset = new AtomicBoolean(true);
+public class MaridConsoleLogHandler extends AbstractHandler {
 
   @Override
-  public void reset() throws SecurityException {
-    if (firstReset.compareAndSet(true, false)) {
-      super.reset();
+  public void publish(LogRecord record) {
+    if (isLoggable(record)) {
+      final String message = getFormatter().format(record);
+      if (record.getLevel().intValue() > Level.WARNING.intValue()) {
+        System.err.print(message);
+      } else {
+        System.out.print(message);
+      }
     }
+  }
+
+  @Override
+  public void flush() {
+    System.err.flush();
+    System.out.flush();
+  }
+
+  @Override
+  public void close() {
   }
 }

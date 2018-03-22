@@ -53,20 +53,10 @@
   <profiles>
     <profile>
       <id>release</id>
-
-      <properties>
-        <marid.release>true</marid.release>
-
-        <spring.profile>release</spring.profile>
-      </properties>
     </profile>
 
     <profile>
       <id>development</id>
-
-      <properties>
-        <spring.profile>development</spring.profile>
-      </properties>
 
       <build>
         <resources>

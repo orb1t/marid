@@ -29,9 +29,9 @@ import org.pac4j.core.client.Clients;
 import org.pac4j.core.config.Config;
 import org.pac4j.oauth.client.Google2Client;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
-@Configuration
+@Component
 public class AuthClientConfiguration {
 
   @Bean

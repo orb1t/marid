@@ -19,21 +19,27 @@
  * #L%
  */
 
-package org.marid.app.logging;
+package org.marid.appcontext.session;
 
-import org.marid.logging.MaridLogManager;
+import io.undertow.server.session.Session;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 
-import java.io.InputStream;
-import java.util.logging.LogManager;
+@Configuration
+@ComponentScan
+public class SessionConfiguration {
 
-public class MaridLogging {
+  private final Session session;
 
-  public static void initLogging() throws Exception {
-    System.setProperty("java.util.logging.manager", MaridLogManager.class.getName());
+  @Autowired(required = false)
+  public SessionConfiguration(Session session) {
+    this.session = session;
+  }
 
-    final LogManager logManager = LogManager.getLogManager();
-    try (final InputStream inputStream = MaridLogging.class.getResourceAsStream("/logging.properties")) {
-      logManager.readConfiguration(inputStream);
-    }
+  @Bean
+  public Session session() {
+    return session;
   }
 }

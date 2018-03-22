@@ -1,6 +1,6 @@
 /*-
  * #%L
- * marid-webapp
+ * marid-util
  * %%
  * Copyright (C) 2012 - 2018 MARID software development group
  * %%
@@ -19,21 +19,19 @@
  * #L%
  */
 
-package org.marid.app.logging;
+package org.marid.logging;
 
-import org.marid.logging.MaridLogManager;
-
-import java.io.InputStream;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.LogManager;
 
-public class MaridLogging {
+public class MaridLogManager extends LogManager {
 
-  public static void initLogging() throws Exception {
-    System.setProperty("java.util.logging.manager", MaridLogManager.class.getName());
+  private final AtomicBoolean firstReset = new AtomicBoolean(true);
 
-    final LogManager logManager = LogManager.getLogManager();
-    try (final InputStream inputStream = MaridLogging.class.getResourceAsStream("/logging.properties")) {
-      logManager.readConfiguration(inputStream);
+  @Override
+  public void reset() throws SecurityException {
+    if (firstReset.compareAndSet(true, false)) {
+      super.reset();
     }
   }
 }
