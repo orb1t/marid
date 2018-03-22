@@ -21,12 +21,14 @@
 
 package org.marid.app.config;
 
+import org.marid.app.props.FacebookAuthProperties;
 import org.marid.app.props.GoogleAuthProperties;
 import org.marid.app.props.UndertowProperties;
 import org.pac4j.core.authorization.authorizer.RequireAnyRoleAuthorizer;
 import org.pac4j.core.client.Client;
 import org.pac4j.core.client.Clients;
 import org.pac4j.core.config.Config;
+import org.pac4j.oauth.client.FacebookClient;
 import org.pac4j.oauth.client.Google2Client;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
@@ -37,6 +39,11 @@ public class AuthClientConfiguration {
   @Bean
   public Google2Client google2Client(GoogleAuthProperties properties) {
     return new Google2Client(properties.getClientId(), properties.getSecret());
+  }
+
+  @Bean
+  public FacebookClient facebookClient(FacebookAuthProperties properties) {
+    return new FacebookClient(properties.getClientId(), properties.getSecret());
   }
 
   @Bean

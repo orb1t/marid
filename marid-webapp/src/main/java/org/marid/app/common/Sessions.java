@@ -59,6 +59,57 @@ public class Sessions {
 
       @Override
       public void sessionDestroyed(Session session, HttpServerExchange exchange, SessionDestroyedReason reason) {
+        destroy(session);
+      }
+
+      @Override
+      public void attributeAdded(Session session, String name, Object value) {
+        switch (name) {
+          case Pac4jConstants.USER_PROFILES:
+            create(session);
+            break;
+        }
+      }
+
+      @Override
+      public void attributeRemoved(Session session, String name, Object oldValue) {
+        switch (name) {
+          case Pac4jConstants.USER_PROFILES:
+            destroy(session);
+            break;
+        }
+      }
+
+      @Override
+      public void attributeUpdated(Session session, String name, Object newValue, Object oldValue) {
+        switch (name) {
+          case Pac4jConstants.USER_PROFILES:
+            destroy(session);
+            create(session);
+            break;
+        }
+      }
+
+      private void create(Session session) {
+        sessionContexts.computeIfAbsent(session, s -> {
+          try {
+            final AnnotationConfigApplicationContext context = ContextUtils.context(parent);
+            context.setId(s.getId());
+            context.setDisplayName(s.getId() + " (" + Instant.ofEpochMilli(s.getCreationTime()) + ")");
+            context.getBeanFactory().addBeanPostProcessor(new LoggingPostProcessor());
+            context.registerBean(SessionConfiguration.class, () -> new SessionConfiguration(s));
+            context.refresh();
+            context.start();
+            logger.info("Created session {}", s.getId());
+            return context;
+          } catch (Exception x) {
+            logger.warn("Unable to create session {} context", s.getId(), x);
+            return null;
+          }
+        });
+      }
+
+      private void destroy(Session session) {
         sessionContexts.computeIfPresent(session, (s, old) -> {
           logger.info("Destroyed session {}", session.getId());
           try (old) {
@@ -68,30 +119,6 @@ public class Sessions {
           }
           return null;
         });
-      }
-
-      @Override
-      public void attributeAdded(Session session, String name, Object value) {
-        switch (name) {
-          case Pac4jConstants.USER_PROFILES:
-            sessionContexts.computeIfAbsent(session, s -> {
-              try {
-                final AnnotationConfigApplicationContext context = ContextUtils.context(parent);
-                context.setId(s.getId());
-                context.setDisplayName(s.getId() + " (" + Instant.ofEpochMilli(s.getCreationTime()) + ")");
-                context.getBeanFactory().addBeanPostProcessor(new LoggingPostProcessor());
-                context.registerBean(SessionConfiguration.class, () -> new SessionConfiguration(s));
-                context.refresh();
-                context.start();
-                logger.info("Created session {}", s.getId());
-                return context;
-              } catch (Exception x) {
-                logger.warn("Unable to create session {} context", s.getId(), x);
-                return null;
-              }
-            });
-            break;
-        }
       }
     });
   }

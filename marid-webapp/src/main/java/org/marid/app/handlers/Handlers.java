@@ -111,4 +111,10 @@ public class Handlers {
   public HttpHandler googlePage() {
     return new RedirectHandler(new ConstantExchangeAttribute("/"));
   }
+
+  @Bean
+  @Handler(path = "/facebook.html", client = "FacebookClient")
+  public HttpHandler facebookPage() {
+    return new RedirectHandler(new ConstantExchangeAttribute("/"));
+  }
 }
