@@ -16,3 +16,12 @@ body {
     height: auto;
     width: auto;
 }
+
+#menu > img {
+    margin-right: 10px;
+}
+
+#menu {
+    display: flex;
+    align-items: center;
+}

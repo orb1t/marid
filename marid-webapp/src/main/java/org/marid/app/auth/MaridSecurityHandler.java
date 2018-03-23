@@ -24,9 +24,7 @@ package org.marid.app.auth;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.AttachmentKey;
-import org.pac4j.core.context.WebContext;
 import org.pac4j.core.profile.CommonProfile;
-import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.undertow.context.UndertowSessionStore;
 import org.pac4j.undertow.context.UndertowWebContext;
 import org.pac4j.undertow.util.UndertowHelper;
@@ -54,23 +52,11 @@ public class MaridSecurityHandler implements HttpHandler {
     final UndertowWebContext context = new UndertowWebContext(exchange, new UndertowSessionStore(exchange));
     exchange.putAttachment(WEB_CONTEXT_KEY, context);
 
-    final Profiles<CommonProfile> manager = new Profiles<>(context);
+    final MaridProfileManager<CommonProfile> manager = new MaridProfileManager<>(context);
     final LinkedHashMap<String, CommonProfile> profiles = manager.retrieveAll(true);
 
     UndertowHelper.populateContext(context, profiles);
 
     logic.perform(context, authorizers, clients);
-  }
-
-  private static class Profiles<U extends CommonProfile> extends ProfileManager<U> {
-
-    public Profiles(WebContext context) {
-      super(context);
-    }
-
-    @Override
-    protected LinkedHashMap<String, U> retrieveAll(boolean readFromSession) {
-      return super.retrieveAll(readFromSession);
-    }
   }
 }

@@ -43,10 +43,12 @@ public class StdLib {
         .meta("viewport", "width=device-width, initial-scale=1")
         .stylesheet("/user/semantic/semantic.css")
         .when(title != null, b -> b.e("title", title))
+        .$(() -> {
+          for (final Consumer<DomBuilder> configurer : headConfigurers) {
+            configurer.accept(h);
+          }
+        })
     );
-    for (final Consumer<DomBuilder> configurer : headConfigurers) {
-      configurer.accept(head);
-    }
     return builder;
   }
 

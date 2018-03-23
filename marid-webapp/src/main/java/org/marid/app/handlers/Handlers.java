@@ -31,6 +31,8 @@ import io.undertow.server.handlers.resource.ResourceManager;
 import org.marid.app.annotation.Handler;
 import org.marid.app.html.StdLib;
 import org.marid.app.http.HttpExecutor;
+import org.pac4j.core.config.Config;
+import org.pac4j.undertow.handler.LogoutHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
@@ -86,8 +88,24 @@ public class Handlers {
   @Bean
   public HttpHandler mainMenuHandler(HttpExecutor executor, StdLib stdLib) {
     return exchange -> executor.html(exchange, (c, builder) ->
-        stdLib.stdHead(builder, c.s("maridMenu"))
-        .e("body", body -> body
+        stdLib.stdHead(builder, c.s("maridMenu"), head -> head.stylesheet("/user/css/index.css"))
+        .e("body", Map.of("class", "ui segment"), body -> body
+            .e("div", Map.of("class", "ui relaxed divided list"), list -> list
+                .e("div", Map.of("class", "item"), item -> item
+                    .e("div", Map.of("class", "content"), content -> content
+                        .e("div", Map.of("class", "header", "id", "menu"), div -> div
+                            .e("img", Map.of("src", "/marid-icon.gif"))
+                            .e("span", c.s("maridMenu"))
+                        )
+                    )
+                )
+                .e("div", Map.of("class", "item"), item -> item
+                    .e("div", Map.of("class", "content"), content -> content
+                        .e("div", c.s("Session"), Map.of("class", "header"))
+                    )
+                )
+                .e("a", c.s("logOut"), Map.of("class", "item", "href", "/logout"))
+            )
             .$(v -> stdLib.scripts(v))
         )
     );
@@ -104,6 +122,12 @@ public class Handlers {
         mainMenuHandler.handleRequest(exchange);
       }
     };
+  }
+
+  @Bean
+  @Handler(path = "/logout")
+  public HttpHandler logoutHandler(Config config) {
+    return new LogoutHandler(config, "/");
   }
 
   @Bean
