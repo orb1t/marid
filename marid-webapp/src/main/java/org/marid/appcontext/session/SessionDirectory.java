@@ -21,37 +21,30 @@
 
 package org.marid.appcontext.session;
 
-import io.undertow.server.session.Session;
+import org.marid.app.common.Directories;
 import org.pac4j.core.profile.CommonProfile;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
-import java.util.Map;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-import static org.pac4j.core.context.Pac4jConstants.USER_PROFILES;
+@Component
+public class SessionDirectory {
 
-@Configuration
-@ComponentScan
-public class SessionConfiguration {
+  private final Path directory;
 
-  private final Session session;
-  private final CommonProfile profile;
-
-  @Autowired(required = false)
-  public SessionConfiguration(Session session) {
-    this.session = session;
-    this.profile = (CommonProfile) ((Map) session.getAttribute(USER_PROFILES)).values().iterator().next();
+  public SessionDirectory(Directories directories, CommonProfile profile) throws IOException {
+    directory = directories.getUsers().resolve(profile.getEmail());
+    Files.createDirectories(directory);
   }
 
-  @Bean
-  public Session session() {
-    return session;
+  public Path getDirectory() {
+    return directory;
   }
 
-  @Bean
-  public CommonProfile profile() {
-    return profile;
+  @Override
+  public String toString() {
+    return directory.toString();
   }
 }
