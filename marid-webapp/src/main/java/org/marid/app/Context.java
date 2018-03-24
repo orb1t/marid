@@ -90,7 +90,7 @@ public class Context {
     System.setProperty("java.util.logging.manager", MaridLogManager.class.getName());
 
     final LogManager logManager = LogManager.getLogManager();
-    try (final InputStream inputStream = Context.class.getResourceAsStream("/logging.properties")) {
+    try (final InputStream inputStream = Context.class.getResourceAsStream("/app/logging.properties")) {
       logManager.readConfiguration(inputStream);
     }
 

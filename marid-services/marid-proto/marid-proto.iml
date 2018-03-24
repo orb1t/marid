@@ -37,8 +37,8 @@
     <orderEntry type="library" scope="TEST" name="Maven: com.beust:jcommander:1.72" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.apache-extras.beanshell:bsh:2.0b6" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.mockito:mockito-core:2.15.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: net.bytebuddy:byte-buddy:1.7.10" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: net.bytebuddy:byte-buddy-agent:1.7.10" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: net.bytebuddy:byte-buddy:1.7.9" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: net.bytebuddy:byte-buddy-agent:1.7.9" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.objenesis:objenesis:2.6" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.springframework:spring-context:5.0.4.RELEASE" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.springframework:spring-aop:5.0.4.RELEASE" level="project" />
@@ -47,10 +47,8 @@
     <orderEntry type="library" scope="TEST" name="Maven: org.springframework:spring-jcl:5.0.4.RELEASE" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.springframework:spring-expression:5.0.4.RELEASE" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.springframework:spring-test:5.0.4.RELEASE" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: ch.qos.logback:logback-classic:1.2.3" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: ch.qos.logback:logback-core:1.2.3" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: org.slf4j:slf4j-api:1.7.25" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: org.slf4j:jul-to-slf4j:1.7.25" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.jboss.logmanager:jboss-logmanager:2.1.0.Final" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.wildfly.common:wildfly-common:1.2.0.Final" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.openjdk.jol:jol-core:0.9" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.openjdk.jmh:jmh-generator-annprocess:1.20" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.openjdk.jmh:jmh-core:1.20" level="project" />

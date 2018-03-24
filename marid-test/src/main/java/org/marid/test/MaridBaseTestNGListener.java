@@ -21,9 +21,12 @@
 
 package org.marid.test;
 
-public interface TestGroups {
+import org.jboss.logmanager.LogManager;
+import org.testng.ITestNGListener;
 
-  String NORMAL = "normal";
-  String SLOW = "slow";
-  String MANUAL = "manual";
+public class MaridBaseTestNGListener implements ITestNGListener {
+
+  static {
+    System.setProperty("java.util.logging.manager", LogManager.class.getName());
+  }
 }

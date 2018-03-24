@@ -21,14 +21,33 @@
 
 package org.marid.app.maven;
 
+import org.apache.ivy.core.settings.IvySettings;
+import org.marid.app.spring.LoggingPostProcessor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
 
-import static org.marid.test.TestGroups.NORMAL;
+import static org.marid.test.TestGroups.MANUAL;
 
-public class RepositoryTest {
+@ContextConfiguration(classes = {Context.class})
+public class RepositoryTest extends AbstractTestNGSpringContextTests {
 
-  @Test(groups = {NORMAL})
+  @Test(groups = {MANUAL})
   public void testResolve() {
 
+  }
+}
+
+@Configuration
+@Import({LoggingPostProcessor.class})
+class Context {
+
+  @Bean
+  public IvySettings settings() {
+    final IvySettings settings = new IvySettings();
+    return settings;
   }
 }
