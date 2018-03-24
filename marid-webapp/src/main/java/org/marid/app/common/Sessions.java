@@ -36,6 +36,7 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
@@ -59,6 +60,7 @@ public class Sessions {
 
       @Override
       public void sessionDestroyed(Session session, HttpServerExchange exchange, SessionDestroyedReason reason) {
+        logger.info("Destroyed {} ({})", session, reason);
         destroy(session);
       }
 
@@ -85,7 +87,9 @@ public class Sessions {
         switch (name) {
           case Pac4jConstants.USER_PROFILES:
             destroy(session);
-            create(session);
+            if (newValue instanceof Map && !((Map) newValue).isEmpty()) {
+              create(session);
+            }
             break;
         }
       }

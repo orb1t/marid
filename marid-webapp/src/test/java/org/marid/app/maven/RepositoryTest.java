@@ -32,6 +32,7 @@ import org.apache.ivy.core.retrieve.RetrieveOptions;
 import org.apache.ivy.core.retrieve.RetrieveReport;
 import org.apache.ivy.core.settings.IvySettings;
 import org.apache.ivy.plugins.resolver.IBiblioResolver;
+import org.marid.app.ivy.IvyCommonConfiguration;
 import org.marid.app.ivy.IvySlfLoggerAdapter;
 import org.marid.app.spring.LoggingPostProcessor;
 import org.marid.test.FileHolder;
@@ -83,7 +84,6 @@ public class RepositoryTest extends AbstractTestNGSpringContextTests {
     final ModuleDescriptor m = r.getModuleDescriptor();
 
     final RetrieveOptions retrieveOptions = new RetrieveOptions()
-        .setConfs(new String[] {"default"})
         .setDestArtifactPattern("lib/[artifact].[type]");
 
     final RetrieveReport rr = ivy.retrieve(m.getModuleRevisionId(), retrieveOptions);
@@ -91,21 +91,12 @@ public class RepositoryTest extends AbstractTestNGSpringContextTests {
   }
 
   @Configuration
-  @Import({LoggingPostProcessor.class})
+  @Import({LoggingPostProcessor.class, IvyCommonConfiguration.class})
   public static class Context {
 
     @Bean
     public FileHolder baseDirectory() throws IOException {
       return new FileHolder(Files.createTempDirectory("temp").toFile());
-    }
-
-    @Bean
-    public IBiblioResolver resolver() {
-      final IBiblioResolver resolver = new IBiblioResolver();
-      resolver.setM2compatible(true);
-      resolver.setUsepoms(true);
-      resolver.setName("central");
-      return resolver;
     }
 
     @Bean

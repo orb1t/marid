@@ -26,21 +26,24 @@ import org.pac4j.core.profile.CommonProfile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.NonNull;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
 import static org.pac4j.core.context.Pac4jConstants.USER_PROFILES;
 
-@Configuration
+@Component
 @ComponentScan
+@EnableScheduling
 public class SessionConfiguration {
 
   private final Session session;
   private final CommonProfile profile;
 
   @Autowired(required = false)
-  public SessionConfiguration(Session session) {
+  public SessionConfiguration(@NonNull Session session) {
     this.session = session;
     this.profile = (CommonProfile) ((Map) session.getAttribute(USER_PROFILES)).values().iterator().next();
   }
