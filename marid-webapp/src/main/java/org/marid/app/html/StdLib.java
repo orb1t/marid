@@ -37,8 +37,9 @@ public class StdLib {
 
   @SafeVarargs
   public final DomBuilder stdHead(DomBuilder builder, String title, Consumer<DomBuilder>... headConfigurers) {
-    final DomBuilder head = builder.e("head", h -> h
+    return builder.e("head", h -> h
         .e("link", Map.of("rel", "icon", "href", "/marid-icon.gif", "type", "image/gif"))
+        .script("/user/js/baseview.js")
         .meta("google", "notranslate")
         .meta("viewport", "width=device-width, initial-scale=1")
         .stylesheet("/user/semantic/semantic.css")
@@ -49,7 +50,6 @@ public class StdLib {
           }
         })
     );
-    return builder;
   }
 
   public final void scripts(DomBuilder builder, String... scripts) {
@@ -62,5 +62,12 @@ public class StdLib {
       builder.c(script);
       builder.script(script);
     }
+  }
+
+  public final void viewScripts(DomBuilder builder, String... scripts) {
+    scripts(builder, scripts);
+
+    builder.c("baseview.js");
+    builder.script("/user/js/baseview.js");
   }
 }

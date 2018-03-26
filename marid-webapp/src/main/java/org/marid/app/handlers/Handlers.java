@@ -101,10 +101,17 @@ public class Handlers {
                 )
                 .e("div", Map.of("class", "item"), item -> item
                     .e("div", Map.of("class", "content"), content -> content
-                        .e("div", c.s("Session"), Map.of("class", "header"))
+                        .e("div", c.s("session"), Map.of("class", "header"))
                     )
                 )
+                .e("a", c.s("preferences"), Map.of("class", "item", "href", "/user/view/prefs", "target", "_blank"))
                 .e("a", c.s("logOut"), Map.of("class", "item", "href", "/logout"))
+                .e("div", Map.of("class", "item"), item -> item
+                    .e("div", Map.of("class", "content"), content -> content
+                        .e("div", c.s("cellars"), Map.of("class", "header"))
+                    )
+                )
+                .e("a", c.s("manage"), Map.of("class", "item", "href", "/user/view/cellars", "target", "_blank"))
             )
             .$(v -> stdLib.scripts(v))
         )

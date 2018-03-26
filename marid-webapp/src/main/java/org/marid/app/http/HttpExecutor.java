@@ -76,4 +76,8 @@ public class HttpExecutor {
   public void with(HttpServerExchange exchange, IOConsumer<HttpContext> consumer) {
     with(exchange, consumer, HttpURLConnection.HTTP_OK);
   }
+
+  public String clean(HttpServerExchange exchange) {
+    return exchange.getRequestPath() + "?clean";
+  }
 }

@@ -29,6 +29,7 @@ import org.marid.app.spring.ContextUtils;
 import org.marid.app.spring.LoggingPostProcessor;
 import org.marid.appcontext.session.SessionConfiguration;
 import org.pac4j.core.context.Pac4jConstants;
+import org.pac4j.undertow.context.UndertowSessionStore;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -49,6 +50,15 @@ public class Sessions {
   public Sessions(Logger logger, GenericApplicationContext parent) {
     this.logger = logger;
     this.parent = parent;
+  }
+
+  public Session getSession(HttpServerExchange exchange) {
+    final UndertowSessionStore sessionStore = new UndertowSessionStore(exchange);
+    return sessionStore.getSessionManager().getSession(exchange, sessionStore.getSessionConfig());
+  }
+
+  public GenericApplicationContext getSessionContext(Session session) {
+    return sessionContexts.get(session);
   }
 
   @Autowired
