@@ -21,13 +21,10 @@
 
 package org.marid.app.util;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.Arrays;
+import java.util.ListIterator;
 
-public final class HandlerPath implements Comparable<HandlerPath> {
-
-  public static final HandlerPath EMPTY = new HandlerPath();
+public final class HandlerPath {
 
   private final String[] path;
 
@@ -40,18 +37,8 @@ public final class HandlerPath implements Comparable<HandlerPath> {
     this.path = path;
   }
 
-  public boolean isGround() {
-    return Arrays.stream(path).noneMatch("*"::equals);
-  }
-
   public int getComponentCount() {
     return path.length;
-  }
-
-  public HandlerPath resolve(String last) {
-    final String[] newPath = Arrays.copyOf(path, path.length + 1);
-    newPath[path.length] = last;
-    return new HandlerPath(newPath);
   }
 
   public HandlerPath subPath(int len) {
@@ -86,18 +73,8 @@ public final class HandlerPath implements Comparable<HandlerPath> {
     return Arrays.hashCode(path);
   }
 
-  @Override
-  public int compareTo(@NotNull HandlerPath that) {
-    final int n1 = this.path.length, n2 = that.path.length, min = Math.min(n1, n2);
-
-    int c = 0;
-    for (int i = 0; i < min; i++) {
-      c = this.path[i].compareTo(that.path[i]);
-      if (c != 0) {
-        return c;
-      }
-    }
-    return n1 == n2 ? c : Integer.compare(n1, n2);
+  public ListIterator<String> iterator() {
+    return Arrays.asList(path).listIterator();
   }
 
   @Override

@@ -21,40 +21,22 @@
 
 package org.marid.appcontext.session;
 
-import io.undertow.server.session.Session;
-import org.pac4j.core.profile.CommonProfile;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.marid.appcontext.cellars.CellarsConfiguration;
+import org.marid.appcontext.session.spring.Role;
+import org.marid.appcontext.session.view.ViewConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.lang.NonNull;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Component;
-
-import java.util.Map;
-
-import static org.pac4j.core.context.Pac4jConstants.USER_PROFILES;
 
 @Component
 @ComponentScan
 @EnableScheduling
 public class SessionConfiguration {
 
-  private final Session session;
-  private final CommonProfile profile;
-
-  @Autowired(required = false)
-  public SessionConfiguration(@NonNull Session session) {
-    this.session = session;
-    this.profile = (CommonProfile) ((Map) session.getAttribute(USER_PROFILES)).values().iterator().next();
-  }
-
   @Bean
-  public Session session() {
-    return session;
-  }
-
-  @Bean
-  public CommonProfile profile() {
-    return profile;
+  @Role("ROLE_USER")
+  public Class<? extends ViewConfiguration> cellars() {
+    return CellarsConfiguration.class;
   }
 }

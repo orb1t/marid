@@ -19,17 +19,19 @@
  * #L%
  */
 
-package org.marid.app.common;
+package org.marid.appcontext.session.spring;
 
-import org.marid.app.annotation.Handler;
-import org.slf4j.Logger;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Conditional;
 
-@Component
-@Handler(path = "/admin/view", exact = false, authorizer = "admin")
-public class AdminViews extends AbstractViews {
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-  public AdminViews(Logger logger, Sessions sessions) {
-    super(logger, sessions);
-  }
+@Conditional({RoleCondition.class})
+@Target({ElementType.METHOD, ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Role {
+
+  String value();
 }

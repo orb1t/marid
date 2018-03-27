@@ -22,13 +22,18 @@
 package org.marid.app.util;
 
 import io.undertow.server.HttpServerExchange;
+import io.undertow.server.session.Session;
 import io.undertow.util.LocaleUtils;
 import org.marid.app.auth.MaridSecurityHandler;
+import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.undertow.context.UndertowWebContext;
 
 import java.util.Collection;
 import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Stream;
+
+import static org.pac4j.core.context.Pac4jConstants.USER_PROFILES;
 
 public interface ExchangeHelper {
 
@@ -54,5 +59,9 @@ public interface ExchangeHelper {
       context.setSessionAttribute(USER_LOCALE_SESSION_KEY, locale);
     }
     return locale;
+  }
+
+  static CommonProfile userProfile(Session session) {
+    return (CommonProfile) ((Map) session.getAttribute(USER_PROFILES)).values().iterator().next();
   }
 }

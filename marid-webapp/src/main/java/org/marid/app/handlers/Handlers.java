@@ -111,7 +111,7 @@ public class Handlers {
                         .e("div", c.s("cellars"), Map.of("class", "header"))
                     )
                 )
-                .e("a", c.s("manage"), Map.of("class", "item", "href", "/user/view/cellars", "target", "_blank"))
+                .e("a", c.s("manage"), Map.of("class", "item", "href", "/view/cellars/manage", "target", "_blank"))
             )
             .$(v -> stdLib.scripts(v))
         )

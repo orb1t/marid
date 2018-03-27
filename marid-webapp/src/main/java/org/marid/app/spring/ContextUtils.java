@@ -27,10 +27,13 @@ import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.support.GenericApplicationContext;
 
 import java.util.Collection;
+import java.util.function.Consumer;
 
 public interface ContextUtils {
 
-  static AnnotationConfigApplicationContext context(GenericApplicationContext parent) {
+  @SafeVarargs
+  static AnnotationConfigApplicationContext context(GenericApplicationContext parent,
+                                                    Consumer<AnnotationConfigApplicationContext>... configurers) {
     final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
     context.setAllowBeanDefinitionOverriding(false);
     context.setAllowCircularReferences(false);
@@ -51,6 +54,10 @@ public interface ContextUtils {
       listeners.remove(parentListener);
     };
     context.addApplicationListener(listener);
+
+    for (final Consumer<AnnotationConfigApplicationContext> configurer : configurers) {
+      configurer.accept(context);
+    }
 
     return context;
   }

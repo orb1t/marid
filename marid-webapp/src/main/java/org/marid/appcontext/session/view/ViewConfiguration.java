@@ -19,18 +19,7 @@
  * #L%
  */
 
-package org.marid.app.handlers;
+package org.marid.appcontext.session.view;
 
-import org.marid.app.common.UserViews;
-import org.marid.appcontext.cellars.CellarsConfiguration;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-@Component
-public class Views {
-
-  @Autowired
-  public void initCellars(UserViews userViews) {
-    userViews.register("/cellars", CellarsConfiguration.class);
-  }
+public interface ViewConfiguration {
 }

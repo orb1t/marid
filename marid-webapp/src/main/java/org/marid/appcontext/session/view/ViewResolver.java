@@ -19,26 +19,12 @@
  * #L%
  */
 
-package org.marid.appcontext.cellars;
+package org.marid.appcontext.session.view;
 
 import io.undertow.server.HttpHandler;
-import org.marid.app.html.StdLib;
-import org.marid.app.http.HttpExecutor;
-import org.marid.appcontext.session.view.ViewConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
 
-@Component
-public class CellarsConfiguration implements ViewConfiguration {
+@FunctionalInterface
+public interface ViewResolver {
 
-  @Bean
-  public HttpHandler manage(HttpExecutor executor, StdLib stdLib) {
-    return exchange -> executor.html(exchange, (c, b) ->
-        stdLib.stdHead(b, "Cellars", h -> h.stylesheet("/user/css/cellars.css"))
-        .e("body", body -> body
-            .e("div")
-            .$(v -> stdLib.viewScripts(v, "/user/js/cellars.js"))
-        )
-    );
-  }
+  HttpHandler resolve(String viewName);
 }

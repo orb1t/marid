@@ -19,17 +19,10 @@
  * #L%
  */
 
-package org.marid.app.common;
+package org.marid.appcontext.session.view;
 
-import org.marid.app.annotation.Handler;
-import org.slf4j.Logger;
-import org.springframework.stereotype.Component;
+@FunctionalInterface
+public interface ViewContextResolver {
 
-@Component
-@Handler(path = "/user/view", exact = false, authorizer = "user")
-public class UserViews extends AbstractViews {
-
-  public UserViews(Logger logger, Sessions sessions) {
-    super(logger, sessions);
-  }
+  Class<?> resolve(String selector);
 }
