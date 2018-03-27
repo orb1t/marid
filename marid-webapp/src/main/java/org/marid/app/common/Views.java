@@ -95,15 +95,7 @@ public class Views implements HttpHandler {
         final String selector = i.next();
         final HandlerPath current = path.subPath(i.nextIndex());
 
-        if (!i.hasNext()) {
-          final ViewResolver viewResolver = viewResolver(ctx.get());
-          final HttpHandler httpHandler = viewResolver.resolve(selector);
-          if (httpHandler != null) {
-            httpHandler.handleRequest(exchange);
-          } else {
-            logger.error("Unable to find {} from {}", current, path);
-          }
-        } else {
+        if (i.hasNext()) {
           final ViewContextResolver viewContextResolver = viewContextResolver(ctx.get());
           final Class<?> c = viewContextResolver.resolve(selector);
           if (c != null) {
@@ -123,6 +115,14 @@ public class Views implements HttpHandler {
           } else {
             logger.error("Unable to find {} from {}", current, path);
             return;
+          }
+        } else {
+          final ViewResolver viewResolver = viewResolver(ctx.get());
+          final HttpHandler httpHandler = viewResolver.resolve(selector);
+          if (httpHandler != null) {
+            httpHandler.handleRequest(exchange);
+          } else {
+            logger.error("Unable to find {} from {}", current, path);
           }
         }
       }
