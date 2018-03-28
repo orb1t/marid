@@ -25,6 +25,7 @@ import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HttpString;
 import org.marid.io.IOConsumer;
 import org.marid.xml.HtmlBuilder;
+import org.marid.xml.HtmlFragmentBuilder;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
@@ -41,13 +42,9 @@ public class HttpExecutor {
     this.logger = logger;
   }
 
-  public HttpExecutor html(HttpServerExchange exchange) {
-    exchange.getResponseHeaders().add(new HttpString("Content-Type"), "text/html; charset=UTF-8");
-    return this;
-  }
-
   public void html(HttpServerExchange exchange, BiConsumer<HttpContext, HtmlBuilder> html, int code) {
-    html(exchange).with(exchange, c -> {
+    exchange.getResponseHeaders().add(new HttpString("Content-Type"), "text/html; charset=UTF-8");
+    this.with(exchange, c -> {
       final HtmlBuilder builder = new HtmlBuilder();
       html.accept(c, builder);
       builder.write(new StreamResult(c.getOut()));
@@ -56,6 +53,15 @@ public class HttpExecutor {
 
   public void html(HttpServerExchange exchange, BiConsumer<HttpContext, HtmlBuilder> html) {
     html(exchange, html, HttpURLConnection.HTTP_OK);
+  }
+
+  public void fragment(HttpServerExchange exchange, String tag, BiConsumer<HttpContext, HtmlFragmentBuilder> fragment) {
+    exchange.getResponseHeaders().add(new HttpString("Content-Type"), "text/html; charset=UTF-8");
+    this.with(exchange, c -> {
+      final HtmlFragmentBuilder builder = new HtmlFragmentBuilder(tag);
+      fragment.accept(c, builder);
+      builder.write(new StreamResult(c.getOut()));
+    }, HttpURLConnection.HTTP_OK);
   }
 
   public void with(HttpServerExchange exchange, IOConsumer<HttpContext> consumer, int code) {
@@ -75,9 +81,5 @@ public class HttpExecutor {
 
   public void with(HttpServerExchange exchange, IOConsumer<HttpContext> consumer) {
     with(exchange, consumer, HttpURLConnection.HTTP_OK);
-  }
-
-  public String clean(HttpServerExchange exchange) {
-    return exchange.getRequestPath() + "?clean";
   }
 }

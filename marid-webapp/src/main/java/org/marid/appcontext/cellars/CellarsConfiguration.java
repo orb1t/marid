@@ -54,8 +54,10 @@ public class CellarsConfiguration implements ViewConfiguration {
 
   @Bean
   public HttpHandler add(HttpExecutor executor) {
-    return ex -> executor.html(ex, (c, b) -> b.e("div", Map.of("class", "ui modal", "id", "addDialog"), dlg -> dlg
-        .e("div", c.s("addCellar"), Map.of("class", "header"))
-    ));
+    return ex -> executor.fragment(ex, "div", (c, b) -> b
+        .a("class", "ui modal")
+        .a("id", "addDialog")
+        .e("i", Map.of("class", "close icon"))
+        .e("div", c.s("addCellar"), Map.of("class", "header")));
   }
 }

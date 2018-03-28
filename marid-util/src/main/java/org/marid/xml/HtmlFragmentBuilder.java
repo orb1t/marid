@@ -21,18 +21,14 @@
 
 package org.marid.xml;
 
-import org.w3c.dom.Node;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 
-public class HtmlBuilder extends DomBuilder {
+public class HtmlFragmentBuilder extends DomBuilder {
 
-  public HtmlBuilder() {
-    super(documentBuilder().newDocument().createElement("html"));
+  public HtmlFragmentBuilder(String tag) {
+    super(HtmlBuilder.documentBuilder().newDocument().createElement(tag));
     getDocument().appendChild(element);
   }
 
@@ -43,21 +39,7 @@ public class HtmlBuilder extends DomBuilder {
     transformer.setOutputProperty(OutputKeys.INDENT, "yes");
     transformer.setOutputProperty(OutputKeys.METHOD, "html");
     transformer.setOutputProperty(OutputKeys.VERSION, "5.0");
-    transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "about:legacy-compat");
+    transformer.setOutputProperty(OutputKeys.STANDALONE, "no");
     return transformer;
-  }
-
-  @Override
-  public Node getNodeToTransform() {
-    return getDocument();
-  }
-
-  static DocumentBuilder documentBuilder() {
-    final DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newDefaultInstance();
-    try {
-      return documentBuilderFactory.newDocumentBuilder();
-    } catch (Exception impossibleException) {
-      throw new IllegalStateException(impossibleException);
-    }
   }
 }

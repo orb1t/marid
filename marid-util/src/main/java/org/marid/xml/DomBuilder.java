@@ -25,7 +25,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import javax.xml.transform.*;
+import javax.xml.transform.Result;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -37,25 +40,6 @@ import java.util.stream.Stream;
 import static org.marid.misc.StringUtils.stringOrNull;
 
 public class DomBuilder {
-
-  private static final ThreadLocal<Transformer> TRANSFORMER_TL = ThreadLocal.withInitial(() -> {
-    final TransformerFactory transformerFactory = TransformerFactory.newDefaultInstance();
-    transformerFactory.setAttribute("indent-number", 2);
-
-    try {
-      final Transformer transformer = transformerFactory.newTransformer();
-
-      transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-      transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-      transformer.setOutputProperty(OutputKeys.METHOD, "html");
-      transformer.setOutputProperty(OutputKeys.VERSION, "5.0");
-      transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "about:legacy-compat");
-
-      return transformer;
-    } catch (Exception impossibleException) {
-      throw new IllegalStateException(impossibleException);
-    }
-  });
 
   final Element element;
 
@@ -276,9 +260,23 @@ public class DomBuilder {
     return e("meta", Map.of("name", name, "content", content));
   }
 
+  protected TransformerFactory transformerFactory() {
+    final TransformerFactory transformerFactory = TransformerFactory.newDefaultInstance();
+    transformerFactory.setAttribute("indent-number", 2);
+    return transformerFactory;
+  }
+
+  protected Transformer transformer(TransformerFactory factory) {
+    try {
+      return factory.newTransformer();
+    } catch (Exception impossibleException) {
+      throw new IllegalStateException(impossibleException);
+    }
+  }
+
   public DomBuilder write(Result result) throws IOException {
     try {
-      final Transformer transformer = TRANSFORMER_TL.get();
+      final Transformer transformer = transformer(transformerFactory());
       transformer.transform(new DOMSource(getNodeToTransform()), result);
       return this;
     } catch (TransformerException x) {
