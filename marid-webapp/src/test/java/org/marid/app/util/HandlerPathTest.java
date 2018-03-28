@@ -24,8 +24,6 @@ package org.marid.app.util;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import java.util.stream.Stream;
-
 import static org.marid.test.TestGroups.NORMAL;
 import static org.testng.Assert.assertEquals;
 
@@ -72,16 +70,5 @@ public class HandlerPathTest {
   public void subPathIOOBE() {
     final HandlerPath hp = new HandlerPath("a/b");
     hp.subPath(3);
-  }
-
-  @Test(groups = {NORMAL})
-  public void compare() {
-    final String[] paths = Stream.of("a/b", "c/d", "c", "", "a/a", "a/_")
-        .map(HandlerPath::new)
-        .sorted()
-        .map(HandlerPath::toString)
-        .toArray(String[]::new);
-
-    assertEquals(paths, new String[] {"", "a/_", "a/a", "a/b", "c", "c/d"});
   }
 }
