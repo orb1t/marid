@@ -22,6 +22,7 @@
 package org.marid.appcontext.cellars;
 
 import io.undertow.server.HttpHandler;
+import io.undertow.util.Methods;
 import org.marid.app.html.StdLib;
 import org.marid.app.http.HttpExecutor;
 import org.marid.appcontext.session.view.ViewConfiguration;
@@ -44,7 +45,7 @@ public class CellarsConfiguration implements ViewConfiguration {
                         .e("i", Map.of("class", "plus circle icon"))
                     )
                 )
-                .e("div", Map.of("id", "list"))
+                .e("div", Map.of("id", "list", "class", "ui middle aligned selection list segment"))
             )
             .e("div", Map.of("id", "props", "class", "ui segment"))
             .$(v -> stdLib.viewScripts(v, "/user/js/cellars.js"))
@@ -54,10 +55,20 @@ public class CellarsConfiguration implements ViewConfiguration {
 
   @Bean
   public HttpHandler add(HttpExecutor executor) {
-    return ex -> executor.fragment(ex, "div", (c, b) -> b
-        .a("class", "ui modal")
-        .a("id", "addDialog")
-        .e("i", Map.of("class", "close icon"))
-        .e("div", c.s("addCellar"), Map.of("class", "header")));
+    return ex -> {
+      if (Methods.GET.equals(ex.getRequestMethod())) {
+        executor.fragment(ex, "div", (c, b) -> b
+            .a("class", "ui modal")
+            .a("id", "addDialog")
+            .e("i", Map.of("class", "close icon"))
+            .e("div", c.s("addCellar"), Map.of("class", "header"))
+            .e("div", Map.of("class", "content"), content -> content
+                .e("form", Map.of("action", "add.html", "method", "post"))
+            )
+        );
+      } else if (Methods.POST.equals(ex.getRequestMethod())) {
+
+      }
+    };
   }
 }
