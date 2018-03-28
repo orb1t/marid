@@ -118,7 +118,7 @@ public class Views implements HttpHandler {
           }
         } else {
           final ViewResolver viewResolver = viewResolver(ctx.get());
-          final HttpHandler httpHandler = viewResolver.resolve(selector);
+          final HttpHandler httpHandler = viewResolver.resolve(viewName(selector));
           if (httpHandler != null) {
             httpHandler.handleRequest(exchange);
           } else {
@@ -129,6 +129,11 @@ public class Views implements HttpHandler {
     } catch (Exception x) {
       logger.error("Unable to handle {}", path, x);
     }
+  }
+
+  private String viewName(String selector) {
+    final int index = selector.indexOf(".html");
+    return index >= 0 ? selector.substring(0, index) : selector;
   }
 
   private ViewContextResolver viewContextResolver(GenericApplicationContext context) {

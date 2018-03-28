@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
@@ -87,8 +87,8 @@ public class Handlers {
 
   @Bean
   public HttpHandler mainMenuHandler(HttpExecutor executor, StdLib stdLib) {
-    return exchange -> executor.html(exchange, (c, builder) ->
-        stdLib.stdHead(builder, c.s("maridMenu"), head -> head.stylesheet("/user/css/index.css"))
+    return exchange -> executor.html(exchange, (c, builder) -> builder
+        .$(() -> stdLib.stdHead(builder, c.s("maridMenu"), head -> head.stylesheet("/user/css/index.css")))
         .e("body", Map.of("class", "ui segment"), body -> body
             .e("div", Map.of("class", "ui relaxed divided list"), list -> list
                 .e("div", Map.of("class", "item"), item -> item
@@ -111,7 +111,7 @@ public class Handlers {
                         .e("div", c.s("cellars"), Map.of("class", "header"))
                     )
                 )
-                .e("a", c.s("manage"), Map.of("class", "item", "href", "/view/cellars/manage", "target", "_blank"))
+                .e("a", c.s("manage"), Map.of("class", "item", "href", "/view/cellars/manage.html", "target", "_blank"))
             )
             .$(v -> stdLib.scripts(v))
         )

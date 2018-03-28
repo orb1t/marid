@@ -45,8 +45,8 @@ public class HtmlBuilder extends DomBuilder {
 
   public HtmlBuilder(Map<String, ?> attributes) {
     super(DOCUMENT_BUILDER.newDocument().createElement("html"));
-    getDocument().appendChild(getElement());
-    attributes.forEach((k, v) -> getElement().setAttribute(k, stringOrNull(v)));
+    getDocument().appendChild(element);
+    attributes.forEach((k, v) -> element.setAttribute(k, stringOrNull(v)));
   }
 
   public HtmlBuilder() {

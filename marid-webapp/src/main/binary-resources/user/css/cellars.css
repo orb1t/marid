@@ -15,3 +15,29 @@ body {
     justify-content: space-around;
     align-items: stretch;
 }
+
+#cellars {
+    min-width: 300px;
+    height: 100%;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    margin-left: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: stretch;
+}
+
+#props {
+    margin-left: 1rem;
+    margin-right: 1rem;
+    flex-grow: 1;
+}
+
+#cellars #toolbar {
+}
+
+#cellars #list {
+    flex-grow: 1;
+    overflow: auto;
+}

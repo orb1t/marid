@@ -57,17 +57,13 @@ public class DomBuilder {
     }
   });
 
-  private final Element element;
+  final Element element;
 
   public DomBuilder(Element element) {
     this.element = element;
   }
 
-  public Element getElement() {
-    return element;
-  }
-
-  public Document getDocument() {
+  Document getDocument() {
     return element.getOwnerDocument();
   }
 
