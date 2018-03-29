@@ -58,12 +58,21 @@ public class CellarsConfiguration implements ViewConfiguration {
     return ex -> {
       if (Methods.GET.equals(ex.getRequestMethod())) {
         executor.fragment(ex, "div", (c, b) -> b
-            .a("class", "ui modal")
-            .a("id", "addDialog")
+            .kv("class", "ui modal")
+            .kv("id", "addDialog")
             .e("i", Map.of("class", "close icon"))
             .e("div", c.s("addCellar"), Map.of("class", "header"))
             .e("div", Map.of("class", "content"), content -> content
-                .e("form", Map.of("action", "add.html", "method", "post"))
+                .form("add.html", "post", "addForm", "ui form", form -> form
+                    .e("div", Map.of("class", "field"), f -> f
+                        .e("label", c.s("name"))
+                        .e("input", Map.of("name", "name", "placeholder", c.s("name"), "type", "text"))
+                    )
+                )
+            )
+            .e("div", Map.of("class", "actions"), actions -> actions
+                .e("div", c.s("add"), Map.of("class", "ui positive button"))
+                .e("div", c.s("cancel"), Map.of("class", "ui deny button"))
             )
         );
       } else if (Methods.POST.equals(ex.getRequestMethod())) {

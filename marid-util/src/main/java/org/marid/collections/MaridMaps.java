@@ -30,7 +30,7 @@ public interface MaridMaps {
 
   @NotNull
   static <K, V> Map<@NotNull K, @NotNull V> immutable(@NotNull Map<@NotNull K, @NotNull V> map) {
-    final Map.Entry[] entries = map.entrySet().toArray(new Map.Entry[map.size()]);
+    final Map.Entry[] entries = map.entrySet().toArray(new Map.Entry[0]);
     return Map.ofEntries(Casts.cast(entries));
   }
 }

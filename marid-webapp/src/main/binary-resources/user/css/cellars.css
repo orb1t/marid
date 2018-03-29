@@ -37,6 +37,7 @@ body {
 }
 
 #cellars #list {
+    margin-top: 0;
     flex-grow: 1;
     overflow: auto;
 }

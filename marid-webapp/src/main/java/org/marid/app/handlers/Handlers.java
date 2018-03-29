@@ -76,7 +76,7 @@ public class Handlers {
                 .e("div", Map.of("id", "ad"), p -> p.t(c.s("spiritDrivenDevelopment")))
                 .e("div", Map.of("id", "auth"), auth -> auth
                     .es("a", List.of("google", "facebook", "twitter"), (e, b) -> b.bc(e)
-                        .a("href", "/" + e + ".html")
+                        .kv("href", "/" + e + ".html")
                         .e("img", Map.of("src", "/public/" + e + ".svg", "width", 32, "height", 32))
                     )
                 )

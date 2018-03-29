@@ -64,13 +64,13 @@ public class DomBuilder {
     return t(String.format(text, args));
   }
 
-  public DomBuilder a(String attr, Object value) {
+  public DomBuilder kv(String attr, Object value) {
     element.setAttribute(attr, stringOrNull(value));
     return this;
   }
 
-  public DomBuilder a(Map<String, ?> attrs) {
-    attrs.forEach(this::a);
+  public DomBuilder kv(Map<String, ?> attrs) {
+    attrs.forEach(this::kv);
     return this;
   }
 
@@ -101,13 +101,13 @@ public class DomBuilder {
     return ac(String.format(commentText, args));
   }
 
-  public DomBuilder i(String text) {
+  public DomBuilder text(String text) {
     element.appendChild(getDocument().createTextNode(text));
     return this;
   }
 
-  public DomBuilder i(String text, Object... args) {
-    return i(String.format(text, args));
+  public DomBuilder text(String text, Object... args) {
+    return text(String.format(text, args));
   }
 
   @SafeVarargs
@@ -135,7 +135,7 @@ public class DomBuilder {
     final Element child = getDocument().createElement(tag);
     element.appendChild(child);
 
-    final DomBuilder domBuilder = new DomBuilder(child).a(attrs);
+    final DomBuilder domBuilder = new DomBuilder(child).kv(attrs);
     for (final Consumer<DomBuilder> childConfigurer : childConfigurers) {
       childConfigurer.accept(domBuilder);
     }
@@ -258,6 +258,11 @@ public class DomBuilder {
 
   public DomBuilder meta(String name, String content) {
     return e("meta", Map.of("name", name, "content", content));
+  }
+
+  @SafeVarargs
+  public final DomBuilder form(String action, String method, String id, String cls, Consumer<DomBuilder>... configurers) {
+    return e("form", Map.of("action", action, "method", method, "id", id, "class", cls), configurers);
   }
 
   protected TransformerFactory transformerFactory() {
