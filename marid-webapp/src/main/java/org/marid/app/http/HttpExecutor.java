@@ -31,6 +31,7 @@ import org.springframework.stereotype.Component;
 
 import javax.xml.transform.stream.StreamResult;
 import java.net.HttpURLConnection;
+import java.util.Map;
 import java.util.function.BiConsumer;
 
 @Component
@@ -55,10 +56,13 @@ public class HttpExecutor {
     html(exchange, html, HttpURLConnection.HTTP_OK);
   }
 
-  public void fragment(HttpServerExchange exchange, String tag, BiConsumer<HttpContext, HtmlFragmentBuilder> fragment) {
+  public void fragment(HttpServerExchange exchange,
+                       String tag,
+                       Map<String, ?> attrs,
+                       BiConsumer<HttpContext, HtmlFragmentBuilder> fragment) {
     exchange.getResponseHeaders().add(new HttpString("Content-Type"), "text/html; charset=UTF-8");
     this.with(exchange, c -> {
-      final HtmlFragmentBuilder builder = new HtmlFragmentBuilder(tag);
+      final HtmlFragmentBuilder builder = new HtmlFragmentBuilder(tag, attrs);
       fragment.accept(c, builder);
       builder.write(new StreamResult(c.getOut()));
     }, HttpURLConnection.HTTP_OK);

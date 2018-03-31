@@ -45,7 +45,9 @@ public class CellarsConfiguration implements ViewConfiguration {
                         .e("i", Map.of("class", "plus circle icon"))
                     )
                 )
-                .e("div", Map.of("id", "list", "class", "ui middle aligned selection list segment"))
+                .e("div", Map.of("id", "list", "class", "ui middle aligned selection list segment"), list -> list
+                    .e("div")
+                )
             )
             .e("div", Map.of("id", "props", "class", "ui segment"))
             .$(v -> stdLib.viewScripts(v, "/user/js/cellars.js"))
@@ -57,9 +59,7 @@ public class CellarsConfiguration implements ViewConfiguration {
   public HttpHandler add(HttpExecutor executor) {
     return ex -> {
       if (Methods.GET.equals(ex.getRequestMethod())) {
-        executor.fragment(ex, "div", (c, b) -> b
-            .kv("class", "ui modal")
-            .kv("id", "addDialog")
+        executor.fragment(ex, "div", Map.of("class", "ui modal", "id", "addDialog"), (c, b) -> b
             .e("i", Map.of("class", "close icon"))
             .e("div", c.s("addCellar"), Map.of("class", "header"))
             .e("div", Map.of("class", "content"), content -> content

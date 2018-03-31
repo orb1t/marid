@@ -24,12 +24,14 @@ package org.marid.xml;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
+import java.util.Map;
 
 public class HtmlFragmentBuilder extends DomBuilder {
 
-  public HtmlFragmentBuilder(String tag) {
+  public HtmlFragmentBuilder(String tag, Map<String, ?> attrs) {
     super(HtmlBuilder.documentBuilder().newDocument().createElement(tag));
     getDocument().appendChild(element);
+    kv(attrs);
   }
 
   @Override
