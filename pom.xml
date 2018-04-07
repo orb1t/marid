@@ -30,7 +30,7 @@
     <project.build.sourceEncoding>${project.encoding}</project.build.sourceEncoding>
     <project.reporting.outputEncoding>${project.encoding}</project.reporting.outputEncoding>
 
-    <java.version>1.9</java.version>
+    <java.version>10</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
 
@@ -279,8 +279,8 @@
             <showWarnings>true</showWarnings>
             <showDeprecation>true</showDeprecation>
             <parameters>true</parameters>
-            <release>9</release>
-            <testRelease>9</testRelease>
+            <release>10</release>
+            <testRelease>10</testRelease>
             <compilerArgs>
               <arg>-Xlint:unchecked</arg>
             </compilerArgs>
@@ -326,7 +326,7 @@
 
         <plugin>
           <artifactId>maven-dependency-plugin</artifactId>
-          <version>3.0.2</version>
+          <version>3.1.0</version>
           <configuration>
             <useJvmChmod>true</useJvmChmod>
           </configuration>
