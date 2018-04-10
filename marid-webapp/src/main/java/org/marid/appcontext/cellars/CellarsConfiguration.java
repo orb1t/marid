@@ -70,19 +70,17 @@ public class CellarsConfiguration implements ViewConfiguration {
   public HttpHandler add(HttpExecutor executor) {
     return ex -> {
       if (Methods.GET.equals(ex.getRequestMethod())) {
-        executor.fragment(ex, "div", Map.of("class", "ui modal", "id", "addDialog"), (c, b) -> b
+        executor.form(ex, "add.html", "post", "addForm", "ui form modal", (c, b) -> b
             .e("i", Map.of("class", "close icon"))
             .e("div", c.s("addCellar"), Map.of("class", "header"))
             .e("div", Map.of("class", "content"), content -> content
-                .form("add.html", "post", "addForm", "ui form", form -> form
-                    .e("div", Map.of("class", "field"), f -> f
-                        .e("label", c.s("name"))
-                        .e("input", Map.of("name", "name", "placeholder", c.s("name"), "type", "text"))
-                    )
+                .e("div", Map.of("class", "field"), f -> f
+                    .e("label", c.s("name"))
+                    .e("input", Map.of("name", "name", "placeholder", c.s("name"), "type", "text"))
                 )
             )
             .e("div", Map.of("class", "actions"), actions -> actions
-                .e("div", c.s("add"), Map.of("class", "ui positive button"))
+                .e("div", c.s("add"), Map.of("class", "ui positive button", "id", "addButton"))
                 .e("div", c.s("cancel"), Map.of("class", "ui deny button"))
             )
         );
