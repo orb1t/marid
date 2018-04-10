@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
@@ -75,8 +75,9 @@ public class Handlers {
                 .e("div", Map.of("id", "header"), p -> p.t(c.s("maridIde")))
                 .e("div", Map.of("id", "ad"), p -> p.t(c.s("spiritDrivenDevelopment")))
                 .e("div", Map.of("id", "auth"), auth -> auth
-                    .es("a", List.of("google", "facebook", "twitter"), (e, b) -> b.bc(e)
+                    .es("a", List.of("google", "facebook", "twitter"), (e, b) -> b
                         .kv("href", "/" + e + ".html")
+                        .$(() -> auth.c(e))
                         .e("img", Map.of("src", "/public/" + e + ".svg", "width", 32, "height", 32))
                     )
                 )
@@ -104,14 +105,14 @@ public class Handlers {
                         .e("div", c.s("session"), Map.of("class", "header"))
                     )
                 )
-                .e("a", c.s("preferences"), Map.of("class", "item", "href", "/user/view/prefs", "target", "_blank"))
+                .e("a", c.s("preferences"), Map.of("class", "item", "href", "/user/view/prefs"))
                 .e("a", c.s("logOut"), Map.of("class", "item", "href", "/logout"))
                 .e("div", Map.of("class", "item"), item -> item
                     .e("div", Map.of("class", "content"), content -> content
                         .e("div", c.s("cellars"), Map.of("class", "header"))
                     )
                 )
-                .e("a", c.s("manage"), Map.of("class", "item", "href", "/view/cellars/manage.html", "target", "_blank"))
+                .e("a", c.s("manage"), Map.of("class", "item", "href", "/view/cellars/manage.html"))
             )
             .$(v -> stdLib.scripts(v))
         )

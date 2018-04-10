@@ -83,24 +83,6 @@ public class DomBuilder {
     return c(String.format(commentText, args));
   }
 
-  public DomBuilder bc(String commentText) {
-    element.getParentNode().insertBefore(getDocument().createComment(commentText), element);
-    return this;
-  }
-
-  public DomBuilder bc(String commentText, Object... args) {
-    return bc(String.format(commentText, args));
-  }
-
-  public DomBuilder ac(String commentText) {
-    element.getParentNode().appendChild(getDocument().createComment(commentText));
-    return this;
-  }
-
-  public DomBuilder ac(String commentText, Object... args) {
-    return ac(String.format(commentText, args));
-  }
-
   public DomBuilder text(String text) {
     element.appendChild(getDocument().createTextNode(text));
     return this;
@@ -133,24 +115,28 @@ public class DomBuilder {
   @SafeVarargs
   public final DomBuilder e(String tag, Map<String, ?> attrs, Consumer<DomBuilder>... childConfigurers) {
     final Element child = getDocument().createElement(tag);
-    element.appendChild(child);
 
     final DomBuilder domBuilder = new DomBuilder(child).kv(attrs);
     for (final Consumer<DomBuilder> childConfigurer : childConfigurers) {
       childConfigurer.accept(domBuilder);
     }
+
+    element.appendChild(child);
+
     return this;
   }
 
   @SafeVarargs
   public final DomBuilder e(String tag, Consumer<DomBuilder>... childConfigurers) {
     final Element child = getDocument().createElement(tag);
-    element.appendChild(child);
 
     final DomBuilder domBuilder = new DomBuilder(child);
     for (final Consumer<DomBuilder> childConfigurer : childConfigurers) {
       childConfigurer.accept(domBuilder);
     }
+
+    element.appendChild(child);
+
     return this;
   }
 
@@ -158,12 +144,13 @@ public class DomBuilder {
   public final <E> DomBuilder es(String tag, Stream<E> stream, BiConsumer<E, DomBuilder>... configurers) {
     stream.forEach(e -> {
       final Element child = getDocument().createElement(tag);
-      element.appendChild(child);
 
       final DomBuilder domBuilder = new DomBuilder(child);
       for (final BiConsumer<E, DomBuilder> configurer : configurers) {
         configurer.accept(e, domBuilder);
       }
+
+      element.appendChild(child);
     });
     return this;
   }
@@ -172,12 +159,13 @@ public class DomBuilder {
   public final <E> DomBuilder es(String tag, Iterable<E> iterable, BiConsumer<E, DomBuilder>... configurers) {
     for (final E e : iterable) {
       final Element child = getDocument().createElement(tag);
-      element.appendChild(child);
 
       final DomBuilder domBuilder = new DomBuilder(child);
       for (final BiConsumer<E, DomBuilder> configurer : configurers) {
         configurer.accept(e, domBuilder);
       }
+
+      element.appendChild(child);
     }
     return this;
   }

@@ -44,6 +44,17 @@ public class CellarsConfiguration implements ViewConfiguration {
                     .e("a", Map.of("class", "item", "href", "javascript:addCellar()"), item -> item
                         .e("i", Map.of("class", "plus circle icon"))
                     )
+                    .e("a", Map.of("class", "item", "href", "javascript:removeCellar()"), item -> item
+                        .e("i", Map.of("class", "minus circle icon"))
+                    )
+                    .e("a", Map.of("class", "item", "href", "javascript:editCellar()"), item -> item
+                        .e("i", Map.of("class", "pencil alternate icon"))
+                    )
+                    .e("div", Map.of("class", "right menu"), rm -> rm
+                        .e("a", Map.of("class", "item", "href", "/"), item -> item
+                            .e("i", Map.of("class", "home icon"))
+                        )
+                    )
                 )
                 .e("div", Map.of("id", "list", "class", "ui middle aligned selection list segment"), list -> list
                     .e("div")
