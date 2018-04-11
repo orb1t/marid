@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
@@ -21,7 +21,12 @@
 
 package org.marid.appcontext.cellars;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.undertow.server.HttpHandler;
+import io.undertow.server.handlers.RedirectHandler;
+import io.undertow.server.handlers.form.FormData;
+import io.undertow.server.handlers.form.FormDataParser;
+import io.undertow.server.handlers.form.FormEncodedDataDefinition;
 import io.undertow.util.Methods;
 import org.marid.app.html.StdLib;
 import org.marid.app.http.HttpExecutor;
@@ -80,12 +85,19 @@ public class CellarsConfiguration implements ViewConfiguration {
                 )
             )
             .e("div", Map.of("class", "actions"), actions -> actions
-                .e("div", c.s("add"), Map.of("class", "ui positive button", "id", "addButton"))
+                .e("input", Map.of("class", "ui positive button", "type", "submit", "value", c.s("add")))
                 .e("div", c.s("cancel"), Map.of("class", "ui deny button"))
             )
         );
-      } else if (Methods.POST.equals(ex.getRequestMethod())) {
-
+      } else {
+        final var parser = new FormEncodedDataDefinition().create(ex);
+        parser.parse(exchange -> {
+          final var data = exchange.getAttachment(FormDataParser.FORM_DATA);
+          if (data != null) {
+            System.out.println(data.getFirst("name").getValue());
+          }
+          new RedirectHandler("/view/cellars/manage.html").handleRequest(exchange);
+        });
       }
     };
   }
