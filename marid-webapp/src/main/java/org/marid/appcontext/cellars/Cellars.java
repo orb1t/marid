@@ -21,5 +21,59 @@
 
 package org.marid.appcontext.cellars;
 
+import org.marid.appcontext.session.SessionDirectory;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
+@Component
 public class Cellars {
+
+  private final Path directory;
+
+  public Cellars(SessionDirectory directory) throws IOException {
+    this.directory = directory.getDirectory().resolve("cellars");
+    Files.createDirectories(this.directory);
+  }
+
+  public Path getDirectory() {
+    return directory;
+  }
+
+  public void add(String name) {
+    Objects.requireNonNull(name, "Cellar name cannot be null");
+
+    if (name.isEmpty()) {
+      throw new IllegalArgumentException("Cellar name cannot be empty");
+    }
+
+    if (!name.codePoints().allMatch(Character::isUnicodeIdentifierPart)) {
+      throw new IllegalArgumentException("Invalid cellar name: " + name);
+    }
+
+    final Path path = directory.resolve(name);
+
+    try {
+      Files.createDirectories(path);
+    } catch (IOException x) {
+      throw new UncheckedIOException(x.getMessage(), x);
+    }
+  }
+
+  public List<String> cellars() {
+    try (final Stream<Path> stream = Files.list(directory).filter(Files::isDirectory)) {
+      return stream.map(Path::getFileName).map(Object::toString).collect(Collectors.toList());
+    } catch (IOException x) {
+      throw new UncheckedIOException(x.getMessage(), x);
+    }
+  }
 }

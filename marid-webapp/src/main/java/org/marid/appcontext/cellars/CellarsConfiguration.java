@@ -38,17 +38,17 @@ import java.util.Map;
 public class CellarsConfiguration implements ViewConfiguration {
 
   @Bean
-  public HttpHandler manage(HttpExecutor executor, StdLib stdLib) {
+  public HttpHandler manage(HttpExecutor executor, StdLib stdLib, Cellars cellars) {
     return exchange -> executor.html(exchange, (c, b) -> b
         .$(() -> stdLib.stdHead(b, h -> h.stylesheet("/user/css/cellars.css").title(c.s("cellars"))))
         .body(body -> body
-            .div("", "cellars", cellars -> cellars
+            .div("", "cellars", cl -> cl
                 .div("ui menu", "toolbar", toolbar -> toolbar
-                    .a("item", "javascript:addCellar()", "", item -> item.i("plus circle icon"))
-                    .a("item", "javascript:removeCellar()", "", item -> item.i("minus circle icon"))
-                    .a("item", "javascript:editCellar()", "", item -> item.i("pencil alternate icon"))
+                    .a("item", "javascript:addCellar()", "", $ -> $.i("plus circle icon"))
+                    .a("item", "javascript:removeCellar()", "", $ -> $.i("minus circle icon"))
+                    .a("item", "javascript:editCellar()", "", $ -> $.i("pencil alternate icon"))
                     .div("right menu", rm -> rm
-                        .a("item", "/", "", item -> item.i("home icon"))
+                        .a("item", "/", "", $ -> $.i("home icon"))
                     )
                 )
                 .div("ui middle aligned selection list segment", "list", list -> list
