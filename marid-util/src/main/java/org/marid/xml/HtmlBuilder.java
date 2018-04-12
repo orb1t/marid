@@ -21,6 +21,7 @@
 
 package org.marid.xml;
 
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -29,11 +30,15 @@ import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 
-public class HtmlBuilder extends DomBuilder {
+public class HtmlBuilder extends HtmlAbstractBuilder<HtmlBuilder> {
 
   public HtmlBuilder() {
-    super(documentBuilder().newDocument().createElement("html"));
+    this(documentBuilder().newDocument().createElement("html"));
     getDocument().appendChild(element);
+  }
+
+  private HtmlBuilder(Element element) {
+    super(element);
   }
 
   @Override
@@ -50,6 +55,11 @@ public class HtmlBuilder extends DomBuilder {
   @Override
   public Node getNodeToTransform() {
     return getDocument();
+  }
+
+  @Override
+  protected HtmlBuilder child(Element element) {
+    return new HtmlBuilder(element);
   }
 
   static DocumentBuilder documentBuilder() {

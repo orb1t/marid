@@ -38,8 +38,8 @@ public class HtmlBuilderTest {
     final StringWriter writer = new StringWriter();
 
     new HtmlBuilder()
-        .e("head", e -> e.e("link", Map.of("rel", "xxx")))
-        .e("body", e -> e.e("details"))
+        .$e("head", e -> e.$e("link", Map.of("rel", "xxx")))
+        .$e("body", e -> e.$e("details"))
         .write(new StreamResult(writer));
 
     assertEquals(

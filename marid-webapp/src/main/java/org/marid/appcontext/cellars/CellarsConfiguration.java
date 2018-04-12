@@ -21,10 +21,8 @@
 
 package org.marid.appcontext.cellars;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.RedirectHandler;
-import io.undertow.server.handlers.form.FormData;
 import io.undertow.server.handlers.form.FormDataParser;
 import io.undertow.server.handlers.form.FormEncodedDataDefinition;
 import io.undertow.util.Methods;
@@ -42,31 +40,23 @@ public class CellarsConfiguration implements ViewConfiguration {
   @Bean
   public HttpHandler manage(HttpExecutor executor, StdLib stdLib) {
     return exchange -> executor.html(exchange, (c, b) -> b
-        .$(() -> stdLib.stdHead(b, c.s("cellars"), h -> h.stylesheet("/user/css/cellars.css")))
-        .e("body", body -> body
-            .e("div", Map.of("id", "cellars"), cellars -> cellars
-                .e("div", Map.of("id", "toolbar", "class", "ui menu"), toolbar -> toolbar
-                    .e("a", Map.of("class", "item", "href", "javascript:addCellar()"), item -> item
-                        .e("i", Map.of("class", "plus circle icon"))
-                    )
-                    .e("a", Map.of("class", "item", "href", "javascript:removeCellar()"), item -> item
-                        .e("i", Map.of("class", "minus circle icon"))
-                    )
-                    .e("a", Map.of("class", "item", "href", "javascript:editCellar()"), item -> item
-                        .e("i", Map.of("class", "pencil alternate icon"))
-                    )
-                    .e("div", Map.of("class", "right menu"), rm -> rm
-                        .e("a", Map.of("class", "item", "href", "/"), item -> item
-                            .e("i", Map.of("class", "home icon"))
-                        )
+        .$(() -> stdLib.stdHead(b, h -> h.stylesheet("/user/css/cellars.css").title(c.s("cellars"))))
+        .body(body -> body
+            .div("", "cellars", cellars -> cellars
+                .div("ui menu", "toolbar", toolbar -> toolbar
+                    .a("item", "javascript:addCellar()", "", item -> item.i("plus circle icon"))
+                    .a("item", "javascript:removeCellar()", "", item -> item.i("minus circle icon"))
+                    .a("item", "javascript:editCellar()", "", item -> item.i("pencil alternate icon"))
+                    .div("right menu", rm -> rm
+                        .a("item", "/", "", item -> item.i("home icon"))
                     )
                 )
-                .e("div", Map.of("id", "list", "class", "ui middle aligned selection list segment"), list -> list
-                    .e("div")
+                .div("ui middle aligned selection list segment", "list", list -> list
+                    .div("")
                 )
             )
-            .e("div", Map.of("id", "props", "class", "ui segment"))
-            .$(v -> stdLib.viewScripts(v, "/user/js/cellars.js"))
+            .$e("div", Map.of("id", "props", "class", "ui segment"))
+            .$(() -> stdLib.viewScripts(body, "/user/js/cellars.js"))
         )
     );
   }
@@ -76,17 +66,17 @@ public class CellarsConfiguration implements ViewConfiguration {
     return ex -> {
       if (Methods.GET.equals(ex.getRequestMethod())) {
         executor.form(ex, "add.html", "post", "addForm", "ui form modal", (c, b) -> b
-            .e("i", Map.of("class", "close icon"))
-            .e("div", c.s("addCellar"), Map.of("class", "header"))
-            .e("div", Map.of("class", "content"), content -> content
-                .e("div", Map.of("class", "field"), f -> f
-                    .e("label", c.s("name"))
-                    .e("input", Map.of("name", "name", "placeholder", c.s("name"), "type", "text"))
+            .i("close icon")
+            .div("header", "", c.s("addCellar"))
+            .div("content", content -> content
+                .div("field", f -> f
+                    .label(c.s("name"))
+                    .input("name", "text", c.s("name"), "")
                 )
             )
-            .e("div", Map.of("class", "actions"), actions -> actions
-                .e("input", Map.of("class", "ui positive button", "type", "submit", "value", c.s("add")))
-                .e("div", c.s("cancel"), Map.of("class", "ui deny button"))
+            .div("actions", actions -> actions
+                .submitButton("ui positive button", c.s("add"))
+                .div("ui deny button", "cancelButton", c.s("cancel"))
             )
         );
       } else {

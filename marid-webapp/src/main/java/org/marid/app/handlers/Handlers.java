@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
@@ -62,25 +62,22 @@ public class Handlers {
   @Bean
   public HttpHandler authListHandler(HttpExecutor executor) {
     return exchange -> executor.html(exchange, (c, builder) -> builder
-        .e("head", head -> head
-            .e("title", c.s("maridIde"))
-            .e("link", Map.of("rel", "icon", "href", "/marid-icon.gif", "type", "image/gif"))
+        .$e("head", head -> head
+            .title(c.s("maridIde"))
+            .link("icon", "/marid-icon.gif", "image/gif")
             .meta("google", "notranslate")
             .meta("viewport", "width=device-width, initial-scale=1")
             .stylesheet("/public/login.css")
         )
-        .e("body", body -> body
-            .e("img", Map.of("src", "/marid-icon.gif?size=100", "width", 100, "height", 100))
-            .e("div", Map.of("id", "adBody"), list -> list
-                .e("div", Map.of("id", "header"), p -> p.t(c.s("maridIde")))
-                .e("div", Map.of("id", "ad"), p -> p.t(c.s("spiritDrivenDevelopment")))
-                .e("div", Map.of("id", "auth"), auth -> auth
-                    .es("a", List.of("google", "facebook", "twitter"), (e, b) -> b
-                        .kv("href", "/" + e + ".html")
-                        .$(() -> auth.c(e))
-                        .e("img", Map.of("src", "/public/" + e + ".svg", "width", 32, "height", 32))
-                    )
-                )
+        .$e("body", body -> body
+            .$e("img", Map.of("src", "/marid-icon.gif?size=100", "width", 100, "height", 100))
+            .div("", "adBody", list -> list
+                .div("", "header", c.s("maridIde"))
+                .div("", "ad", c.s("spiritDrivenDevelopment"))
+                .div("", "auth", auth -> List.of("google", "facebook", "twitter").forEach(e -> {
+                  auth.$c(e);
+                  auth.a("", "/" + e + ".html", "", a -> a.img(32, 32, "/public/" + e + ".svg"));
+                }))
             )
         )
     );
@@ -88,33 +85,36 @@ public class Handlers {
 
   @Bean
   public HttpHandler mainMenuHandler(HttpExecutor executor, StdLib stdLib) {
-    return exchange -> executor.html(exchange, (c, builder) -> builder
-        .$(() -> stdLib.stdHead(builder, c.s("maridMenu"), head -> head.stylesheet("/user/css/index.css")))
-        .e("body", Map.of("class", "ui segment"), body -> body
-            .e("div", Map.of("class", "ui relaxed divided list"), list -> list
-                .e("div", Map.of("class", "item"), item -> item
-                    .e("div", Map.of("class", "content"), content -> content
-                        .e("div", Map.of("class", "header", "id", "menu"), div -> div
-                            .e("img", Map.of("src", "/marid-icon.gif"))
-                            .e("span", c.s("maridMenu"))
+    return $e -> executor.html($e, (c, b) -> b
+        .$(() -> stdLib.stdHead(b, h -> h
+            .stylesheet("/user/css/index.css")
+            .title(c.s("maridMenu")))
+        )
+        .body("ui segment", body -> body
+            .div("ui relaxed divided list", list -> list
+                .div("item", item -> item
+                    .div("content", content -> content
+                        .div("header", "menu", div -> div
+                            .img(32, 32, "/marid-icon.gif")
+                            .span(c.s("maridMenu"))
                         )
                     )
                 )
-                .e("div", Map.of("class", "item"), item -> item
-                    .e("div", Map.of("class", "content"), content -> content
-                        .e("div", c.s("session"), Map.of("class", "header"))
+                .div("item", item -> item
+                    .div("content", content -> content
+                        .div("header", "", c.s("session"))
                     )
                 )
-                .e("a", c.s("preferences"), Map.of("class", "item", "href", "/user/view/prefs"))
-                .e("a", c.s("logOut"), Map.of("class", "item", "href", "/logout"))
-                .e("div", Map.of("class", "item"), item -> item
-                    .e("div", Map.of("class", "content"), content -> content
-                        .e("div", c.s("cellars"), Map.of("class", "header"))
+                .a("item", "/user/view/prefs", c.s("preferences"))
+                .a("item", "/logout", c.s("logOut"))
+                .div("item", item -> item
+                    .div("content", content -> content
+                        .div("header", c.s("cellars"))
                     )
                 )
-                .e("a", c.s("manage"), Map.of("class", "item", "href", "/view/cellars/manage.html"))
+                .a("item", "/view/cellars/manage.html", c.s("manage"))
             )
-            .$(v -> stdLib.scripts(v))
+            .$(() -> stdLib.scripts(body))
         )
     );
   }

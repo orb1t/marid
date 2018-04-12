@@ -21,17 +21,28 @@
 
 package org.marid.xml;
 
+import org.w3c.dom.Element;
+
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import java.util.Map;
 
-public class HtmlFragmentBuilder extends DomBuilder {
+public class HtmlFragmentBuilder extends HtmlAbstractBuilder<HtmlFragmentBuilder> {
 
   public HtmlFragmentBuilder(String tag, Map<String, ?> attrs) {
-    super(HtmlBuilder.documentBuilder().newDocument().createElement(tag));
+    this(HtmlBuilder.documentBuilder().newDocument().createElement(tag));
     getDocument().appendChild(element);
-    kv(attrs);
+    $a(attrs);
+  }
+
+  private HtmlFragmentBuilder(Element element) {
+    super(element);
+  }
+
+  @Override
+  protected HtmlFragmentBuilder child(Element element) {
+    return new HtmlFragmentBuilder(element);
   }
 
   @Override
