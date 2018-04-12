@@ -30,11 +30,13 @@ import org.marid.app.html.StdLib;
 import org.marid.app.http.HttpExecutor;
 import org.marid.appcontext.session.view.ViewConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
 @Component
+@ComponentScan
 public class CellarsConfiguration implements ViewConfiguration {
 
   @Bean
@@ -51,9 +53,10 @@ public class CellarsConfiguration implements ViewConfiguration {
                         .a("item", "/", "", $ -> $.i("home icon"))
                     )
                 )
-                .div("ui middle aligned selection list segment", "list", list -> list
-                    .div("")
-                )
+                .div("ui middle aligned selection list segment", "list", list -> cellars.cellars().forEach(e -> {
+                  list.$c(e);
+                  list.div("item", "cellar" + e, e);
+                }))
             )
             .$e("div", Map.of("id", "props", "class", "ui segment"))
             .$(() -> stdLib.viewScripts(body, "/user/js/cellars.js"))
@@ -62,7 +65,7 @@ public class CellarsConfiguration implements ViewConfiguration {
   }
 
   @Bean
-  public HttpHandler add(HttpExecutor executor) {
+  public HttpHandler add(HttpExecutor executor, Cellars cellars) {
     return ex -> {
       if (Methods.GET.equals(ex.getRequestMethod())) {
         executor.form(ex, "add.html", "post", "addForm", "ui form modal", (c, b) -> b
@@ -84,7 +87,8 @@ public class CellarsConfiguration implements ViewConfiguration {
         parser.parse(exchange -> {
           final var data = exchange.getAttachment(FormDataParser.FORM_DATA);
           if (data != null) {
-            System.out.println(data.getFirst("name").getValue());
+            final String name = data.getFirst("name").getValue();
+            cellars.add(name);
           }
           new RedirectHandler("/view/cellars/manage.html").handleRequest(exchange);
         });

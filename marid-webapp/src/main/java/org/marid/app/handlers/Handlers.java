@@ -109,7 +109,7 @@ public class Handlers {
                 .a("item", "/logout", c.s("logOut"))
                 .div("item", item -> item
                     .div("content", content -> content
-                        .div("header", c.s("cellars"))
+                        .div("header", "cellars", c.s("cellars"))
                     )
                 )
                 .a("item", "/view/cellars/manage.html", c.s("manage"))
