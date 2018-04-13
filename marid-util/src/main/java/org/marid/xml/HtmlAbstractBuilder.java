@@ -91,7 +91,7 @@ public abstract class HtmlAbstractBuilder<B extends HtmlAbstractBuilder<B>> exte
   }
 
   public B title(String title) {
-    return $e("title");
+    return $e("title", title, Map.of());
   }
 
   public B title(String format, Object... args) {

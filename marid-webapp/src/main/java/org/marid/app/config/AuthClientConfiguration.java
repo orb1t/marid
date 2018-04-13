@@ -43,7 +43,9 @@ public class AuthClientConfiguration {
 
   @Bean
   public FacebookClient facebookClient(FacebookAuthProperties properties) {
-    return new FacebookClient(properties.getClientId(), properties.getSecret());
+    final var client = new FacebookClient(properties.getClientId(), properties.getSecret());
+    client.setScope("email");
+    return client;
   }
 
   @Bean
