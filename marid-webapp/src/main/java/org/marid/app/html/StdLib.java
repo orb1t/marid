@@ -33,10 +33,11 @@ public class StdLib {
   public final void stdHead(HtmlBuilder builder, Consumer<HtmlBuilder>... headConfigurers) {
     builder.head(h -> h
         .link("icon", "/marid-icon.gif", "image/gif")
+        .script("/user/jquery/jquery.js")
         .script("/user/js/baseview.js")
         .meta("google", "notranslate")
         .meta("viewport", "width=device-width, initial-scale=1")
-        .stylesheet("/user/semantic/semantic.css")
+        .stylesheet("/user/semantic/cosmo.css")
         .$(() -> {
           for (final Consumer<HtmlBuilder> configurer : headConfigurers) {
             configurer.accept(h);
@@ -45,21 +46,10 @@ public class StdLib {
   }
 
   public final void scripts(HtmlBuilder builder, String... scripts) {
-    builder.$c("jQuery");
-    builder.script("/user/jquery/jquery.js");
-    builder.$c("Semantic-UI");
     builder.script("/user/semantic/semantic.js");
 
     for (final String script : scripts) {
-      builder.$c(script);
       builder.script(script);
     }
-  }
-
-  public final void viewScripts(HtmlBuilder builder, String... scripts) {
-    scripts(builder, scripts);
-
-    builder.$c("baseview.js");
-    builder.script("/user/js/baseview.js");
   }
 }

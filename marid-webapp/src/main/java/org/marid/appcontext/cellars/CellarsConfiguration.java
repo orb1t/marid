@@ -33,6 +33,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
 
+import java.util.Deque;
 import java.util.Map;
 
 @Component
@@ -53,13 +54,12 @@ public class CellarsConfiguration implements ViewConfiguration {
                         .a("item", "/", "", $ -> $.i("home icon"))
                     )
                 )
-                .div("ui middle aligned selection list segment", "list", list -> cellars.cellars().forEach(e -> {
-                  list.$c(e);
+                .div("ui selection list segment", "list", list -> cellars.cellars().forEach(e -> {
                   list.div("item", "cellar" + e, e);
                 }))
             )
             .$e("div", Map.of("id", "props", "class", "ui segment"))
-            .$(() -> stdLib.viewScripts(body, "/user/js/cellars.js"))
+            .$(() -> stdLib.scripts(body, "/user/js/cellars.js"))
         )
     );
   }
@@ -90,9 +90,19 @@ public class CellarsConfiguration implements ViewConfiguration {
             final String name = data.getFirst("name").getValue();
             cellars.add(name);
           }
-          new RedirectHandler("/view/cellars/manage.html").handleRequest(exchange);
+          new RedirectHandler("manage.html").handleRequest(exchange);
         });
       }
+    };
+  }
+
+  @Bean
+  public HttpHandler delete(Cellars cellars) {
+    return ex -> {
+      final Deque<String> names = ex.getQueryParameters().get("name");
+      final String name = names == null ? null : names.poll();
+      cellars.delete(name);
+      new RedirectHandler("manage.html").handleRequest(ex);
     };
   }
 }

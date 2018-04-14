@@ -23,6 +23,7 @@ package org.marid.appcontext.cellars;
 
 import org.marid.appcontext.session.SessionDirectory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.FileSystemUtils;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -64,6 +65,26 @@ public class Cellars {
 
     try {
       Files.createDirectories(path);
+    } catch (IOException x) {
+      throw new UncheckedIOException(x.getMessage(), x);
+    }
+  }
+
+  public void delete(String name) {
+    Objects.requireNonNull(name, "Cellar name cannot be null");
+
+    if (name.isEmpty()) {
+      throw new IllegalArgumentException("Cellar name cannot be empty");
+    }
+
+    if (!name.codePoints().allMatch(Character::isUnicodeIdentifierPart)) {
+      throw new IllegalArgumentException("Invalid cellar name: " + name);
+    }
+
+    final Path path = directory.resolve(name);
+
+    try {
+      FileSystemUtils.deleteRecursively(path);
     } catch (IOException x) {
       throw new UncheckedIOException(x.getMessage(), x);
     }
