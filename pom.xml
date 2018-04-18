@@ -453,13 +453,6 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>wagon-maven-plugin</artifactId>
         <version>2.0.0</version>
-        <configuration>
-          <serverId>marid</serverId>
-          <fromDir>target</fromDir>
-          <includes>*.zip,*.tar.gz,*.tar.bz2</includes>
-          <url>sftp://frs.sf.net</url>
-          <toDir>/home/frs/project/marid/${project.version}</toDir>
-        </configuration>
       </plugin>
 
       <plugin>
