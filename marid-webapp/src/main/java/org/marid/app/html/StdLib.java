@@ -21,6 +21,7 @@
 
 package org.marid.app.html;
 
+import org.marid.app.http.HttpContext;
 import org.marid.xml.HtmlBuilder;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +31,7 @@ import java.util.function.Consumer;
 public class StdLib {
 
   @SafeVarargs
-  public final void stdHead(HtmlBuilder builder, Consumer<HtmlBuilder>... headConfigurers) {
+  public final void stdHead(HttpContext context, HtmlBuilder builder, Consumer<HtmlBuilder>... headConfigurers) {
     builder.head(h -> h
         .link("icon", "/marid-icon.gif", "image/gif")
         .script("/user/jquery/jquery.js")

@@ -86,7 +86,7 @@ public class Handlers {
   @Bean
   public HttpHandler mainMenuHandler(HttpExecutor executor, StdLib stdLib) {
     return $e -> executor.html($e, (c, b) -> b
-        .$(() -> stdLib.stdHead(b, h -> h
+        .$(() -> stdLib.stdHead(c, b, h -> h
             .stylesheet("/user/css/index.css")
             .title(c.s("maridMenu")))
         )

@@ -43,7 +43,7 @@ public class CellarsConfiguration implements ViewConfiguration {
   @Bean
   public HttpHandler manage(HttpExecutor executor, StdLib stdLib, Cellars cellars) {
     return exchange -> executor.html(exchange, (c, b) -> b
-        .$(() -> stdLib.stdHead(b, h -> h.stylesheet("/user/css/cellars.css").title(c.s("cellars"))))
+        .$(() -> stdLib.stdHead(c, b, h -> h.stylesheet("/user/css/cellars.css").title(c.s("cellars"))))
         .body(body -> body
             .div("", "cellars", cl -> cl
                 .div("ui menu", "toolbar", toolbar -> toolbar
