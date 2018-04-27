@@ -29,6 +29,7 @@ import io.undertow.server.session.*;
 import org.marid.app.handlers.MainHandler;
 import org.marid.app.http.BowerResourceManager;
 import org.marid.app.http.MaridResourceManager;
+import org.marid.app.http.NpmResourceManager;
 import org.marid.app.props.UndertowProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
@@ -71,7 +72,12 @@ public class UndertowConfiguration {
 
   @Bean
   public BowerResourceManager bowerResourceManager() {
-    return new BowerResourceManager("semantic", "jquery");
+    return new BowerResourceManager("bootstrap", "jquery");
+  }
+
+  @Bean
+  public NpmResourceManager npmResourceManager() {
+    return new NpmResourceManager("ionicons");
   }
 
   @Bean
@@ -80,15 +86,13 @@ public class UndertowConfiguration {
   }
 
   @Bean
-  public ResourceManager userResourceManager(BowerResourceManager bower) {
-    return new MaridResourceManager("/user/")
-        .addParent(bower);
+  public ResourceManager userResourceManager(BowerResourceManager bower, NpmResourceManager npm) {
+    return new MaridResourceManager("/user/").addParent(bower).addParent(npm);
   }
 
   @Bean
   public ResourceManager adminResourceManager(ResourceManager userResourceManager) {
-    return new MaridResourceManager("/admin/")
-        .addParent(userResourceManager);
+    return new MaridResourceManager("/admin/").addParent(userResourceManager);
   }
 }
 

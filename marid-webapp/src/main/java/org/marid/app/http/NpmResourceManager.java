@@ -18,18 +18,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-
 package org.marid.app.http;
 
-public class BowerResourceManager extends WebjarResourceManager {
+public class NpmResourceManager extends WebjarResourceManager {
 
-  public BowerResourceManager(String... libraries) {
+  public NpmResourceManager(String... libraries) {
     super(libraries);
   }
 
   @Override
   protected String pom(String library) {
-    return "/META-INF/maven/org.webjars.bower/" + library + "/pom.properties";
+    return "/META-INF/maven/org.webjars.npm/" + library + "/pom.properties";
   }
 
   @Override

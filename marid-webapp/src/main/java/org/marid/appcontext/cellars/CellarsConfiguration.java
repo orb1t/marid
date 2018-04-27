@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
@@ -44,21 +44,20 @@ public class CellarsConfiguration implements ViewConfiguration {
   public HttpHandler manage(HttpExecutor executor, StdLib stdLib, Cellars cellars) {
     return exchange -> executor.html(exchange, (c, b) -> b
         .$(() -> stdLib.stdHead(c, b, h -> h.stylesheet("/user/css/cellars.css").title(c.s("cellars"))))
-        .body(body -> body
-            .div("", "cellars", cl -> cl
-                .div("ui menu", "toolbar", toolbar -> toolbar
-                    .a("item", "javascript:addCellar()", "", $ -> $.i("plus circle icon"))
-                    .a("item", "javascript:removeCellar()", "", $ -> $.i("minus circle icon"))
-                    .a("item", "javascript:editCellar()", "", $ -> $.i("pencil alternate icon"))
-                    .div("right menu", rm -> rm
-                        .a("item", "/", "", $ -> $.i("home icon"))
-                    )
+        .body("p-2", body -> body
+            .div("btn-toolbar", "toolbar", toolbar -> toolbar
+                .div("btn-group btn-group-lg mr-2", g -> g
+                    .button("btn btn-secondary", $ -> $.$a("onclick", "addCellar()").i("ion-ios-add"))
+                    .button("btn btn-secondary", $ -> $.$a("onclick", "removeCellar()").i("ion-ios-remove"))
+                    .button("btn btn-secondary", $ -> $.$a("onclick", "editCellar()").i("ion-ios-settings"))
                 )
-                .div("ui selection list segment", "list", list -> cellars.cellars().forEach(e -> {
-                  list.div("item", "cellar" + e, e);
-                }))
+                .div("btn-group btn-group-lg", g -> g
+                    .button("btn btn-secondary", $ -> $.$a("onclick", "window.location = '/'").i("ion-ios-home"))
+                )
             )
-            .$e("div", Map.of("id", "props", "class", "ui segment"))
+            .div("list-group mt-2", "list", list -> cellars.cellars().forEach(e -> {
+              list.div("list-group-item", "cellar" + e, e);
+            }))
             .$(() -> stdLib.scripts(body, "/user/js/cellars.js"))
         )
     );
@@ -68,18 +67,23 @@ public class CellarsConfiguration implements ViewConfiguration {
   public HttpHandler add(HttpExecutor executor, Cellars cellars) {
     return ex -> {
       if (Methods.GET.equals(ex.getRequestMethod())) {
-        executor.form(ex, "add.html", "post", "addForm", "ui form modal", (c, b) -> b
-            .i("close icon")
-            .div("header", "", c.s("addCellar"))
-            .div("content", content -> content
-                .div("field", f -> f
-                    .label(c.s("name"))
-                    .input("name", "text", c.s("name"), "")
+        executor.fragment(ex, "div", Map.of("class", "modal fade"), (c, modal) -> modal
+            .div("modal-dialog modal-dialog-centered", mdl -> mdl
+                .form("add.html", "post", "addForm", "modal-content", mdc -> mdc
+                    .div("modal-header", mdh -> mdh
+                        .h5("modal-title", c.s("addCellar"))
+                    )
+                    .div("modal-body", bd -> bd
+                        .div("form-group", g -> g
+                            .label(c.s("name"), "name")
+                            .input("name", "text", c.s("name"), "")
+                        )
+                    )
+                    .div("modal-footer", ft -> ft
+                        .button("btn btn-secondary", b -> b.$t(c.s("cancel")).$a("data-dismiss", "modal"))
+                        .button("btn btn-primary", b -> b.$t(c.s("add")).$a("type", "submit"))
+                    )
                 )
-            )
-            .div("actions", actions -> actions
-                .submitButton("ui positive button", c.s("add"))
-                .div("ui deny button", "cancelButton", c.s("cancel"))
             )
         );
       } else {

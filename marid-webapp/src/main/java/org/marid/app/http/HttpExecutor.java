@@ -68,15 +68,6 @@ public class HttpExecutor {
     }, HttpURLConnection.HTTP_OK);
   }
 
-  public void form(HttpServerExchange exchange,
-                   String action,
-                   String method,
-                   String id,
-                   String cls,
-                   BiConsumer<HttpContext, HtmlFragmentBuilder> fragment) {
-    fragment(exchange, "form", Map.of("action", action, "method", method, "id", id, "class", cls), fragment);
-  }
-
   public void with(HttpServerExchange exchange, IOConsumer<HttpContext> consumer, int code) {
     exchange.dispatch(() -> {
       exchange.startBlocking();

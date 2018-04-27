@@ -23,7 +23,6 @@ package org.marid.xml;
 
 import org.w3c.dom.Element;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -102,6 +101,10 @@ public abstract class HtmlAbstractBuilder<B extends HtmlAbstractBuilder<B>> exte
     return $e("img", Map.of("width", width, "height", height, "src", src));
   }
 
+  public B icon(Object size, String src) {
+    return img(size, size, src);
+  }
+
   public B span(Object text) {
     return $e("span", text.toString(), Map.of());
   }
@@ -110,12 +113,24 @@ public abstract class HtmlAbstractBuilder<B extends HtmlAbstractBuilder<B>> exte
     return $e("span", String.format(format, args), Map.of());
   }
 
+  public B cspan(String cls, Object text) {
+    return $e("span", text.toString(), Map.of("class", cls));
+  }
+
+  public B cspan(String cls, String format, Object... args) {
+    return cspan(cls, String.format(format, args));
+  }
+
   public B i(String cls) {
     return $e("i", Map.of("class", cls));
   }
 
   public B label(String text) {
     return $e("label", text, Map.of());
+  }
+
+  public B label(String text, String forName) {
+    return $e("label", text, Map.of("for", forName));
   }
 
   public B input(String name, String type, String placeholder, String value) {
@@ -127,5 +142,14 @@ public abstract class HtmlAbstractBuilder<B extends HtmlAbstractBuilder<B>> exte
 
   public B submitButton(String cls, String value) {
     return $e("input", Map.of("type", "submit", "value", value, "class", cls));
+  }
+
+  @SafeVarargs
+  public final B button(String cls, Consumer<B>... configurers) {
+      return $e("button", Map.of("class", cls), configurers);
+  }
+
+  public B h5(String cls, String text) {
+    return $e("h5", text, Map.of("class", cls));
   }
 }

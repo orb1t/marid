@@ -1,5 +1,5 @@
 function addCellar() {
-  $.get("add.html", data => $(data).modal("show"));
+  $.get("add.html", data => $(data).modal('show'));
 }
 
 function removeCellar() {

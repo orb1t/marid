@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
@@ -90,29 +90,17 @@ public class Handlers {
             .stylesheet("/user/css/index.css")
             .title(c.s("maridMenu")))
         )
-        .body("ui segment", body -> body
-            .div("ui relaxed divided list", list -> list
-                .div("item", item -> item
-                    .div("content", content -> content
-                        .div("header", "menu", div -> div
-                            .img(32, 32, "/marid-icon.gif")
-                            .span(c.s("maridMenu"))
-                        )
-                    )
+        .body(body -> body
+            .div("list-group", list -> list
+                .div("list-group-item", header -> header
+                    .img(32, 32, "/marid-icon.gif")
+                    .cspan("ml-3", c.s("maridMenu"))
                 )
-                .div("item", item -> item
-                    .div("content", content -> content
-                        .div("header", "", c.s("session"))
-                    )
-                )
-                .a("item", "/user/view/prefs", c.s("preferences"))
-                .a("item", "/logout", c.s("logOut"))
-                .div("item", item -> item
-                    .div("content", content -> content
-                        .div("header", "cellars", c.s("cellars"))
-                    )
-                )
-                .a("item", "/view/cellars/manage.html", c.s("manage"))
+                .div("list-group-item list-group-item-primary", "sessionHeader", c.s("session"))
+                .a("list-group-item list-group-item-action", "/user/view/prefs", c.s("preferences"))
+                .a("list-group-item list-group-item-action", "/logout", c.s("logOut"))
+                .div("list-group-item list-group-item-primary", "sessionHeader", c.s("cellars"))
+                .a("list-group-item list-group-item-action", "/view/cellars/manage.html", c.s("manage"))
             )
             .$(() -> stdLib.scripts(body))
         )
