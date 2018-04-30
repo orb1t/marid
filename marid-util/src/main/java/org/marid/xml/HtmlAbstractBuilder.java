@@ -133,11 +133,17 @@ public abstract class HtmlAbstractBuilder<B extends HtmlAbstractBuilder<B>> exte
     return $e("label", text, Map.of("for", forName));
   }
 
-  public B input(String name, String type, String placeholder, String value) {
+  @SafeVarargs
+  public final B input(String name,
+                       String type,
+                       String cls,
+                       String placeholder,
+                       String value,
+                       Consumer<B>... configurers) {
     final var map = value.isEmpty()
-        ? Map.of("name", name, "type", type, "placeholder", placeholder)
-        : Map.of("name", name, "type", type, "placeholder", placeholder, "value", value);
-    return $e("input", map);
+        ? Map.of("name", name, "type", type, "placeholder", placeholder, "class", cls)
+        : Map.of("name", name, "type", type, "placeholder", placeholder, "value", value, "class", cls);
+    return $e("input", map, configurers);
   }
 
   public B submitButton(String cls, String value) {

@@ -74,10 +74,7 @@ public class CellarsConfiguration implements ViewConfiguration {
                         .h5("modal-title", c.s("addCellar"))
                     )
                     .div("modal-body", bd -> bd
-                        .div("form-group", g -> g
-                            .label(c.s("name"), "name")
-                            .input("name", "text", c.s("name"), "")
-                        )
+                        .div("form-group", g -> g.input("name", "text", "form-control", c.s("name"), ""))
                     )
                     .div("modal-footer", ft -> ft
                         .button("btn btn-secondary", b -> b.$t(c.s("cancel")).$a("data-dismiss", "modal"))
