@@ -66,7 +66,7 @@ public class Views implements HttpHandler {
   @Override
   public void handleRequest(HttpServerExchange exchange) {
 
-    final Session session = sessions.getSession(exchange);
+    final Session session = sessions.get(exchange);
     if (session == null) {
       logger.error("Unable to find session for {}", exchange);
       return;

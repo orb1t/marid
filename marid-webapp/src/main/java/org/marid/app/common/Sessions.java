@@ -30,7 +30,6 @@ import org.marid.app.spring.LoggingPostProcessor;
 import org.marid.app.util.ExchangeHelper;
 import org.marid.appcontext.session.SessionConfiguration;
 import org.pac4j.core.context.Pac4jConstants;
-import org.pac4j.undertow.context.UndertowSessionStore;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -40,6 +39,8 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static io.undertow.util.Sessions.getSession;
 
 @Component
 public class Sessions {
@@ -53,9 +54,8 @@ public class Sessions {
     this.parent = parent;
   }
 
-  public Session getSession(HttpServerExchange exchange) {
-    final UndertowSessionStore sessionStore = new UndertowSessionStore(exchange);
-    return sessionStore.getSessionManager().getSession(exchange, sessionStore.getSessionConfig());
+  public Session get(HttpServerExchange exchange) {
+    return getSession(exchange);
   }
 
   public GenericApplicationContext getSessionContext(Session session) {

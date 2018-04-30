@@ -18,38 +18,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-
-package org.marid.app.http;
+package org.marid.app.html;
 
 import io.undertow.server.HttpServerExchange;
-import org.marid.l10n.L10n;
+import org.marid.app.http.HttpContext;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import static org.marid.app.util.ExchangeHelper.locale;
-
-public final class HttpContext {
+public class BaseLib {
 
   private final HttpServerExchange exchange;
+  private final HttpContext context;
 
-  public HttpContext(HttpServerExchange exchange) {
+  public BaseLib(HttpServerExchange exchange, HttpContext context) {
     this.exchange = exchange;
-  }
-
-  public OutputStream getOut() {
-    return exchange.getOutputStream();
-  }
-
-  public InputStream getIn() {
-    return exchange.getInputStream();
-  }
-
-  public String s(String pattern, Object... args) {
-    return L10n.s(locale(exchange), pattern, args);
-  }
-
-  public String m(String pattern, Object... args) {
-    return L10n.m(locale(exchange), pattern, args);
+    this.context = context;
   }
 }

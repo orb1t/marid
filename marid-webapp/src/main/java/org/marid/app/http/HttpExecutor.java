@@ -23,6 +23,7 @@ package org.marid.app.http;
 
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HttpString;
+import org.marid.app.common.Sessions;
 import org.marid.io.IOConsumer;
 import org.marid.xml.HtmlBuilder;
 import org.marid.xml.HtmlFragmentBuilder;
@@ -38,9 +39,11 @@ import java.util.function.BiConsumer;
 public class HttpExecutor {
 
   private final Logger logger;
+  private final Sessions sessions;
 
-  public HttpExecutor(Logger logger) {
+  public HttpExecutor(Logger logger, Sessions sessions) {
     this.logger = logger;
+    this.sessions = sessions;
   }
 
   public void html(HttpServerExchange exchange, BiConsumer<HttpContext, HtmlBuilder> html, int code) {
