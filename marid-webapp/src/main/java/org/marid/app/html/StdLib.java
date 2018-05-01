@@ -21,17 +21,20 @@
 
 package org.marid.app.html;
 
+import io.undertow.server.HttpServerExchange;
 import org.marid.app.http.HttpContext;
 import org.marid.xml.HtmlBuilder;
-import org.springframework.stereotype.Component;
 
 import java.util.function.Consumer;
 
-@Component
-public class StdLib {
+public class StdLib extends BaseLib {
+
+  public StdLib(HttpServerExchange exchange) {
+    super(exchange);
+  }
 
   @SafeVarargs
-  public final void stdHead(HttpContext context, HtmlBuilder builder, Consumer<HtmlBuilder>... headConfigurers) {
+  public final void stdHead(HtmlBuilder builder, Consumer<HtmlBuilder>... headConfigurers) {
     builder.head(h -> h
         .link("icon", "/marid-icon.gif", "image/gif")
         .script("/user/jquery/jquery.js")

@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
@@ -29,6 +29,7 @@ import io.undertow.util.Methods;
 import org.marid.app.html.StdLib;
 import org.marid.app.http.HttpExecutor;
 import org.marid.appcontext.session.view.ViewConfiguration;
+import org.marid.xml.HtmlBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
@@ -41,9 +42,9 @@ import java.util.Map;
 public class CellarsConfiguration implements ViewConfiguration {
 
   @Bean
-  public HttpHandler manage(HttpExecutor executor, StdLib stdLib, Cellars cellars) {
-    return exchange -> executor.html(exchange, (c, b) -> b
-        .$(() -> stdLib.stdHead(c, b, h -> h.stylesheet("/user/css/cellars.css").title(c.s("cellars"))))
+  public HttpHandler manage(HttpExecutor executor, Cellars cellars) {
+    return executor.handler(StdLib.class, HtmlBuilder::new, (c, b) -> b
+        .$(() -> c.stdHead(b, h -> h.stylesheet("/user/css/cellars.css").title(c.s("cellars"))))
         .body("p-2", body -> body
             .div("btn-toolbar", "toolbar", toolbar -> toolbar
                 .div("btn-group btn-group-lg mr-2", g -> g
@@ -58,9 +59,8 @@ public class CellarsConfiguration implements ViewConfiguration {
             .div("list-group mt-2", "list", list -> cellars.cellars().forEach(e -> {
               list.div("list-group-item", "cellar" + e, e);
             }))
-            .$(() -> stdLib.scripts(body, "/user/js/cellars.js"))
-        )
-    );
+            .$(() -> c.scripts(body, "/user/js/cellars.js"))
+        ));
   }
 
   @Bean

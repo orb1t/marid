@@ -21,15 +21,38 @@
 package org.marid.app.html;
 
 import io.undertow.server.HttpServerExchange;
-import org.marid.app.http.HttpContext;
+import org.marid.l10n.L10n;
+
+import java.io.InputStream;
+import java.io.OutputStream;
+
+import static org.marid.app.util.ExchangeHelper.locale;
 
 public class BaseLib {
 
-  private final HttpServerExchange exchange;
-  private final HttpContext context;
+  protected final HttpServerExchange exchange;
 
-  public BaseLib(HttpServerExchange exchange, HttpContext context) {
+  public BaseLib(HttpServerExchange exchange) {
     this.exchange = exchange;
-    this.context = context;
+  }
+
+  public OutputStream getOut() {
+    return exchange.getOutputStream();
+  }
+
+  public InputStream getIn() {
+    return exchange.getInputStream();
+  }
+
+  public HttpServerExchange getExchange() {
+    return exchange;
+  }
+
+  public String s(String pattern, Object... args) {
+    return L10n.s(locale(exchange), pattern, args);
+  }
+
+  public String m(String pattern, Object... args) {
+    return L10n.m(locale(exchange), pattern, args);
   }
 }

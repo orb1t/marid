@@ -31,6 +31,7 @@ import io.undertow.server.handlers.resource.ResourceManager;
 import org.marid.app.annotation.Handler;
 import org.marid.app.html.StdLib;
 import org.marid.app.http.HttpExecutor;
+import org.marid.xml.HtmlBuilder;
 import org.pac4j.core.config.Config;
 import org.pac4j.undertow.handler.LogoutHandler;
 import org.springframework.context.annotation.Bean;
@@ -84,9 +85,9 @@ public class Handlers {
   }
 
   @Bean
-  public HttpHandler mainMenuHandler(HttpExecutor executor, StdLib stdLib) {
-    return $e -> executor.html($e, (c, b) -> b
-        .$(() -> stdLib.stdHead(c, b, h -> h
+  public HttpHandler mainMenuHandler(HttpExecutor executor) {
+    return executor.handler(StdLib.class, HtmlBuilder::new, (c, b) -> b
+        .$(() -> c.stdHead(b, h -> h
             .stylesheet("/user/css/index.css")
             .title(c.s("maridMenu")))
         )
@@ -102,7 +103,7 @@ public class Handlers {
                 .div("list-group-item list-group-item-primary", "sessionHeader", c.s("cellars"))
                 .a("list-group-item list-group-item-action", "/view/cellars/manage.html", c.s("manage"))
             )
-            .$(() -> stdLib.scripts(body))
+            .$(() -> c.scripts(body))
         )
     );
   }
