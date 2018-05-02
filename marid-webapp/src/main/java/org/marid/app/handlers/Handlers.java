@@ -28,6 +28,7 @@ import io.undertow.server.handlers.CanonicalPathHandler;
 import io.undertow.server.handlers.RedirectHandler;
 import io.undertow.server.handlers.resource.ResourceHandler;
 import io.undertow.server.handlers.resource.ResourceManager;
+import io.undertow.server.handlers.sse.ServerSentEventHandler;
 import org.marid.app.annotation.Handler;
 import org.marid.app.html.StdLib;
 import org.marid.app.http.HttpExecutor;
@@ -42,6 +43,12 @@ import java.util.Map;
 
 @Component
 public class Handlers {
+
+  @Bean
+  @Handler(path = "/sse", processUnauthorized = true)
+  public ServerSentEventHandler sseHandler() {
+    return new ServerSentEventHandler();
+  }
 
   @Bean
   public HttpHandler pubResourcesHandler(ResourceManager pubResourceManager) {
