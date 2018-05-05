@@ -39,9 +39,9 @@ public class MaridAccount implements Account {
   public MaridAccount(LinkedHashMap<String, CommonProfile> profiles) {
     this.profiles = profiles;
     this.roles = profiles.values().stream().flatMap(p -> p.getRoles().stream()).collect(toSet());
-
-    final CommonProfile profile = ProfileHelper.flatIntoOneProfile(this.profiles).get();
-    this.principal = profile::getId;
+    this.principal = ProfileHelper.flatIntoOneProfile(profiles.values())
+        .map(v -> (Principal) v::getId)
+        .orElseThrow();
   }
 
   @Override

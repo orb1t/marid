@@ -146,7 +146,7 @@ public class Handlers {
 
     final HttpHandler httpHandler = exchange -> {
       final var context = new MaridWebContext(exchange);
-      callbackLogic.perform(context, config, (code, ctx) -> null, "/", false, null);
+      callbackLogic.perform(context, config, (code, ctx) -> null, "/", true, false, null, null);
     };
     formHandler.setNext(httpHandler);
     return new BlockingHandler(formHandler);

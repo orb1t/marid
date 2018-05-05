@@ -56,14 +56,8 @@ public class MaridWebContext implements WebContext {
   }
 
   @Override
-  public SessionStore getSessionStore() {
+  public SessionStore<MaridWebContext> getSessionStore() {
     return new MaridSessionStore();
-  }
-
-  @Override
-  @Deprecated
-  public void setSessionStore(SessionStore sessionStore) {
-    throw new UnsupportedOperationException();
   }
 
   @Override

@@ -25,6 +25,7 @@ import io.undertow.server.HttpHandler;
 import org.pac4j.core.client.Client;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.engine.DefaultSecurityLogic;
+import org.pac4j.core.engine.decision.AlwaysUseSessionProfileStorageDecision;
 import org.pac4j.core.exception.HttpAction;
 
 import java.util.List;
@@ -39,8 +40,7 @@ public class MaridSecurityLogic extends DefaultSecurityLogic<Void, MaridWebConte
     this.next = next;
     this.config = config;
     this.processUnauthorized = processUnauthorized;
-
-    setSaveProfileInSession(true);
+    setProfileStorageDecision(new AlwaysUseSessionProfileStorageDecision());
   }
 
   @Override
@@ -58,12 +58,10 @@ public class MaridSecurityLogic extends DefaultSecurityLogic<Void, MaridWebConte
     return action;
   }
 
-  public void perform(MaridWebContext context, String authorizers, String clients) {
-    perform(context, config, this::process, (code, ctx) -> null, clients, authorizers, null, null);
-  }
-
-  private Void process(MaridWebContext context, Object... params) throws Throwable {
-    next.handleRequest(context.getExchange());
-    return null;
+  void perform(MaridWebContext context, String authorizers, String clients) {
+    perform(context, config, (ctx, profiles, parameters) -> {
+      next.handleRequest(ctx.getExchange());
+      return null;
+    }, (code, ctx) -> null, clients, authorizers, null, false);
   }
 }
