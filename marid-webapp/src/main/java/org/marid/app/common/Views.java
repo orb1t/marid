@@ -23,7 +23,6 @@ package org.marid.app.common;
 
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
-import io.undertow.server.session.Session;
 import org.marid.app.annotation.Handler;
 import org.marid.app.spring.ContextUtils;
 import org.marid.app.spring.LoggingPostProcessor;
@@ -35,16 +34,19 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.MapPropertySource;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Handler(path = "/view", exact = false)
 @Component
 public class Views implements HttpHandler {
+
+  private static final String USAGE_COUNTER = "$USAGE_COUNTER";
 
   private final Logger logger;
   private final Sessions sessions;
@@ -55,70 +57,70 @@ public class Views implements HttpHandler {
     this.sessions = sessions;
   }
 
-  public void clean(HandlerPath path) {
-    views.computeIfPresent(path, (k, old) -> {
-      try (old) {
-        return null;
+  @Scheduled(fixedDelay = 60_000L, initialDelay = 60_000L)
+  public void clean() {
+    views.forEachValue(8, context -> {
+      final var usageCounter = context.getBean(USAGE_COUNTER, AtomicInteger.class);
+      final int usageCount = usageCounter.getAndSet(0);
+      if (usageCount == 0) {
+        context.close();
       }
     });
   }
 
   @Override
   public void handleRequest(HttpServerExchange exchange) {
-
-    final Session session = sessions.get(exchange);
+    final var session = sessions.get(exchange);
     if (session == null) {
       logger.error("Unable to find session for {}", exchange);
       return;
     }
 
-    final GenericApplicationContext context = sessions.getSessionContext(session);
+    final var context = sessions.getSessionContext(session);
     if (context == null) {
       logger.error("Unable to find session context for session {}", session.getId());
       return;
     }
 
-    final HandlerPath path = new HandlerPath(exchange.getRelativePath());
+    final var path = new HandlerPath(exchange.getRelativePath());
     if (path.getComponentCount() == 0) {
       logger.error("Invalid path {}", path);
       return;
     }
 
-    if (exchange.getQueryParameters().containsKey("clean")) {
-      clean(path);
-      return;
-    }
-
     try {
-      final AtomicReference<GenericApplicationContext> ctx = new AtomicReference<>(context);
-      for (final ListIterator<String> i = path.iterator(); i.hasNext(); ) {
-        final String selector = i.next();
-        final HandlerPath current = path.subPath(i.nextIndex());
+      final var ctx = new AtomicReference<>(context);
+      for (final var i = path.iterator(); i.hasNext(); ) {
+        final var selector = i.next();
+        final var current = path.subPath(i.nextIndex());
 
         if (i.hasNext()) {
-          final ViewContextResolver viewContextResolver = viewContextResolver(ctx.get());
-          final Class<?> c = viewContextResolver.resolve(selector);
+          final var viewContextResolver = viewContextResolver(ctx.get());
+          final var c = viewContextResolver.resolve(selector);
           if (c != null) {
             final ApplicationListener<ContextClosedEvent> contextCloseListener = e -> views.remove(current);
-            final MapPropertySource env = new MapPropertySource("viewPropertySource", Map.of("path", current));
+            final var env = new MapPropertySource("viewPropertySource", Map.of("path", current));
 
             ctx.set(views.computeIfAbsent(current, p -> ContextUtils.context(ctx.get(), child -> {
               child.setDisplayName(current.toString());
               child.setId(child.getDisplayName());
               child.getEnvironment().getPropertySources().addLast(env);
               child.getBeanFactory().addBeanPostProcessor(new LoggingPostProcessor());
+              child.getBeanFactory().registerSingleton(USAGE_COUNTER, new AtomicInteger());
               child.register(c);
               child.addApplicationListener(contextCloseListener);
               child.refresh();
               child.start();
             })));
+
+            ctx.get().getBean(USAGE_COUNTER, AtomicInteger.class).incrementAndGet();
           } else {
             logger.error("Unable to find {} from {}", current, path);
             return;
           }
         } else {
-          final ViewResolver viewResolver = viewResolver(ctx.get());
-          final HttpHandler httpHandler = viewResolver.resolve(viewName(selector));
+          final var viewResolver = viewResolver(ctx.get());
+          final var httpHandler = viewResolver.resolve(viewName(selector));
           if (httpHandler != null) {
             httpHandler.handleRequest(exchange);
           } else {

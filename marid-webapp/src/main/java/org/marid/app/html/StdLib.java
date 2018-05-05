@@ -22,7 +22,6 @@
 package org.marid.app.html;
 
 import io.undertow.server.HttpServerExchange;
-import org.marid.app.http.HttpContext;
 import org.marid.xml.HtmlBuilder;
 
 import java.util.function.Consumer;

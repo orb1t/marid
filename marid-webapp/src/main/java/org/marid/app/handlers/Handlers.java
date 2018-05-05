@@ -22,7 +22,6 @@
 package org.marid.app.handlers;
 
 import io.undertow.attribute.ConstantExchangeAttribute;
-import io.undertow.security.api.SecurityContext;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.CanonicalPathHandler;
 import io.undertow.server.handlers.RedirectHandler;
@@ -39,13 +38,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Map;
 
 @Component
 public class Handlers {
 
   @Bean
-  @Handler(path = "/sse", processUnauthorized = true)
+  @Handler(path = "/sse", authorizer = "user")
   public ServerSentEventHandler sseHandler() {
     return new ServerSentEventHandler();
   }
@@ -70,15 +68,15 @@ public class Handlers {
   @Bean
   public HttpHandler authListHandler(HttpExecutor executor) {
     return exchange -> executor.html(exchange, (c, builder) -> builder
-        .$e("head", head -> head
+        .head(head -> head
             .title(c.s("maridIde"))
             .link("icon", "/marid-icon.gif", "image/gif")
             .meta("google", "notranslate")
             .meta("viewport", "width=device-width, initial-scale=1")
             .stylesheet("/public/login.css")
         )
-        .$e("body", body -> body
-            .$e("img", Map.of("src", "/marid-icon.gif?size=100", "width", 100, "height", 100))
+        .body(body -> body
+            .img(100, 100, "/marid-icon.gif?size=100")
             .div("", "adBody", list -> list
                 .div("", "header", c.s("maridIde"))
                 .div("", "ad", c.s("spiritDrivenDevelopment"))
@@ -119,7 +117,7 @@ public class Handlers {
   @Handler(path = "/", processUnauthorized = true)
   public HttpHandler loginPage(HttpHandler authListHandler, HttpHandler mainMenuHandler) {
     return exchange -> {
-      final SecurityContext context = exchange.getSecurityContext();
+      final var context = exchange.getSecurityContext();
       if (context == null) {
         authListHandler.handleRequest(exchange);
       } else {
