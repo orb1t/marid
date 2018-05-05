@@ -28,7 +28,6 @@ import org.marid.app.annotation.HandlerQualifier;
 import org.marid.app.auth.MaridSecurityHandler;
 import org.marid.app.auth.MaridSecurityLogic;
 import org.pac4j.core.config.Config;
-import org.pac4j.undertow.handler.CallbackHandler;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -46,7 +45,6 @@ public class MainHandler extends PathHandler {
 
   public MainHandler(Config config) {
     this.config = config;
-    addExactPath("/callback", CallbackHandler.build(config, "/", false));
   }
 
   @Autowired

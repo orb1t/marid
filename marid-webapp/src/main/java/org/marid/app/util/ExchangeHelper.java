@@ -26,7 +26,6 @@ import io.undertow.server.session.Session;
 import io.undertow.util.LocaleUtils;
 import org.marid.app.auth.MaridSecurityHandler;
 import org.pac4j.core.profile.CommonProfile;
-import org.pac4j.undertow.context.UndertowWebContext;
 
 import java.util.Collection;
 import java.util.Locale;
@@ -44,7 +43,7 @@ public interface ExchangeHelper {
   }
 
   static Locale locale(HttpServerExchange exchange) {
-    final UndertowWebContext context = exchange.getAttachment(MaridSecurityHandler.WEB_CONTEXT_KEY);
+    final var context = exchange.getAttachment(MaridSecurityHandler.WEB_CONTEXT_KEY);
     if (context != null) {
       final Locale locale = (Locale) context.getSessionAttribute(USER_LOCALE_SESSION_KEY);
       if (locale != null) {

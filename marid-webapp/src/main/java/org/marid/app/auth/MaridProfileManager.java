@@ -27,9 +27,9 @@ import org.pac4j.core.profile.ProfileManager;
 
 import java.util.LinkedHashMap;
 
-class MaridProfileManager<U extends CommonProfile> extends ProfileManager<U> {
+public class MaridProfileManager<U extends CommonProfile> extends ProfileManager<U> {
 
-  MaridProfileManager(WebContext context) {
+  public MaridProfileManager(WebContext context) {
     super(context);
   }
 

@@ -23,17 +23,24 @@ package org.marid.app.handlers;
 
 import io.undertow.attribute.ConstantExchangeAttribute;
 import io.undertow.server.HttpHandler;
+import io.undertow.server.handlers.BlockingHandler;
 import io.undertow.server.handlers.CanonicalPathHandler;
 import io.undertow.server.handlers.RedirectHandler;
+import io.undertow.server.handlers.form.EagerFormParsingHandler;
+import io.undertow.server.handlers.form.FormEncodedDataDefinition;
+import io.undertow.server.handlers.form.FormParserFactory;
 import io.undertow.server.handlers.resource.ResourceHandler;
 import io.undertow.server.handlers.resource.ResourceManager;
 import io.undertow.server.handlers.sse.ServerSentEventHandler;
 import org.marid.app.annotation.Handler;
+import org.marid.app.auth.MaridProfileManager;
+import org.marid.app.auth.MaridWebContext;
 import org.marid.app.html.StdLib;
 import org.marid.app.http.HttpExecutor;
 import org.marid.xml.HtmlBuilder;
 import org.pac4j.core.config.Config;
-import org.pac4j.undertow.handler.LogoutHandler;
+import org.pac4j.core.engine.DefaultCallbackLogic;
+import org.pac4j.core.engine.DefaultLogoutLogic;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
@@ -66,30 +73,46 @@ public class Handlers {
   }
 
   @Bean
+  @Handler(path = "/", processUnauthorized = true)
   public HttpHandler authListHandler(HttpExecutor executor) {
-    return exchange -> executor.html(exchange, (c, builder) -> builder
-        .head(head -> head
-            .title(c.s("maridIde"))
-            .link("icon", "/marid-icon.gif", "image/gif")
-            .meta("google", "notranslate")
-            .meta("viewport", "width=device-width, initial-scale=1")
-            .stylesheet("/public/login.css")
-        )
-        .body(body -> body
-            .img(100, 100, "/marid-icon.gif?size=100")
-            .div("", "adBody", list -> list
-                .div("", "header", c.s("maridIde"))
-                .div("", "ad", c.s("spiritDrivenDevelopment"))
-                .div("", "auth", auth -> List.of("google", "facebook", "twitter").forEach(e -> {
-                  auth.$c(e);
-                  auth.a("", "/" + e + ".html", "", a -> a.img(32, 32, "/public/" + e + ".svg"));
-                }))
-            )
-        )
-    );
+    return exchange -> {
+      CHECK_PROFILES: {
+        if (exchange.getSecurityContext() == null) {
+          break CHECK_PROFILES;
+        }
+        if (exchange.getSecurityContext().getAuthenticatedAccount() == null) {
+          break CHECK_PROFILES;
+        }
+        if (exchange.getSecurityContext().getAuthenticatedAccount().getRoles().contains("ROLE_USER")) {
+          new RedirectHandler("menu").handleRequest(exchange);
+          return;
+        }
+      }
+      executor.html(exchange, (c, builder) -> builder
+          .head(head -> head
+              .title(c.s("maridIde"))
+              .link("icon", "/marid-icon.gif", "image/gif")
+              .meta("google", "notranslate")
+              .meta("viewport", "width=device-width, initial-scale=1")
+              .stylesheet("/public/login.css")
+          )
+          .body(body -> body
+              .img(100, 100, "/marid-icon.gif?size=100")
+              .div("", "adBody", list -> list
+                  .div("", "header", c.s("maridIde"))
+                  .div("", "ad", c.s("spiritDrivenDevelopment"))
+                  .div("", "auth", auth -> List.of("google", "facebook", "twitter").forEach(e -> {
+                    auth.$c(e);
+                    auth.a("", "/" + e + ".html", "", a -> a.img(32, 32, "/public/" + e + ".svg"));
+                  }))
+              )
+          )
+      );
+    };
   }
 
   @Bean
+  @Handler(path = "/menu", authorizer = "user")
   public HttpHandler mainMenuHandler(HttpExecutor executor) {
     return executor.handler(StdLib.class, HtmlBuilder::new, (c, b) -> b
         .$(() -> c.stdHead(b, h -> h
@@ -114,22 +137,30 @@ public class Handlers {
   }
 
   @Bean
-  @Handler(path = "/", processUnauthorized = true)
-  public HttpHandler loginPage(HttpHandler authListHandler, HttpHandler mainMenuHandler) {
-    return exchange -> {
-      final var context = exchange.getSecurityContext();
-      if (context == null) {
-        authListHandler.handleRequest(exchange);
-      } else {
-        mainMenuHandler.handleRequest(exchange);
-      }
+  @Handler(path = "/callback", processUnauthorized = true, secure = false)
+  public HttpHandler callbackHandler(Config config) {
+    final var factory = FormParserFactory.builder().addParser(new FormEncodedDataDefinition()).build();
+    final var formHandler = new EagerFormParsingHandler(factory);
+    final var callbackLogic = new DefaultCallbackLogic<Object, MaridWebContext>();
+    callbackLogic.setProfileManagerFactory(MaridProfileManager::new);
+
+    final HttpHandler httpHandler = exchange -> {
+      final var context = new MaridWebContext(exchange);
+      callbackLogic.perform(context, config, (code, ctx) -> null, "/", false, null);
     };
+    formHandler.setNext(httpHandler);
+    return new BlockingHandler(formHandler);
   }
 
   @Bean
   @Handler(path = "/logout")
   public HttpHandler logoutHandler(Config config) {
-    return new LogoutHandler(config, "/");
+    final var logoutLogic = new DefaultLogoutLogic<Object, MaridWebContext>();
+    logoutLogic.setProfileManagerFactory(MaridProfileManager::new);
+    return exchange -> {
+      final var context = new MaridWebContext(exchange);
+      logoutLogic.perform(context, config, (code, ctx) -> null, "/", null, null, null, null);
+    };
   }
 
   @Bean

@@ -22,18 +22,14 @@
 package org.marid.app.auth;
 
 import io.undertow.server.HttpHandler;
-import org.marid.misc.Casts;
 import org.pac4j.core.client.Client;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.engine.DefaultSecurityLogic;
 import org.pac4j.core.exception.HttpAction;
-import org.pac4j.undertow.context.UndertowWebContext;
 
 import java.util.List;
 
-import static org.pac4j.undertow.http.UndertowNopHttpActionAdapter.INSTANCE;
-
-public class MaridSecurityLogic extends DefaultSecurityLogic<Void, UndertowWebContext> {
+public class MaridSecurityLogic extends DefaultSecurityLogic<Void, MaridWebContext> {
 
   private final HttpHandler next;
   private final Config config;
@@ -48,7 +44,7 @@ public class MaridSecurityLogic extends DefaultSecurityLogic<Void, UndertowWebCo
   }
 
   @Override
-  protected HttpAction unauthorized(UndertowWebContext context, List<Client> currentClients) throws HttpAction {
+  protected HttpAction unauthorized(MaridWebContext context, List<Client> currentClients) throws HttpAction {
     final HttpAction action = super.unauthorized(context, currentClients);
     if (processUnauthorized) {
       try {
@@ -62,11 +58,11 @@ public class MaridSecurityLogic extends DefaultSecurityLogic<Void, UndertowWebCo
     return action;
   }
 
-  public void perform(UndertowWebContext context, String authorizers, String clients) {
-    perform(context, config, this::process, Casts.cast(INSTANCE), clients, authorizers, null, null);
+  public void perform(MaridWebContext context, String authorizers, String clients) {
+    perform(context, config, this::process, (code, ctx) -> null, clients, authorizers, null, null);
   }
 
-  private Void process(UndertowWebContext context, Object... params) throws Throwable {
+  private Void process(MaridWebContext context, Object... params) throws Throwable {
     next.handleRequest(context.getExchange());
     return null;
   }
