@@ -54,7 +54,7 @@ public class MaridSecurityHandler implements HttpHandler {
     final MaridProfileManager<CommonProfile> manager = new MaridProfileManager<>(context);
     final LinkedHashMap<String, CommonProfile> profiles = manager.retrieveAll(true);
 
-    if (profiles != null && !profiles.isEmpty()) {
+    if (!profiles.isEmpty()) {
       if (exchange.getSecurityContext() == null) {
         exchange.setSecurityContext(new SecurityInitialHandler(PRO_ACTIVE, null, null).createSecurityContext(exchange));
       }
