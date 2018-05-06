@@ -572,7 +572,7 @@
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>24.1-jre</version>
+        <version>25.0-jre</version>
       </dependency>
 
       <dependency>
@@ -585,14 +585,6 @@
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-math3</artifactId>
         <version>3.6.1</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.apache.maven.resolver</groupId>
-        <artifactId>maven-resolver</artifactId>
-        <version>1.1.1</version>
-        <scope>import</scope>
-        <type>pom</type>
       </dependency>
 
       <dependency>
