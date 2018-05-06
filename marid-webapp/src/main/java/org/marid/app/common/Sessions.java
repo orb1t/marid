@@ -31,7 +31,6 @@ import org.marid.app.util.ExchangeHelper;
 import org.marid.appcontext.session.SessionConfiguration;
 import org.pac4j.core.context.Pac4jConstants;
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.support.GenericApplicationContext;
@@ -51,9 +50,11 @@ public class Sessions {
   private final Logger logger;
   private final GenericApplicationContext parent;
 
-  public Sessions(Logger logger, GenericApplicationContext parent) {
+  public Sessions(Logger logger, GenericApplicationContext parent, SessionManager sessionManager) {
     this.logger = logger;
     this.parent = parent;
+
+    sessionManager.registerSessionListener(new MaridSessionListener());
   }
 
   public Session get(HttpServerExchange exchange) {
@@ -64,84 +65,81 @@ public class Sessions {
     return (GenericApplicationContext) session.getAttribute(CONTEXT_KEY);
   }
 
-  @Autowired
-  public void init(SessionManager sessionManager) {
-    sessionManager.registerSessionListener(new SessionListener() {
-      @Override
-      public void sessionCreated(Session session, HttpServerExchange exchange) {
-        logger.info("Created {}", session);
-        final Map map = (Map) session.getAttribute(Pac4jConstants.USER_PROFILES);
-        if (map != null && !map.isEmpty() && session.getAttribute(CONTEXT_KEY) == null) {
+  private class MaridSessionListener implements SessionListener {
+    @Override
+    public void sessionCreated(Session session, HttpServerExchange exchange) {
+      logger.info("Created {}", session);
+      final Map map = (Map) session.getAttribute(Pac4jConstants.USER_PROFILES);
+      if (map != null && !map.isEmpty() && session.getAttribute(CONTEXT_KEY) == null) {
+        create(session);
+      }
+    }
+
+    @Override
+    public void sessionDestroyed(Session session, HttpServerExchange exchange, SessionDestroyedReason reason) {
+      logger.info("Destroyed {} ({})", session, reason);
+      destroy(session);
+    }
+
+    @Override
+    public void attributeAdded(Session session, String name, Object value) {
+      switch (name) {
+        case Pac4jConstants.USER_PROFILES:
           create(session);
-        }
+          break;
       }
+    }
 
-      @Override
-      public void sessionDestroyed(Session session, HttpServerExchange exchange, SessionDestroyedReason reason) {
-        logger.info("Destroyed {} ({})", session, reason);
-        destroy(session);
+    @Override
+    public void attributeRemoved(Session session, String name, Object oldValue) {
+      switch (name) {
+        case Pac4jConstants.USER_PROFILES:
+          destroy(session);
+          break;
       }
+    }
 
-      @Override
-      public void attributeAdded(Session session, String name, Object value) {
-        switch (name) {
-          case Pac4jConstants.USER_PROFILES:
-            create(session);
-            break;
-        }
-      }
-
-      @Override
-      public void attributeRemoved(Session session, String name, Object oldValue) {
-        switch (name) {
-          case Pac4jConstants.USER_PROFILES:
+    @Override
+    public void attributeUpdated(Session session, String name, Object newValue, Object oldValue) {
+      switch (name) {
+        case Pac4jConstants.USER_PROFILES:
+          if (!Objects.equals(oldValue, newValue)) {
             destroy(session);
-            break;
-        }
-      }
-
-      @Override
-      public void attributeUpdated(Session session, String name, Object newValue, Object oldValue) {
-        switch (name) {
-          case Pac4jConstants.USER_PROFILES:
-            if (!Objects.equals(oldValue, newValue)) {
-              destroy(session);
-              if (newValue instanceof Map && !((Map) newValue).isEmpty()) {
-                create(session);
-              }
+            if (newValue instanceof Map && !((Map) newValue).isEmpty()) {
+              create(session);
             }
-            break;
-        }
-      }
-
-      private void create(Session session) {
-        session.setAttribute(CONTEXT_KEY, ContextUtils.context(parent, child -> {
-          final ApplicationListener<ContextClosedEvent> closeListener = event -> {
-            if (event.getApplicationContext() == child) {
-              session.removeAttribute(CONTEXT_KEY);
-            }
-          };
-          child.setId(session.getId());
-          child.setDisplayName(session.getId() + " (" + Instant.ofEpochMilli(session.getCreationTime()) + ")");
-          child.getBeanFactory().registerSingleton("session", session);
-          child.getBeanFactory().registerSingleton("userProfile", ExchangeHelper.userProfile(session));
-          child.getBeanFactory().addBeanPostProcessor(new LoggingPostProcessor());
-          child.register(SessionConfiguration.class);
-          child.addApplicationListener(closeListener);
-          child.refresh();
-          child.start();
-          logger.info("Created session {}", session.getId());
-        }));
-      }
-
-      private void destroy(Session session) {
-        final GenericApplicationContext context = (GenericApplicationContext) session.removeAttribute(CONTEXT_KEY);
-        if (context != null) {
-          try (context) {
-            logger.info("Destroying {}: {}", session, session.getId());
           }
+          break;
+      }
+    }
+
+    private void create(Session session) {
+      session.setAttribute(CONTEXT_KEY, ContextUtils.context(parent, child -> {
+        final ApplicationListener<ContextClosedEvent> closeListener = event -> {
+          if (event.getApplicationContext() == child) {
+            session.removeAttribute(CONTEXT_KEY);
+          }
+        };
+        child.setId(session.getId());
+        child.setDisplayName(session.getId() + " (" + Instant.ofEpochMilli(session.getCreationTime()) + ")");
+        child.getBeanFactory().registerSingleton("session", session);
+        child.getBeanFactory().registerSingleton("userProfile", ExchangeHelper.userProfile(session));
+        child.getBeanFactory().addBeanPostProcessor(new LoggingPostProcessor());
+        child.register(SessionConfiguration.class);
+        child.addApplicationListener(closeListener);
+        child.refresh();
+        child.start();
+        logger.info("Created session {}", session.getId());
+      }));
+    }
+
+    private void destroy(Session session) {
+      final GenericApplicationContext context = (GenericApplicationContext) session.removeAttribute(CONTEXT_KEY);
+      if (context != null) {
+        try (context) {
+          logger.info("Destroying {}: {}", session, session.getId());
         }
       }
-    });
+    }
   }
 }
