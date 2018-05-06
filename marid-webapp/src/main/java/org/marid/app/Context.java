@@ -35,6 +35,7 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.SimpleCommandLinePropertySource;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -65,6 +66,11 @@ public class Context {
     configurer.setIgnoreResourceNotFound(false);
     configurer.setIgnoreUnresolvablePlaceholders(false);
     return configurer;
+  }
+
+  @Bean
+  public static ConcurrentTaskScheduler taskScheduler() {
+    return new ConcurrentTaskScheduler();
   }
 
   @Bean(initMethod = "start")

@@ -59,11 +59,16 @@ public class Views implements HttpHandler {
 
   @Scheduled(fixedDelay = 60_000L, initialDelay = 60_000L)
   public void clean() {
-    views.forEachValue(8, context -> {
+    views.entrySet().removeIf(e -> {
+      final var context = e.getValue();
       final var usageCounter = context.getBean(USAGE_COUNTER, AtomicInteger.class);
       final int usageCount = usageCounter.getAndSet(0);
       if (usageCount == 0) {
+        logger.info("Clean {}", e.getKey());
         context.close();
+        return true;
+      } else {
+        return false;
       }
     });
   }
@@ -98,10 +103,14 @@ public class Views implements HttpHandler {
           final var viewContextResolver = viewContextResolver(ctx.get());
           final var c = viewContextResolver.resolve(selector);
           if (c != null) {
-            final ApplicationListener<ContextClosedEvent> contextCloseListener = e -> views.remove(current);
             final var env = new MapPropertySource("viewPropertySource", Map.of("path", current));
 
             ctx.set(views.computeIfAbsent(current, p -> ContextUtils.context(ctx.get(), child -> {
+              final ApplicationListener<ContextClosedEvent> contextCloseListener = e -> {
+                if (e.getApplicationContext() == child) {
+                  views.remove(p);
+                }
+              };
               child.setDisplayName(current.toString());
               child.setId(child.getDisplayName());
               child.getEnvironment().getPropertySources().addLast(env);

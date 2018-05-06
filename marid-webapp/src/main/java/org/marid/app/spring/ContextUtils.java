@@ -41,17 +41,21 @@ public interface ContextUtils {
     context.setParent(parent);
 
     final ApplicationListener<ContextClosedEvent> parentListener = event -> {
-      try {
-        context.close();
-      } catch (Exception x) {
-        x.printStackTrace();
+      if (event.getApplicationContext() == parent) {
+        try {
+          context.close();
+        } catch (Exception x) {
+          x.printStackTrace();
+        }
       }
     };
     parent.addApplicationListener(parentListener);
 
     final ApplicationListener<ContextClosedEvent> listener = event -> {
-      final Collection<ApplicationListener<?>> listeners = parent.getApplicationListeners();
-      listeners.remove(parentListener);
+      if (event.getApplicationContext() == context) {
+        final Collection<ApplicationListener<?>> listeners = parent.getApplicationListeners();
+        listeners.remove(parentListener);
+      }
     };
     context.addApplicationListener(listener);
 

@@ -32,20 +32,22 @@ import org.marid.appcontext.session.SessionConfiguration;
 import org.pac4j.core.context.Pac4jConstants;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Objects;
 
 import static io.undertow.util.Sessions.getSession;
 
 @Component
 public class Sessions {
 
-  private final ConcurrentHashMap<Session, GenericApplicationContext> sessionContexts = new ConcurrentHashMap<>();
+  private static final String CONTEXT_KEY = "CHILD_CONTEXT";
+
   private final Logger logger;
   private final GenericApplicationContext parent;
 
@@ -59,7 +61,7 @@ public class Sessions {
   }
 
   public GenericApplicationContext getSessionContext(Session session) {
-    return sessionContexts.get(session);
+    return (GenericApplicationContext) session.getAttribute(CONTEXT_KEY);
   }
 
   @Autowired
@@ -67,6 +69,11 @@ public class Sessions {
     sessionManager.registerSessionListener(new SessionListener() {
       @Override
       public void sessionCreated(Session session, HttpServerExchange exchange) {
+        logger.info("Created {}", session);
+        final Map map = (Map) session.getAttribute(Pac4jConstants.USER_PROFILES);
+        if (map != null && !map.isEmpty() && session.getAttribute(CONTEXT_KEY) == null) {
+          create(session);
+        }
       }
 
       @Override
@@ -97,45 +104,43 @@ public class Sessions {
       public void attributeUpdated(Session session, String name, Object newValue, Object oldValue) {
         switch (name) {
           case Pac4jConstants.USER_PROFILES:
-            destroy(session);
-            if (newValue instanceof Map && !((Map) newValue).isEmpty()) {
-              create(session);
+            if (!Objects.equals(oldValue, newValue)) {
+              destroy(session);
+              if (newValue instanceof Map && !((Map) newValue).isEmpty()) {
+                create(session);
+              }
             }
             break;
         }
       }
 
       private void create(Session session) {
-        sessionContexts.computeIfAbsent(session, s -> {
-          try {
-            final AnnotationConfigApplicationContext context = ContextUtils.context(parent);
-            context.setId(s.getId());
-            context.setDisplayName(s.getId() + " (" + Instant.ofEpochMilli(s.getCreationTime()) + ")");
-            context.getBeanFactory().registerSingleton("session", s);
-            context.getBeanFactory().registerSingleton("userProfile", ExchangeHelper.userProfile(s));
-            context.getBeanFactory().addBeanPostProcessor(new LoggingPostProcessor());
-            context.register(SessionConfiguration.class);
-            context.refresh();
-            context.start();
-            logger.info("Created session {}", s.getId());
-            return context;
-          } catch (Exception x) {
-            logger.warn("Unable to create session {} context", s.getId(), x);
-            return null;
-          }
-        });
+        session.setAttribute(CONTEXT_KEY, ContextUtils.context(parent, child -> {
+          final ApplicationListener<ContextClosedEvent> closeListener = event -> {
+            if (event.getApplicationContext() == child) {
+              session.removeAttribute(CONTEXT_KEY);
+            }
+          };
+          child.setId(session.getId());
+          child.setDisplayName(session.getId() + " (" + Instant.ofEpochMilli(session.getCreationTime()) + ")");
+          child.getBeanFactory().registerSingleton("session", session);
+          child.getBeanFactory().registerSingleton("userProfile", ExchangeHelper.userProfile(session));
+          child.getBeanFactory().addBeanPostProcessor(new LoggingPostProcessor());
+          child.register(SessionConfiguration.class);
+          child.addApplicationListener(closeListener);
+          child.refresh();
+          child.start();
+          logger.info("Created session {}", session.getId());
+        }));
       }
 
       private void destroy(Session session) {
-        sessionContexts.computeIfPresent(session, (s, old) -> {
-          logger.info("Destroyed session {}", session.getId());
-          try (old) {
-            logger.info("Closing {}", s.getId());
-          } catch (Exception x) {
-            logger.warn("Unable to close {}", s.getId(), x);
+        final GenericApplicationContext context = (GenericApplicationContext) session.removeAttribute(CONTEXT_KEY);
+        if (context != null) {
+          try (context) {
+            logger.info("Destroying {}: {}", session, session.getId());
           }
-          return null;
-        });
+        }
       }
     });
   }
