@@ -616,14 +616,6 @@
         <scope>import</scope>
         <type>pom</type>
       </dependency>
-
-      <dependency>
-        <groupId>org.jboss.xnio</groupId>
-        <artifactId>xnio-all</artifactId>
-        <version>3.6.2.Final</version>
-        <scope>import</scope>
-        <type>pom</type>
-      </dependency>
     </dependencies>
   </dependencyManagement>
 

@@ -56,13 +56,8 @@ public class UndertowConfiguration {
   }
 
   @Bean
-  public SessionConfig sessionConfig() {
-    final SessionCookieConfig cookieConfig = new SessionCookieConfig();
-    cookieConfig.setCookieName("sid");
-    cookieConfig.setHttpOnly(true);
-    cookieConfig.setSecure(true);
-    cookieConfig.setMaxAge(600);
-    return cookieConfig;
+  public SessionConfig sessionConfig(SessionManager sessionManager) {
+    return new SslSessionConfig(sessionManager);
   }
 
   @Bean
