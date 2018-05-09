@@ -25,7 +25,10 @@ import io.undertow.Undertow;
 import io.undertow.UndertowOptions;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.resource.ResourceManager;
-import io.undertow.server.session.*;
+import io.undertow.server.session.InMemorySessionManager;
+import io.undertow.server.session.SessionAttachmentHandler;
+import io.undertow.server.session.SessionManager;
+import io.undertow.server.session.SslSessionConfig;
 import org.marid.app.handlers.MainHandler;
 import org.marid.app.http.BowerResourceManager;
 import org.marid.app.http.MaridResourceManager;
@@ -56,13 +59,8 @@ public class UndertowConfiguration {
   }
 
   @Bean
-  public SessionConfig sessionConfig(SessionManager sessionManager) {
-    return new SslSessionConfig(sessionManager);
-  }
-
-  @Bean
-  public HttpHandler rootHandler(MainHandler mainHandler, SessionManager sessionManager, SessionConfig config) {
-    return new SessionAttachmentHandler(mainHandler, sessionManager, config);
+  public HttpHandler rootHandler(MainHandler mainHandler, SessionManager sessionManager) {
+    return new SessionAttachmentHandler(mainHandler, sessionManager, new SslSessionConfig(sessionManager));
   }
 
   @Bean

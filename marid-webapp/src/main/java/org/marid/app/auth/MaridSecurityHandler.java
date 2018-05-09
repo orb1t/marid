@@ -25,6 +25,7 @@ import io.undertow.security.handlers.SecurityInitialHandler;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.AttachmentKey;
+import org.pac4j.core.config.Config;
 import org.pac4j.core.profile.CommonProfile;
 
 import java.util.LinkedHashMap;
@@ -40,8 +41,8 @@ public class MaridSecurityHandler implements HttpHandler {
   private final String authorizers;
   private final String clients;
 
-  public MaridSecurityHandler(MaridSecurityLogic logic, String authorizers, String clients) {
-    this.logic = logic;
+  public MaridSecurityHandler(Config config, String authorizers, String clients, HttpHandler next, boolean processUnauthorized) {
+    this.logic = new MaridSecurityLogic(next, config, processUnauthorized);
     this.authorizers = authorizers;
     this.clients = clients;
   }

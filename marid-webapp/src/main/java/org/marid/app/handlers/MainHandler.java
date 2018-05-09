@@ -26,7 +26,6 @@ import io.undertow.server.handlers.PathHandler;
 import org.marid.app.annotation.Handler;
 import org.marid.app.annotation.HandlerQualifier;
 import org.marid.app.auth.MaridSecurityHandler;
-import org.marid.app.auth.MaridSecurityLogic;
 import org.pac4j.core.config.Config;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,10 +70,9 @@ public class MainHandler extends PathHandler {
         final Handler h = AnnotationUtils.synthesizeAnnotation(values, Handler.class, null);
 
         if (h.secure()) {
-          final MaridSecurityLogic logic = new MaridSecurityLogic(handler, config, h.processUnauthorized());
           final String authorizer = h.authorizer().isEmpty() ? null : h.authorizer();
           final String client = h.client().isEmpty() ? null : h.client();
-          handler = new MaridSecurityHandler(logic, authorizer, client);
+          handler = new MaridSecurityHandler(config, authorizer, client, handler, h.processUnauthorized());
         }
 
         if (h.exact()) {
