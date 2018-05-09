@@ -25,23 +25,21 @@ import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.core.profile.ProfileHelper;
 
 import java.security.Principal;
-import java.util.LinkedHashMap;
+import java.util.Collection;
 import java.util.Set;
 
 import static java.util.stream.Collectors.toSet;
 
 public class MaridAccount implements Account {
 
-  private final LinkedHashMap<String, CommonProfile> profiles;
+  private final Collection<CommonProfile> profiles;
   private final Set<String> roles;
   private final Principal principal;
 
-  public MaridAccount(LinkedHashMap<String, CommonProfile> profiles) {
+  public MaridAccount(Collection<CommonProfile> profiles) {
     this.profiles = profiles;
-    this.roles = profiles.values().stream().flatMap(p -> p.getRoles().stream()).collect(toSet());
-    this.principal = ProfileHelper.flatIntoOneProfile(profiles.values())
-        .map(v -> (Principal) v::getId)
-        .orElseThrow();
+    this.roles = profiles.stream().flatMap(p -> p.getRoles().stream()).collect(toSet());
+    this.principal = ProfileHelper.flatIntoOneProfile(profiles).map(v -> (Principal) v::getId).orElseThrow();
   }
 
   @Override
@@ -54,7 +52,7 @@ public class MaridAccount implements Account {
     return roles;
   }
 
-  public LinkedHashMap<String, CommonProfile> getProfiles() {
+  public Collection<CommonProfile> getProfiles() {
     return profiles;
   }
 }

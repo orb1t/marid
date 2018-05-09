@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
@@ -27,7 +27,9 @@ import org.pac4j.core.config.Config;
 import org.pac4j.core.engine.DefaultSecurityLogic;
 import org.pac4j.core.engine.decision.AlwaysUseSessionProfileStorageDecision;
 import org.pac4j.core.exception.HttpAction;
+import org.pac4j.core.profile.CommonProfile;
 
+import java.util.Collection;
 import java.util.List;
 
 public class MaridSecurityLogic extends DefaultSecurityLogic<Void, MaridWebContext> {
@@ -46,10 +48,18 @@ public class MaridSecurityLogic extends DefaultSecurityLogic<Void, MaridWebConte
     return HttpAction.redirect(context, "/unauthorized");
   }
 
-  void perform(MaridWebContext context, String authorizers, String clients) {
-    perform(context, config, (ctx, profiles, parameters) -> {
-      next.handleRequest(ctx.getExchange());
-      return null;
-    }, (code, ctx) -> null, clients, authorizers, null, false);
+  private Void granted(MaridWebContext context, Collection<CommonProfile> profiles, Object... params) throws Exception {
+    final var exchange = context.getExchange();
+    exchange.getSecurityContext().authenticationComplete(new MaridAccount(profiles), "PAC4J_ACCOUNT", false);
+    next.handleRequest(exchange);
+    return null;
+  }
+
+  private Void adapt(int code, MaridWebContext context) {
+    return null;
+  }
+
+  public HttpHandler handler(String authorizers, String clients) {
+    return e -> perform(new MaridWebContext(e), config, this::granted, this::adapt, clients, authorizers, null, false);
   }
 }

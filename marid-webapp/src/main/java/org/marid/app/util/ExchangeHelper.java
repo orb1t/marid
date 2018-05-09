@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
@@ -23,10 +23,9 @@ package org.marid.app.util;
 
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.session.Session;
+import io.undertow.server.session.SessionConfig;
+import io.undertow.server.session.SessionManager;
 import io.undertow.util.LocaleUtils;
-import org.marid.app.auth.MaridSecurityHandler;
-import org.marid.app.auth.MaridWebContext;
-import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.profile.CommonProfile;
 
 import java.util.Collection;
@@ -45,10 +44,11 @@ public interface ExchangeHelper {
   }
 
   static Locale locale(HttpServerExchange exchange) {
-    final var context = exchange.getAttachment(MaridSecurityHandler.WEB_CONTEXT_KEY);
-    if (context != null) {
-      final SessionStore<MaridWebContext> sessionStore = context.getSessionStore();
-      final Locale locale = (Locale) sessionStore.get(context, USER_LOCALE_SESSION_KEY);
+    final var manager = exchange.getAttachment(SessionManager.ATTACHMENT_KEY);
+    final var config = exchange.getAttachment(SessionConfig.ATTACHMENT_KEY);
+    final var session = manager.getSession(exchange, config);
+    {
+      final Locale locale = (Locale) session.getAttribute(USER_LOCALE_SESSION_KEY);
       if (locale != null) {
         return locale;
       }
@@ -57,10 +57,7 @@ public interface ExchangeHelper {
         .stream()
         .findFirst()
         .orElse(Locale.US);
-    if (context != null) {
-      final SessionStore<MaridWebContext> sessionStore = context.getSessionStore();
-      sessionStore.set(context, USER_LOCALE_SESSION_KEY, locale);
-    }
+    session.setAttribute(USER_LOCALE_SESSION_KEY, locale);
     return locale;
   }
 
