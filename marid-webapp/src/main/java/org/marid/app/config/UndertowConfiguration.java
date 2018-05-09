@@ -23,6 +23,8 @@ package org.marid.app.config;
 
 import io.undertow.Undertow;
 import io.undertow.UndertowOptions;
+import io.undertow.security.api.AuthenticationMode;
+import io.undertow.security.handlers.SecurityInitialHandler;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.resource.ResourceManager;
 import io.undertow.server.session.InMemorySessionManager;
@@ -47,7 +49,13 @@ public class UndertowConfiguration {
     return Undertow.builder()
         .setServerOption(UndertowOptions.ENABLE_HTTP2, true)
         .setServerOption(UndertowOptions.HTTP2_SETTINGS_ENABLE_PUSH, true)
-        .addHttpsListener(properties.getPort(), properties.getHost(), sslContext, rootHandler)
+        .addListener(new Undertow.ListenerBuilder()
+            .setType(Undertow.ListenerType.HTTPS)
+            .setHost(properties.getHost())
+            .setPort(properties.getPort())
+            .setRootHandler(rootHandler)
+            .setSslContext(sslContext)
+        )
         .build();
   }
 
@@ -60,7 +68,8 @@ public class UndertowConfiguration {
 
   @Bean
   public HttpHandler rootHandler(MainHandler mainHandler, SessionManager sessionManager) {
-    return new SessionAttachmentHandler(mainHandler, sessionManager, new SslSessionConfig(sessionManager));
+    final var sh = new SessionAttachmentHandler(mainHandler, sessionManager, new SslSessionConfig(sessionManager));
+    return new SecurityInitialHandler(AuthenticationMode.PRO_ACTIVE, null, sh);
   }
 
   @Bean

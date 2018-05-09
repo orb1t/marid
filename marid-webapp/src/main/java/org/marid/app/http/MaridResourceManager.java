@@ -33,24 +33,21 @@ import java.util.LinkedList;
 public class MaridResourceManager implements ResourceManager {
 
   private final LinkedList<ResourceManager> parents = new LinkedList<>();
-  private final String[] prefixes;
+  private final String prefix;
 
-  public MaridResourceManager(String... prefixes) {
-    this.prefixes = prefixes;
+  public MaridResourceManager(String prefix) {
+    this.prefix = prefix;
   }
 
   @Override
   public Resource getResource(String path) throws IOException {
     final String modPath = path.startsWith("/") ? path.substring(1) : path;
 
-    for (final String prefix : prefixes) {
+    final String realPath = prefix + modPath;
 
-      final String realPath = prefix + modPath;
-
-      final URL url = getClass().getResource(realPath);
-      if (url != null) {
-        return new URLResource(url, path);
-      }
+    final URL url = getClass().getResource(realPath);
+    if (url != null) {
+      return new URLResource(url, path);
     }
 
     for (final ResourceManager parent : parents) {

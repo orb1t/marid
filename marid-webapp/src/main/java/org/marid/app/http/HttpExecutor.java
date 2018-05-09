@@ -22,14 +22,10 @@
 package org.marid.app.http;
 
 import io.undertow.server.HttpHandler;
-import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HttpString;
 import org.marid.app.common.Sessions;
 import org.marid.app.html.BaseLib;
-import org.marid.io.IOConsumer;
 import org.marid.xml.HtmlAbstractBuilder;
-import org.marid.xml.HtmlBuilder;
-import org.marid.xml.HtmlFragmentBuilder;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.stereotype.Component;
@@ -37,8 +33,6 @@ import org.springframework.stereotype.Component;
 import javax.xml.transform.stream.StreamResult;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.net.HttpURLConnection;
-import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -76,6 +70,8 @@ public class HttpExecutor {
                                                                                    Supplier<B> builder,
                                                                                    BiConsumer<L, B> code) {
     return handler(lib, l -> {
+      l.getExchange().getResponseHeaders().add(new HttpString("Content-Type"), "text/html; charset=UTF-8");
+
       final B b = builder.get();
       code.accept(l, b);
       l.getExchange().dispatch(() -> {
@@ -88,41 +84,6 @@ public class HttpExecutor {
           l.getExchange().endExchange();
         }
       });
-    });
-  }
-
-  public void html(HttpServerExchange exchange, BiConsumer<HttpContext, HtmlBuilder> html) {
-    exchange.getResponseHeaders().add(new HttpString("Content-Type"), "text/html; charset=UTF-8");
-    this.with(exchange, c -> {
-      final HtmlBuilder builder = new HtmlBuilder();
-      html.accept(c, builder);
-      builder.write(new StreamResult(c.getOut()));
-    });
-  }
-
-  public void fragment(HttpServerExchange exchange,
-                       String tag,
-                       Map<String, ?> attrs,
-                       BiConsumer<HttpContext, HtmlFragmentBuilder> fragment) {
-    exchange.getResponseHeaders().add(new HttpString("Content-Type"), "text/html; charset=UTF-8");
-    this.with(exchange, c -> {
-      final HtmlFragmentBuilder builder = new HtmlFragmentBuilder(tag, attrs);
-      fragment.accept(c, builder);
-      builder.write(new StreamResult(c.getOut()));
-    });
-  }
-
-  public void with(HttpServerExchange exchange, IOConsumer<HttpContext> consumer) {
-    exchange.dispatch(() -> {
-      exchange.startBlocking();
-      try {
-        consumer.ioAccept(new HttpContext(exchange));
-      } catch (Exception x) {
-        logger.warn("Unable to process {}", exchange, x);
-        exchange.setStatusCode(HttpURLConnection.HTTP_INTERNAL_ERROR);
-      } finally {
-        exchange.endExchange();
-      }
     });
   }
 }

@@ -21,7 +21,6 @@
 
 package org.marid.app.auth;
 
-import io.undertow.security.handlers.SecurityInitialHandler;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.AttachmentKey;
@@ -30,7 +29,6 @@ import org.pac4j.core.profile.CommonProfile;
 
 import java.util.LinkedHashMap;
 
-import static io.undertow.security.api.AuthenticationMode.PRO_ACTIVE;
 import static io.undertow.util.AttachmentKey.create;
 
 public class MaridSecurityHandler implements HttpHandler {
@@ -56,10 +54,6 @@ public class MaridSecurityHandler implements HttpHandler {
     final LinkedHashMap<String, CommonProfile> profiles = manager.retrieveAll(true);
 
     if (!profiles.isEmpty()) {
-      if (exchange.getSecurityContext() == null) {
-        exchange.setSecurityContext(new SecurityInitialHandler(PRO_ACTIVE, null, null).createSecurityContext(exchange));
-      }
-
       exchange.getSecurityContext().authenticationComplete(new MaridAccount(profiles), "PAC4J_ACCOUNT", false);
     }
 

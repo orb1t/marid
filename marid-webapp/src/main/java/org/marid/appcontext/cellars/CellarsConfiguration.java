@@ -30,6 +30,7 @@ import org.marid.app.html.StdLib;
 import org.marid.app.http.HttpExecutor;
 import org.marid.appcontext.session.view.ViewConfiguration;
 import org.marid.xml.HtmlBuilder;
+import org.marid.xml.HtmlFragmentBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
@@ -67,7 +68,7 @@ public class CellarsConfiguration implements ViewConfiguration {
   public HttpHandler add(HttpExecutor executor, Cellars cellars) {
     return ex -> {
       if (Methods.GET.equals(ex.getRequestMethod())) {
-        executor.fragment(ex, "div", Map.of("class", "modal fade"), (c, modal) -> modal
+        executor.handler(StdLib.class, () -> new HtmlFragmentBuilder("div", Map.of("class", "modal fade")), (c, $) -> $
             .div("modal-dialog modal-dialog-centered", mdl -> mdl
                 .form("add.html", "post", "addForm", "modal-content", mdc -> mdc
                     .div("modal-header", mdh -> mdh
@@ -82,7 +83,7 @@ public class CellarsConfiguration implements ViewConfiguration {
                     )
                 )
             )
-        );
+        ).handleRequest(ex);
       } else {
         final var parser = new FormEncodedDataDefinition().create(ex);
         parser.parse(exchange -> {

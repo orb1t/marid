@@ -88,7 +88,7 @@ public class Handlers {
           return;
         }
       }
-      executor.html(exchange, (c, builder) -> builder
+      final HttpHandler httpHandler = executor.handler(StdLib.class, HtmlBuilder::new, (c, builder) -> builder
           .head(head -> head
               .title(c.s("maridIde"))
               .link("icon", "/marid-icon.gif", "image/gif")
@@ -108,6 +108,7 @@ public class Handlers {
               )
           )
       );
+      httpHandler.handleRequest(exchange);
     };
   }
 
