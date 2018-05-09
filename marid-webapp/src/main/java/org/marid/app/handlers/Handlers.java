@@ -73,48 +73,33 @@ public class Handlers {
   }
 
   @Bean
-  @Handler(path = "/", processUnauthorized = true)
-  public HttpHandler authListHandler(HttpExecutor executor) {
-    return exchange -> {
-      CHECK_PROFILES: {
-        if (exchange.getSecurityContext() == null) {
-          break CHECK_PROFILES;
-        }
-        if (exchange.getSecurityContext().getAuthenticatedAccount() == null) {
-          break CHECK_PROFILES;
-        }
-        if (exchange.getSecurityContext().getAuthenticatedAccount().getRoles().contains("ROLE_USER")) {
-          new RedirectHandler("menu").handleRequest(exchange);
-          return;
-        }
-      }
-      final HttpHandler httpHandler = executor.handler(StdLib.class, HtmlBuilder::new, (c, builder) -> builder
-          .head(head -> head
-              .title(c.s("maridIde"))
-              .link("icon", "/marid-icon.gif", "image/gif")
-              .meta("google", "notranslate")
-              .meta("viewport", "width=device-width, initial-scale=1")
-              .stylesheet("/public/login.css")
-          )
-          .body(body -> body
-              .img(100, 100, "/marid-icon.gif?size=100")
-              .div("", "adBody", list -> list
-                  .div("", "header", c.s("maridIde"))
-                  .div("", "ad", c.s("spiritDrivenDevelopment"))
-                  .div("", "auth", auth -> List.of("google", "facebook", "twitter").forEach(e -> {
-                    auth.$c(e);
-                    auth.a("", "/" + e + ".html", "", a -> a.img(32, 32, "/public/" + e + ".svg"));
-                  }))
-              )
-          )
-      );
-      httpHandler.handleRequest(exchange);
-    };
+  @Handler(path = "/unauthorized", secure = false)
+  public HttpHandler unauthorized(HttpExecutor executor) {
+    return executor.handler(StdLib.class, HtmlBuilder::new, (c, builder) -> builder
+        .head(head -> head
+            .title(c.s("maridIde"))
+            .link("icon", "/marid-icon.gif", "image/gif")
+            .meta("google", "notranslate")
+            .meta("viewport", "width=device-width, initial-scale=1")
+            .stylesheet("/public/login.css")
+        )
+        .body(body -> body
+            .img(100, 100, "/marid-icon.gif?size=100")
+            .div("", "adBody", list -> list
+                .div("", "header", c.s("maridIde"))
+                .div("", "ad", c.s("spiritDrivenDevelopment"))
+                .div("", "auth", auth -> List.of("google", "facebook", "twitter").forEach(e -> {
+                  auth.$c(e);
+                  auth.a("", "/" + e + ".html", "", a -> a.img(32, 32, "/public/" + e + ".svg"));
+                }))
+            )
+        )
+    );
   }
 
   @Bean
-  @Handler(path = "/menu", authorizer = "user")
-  public HttpHandler mainMenuHandler(HttpExecutor executor) {
+  @Handler(path = "/", authorizer = "user")
+  public HttpHandler menuHandler(HttpExecutor executor) {
     return executor.handler(StdLib.class, HtmlBuilder::new, (c, b) -> b
         .$(() -> c.stdHead(b, h -> h
             .stylesheet("/user/css/index.css")
@@ -138,7 +123,7 @@ public class Handlers {
   }
 
   @Bean
-  @Handler(path = "/callback", processUnauthorized = true, secure = false)
+  @Handler(path = "/callback", secure = false)
   public HttpHandler callbackHandler(Config config) {
     final var factory = FormParserFactory.builder().addParser(new FormEncodedDataDefinition()).build();
     final var formHandler = new EagerFormParsingHandler(factory);

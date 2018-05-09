@@ -41,7 +41,5 @@ public @interface Handler {
 
   boolean secure() default true;
 
-  boolean processUnauthorized() default false;
-
   boolean safePath() default false;
 }

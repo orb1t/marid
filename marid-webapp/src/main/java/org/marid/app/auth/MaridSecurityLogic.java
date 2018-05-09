@@ -34,28 +34,16 @@ public class MaridSecurityLogic extends DefaultSecurityLogic<Void, MaridWebConte
 
   private final HttpHandler next;
   private final Config config;
-  private final boolean processUnauthorized;
 
-  public MaridSecurityLogic(HttpHandler next, Config config, boolean processUnauthorized) {
+  public MaridSecurityLogic(HttpHandler next, Config config) {
     this.next = next;
     this.config = config;
-    this.processUnauthorized = processUnauthorized;
     setProfileStorageDecision(new AlwaysUseSessionProfileStorageDecision());
   }
 
   @Override
-  protected HttpAction unauthorized(MaridWebContext context, List<Client> currentClients) throws HttpAction {
-    final HttpAction action = super.unauthorized(context, currentClients);
-    if (processUnauthorized) {
-      try {
-        next.handleRequest(context.getExchange());
-      } catch (RuntimeException x) {
-        throw x;
-      } catch (Exception x) {
-        throw new IllegalStateException(x);
-      }
-    }
-    return action;
+  protected HttpAction unauthorized(MaridWebContext context, List<Client> currentClients) {
+    return HttpAction.redirect(context, "/unauthorized");
   }
 
   void perform(MaridWebContext context, String authorizers, String clients) {

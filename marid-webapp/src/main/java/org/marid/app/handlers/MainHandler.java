@@ -72,7 +72,7 @@ public class MainHandler extends PathHandler {
         if (h.secure()) {
           final String authorizer = h.authorizer().isEmpty() ? null : h.authorizer();
           final String client = h.client().isEmpty() ? null : h.client();
-          handler = new MaridSecurityHandler(config, authorizer, client, handler, h.processUnauthorized());
+          handler = new MaridSecurityHandler(config, authorizer, client, handler);
         }
 
         if (h.exact()) {

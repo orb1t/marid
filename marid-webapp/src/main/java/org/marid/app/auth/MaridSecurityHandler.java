@@ -39,8 +39,8 @@ public class MaridSecurityHandler implements HttpHandler {
   private final String authorizers;
   private final String clients;
 
-  public MaridSecurityHandler(Config config, String authorizers, String clients, HttpHandler next, boolean processUnauthorized) {
-    this.logic = new MaridSecurityLogic(next, config, processUnauthorized);
+  public MaridSecurityHandler(Config config, String authorizers, String clients, HttpHandler next) {
+    this.logic = new MaridSecurityLogic(next, config);
     this.authorizers = authorizers;
     this.clients = clients;
   }
