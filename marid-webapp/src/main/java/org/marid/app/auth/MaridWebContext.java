@@ -22,6 +22,9 @@ package org.marid.app.auth;
 
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.CookieImpl;
+import io.undertow.server.session.Session;
+import io.undertow.server.session.SessionConfig;
+import io.undertow.server.session.SessionManager;
 import io.undertow.util.Headers;
 import io.undertow.util.HttpString;
 import org.pac4j.core.context.Cookie;
@@ -40,8 +43,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static io.undertow.server.handlers.form.FormDataParser.FORM_DATA;
+import static java.util.stream.Collectors.toMap;
 
-public class MaridWebContext implements WebContext {
+public class MaridWebContext implements WebContext, SessionStore<MaridWebContext> {
 
   private static final JavaSerializationHelper JAVA_SERIALIZATION_HELPER = new JavaSerializationHelper();
 
@@ -57,7 +61,7 @@ public class MaridWebContext implements WebContext {
 
   @Override
   public SessionStore<MaridWebContext> getSessionStore() {
-    return new MaridSessionStore();
+    return this;
   }
 
   @Override
@@ -239,6 +243,66 @@ public class MaridWebContext implements WebContext {
   @Override
   public String getPath() {
     return exchange.getRequestPath();
+  }
+
+  // session store methods
+
+  private Session get(MaridWebContext context) {
+    final var manager = context.getExchange().getAttachment(SessionManager.ATTACHMENT_KEY);
+    final var config = context.getExchange().getAttachment(SessionConfig.ATTACHMENT_KEY);
+    final var session = manager.getSession(context.getExchange(), config);
+    return session == null ? manager.createSession(context.getExchange(), config) : session;
+  }
+
+  @Override
+  public String getOrCreateSessionId(MaridWebContext context) {
+    return get(context).getId();
+  }
+
+  @Override
+  public Object get(MaridWebContext context, String key) {
+    final Session session = get(context);
+    return session == null ? null : session.getAttribute(key);
+  }
+
+  @Override
+  public void set(MaridWebContext context, String key, Object value) {
+    get(context).setAttribute(key, value);
+  }
+
+  @Override
+  public boolean destroySession(MaridWebContext context) {
+    final var session = get(context);
+    if (session != null) {
+      session.invalidate(context.getExchange());
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  @Override
+  public Object getTrackableSession(MaridWebContext context) {
+    return get(context);
+  }
+
+  @Override
+  public SessionStore<MaridWebContext> buildFromTrackableSession(MaridWebContext context, Object trackableSession) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public boolean renewSession(MaridWebContext context) {
+    final var session = get(context);
+    if (session == null) {
+      get(context);
+    } else {
+      final var attrs = session.getAttributeNames().stream().collect(toMap(a -> a, session::getAttribute));
+      session.invalidate(context.getExchange());
+      final var newSession = get(context);
+      attrs.forEach(newSession::setAttribute);
+    }
+    return true;
   }
 
   @Override
