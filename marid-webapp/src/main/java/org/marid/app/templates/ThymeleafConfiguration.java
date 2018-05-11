@@ -45,6 +45,7 @@ public class ThymeleafConfiguration {
   public TemplateEngine htmlTemplateEngine(ClassLoaderTemplateResolver htmlTemplateResolver) {
     final var templateEngine = new TemplateEngine();
     templateEngine.setTemplateResolver(htmlTemplateResolver);
+    templateEngine.setMessageResolver(new MaridMessageResolver());
     return templateEngine;
   }
 }

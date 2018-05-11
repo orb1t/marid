@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <title th:value="#{maridIde}">Marid IDE</title>
+    <title th:text="#{maridIde}">Marid IDE</title>
     <meta name="google" content="notranslate">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/gif" th:href="@{~/marid-icon.gif}">
@@ -12,8 +12,8 @@
 <body>
 <img th:src="@{~/marid-icon.gif(size=100)}" width="100" height="100" src="#">
 <div id="adBody">
-    <div id="header" th:value="#{maridIde}">Marid IDE</div>
-    <div id="ad" th:value="#{spiritDrivenDevelopment}">Spirit Driven Development</div>
+    <div id="header" th:text="#{maridIde}">Marid IDE</div>
+    <div id="ad" th:text="#{spiritDrivenDevelopment}">Spirit Driven Development</div>
     <div id="auth">
         <a th:href="@{~/google.html}"><img src="/public/google.svg" width="32" height="32"></a>
         <a th:href="@{~/facebook.html}"><img src="/public/facebook.svg" width="32" height="32"></a>
