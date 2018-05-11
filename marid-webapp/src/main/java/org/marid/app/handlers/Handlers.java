@@ -37,6 +37,7 @@ import org.marid.app.auth.MaridProfileManager;
 import org.marid.app.auth.MaridWebContext;
 import org.marid.app.html.StdLib;
 import org.marid.app.http.HttpExecutor;
+import org.marid.app.templates.HtmlHandlerFactory;
 import org.marid.xml.HtmlBuilder;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.engine.DefaultCallbackLogic;
@@ -44,7 +45,7 @@ import org.pac4j.core.engine.DefaultLogoutLogic;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import java.util.Map;
 
 @Component
 public class Handlers {
@@ -74,27 +75,8 @@ public class Handlers {
 
   @Bean
   @Handler(path = "/unauthorized", secure = false)
-  public HttpHandler unauthorized(HttpExecutor executor) {
-    return executor.handler(StdLib.class, HtmlBuilder::new, (c, builder) -> builder
-        .head(head -> head
-            .title(c.s("maridIde"))
-            .link("icon", "/marid-icon.gif", "image/gif")
-            .meta("google", "notranslate")
-            .meta("viewport", "width=device-width, initial-scale=1")
-            .stylesheet("/public/login.css")
-        )
-        .body(body -> body
-            .img(100, 100, "/marid-icon.gif?size=100")
-            .div("", "adBody", list -> list
-                .div("", "header", c.s("maridIde"))
-                .div("", "ad", c.s("spiritDrivenDevelopment"))
-                .div("", "auth", auth -> List.of("google", "facebook", "twitter").forEach(e -> {
-                  auth.$c(e);
-                  auth.a("", "/" + e + ".html", "", a -> a.img(32, 32, "/public/" + e + ".svg"));
-                }))
-            )
-        )
-    );
+  public HttpHandler unauthorized(HtmlHandlerFactory f) {
+    return f.handler("unauthorized", Map.of());
   }
 
   @Bean
