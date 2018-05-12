@@ -47,10 +47,9 @@ public class L10n {
     return builder.toString();
   }
 
-  public static boolean s(@NotNull Locale locale, @NotNull String key, @NotNull Formatter formatter, Object... ps) {
+  public static void s(@NotNull Locale locale, @NotNull String key, @NotNull Formatter formatter, Object... ps) {
     final ResourceBundle b = getStringsBundle(locale);
-    final boolean result = b.containsKey(key);
-    final String r = result ? b.getString(key) : key;
+    final String r = b.containsKey(key) ? b.getString(key) : key;
     if (ps == null || ps.length == 0) {
       formatter.format("%s", r);
     } else {
@@ -58,10 +57,8 @@ public class L10n {
         formatter.format(b.getLocale(), r, ps);
       } catch (Exception x) {
         formatter.format("!%s", r);
-        return false;
       }
     }
-    return result;
   }
 
   public static String m(@NotNull String k, Object... v) {
@@ -74,10 +71,9 @@ public class L10n {
     return buffer.toString();
   }
 
-  public static boolean m(@NotNull Locale locale, @NotNull String k, @NotNull StringBuffer buffer, Object... v) {
+  public static void m(@NotNull Locale locale, @NotNull String k, @NotNull StringBuffer buffer, Object... v) {
     final ResourceBundle b = getMessagesBundle(locale);
-    final boolean result = b.containsKey(k);
-    final String r = result ? b.getString(k) : k;
+    final String r = b.containsKey(k) ? b.getString(k) : k;
     if (v == null || v.length == 0) {
       buffer.append(r);
     } else {
@@ -85,10 +81,8 @@ public class L10n {
         new MessageFormat(r, b.getLocale()).format(v, buffer, null);
       } catch (Exception x) {
         buffer.append('!').append(r);
-        return false;
       }
     }
-    return result;
   }
 
   public static ResourceBundle getMessagesBundle(Locale locale) {
