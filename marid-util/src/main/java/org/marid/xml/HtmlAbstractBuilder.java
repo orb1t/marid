@@ -21,6 +21,7 @@
 
 package org.marid.xml;
 
+import org.intellij.lang.annotations.Language;
 import org.w3c.dom.Element;
 
 import java.util.Map;
@@ -32,11 +33,11 @@ public abstract class HtmlAbstractBuilder<B extends HtmlAbstractBuilder<B>> exte
     super(element);
   }
 
-  public B stylesheet(String href) {
+  public B stylesheet(@Language(value = "HTML", prefix = "<link href='", suffix = "'>") String href) {
     return link("stylesheet", href, "text/css");
   }
 
-  public B script(String src) {
+  public B script(@Language(value = "HTML", prefix = "<script src='", suffix = "'>") String src) {
     return $e("script", Map.of("type", "text/javascript", "src", src));
   }
 
@@ -44,27 +45,39 @@ public abstract class HtmlAbstractBuilder<B extends HtmlAbstractBuilder<B>> exte
     return $e("meta", Map.of("name", name, "content", content));
   }
 
-  public B link(String rel, String href, String type) {
+  public B link(@Language(value = "HTML", prefix = "<link rel='", suffix = "'>") String rel,
+                @Language(value = "HTML", prefix = "<link href='", suffix = "'>") String href,
+                @Language(value = "HTML", prefix = "<link type='", suffix = "'>") String type) {
     return $e("link", Map.of("rel", rel, "href", href, "type", type));
   }
 
   @SafeVarargs
-  public final B form(String action, String method, String id, String cls, Consumer<B>... configurers) {
+  public final B form(@Language(value = "HTML", prefix = "<form action='", suffix = "'/>") String action,
+                      @Language(value = "HTML", prefix = "<form method='", suffix = "'/>") String method,
+                      @Language(value = "HTML", prefix = "<form id='", suffix = "'/>") String id,
+                      @Language(value = "HTML", prefix = "<form class='", suffix = "'/>") String cls,
+                      Consumer<B>... configurers) {
     return $e("form", Map.of("action", action, "method", method, "id", id, "class", cls), configurers);
   }
 
   @SafeVarargs
-  public final B div(String cls, String id, String txt, Consumer<B>... configurers) {
+  public final B div(@Language(value = "HTML", prefix = "<div class='", suffix = "'/>") String cls,
+                     @Language(value = "HTML", prefix = "<div id='", suffix = "'/>") String id,
+                     String txt,
+                     Consumer<B>... configurers) {
     return $e("div", txt, cls.isEmpty() ? Map.of("id", id) : Map.of("class", cls, "id", id), configurers);
   }
 
   @SafeVarargs
-  public final B div(String cls, String id, Consumer<B>... configurers) {
+  public final B div(@Language(value = "HTML", prefix = "<div class='", suffix = "'/>") String cls,
+                     @Language(value = "HTML", prefix = "<div id='", suffix = "'/>") String id,
+                     Consumer<B>... configurers) {
     return $e("div", cls.isEmpty() ? Map.of("id", id) : Map.of("class", cls, "id", id), configurers);
   }
 
   @SafeVarargs
-  public final B div(String cls, Consumer<B>... configurers) {
+  public final B div(@Language(value = "HTML", prefix = "<div class='", suffix = "'/>") String cls,
+                     Consumer<B>... configurers) {
     return $e("div", Map.of("class", cls), configurers);
   }
 
@@ -79,12 +92,15 @@ public abstract class HtmlAbstractBuilder<B extends HtmlAbstractBuilder<B>> exte
   }
 
   @SafeVarargs
-  public final B body(String cls, Consumer<B>... configurers) {
+  public final B body(@Language(value = "HTML", prefix = "<body class='", suffix = "'/>") String cls,
+                      Consumer<B>... configurers) {
     return $e("body", Map.of("class", cls), configurers);
   }
 
   @SafeVarargs
-  public final B a(String cls, String href, String text, Consumer<B>... configurers) {
+  public final B a(@Language(value = "HTML", prefix = "<a class='", suffix = "'/>") String cls,
+                   @Language(value = "HTML", prefix = "<a href='", suffix = "'/>") String href,
+                   String text, Consumer<B>... configurers) {
     final var attrs = cls.isEmpty() ? Map.of("href", href) : Map.of("class", cls, "href", href);
     return text.isEmpty() ? $e("a", attrs, configurers) : $e("a", text, attrs, configurers);
   }
@@ -97,11 +113,13 @@ public abstract class HtmlAbstractBuilder<B extends HtmlAbstractBuilder<B>> exte
     return $e(String.format(format, args));
   }
 
-  public B img(Object width, Object height, String src) {
+  public B img(Object width,
+               Object height,
+               @Language(value = "HTML", prefix = "<img src='", suffix = "'/>") String src) {
     return $e("img", Map.of("width", width, "height", height, "src", src));
   }
 
-  public B icon(Object size, String src) {
+  public B icon(Object size, @Language(value = "HTML", prefix = "<img src='", suffix = "'/>") String src) {
     return img(size, size, src);
   }
 
@@ -113,15 +131,17 @@ public abstract class HtmlAbstractBuilder<B extends HtmlAbstractBuilder<B>> exte
     return $e("span", String.format(format, args), Map.of());
   }
 
-  public B cspan(String cls, Object text) {
+  public B cspan(@Language(value = "HTML", prefix = "<span class='", suffix = "'/>") String cls, Object text) {
     return $e("span", text.toString(), Map.of("class", cls));
   }
 
-  public B cspan(String cls, String format, Object... args) {
+  public B cspan(@Language(value = "HTML", prefix = "<span class='", suffix = "'/>") String cls,
+                 String format,
+                 Object... args) {
     return cspan(cls, String.format(format, args));
   }
 
-  public B i(String cls) {
+  public B i(@Language(value = "HTML", prefix = "<i class='", suffix = "'/>") String cls) {
     return $e("i", Map.of("class", cls));
   }
 
@@ -129,14 +149,14 @@ public abstract class HtmlAbstractBuilder<B extends HtmlAbstractBuilder<B>> exte
     return $e("label", text, Map.of());
   }
 
-  public B label(String text, String forName) {
+  public B label(String text, @Language(value = "HTML", prefix = "<label for='", suffix = "'/>") String forName) {
     return $e("label", text, Map.of("for", forName));
   }
 
   @SafeVarargs
-  public final B input(String name,
-                       String type,
-                       String cls,
+  public final B input(@Language(value = "HTML", prefix = "<input name='", suffix = "'/>") String name,
+                       @Language(value = "HTML", prefix = "<input type='", suffix = "'/>") String type,
+                       @Language(value = "HTML", prefix = "<input class='", suffix = "'/>") String cls,
                        String placeholder,
                        String value,
                        Consumer<B>... configurers) {
@@ -146,16 +166,18 @@ public abstract class HtmlAbstractBuilder<B extends HtmlAbstractBuilder<B>> exte
     return $e("input", map, configurers);
   }
 
-  public B submitButton(String cls, String value) {
+  public B submitButton(@Language(value = "HTML", prefix = "<input class='", suffix = "'/>") String cls,
+                        String value) {
     return $e("input", Map.of("type", "submit", "value", value, "class", cls));
   }
 
   @SafeVarargs
-  public final B button(String cls, Consumer<B>... configurers) {
+  public final B button(@Language(value = "HTML", prefix = "<button class='", suffix = "'/>") String cls,
+                        Consumer<B>... configurers) {
       return $e("button", Map.of("class", cls), configurers);
   }
 
-  public B h5(String cls, String text) {
+  public B h5(@Language(value = "HTML", prefix = "<h5 class='", suffix = "'/>") String cls, String text) {
     return $e("h5", text, Map.of("class", cls));
   }
 }

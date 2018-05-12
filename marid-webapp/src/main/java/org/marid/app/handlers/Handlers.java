@@ -101,10 +101,7 @@ public class Handlers {
   @Handler(path = "/", authorizer = "user")
   public HttpHandler menuHandler(HttpExecutor executor) {
     return executor.handler(StdLib.class, HtmlBuilder::new, (c, b) -> b
-        .$(() -> c.stdHead(b, h -> h
-            .stylesheet("/user/css/index.css")
-            .title(c.s("maridMenu")))
-        )
+        .$(() -> c.stdHead(b, h -> h.stylesheet("/user/css/index.css").title(c.s("maridMenu"))))
         .body(body -> body
             .div("list-group", list -> list
                 .div("list-group-item", header -> header
