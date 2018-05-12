@@ -124,7 +124,6 @@ public class Sessions {
         child.setDisplayName(session.getId() + " (" + Instant.ofEpochMilli(session.getCreationTime()) + ")");
         child.getBeanFactory().registerSingleton("session", session);
         child.getBeanFactory().registerSingleton("userProfile", ExchangeHelper.userProfile(session));
-        child.getBeanFactory().addBeanPostProcessor(new LoggingPostProcessor());
         child.register(SessionConfiguration.class);
         child.addApplicationListener(closeListener);
         child.refresh();

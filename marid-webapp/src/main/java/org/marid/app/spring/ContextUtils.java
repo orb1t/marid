@@ -27,9 +27,13 @@ import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.support.GenericApplicationContext;
 
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public interface ContextUtils {
+
+  String USAGE_COUNTER = "internalUsageCounter";
 
   @SafeVarargs
   static AnnotationConfigApplicationContext context(GenericApplicationContext parent,
@@ -37,6 +41,8 @@ public interface ContextUtils {
     final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
     context.setAllowBeanDefinitionOverriding(false);
     context.setAllowCircularReferences(false);
+    context.registerBean(USAGE_COUNTER, AtomicInteger.class, (Supplier<AtomicInteger>) AtomicInteger::new);
+    context.getBeanFactory().addBeanPostProcessor(new LoggingPostProcessor());
 
     context.setParent(parent);
 

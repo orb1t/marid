@@ -25,7 +25,6 @@ import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import org.marid.app.annotation.Handler;
 import org.marid.app.spring.ContextUtils;
-import org.marid.app.spring.LoggingPostProcessor;
 import org.marid.app.util.HandlerPath;
 import org.marid.appcontext.session.view.ViewContextResolver;
 import org.marid.appcontext.session.view.ViewResolver;
@@ -42,11 +41,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static org.marid.app.spring.ContextUtils.USAGE_COUNTER;
+
 @Handler(path = "/view", exact = false)
 @Component
 public class Views implements HttpHandler {
-
-  private static final String USAGE_COUNTER = "$USAGE_COUNTER";
 
   private final Logger logger;
   private final Sessions sessions;
@@ -114,8 +113,6 @@ public class Views implements HttpHandler {
               child.setDisplayName(current.toString());
               child.setId(child.getDisplayName());
               child.getEnvironment().getPropertySources().addLast(env);
-              child.getBeanFactory().addBeanPostProcessor(new LoggingPostProcessor());
-              child.getBeanFactory().registerSingleton(USAGE_COUNTER, new AtomicInteger());
               child.register(c);
               child.addApplicationListener(contextCloseListener);
               child.refresh();
