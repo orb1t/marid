@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
@@ -33,12 +33,35 @@ public abstract class HtmlAbstractBuilder<B extends HtmlAbstractBuilder<B>> exte
     super(element);
   }
 
-  public B stylesheet(@Language(value = "HTML", prefix = "<link href='", suffix = "'>") String href) {
+  public B stylesheet(
+      @Language(value = "HTML", prefix = "<link rel='stylesheet' type='text/css' href='", suffix = "'>") String href) {
     return link("stylesheet", href, "text/css");
+  }
+
+  public B stylesheet(
+      @Language(value = "HTML", prefix = "<link rel='stylesheet' type='text/css' href='", suffix = "'>") String href,
+      String integrity) {
+    return $e("link", Map.of(
+        "rel", "stylesheet",
+        "href", href,
+        "type", "text/css",
+        "integrity", integrity,
+        "crossorigin", "anonymous"
+    ));
   }
 
   public B script(@Language(value = "HTML", prefix = "<script src='", suffix = "'>") String src) {
     return $e("script", Map.of("type", "text/javascript", "src", src));
+  }
+
+  public B script(@Language(value = "HTML", prefix = "<script src='", suffix = "'>") String src,
+                  @Language(value = "HTML", prefix = "<script integrity='", suffix = "'>") String integrity) {
+    return $e("script", Map.of(
+        "type", "text/javascript",
+        "src", src,
+        "integrity", integrity,
+        "crossorigin", "anonymous"
+    ));
   }
 
   public B meta(String name, String content) {
@@ -174,7 +197,7 @@ public abstract class HtmlAbstractBuilder<B extends HtmlAbstractBuilder<B>> exte
   @SafeVarargs
   public final B button(@Language(value = "HTML", prefix = "<button class='", suffix = "'/>") String cls,
                         Consumer<B>... configurers) {
-      return $e("button", Map.of("class", cls), configurers);
+    return $e("button", Map.of("class", cls), configurers);
   }
 
   public B h5(@Language(value = "HTML", prefix = "<h5 class='", suffix = "'/>") String cls, String text) {

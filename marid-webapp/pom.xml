@@ -52,18 +52,21 @@
       <groupId>org.webjars.bower</groupId>
       <artifactId>bootstrap</artifactId>
       <version>4.1.1</version>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>org.webjars.bower</groupId>
       <artifactId>jquery</artifactId>
       <version>3.3.1</version>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>org.webjars.npm</groupId>
       <artifactId>ionicons</artifactId>
       <version>4.0.0-9</version>
+      <scope>provided</scope>
     </dependency>
 
     <!-- test -->
