@@ -18,28 +18,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.marid.app.spring;
 
-package org.marid.app.annotation;
+import com.vaadin.server.DefaultUIProvider;
+import com.vaadin.server.UICreateEvent;
+import com.vaadin.ui.UI;
+import org.marid.app.web.MainServletService;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+public class SpringUIProvider extends DefaultUIProvider {
 
-@Target({ElementType.TYPE, ElementType.METHOD, ElementType.PARAMETER, ElementType.FIELD})
-@Retention(RetentionPolicy.RUNTIME)
-@HandlerQualifier
-public @interface Handler {
-
-  String path();
-
-  boolean exact() default true;
-
-  String authorizer() default "";
-
-  String client() default "";
-
-  boolean secure() default true;
-
-  boolean safePath() default false;
+  @Override
+  public UI createInstance(UICreateEvent event) {
+    final var service = (MainServletService) event.getService();
+    final var context = service.getContext();
+    final var klass = event.getUIClass();
+    final var beanFactory = context.getBeanFactory();
+    return (UI) beanFactory.createBean(klass, AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR, true);
+  }
 }

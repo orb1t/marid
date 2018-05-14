@@ -18,29 +18,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.marid.app.web;
 
-package org.marid.appcontext.session.ivy;
-
-import org.apache.ivy.core.settings.IvySettings;
-import org.apache.ivy.plugins.resolver.DependencyResolver;
+import io.undertow.server.handlers.resource.ClassPathResourceManager;
+import io.undertow.server.handlers.resource.Resource;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.LinkedList;
+import java.io.IOException;
 
 @Component
-public class IvyDependencyResolvers {
+public class MaridResourceManager extends ClassPathResourceManager {
 
-  private final LinkedList<DependencyResolver> resolvers = new LinkedList<>();
-
-  public IvyDependencyResolvers(DependencyResolver[] resolvers) {
-    Collections.addAll(this.resolvers, resolvers);
+  public MaridResourceManager() {
+    super(Thread.currentThread().getContextClassLoader());
   }
 
-  public void configure(IvySettings settings) {
-    for (final DependencyResolver resolver : resolvers) {
-      settings.addResolver(resolver);
+  @Override
+  public Resource getResource(String path) throws IOException {
+    if (path.startsWith("/public/")) {
+      return super.getResource(path);
+    } else {
+      return null;
     }
-    settings.setDefaultResolver("central");
   }
 }

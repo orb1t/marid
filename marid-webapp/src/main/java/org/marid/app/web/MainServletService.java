@@ -18,11 +18,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.marid.app.web;
 
-package org.marid.appcontext.session.view;
+import com.vaadin.server.DeploymentConfiguration;
+import com.vaadin.server.ServiceException;
+import com.vaadin.server.VaadinServlet;
+import com.vaadin.server.VaadinServletService;
+import org.springframework.context.support.GenericApplicationContext;
 
-@FunctionalInterface
-public interface ViewContextResolver {
+public class MainServletService extends VaadinServletService {
 
-  Class<?> resolve(String selector);
+  private final GenericApplicationContext context;
+
+  public MainServletService(GenericApplicationContext context,
+                            VaadinServlet servlet,
+                            DeploymentConfiguration conf) throws ServiceException {
+    super(servlet, conf);
+    this.context = context;
+  }
+
+  public GenericApplicationContext getContext() {
+    return context;
+  }
 }

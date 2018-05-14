@@ -23,26 +23,53 @@ package org.marid.app.config;
 
 import io.undertow.Undertow;
 import io.undertow.UndertowOptions;
-import io.undertow.security.api.AuthenticationMode;
-import io.undertow.security.handlers.SecurityInitialHandler;
 import io.undertow.server.HttpHandler;
-import io.undertow.server.handlers.resource.ResourceManager;
-import io.undertow.server.session.InMemorySessionManager;
-import io.undertow.server.session.SessionAttachmentHandler;
-import io.undertow.server.session.SessionManager;
 import io.undertow.server.session.SslSessionConfig;
-import org.marid.app.handlers.MainHandler;
-import org.marid.app.http.BowerResourceManager;
-import org.marid.app.http.MaridResourceManager;
-import org.marid.app.http.NpmResourceManager;
+import io.undertow.servlet.Servlets;
+import io.undertow.servlet.api.DeploymentInfo;
+import io.undertow.servlet.api.DeploymentManager;
+import io.undertow.servlet.api.FilterInfo;
+import io.undertow.servlet.api.ServletInfo;
 import org.marid.app.props.UndertowProperties;
+import org.marid.app.web.MaridResourceManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import javax.net.ssl.SSLContext;
+import javax.servlet.DispatcherType;
+import javax.servlet.ServletException;
 
 @Component
 public class UndertowConfiguration {
+
+  @Bean
+  public DeploymentInfo deploymentInfo(MaridResourceManager maridResourceManager,
+                                       ServletInfo[] servlets,
+                                       FilterInfo[] filters) {
+    final var info = new DeploymentInfo();
+    info.setDeploymentName("marid");
+    info.setClassLoader(Thread.currentThread().getContextClassLoader());
+    info.setDefaultEncoding("UTF-8");
+    info.setDisableCachingForSecuredPages(true);
+    info.setContextPath("/");
+    info.setSessionConfigWrapper((sessionConfig, deployment) -> new SslSessionConfig(deployment.getSessionManager()));
+    info.setResourceManager(maridResourceManager);
+    info.addServlets(servlets);
+    info.addFilters(filters);
+    info.addFilterUrlMapping("authFilter", "/*", DispatcherType.REQUEST);
+    info.addWelcomePage("/app");
+    return info;
+  }
+
+  @Bean(initMethod = "deploy", destroyMethod = "stop")
+  public DeploymentManager deploymentManager(DeploymentInfo deploymentInfo) {
+    return Servlets.defaultContainer().addDeployment(deploymentInfo);
+  }
+
+  @Bean
+  public HttpHandler rootHandler(DeploymentManager deploymentManager) throws ServletException {
+    return deploymentManager.start();
+  }
 
   @Bean(initMethod = "start", destroyMethod = "stop")
   public Undertow undertow(SSLContext sslContext, UndertowProperties properties, HttpHandler rootHandler) {
@@ -57,44 +84,6 @@ public class UndertowConfiguration {
             .setSslContext(sslContext)
         )
         .build();
-  }
-
-  @Bean(initMethod = "start", destroyMethod = "stop")
-  public SessionManager sessionManager(UndertowProperties properties) {
-    final InMemorySessionManager sessionManager = new InMemorySessionManager("maridSessionManager");
-    sessionManager.setDefaultSessionTimeout(properties.getSessionTimeout());
-    return sessionManager;
-  }
-
-  @Bean
-  public HttpHandler rootHandler(MainHandler mainHandler, SessionManager sessionManager) {
-    final var sh = new SessionAttachmentHandler(mainHandler, sessionManager, new SslSessionConfig(sessionManager));
-    return new SecurityInitialHandler(AuthenticationMode.PRO_ACTIVE, null, sh);
-  }
-
-  @Bean
-  public BowerResourceManager bowerResourceManager() {
-    return new BowerResourceManager("bootstrap", "jquery");
-  }
-
-  @Bean
-  public NpmResourceManager npmResourceManager() {
-    return new NpmResourceManager("ionicons");
-  }
-
-  @Bean
-  public ResourceManager pubResourceManager() {
-    return new MaridResourceManager("/public/");
-  }
-
-  @Bean
-  public ResourceManager userResourceManager(BowerResourceManager bower, NpmResourceManager npm) {
-    return new MaridResourceManager("/user/").addParent(bower).addParent(npm);
-  }
-
-  @Bean
-  public ResourceManager adminResourceManager(ResourceManager userResourceManager) {
-    return new MaridResourceManager("/admin/").addParent(userResourceManager);
   }
 }
 

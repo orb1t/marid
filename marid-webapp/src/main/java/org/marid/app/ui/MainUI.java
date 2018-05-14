@@ -18,21 +18,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.marid.app.http;
+package org.marid.app.ui;
 
-public class NpmResourceManager extends WebjarResourceManager {
+import com.vaadin.annotations.Push;
+import com.vaadin.annotations.Viewport;
+import com.vaadin.navigator.PushStateNavigation;
+import com.vaadin.server.VaadinRequest;
+import com.vaadin.shared.communication.PushMode;
+import com.vaadin.shared.ui.ui.Transport;
+import com.vaadin.ui.UI;
 
-  public NpmResourceManager(String... libraries) {
-    super(libraries);
-  }
+@PushStateNavigation
+@Push(value = PushMode.AUTOMATIC, transport = Transport.LONG_POLLING)
+@Viewport("width=device-width, initial-scale=1")
+public class MainUI extends UI {
 
   @Override
-  protected String pom(String library) {
-    return "/META-INF/maven/org.webjars.npm/" + library + "/pom.properties";
-  }
+  protected void init(VaadinRequest request) {
 
-  @Override
-  protected String pattern(String version) {
-    return "/META-INF/resources/webjars/%s/" + version + "/dist/%s";
   }
 }

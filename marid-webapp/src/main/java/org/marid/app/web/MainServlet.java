@@ -18,33 +18,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.marid.app.web;
 
-package org.marid.appcontext.session;
-
-import org.marid.app.common.Directories;
-import org.pac4j.core.profile.CommonProfile;
+import com.vaadin.server.DeploymentConfiguration;
+import com.vaadin.server.ServiceException;
+import com.vaadin.server.VaadinServlet;
+import com.vaadin.server.VaadinServletService;
+import org.marid.app.annotation.PrototypeScoped;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
 @Component
-public class SessionDirectory {
+@PrototypeScoped
+public class MainServlet extends VaadinServlet {
 
-  private final Path directory;
+  private final GenericApplicationContext context;
 
-  public SessionDirectory(Directories directories, CommonProfile profile) throws IOException {
-    directory = directories.getUsers().resolve(profile.getEmail());
-    Files.createDirectories(directory);
-  }
-
-  public Path getDirectory() {
-    return directory;
+  public MainServlet(GenericApplicationContext context) {
+    this.context = context;
   }
 
   @Override
-  public String toString() {
-    return directory.toString();
+  protected VaadinServletService createServletService(DeploymentConfiguration conf) throws ServiceException {
+    final MainServletService servletService = new MainServletService(context, this, conf);
+    servletService.init();
+    return servletService;
   }
 }

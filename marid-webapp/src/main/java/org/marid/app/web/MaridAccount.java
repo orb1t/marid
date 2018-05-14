@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.marid.app.auth;
+package org.marid.app.web;
 
 import io.undertow.security.idm.Account;
 import org.pac4j.core.profile.CommonProfile;

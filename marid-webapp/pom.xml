@@ -14,8 +14,28 @@
     <!-- web -->
     <dependency>
       <groupId>io.undertow</groupId>
-      <artifactId>undertow-core</artifactId>
+      <artifactId>undertow-servlet</artifactId>
       <version>2.0.6.Final</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-server</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-client-compiled</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-push</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-themes</artifactId>
     </dependency>
 
     <dependency>
@@ -47,28 +67,6 @@
       <artifactId>slf4j-jdk14</artifactId>
     </dependency>
 
-    <!-- webjars -->
-    <dependency>
-      <groupId>org.webjars.bower</groupId>
-      <artifactId>bootstrap</artifactId>
-      <version>4.1.1</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.webjars.bower</groupId>
-      <artifactId>jquery</artifactId>
-      <version>3.3.1</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.webjars.npm</groupId>
-      <artifactId>ionicons</artifactId>
-      <version>4.0.0-9</version>
-      <scope>provided</scope>
-    </dependency>
-
     <!-- test -->
     <dependency>
       <groupId>org.marid</groupId>
@@ -77,6 +75,18 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.vaadin</groupId>
+        <artifactId>vaadin-bom</artifactId>
+        <type>pom</type>
+        <version>8.4.1</version>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <build>
     <plugins>
@@ -137,6 +147,7 @@
             <configuration>
               <commands>
                 <command>service webapp stop</command>
+                <command>rm -rf /home/site/app/lib/*</command>
               </commands>
               <failOnError>false</failOnError>
             </configuration>
