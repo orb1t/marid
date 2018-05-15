@@ -56,7 +56,7 @@ public class UndertowConfiguration {
     info.setResourceManager(maridResourceManager);
     info.addServlets(servlets);
     info.addFilters(filters);
-    info.addFilterUrlMapping("authFilter", "/*", DispatcherType.REQUEST);
+    info.addFilterUrlMapping("authFilter", "/app/*", DispatcherType.REQUEST);
     info.addWelcomePage("/app");
     return info;
   }

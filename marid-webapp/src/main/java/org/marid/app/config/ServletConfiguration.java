@@ -46,7 +46,7 @@ public class ServletConfiguration {
   public ServletInfo vaadinServletInfo(MainServlet servlet, @Value("${vaadin.production:true}") boolean production) {
     final var info = new ServletInfo("vaadinServlet", VaadinServlet.class, new ImmediateInstanceFactory<>(servlet));
     info.setAsyncSupported(true);
-    info.setLoadOnStartup(3);
+    info.setLoadOnStartup(4);
     info.setEnabled(true);
     info.addMappings("/app/*", "/VAADIN/*");
     info.addInitParam(SERVLET_PARAMETER_UI_PROVIDER, SpringUIProvider.class.getName());
@@ -68,7 +68,7 @@ public class ServletConfiguration {
   @Bean
   public ServletInfo authServletInfo(AuthServlet servlet, Clients clients) {
     final var info = new ServletInfo("authServlet", AuthServlet.class, new ImmediateInstanceFactory<>(servlet));
-    info.setAsyncSupported(true);
+    info.setAsyncSupported(false);
     info.setLoadOnStartup(2);
     info.setEnabled(true);
     clients.findAllClients().forEach(c -> info.addMapping("/" + c.getName()));

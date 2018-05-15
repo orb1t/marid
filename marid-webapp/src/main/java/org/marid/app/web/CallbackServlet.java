@@ -47,12 +47,9 @@ public class CallbackServlet extends HttpServlet {
   protected void doGet(HttpServletRequest q, HttpServletResponse r) {
     final var request = (HttpServletRequestImpl) q;
     final var exchange = request.getExchange();
-    final var formData = request.getQueryParameters().entrySet().stream()
-        .reduce(new FormData(request.getQueryParameters().size()), (d, e) -> {
-          d.add(e.getKey(), e.getValue().peek());
-          return d;
-        }, (d1, d2) -> d2);
 
+    final var formData = new FormData(request.getQueryParameters().size());
+    request.getQueryParameters().forEach((k, v) -> formData.add(k, v.peek()));
     exchange.putAttachment(FormDataParser.FORM_DATA, formData);
 
     callbackLogic.perform(new J2EContext(q, r), config, (code, ctx) -> null, "/app", true, false, null, null);

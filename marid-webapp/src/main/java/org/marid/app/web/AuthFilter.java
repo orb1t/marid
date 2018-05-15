@@ -32,11 +32,9 @@ import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.List;
 
 @Component
@@ -60,27 +58,12 @@ public class AuthFilter extends HttpFilter {
   }
 
   @Override
-  public void doFilter(HttpServletRequest q, HttpServletResponse r, FilterChain c) throws IOException, ServletException {
-    final var path = q.getServletPath();
-    logger.info("Request: {}", q);
-
-    if (path.startsWith("/VAADIN/") || path.startsWith("/public/")) {
-      super.doFilter(q, r, c);
-      return;
-    }
+  public void doFilter(HttpServletRequest q, HttpServletResponse r, FilterChain c) {
+    logger.info("Request: {}", q.getServletPath());
 
     final var request = (HttpServletRequestImpl) q;
     final var exchange = request.getExchange();
     final var securityContext = exchange.getSecurityContext();
-
-    switch (path) {
-      case "/Google2Client":
-      case "/FacebookClient":
-      case "/callback":
-      case "/logout":
-        super.doFilter(q, r, c);
-        return;
-    }
 
     securityLogic.perform(new J2EContext(q, r), config, (ctx, profiles, params) -> {
       securityContext.authenticationComplete(new MaridAccount(profiles), "PAC4J_ACCOUNT", false);
