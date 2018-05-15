@@ -20,15 +20,14 @@
  */
 package org.marid.app.web;
 
-import com.vaadin.server.DeploymentConfiguration;
-import com.vaadin.server.ServiceException;
-import com.vaadin.server.VaadinServlet;
-import com.vaadin.server.VaadinServletService;
+import com.vaadin.server.*;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.ServletException;
+
 @Component
-public class MainServlet extends VaadinServlet {
+public class MainServlet extends VaadinServlet implements BootstrapListener {
 
   private final GenericApplicationContext context;
 
@@ -37,9 +36,22 @@ public class MainServlet extends VaadinServlet {
   }
 
   @Override
-  protected VaadinServletService createServletService(DeploymentConfiguration conf) throws ServiceException {
-    final MainServletService servletService = new MainServletService(context, this, conf);
-    servletService.init();
-    return servletService;
+  protected VaadinServletService createServletService() throws ServletException, ServiceException {
+    final var service = super.createServletService();
+    service.addSessionInitListener((SessionInitListener) event -> event.getSession().addBootstrapListener(this));
+    return service;
+  }
+
+  @Override
+  public void modifyBootstrapFragment(BootstrapFragmentResponse response) {
+  }
+
+  @Override
+  public void modifyBootstrapPage(BootstrapPageResponse response) {
+    response.getDocument().head().getElementsByAttributeValue("rel", "icon").attr("href", "/public/marid32.png");
+  }
+
+  public GenericApplicationContext getContext() {
+    return context;
   }
 }

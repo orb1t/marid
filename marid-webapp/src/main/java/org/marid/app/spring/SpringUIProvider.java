@@ -22,16 +22,18 @@ package org.marid.app.spring;
 
 import com.vaadin.server.DefaultUIProvider;
 import com.vaadin.server.UICreateEvent;
+import com.vaadin.server.VaadinServletService;
 import com.vaadin.ui.UI;
-import org.marid.app.web.MainServletService;
+import org.marid.app.web.MainServlet;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
 public class SpringUIProvider extends DefaultUIProvider {
 
   @Override
   public UI createInstance(UICreateEvent event) {
-    final var service = (MainServletService) event.getService();
-    final var context = service.getContext();
+    final var service = (VaadinServletService) event.getService();
+    final var servlet = (MainServlet) service.getServlet();
+    final var context = servlet.getContext();
     final var klass = event.getUIClass();
     final var beanFactory = context.getBeanFactory();
     return (UI) beanFactory.createBean(klass, AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR, true);

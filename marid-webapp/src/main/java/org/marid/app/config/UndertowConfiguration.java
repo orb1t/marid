@@ -24,6 +24,7 @@ package org.marid.app.config;
 import io.undertow.Undertow;
 import io.undertow.UndertowOptions;
 import io.undertow.server.HttpHandler;
+import io.undertow.server.handlers.RedirectHandler;
 import io.undertow.server.session.SslSessionConfig;
 import io.undertow.servlet.Servlets;
 import io.undertow.servlet.api.DeploymentInfo;
@@ -67,8 +68,22 @@ public class UndertowConfiguration {
   }
 
   @Bean
-  public HttpHandler rootHandler(DeploymentManager deploymentManager) throws ServletException {
+  public HttpHandler servletHandler(DeploymentManager deploymentManager) throws ServletException {
     return deploymentManager.start();
+  }
+
+  @Bean
+  public HttpHandler rootHandler(HttpHandler servletHandler) {
+    return exchange -> {
+      switch (exchange.getRelativePath()) {
+        case "/":
+          new RedirectHandler("/app").handleRequest(exchange);
+          break;
+        default:
+          servletHandler.handleRequest(exchange);
+          break;
+      }
+    };
   }
 
   @Bean(initMethod = "start", destroyMethod = "stop")
