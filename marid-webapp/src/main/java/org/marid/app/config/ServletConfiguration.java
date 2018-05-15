@@ -25,9 +25,8 @@ import io.undertow.servlet.api.FilterInfo;
 import io.undertow.servlet.api.ServletInfo;
 import io.undertow.servlet.util.ImmediateInstanceFactory;
 import io.undertow.servlet.util.ImmediateInstanceHandle;
-import org.marid.app.spring.SpringUIProvider;
-import org.marid.app.ui.MainUI;
 import org.marid.app.web.*;
+import org.marid.ui.webide.base.MainUI;
 import org.pac4j.core.client.Clients;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,7 +35,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import static com.vaadin.server.Constants.SERVLET_PARAMETER_PRODUCTION_MODE;
-import static com.vaadin.server.Constants.SERVLET_PARAMETER_UI_PROVIDER;
 import static com.vaadin.server.VaadinSession.UI_PARAMETER;
 
 @Component
@@ -49,7 +47,6 @@ public class ServletConfiguration {
     info.setLoadOnStartup(4);
     info.setEnabled(true);
     info.addMappings("/app/*", "/VAADIN/*");
-    info.addInitParam(SERVLET_PARAMETER_UI_PROVIDER, SpringUIProvider.class.getName());
     info.addInitParam(SERVLET_PARAMETER_PRODUCTION_MODE, Boolean.toString(production));
     info.addInitParam(UI_PARAMETER, MainUI.class.getName());
     return info;

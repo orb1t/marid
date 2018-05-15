@@ -18,24 +18,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.marid.app.spring;
+package org.marid.app.web;
 
-import com.vaadin.server.DefaultUIProvider;
-import com.vaadin.server.UICreateEvent;
-import com.vaadin.server.VaadinServletService;
-import com.vaadin.ui.UI;
-import org.marid.app.web.MainServlet;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import com.vaadin.server.BootstrapFragmentResponse;
+import com.vaadin.server.BootstrapListener;
+import com.vaadin.server.BootstrapPageResponse;
+import org.springframework.stereotype.Component;
 
-public class SpringUIProvider extends DefaultUIProvider {
+@Component
+public class MainServletBootstrapListener implements BootstrapListener {
+  @Override
+  public void modifyBootstrapFragment(BootstrapFragmentResponse response) {
+
+  }
 
   @Override
-  public UI createInstance(UICreateEvent event) {
-    final var service = (VaadinServletService) event.getService();
-    final var servlet = (MainServlet) service.getServlet();
-    final var context = servlet.getContext();
-    final var klass = event.getUIClass();
-    final var beanFactory = context.getBeanFactory();
-    return (UI) beanFactory.createBean(klass, AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR, true);
+  public void modifyBootstrapPage(BootstrapPageResponse response) {
+    response.getDocument().head().getElementsByAttributeValue("rel", "icon").attr("href", "/public/marid32.png");
   }
 }
