@@ -20,26 +20,28 @@
  */
 package org.marid.app.web;
 
-import com.vaadin.server.DeploymentConfiguration;
-import com.vaadin.server.ServiceException;
-import com.vaadin.server.VaadinServlet;
-import com.vaadin.server.VaadinServletService;
-import org.springframework.context.support.GenericApplicationContext;
+import org.pac4j.core.config.Config;
+import org.pac4j.core.context.J2EContext;
+import org.pac4j.core.engine.DefaultLogoutLogic;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 @Component
-public class MainServlet extends VaadinServlet {
+public class LogoutServlet extends HttpServlet {
 
-  private final GenericApplicationContext context;
+  private final Config config;
+  private final DefaultLogoutLogic<Void, J2EContext> logic;
 
-  public MainServlet(GenericApplicationContext context) {
-    this.context = context;
+  public LogoutServlet(Config config) {
+    this.config = config;
+    this.logic = new DefaultLogoutLogic<>();
   }
 
   @Override
-  protected VaadinServletService createServletService(DeploymentConfiguration conf) throws ServiceException {
-    final MainServletService servletService = new MainServletService(context, this, conf);
-    servletService.init();
-    return servletService;
+  protected void doGet(HttpServletRequest q, HttpServletResponse r) {
+    logic.perform(new J2EContext(q, r), config, (code, c) -> null, "/public/unauthorized.html", null, null, true, true);
   }
 }
