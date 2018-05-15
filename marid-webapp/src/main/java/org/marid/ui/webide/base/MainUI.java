@@ -36,8 +36,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.SmartFactoryBean;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -66,13 +68,19 @@ public class MainUI extends UI {
       c.setDisplayName("mainUI");
       c.registerBean("mainUI", MainUI.class, () -> this);
       getNavigator().addView("a", new Navigator.EmptyView());
-      addDetachListener(event -> {
+      final var registration = addDetachListener(event -> {
         try {
           c.close();
         } catch (Throwable x) {
           LOGGER.warn("Unable to close {}", c, x);
         }
       });
+      final ApplicationListener<ContextClosedEvent> closeListener = event -> {
+        if (event.getApplicationContext() == c) {
+          registration.remove();
+        }
+      };
+      c.addApplicationListener(closeListener);
     });
     super.attach();
     child.refresh();
