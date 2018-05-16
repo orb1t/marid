@@ -21,19 +21,16 @@
 
 package org.marid.app.spring;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.support.GenericApplicationContext;
 
-import java.util.Collection;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public interface ContextUtils {
-
-  String USAGE_COUNTER = "internalUsageCounter";
 
   @SafeVarargs
   static AnnotationConfigApplicationContext context(GenericApplicationContext parent,
@@ -41,28 +38,20 @@ public interface ContextUtils {
     final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
     context.setAllowBeanDefinitionOverriding(false);
     context.setAllowCircularReferences(false);
-    context.registerBean(USAGE_COUNTER, AtomicInteger.class, (Supplier<AtomicInteger>) AtomicInteger::new);
     context.getBeanFactory().addBeanPostProcessor(new LoggingPostProcessor());
 
     context.setParent(parent);
 
-    final ApplicationListener<ContextClosedEvent> parentListener = event -> {
-      if (event.getApplicationContext() == parent) {
-        try {
-          context.close();
-        } catch (Exception x) {
-          x.printStackTrace();
-        }
+    final var parentListener = closeListener(parent, event -> {
+      try {
+        context.close();
+      } catch (Exception x) {
+        x.printStackTrace();
       }
-    };
+    });
     parent.addApplicationListener(parentListener);
 
-    final ApplicationListener<ContextClosedEvent> listener = event -> {
-      if (event.getApplicationContext() == context) {
-        final Collection<ApplicationListener<?>> listeners = parent.getApplicationListeners();
-        listeners.remove(parentListener);
-      }
-    };
+    final var listener = closeListener(context, e -> parent.getApplicationListeners().remove(parentListener));
     context.addApplicationListener(listener);
 
     for (final Consumer<AnnotationConfigApplicationContext> configurer : configurers) {
@@ -70,5 +59,23 @@ public interface ContextUtils {
     }
 
     return context;
+  }
+
+  static ApplicationListener<ContextClosedEvent> closeListener(ApplicationContext context,
+                                                               ApplicationListener<ContextClosedEvent> listener) {
+    return ev -> {
+      if (ev.getApplicationContext() == context) {
+        listener.onApplicationEvent(ev);
+      }
+    };
+  }
+
+  static ApplicationListener<ContextStartedEvent> startListener(ApplicationContext context,
+                                                                ApplicationListener<ContextStartedEvent> listener) {
+    return ev -> {
+      if (ev.getApplicationContext() == context) {
+        listener.onApplicationEvent(ev);
+      }
+    };
   }
 }

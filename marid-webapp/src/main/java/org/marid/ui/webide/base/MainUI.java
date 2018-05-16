@@ -32,14 +32,10 @@ import com.vaadin.shared.ui.ui.Transport;
 import com.vaadin.ui.UI;
 import org.marid.app.spring.ContextUtils;
 import org.marid.app.web.MainServlet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.SmartFactoryBean;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -47,9 +43,8 @@ import org.springframework.stereotype.Component;
 @Push(value = PushMode.AUTOMATIC, transport = Transport.LONG_POLLING)
 @Viewport("width=device-width, initial-scale=1")
 @Component
+@Import({UIConfiguration.class})
 public class MainUI extends UI {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(MainUI.class);
 
   public MainUI() {
     setNavigator(new Navigator(this, this));
@@ -58,28 +53,18 @@ public class MainUI extends UI {
   @Override
   protected void init(VaadinRequest request) {
     getPage().setTitle("Menu");
-    getNavigator().navigateTo("a");
+    setSizeFull();
   }
 
   @Override
   public void attach() {
-    final AnnotationConfigApplicationContext child = ContextUtils.context(getContext(), c -> {
+    final var parent = getContext();
+    final var child = ContextUtils.context(parent, c -> {
       c.setId("mainUI");
       c.setDisplayName("mainUI");
       c.registerBean("mainUI", MainUI.class, () -> this);
-      getNavigator().addView("a", new Navigator.EmptyView());
-      final var registration = addDetachListener(event -> {
-        try {
-          c.close();
-        } catch (Throwable x) {
-          LOGGER.warn("Unable to close {}", c, x);
-        }
-      });
-      final ApplicationListener<ContextClosedEvent> closeListener = event -> {
-        if (event.getApplicationContext() == c) {
-          registration.remove();
-        }
-      };
+      final var registration = addDetachListener(event -> c.close());
+      final var closeListener = ContextUtils.closeListener(c, event -> registration.remove());
       c.addApplicationListener(closeListener);
     });
     super.attach();
