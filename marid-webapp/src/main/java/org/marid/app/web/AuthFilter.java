@@ -59,7 +59,7 @@ public class AuthFilter extends HttpFilter {
 
   @Override
   public void doFilter(HttpServletRequest q, HttpServletResponse r, FilterChain c) {
-    logger.info("Request: {}", q.getServletPath());
+    logger.debug("Request: {}?{}", q.getRequestURI(), q.getQueryString());
 
     final var request = (HttpServletRequestImpl) q;
     final var exchange = request.getExchange();

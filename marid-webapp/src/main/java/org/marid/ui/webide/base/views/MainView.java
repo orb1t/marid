@@ -38,6 +38,7 @@ public class MainView extends VerticalLayout implements StaticView {
 
   public MainView() {
     addComponent(accordion);
+    setWidthUndefined();
     setComponentAlignment(accordion, Alignment.MIDDLE_CENTER);
   }
 
@@ -45,7 +46,7 @@ public class MainView extends VerticalLayout implements StaticView {
   public Runnable sessionTab(Strs strs) {
     return () -> {
       final var buttons = new VerticalLayout();
-      buttons.setWidthUndefined();
+      buttons.setWidth(100, Unit.PERCENTAGE);
       buttons.setDefaultComponentAlignment(Alignment.TOP_CENTER);
 
       {

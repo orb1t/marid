@@ -8,12 +8,12 @@
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
@@ -21,11 +21,10 @@
 
 package org.marid.applib.spring;
 
+import org.marid.applib.spring.events.ContextClosedListener;
+import org.marid.applib.spring.events.ContextStartedListener;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.event.ContextClosedEvent;
-import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.support.AbstractApplicationContext;
 
 import java.util.function.Consumer;
@@ -61,8 +60,7 @@ public interface ContextUtils {
     return context;
   }
 
-  static ApplicationListener<ContextClosedEvent> closeListener(ApplicationContext context,
-                                                               ApplicationListener<ContextClosedEvent> listener) {
+  static ContextClosedListener closeListener(ApplicationContext context, ContextClosedListener listener) {
     return ev -> {
       if (ev.getApplicationContext() == context) {
         listener.onApplicationEvent(ev);
@@ -70,8 +68,8 @@ public interface ContextUtils {
     };
   }
 
-  static ApplicationListener<ContextStartedEvent> startListener(ApplicationContext context,
-                                                                ApplicationListener<ContextStartedEvent> listener) {
+  static ContextStartedListener startListener(ApplicationContext context,
+                                                                ContextStartedListener listener) {
     return ev -> {
       if (ev.getApplicationContext() == context) {
         listener.onApplicationEvent(ev);
