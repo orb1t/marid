@@ -19,21 +19,21 @@
  * #L%
  */
 
-package org.marid.app.spring;
+package org.marid.applib.spring;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextStartedEvent;
-import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.context.support.AbstractApplicationContext;
 
 import java.util.function.Consumer;
 
 public interface ContextUtils {
 
   @SafeVarargs
-  static AnnotationConfigApplicationContext context(GenericApplicationContext parent,
+  static AnnotationConfigApplicationContext context(AbstractApplicationContext parent,
                                                     Consumer<AnnotationConfigApplicationContext>... configurers) {
     final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
     context.setAllowBeanDefinitionOverriding(false);

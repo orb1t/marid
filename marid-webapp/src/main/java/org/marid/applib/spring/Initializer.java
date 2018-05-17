@@ -18,10 +18,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.marid.applib.l10n;
+package org.marid.applib.spring;
 
-@FunctionalInterface
-public interface Msg {
+import org.springframework.context.annotation.Bean;
+import org.springframework.core.annotation.AliasFor;
+import org.springframework.core.annotation.Order;
 
-  String m(Object... args);
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Target({ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+@Bean(initMethod = "run")
+public @interface Initializer {
+
+  @AliasFor(annotation = Order.class, attribute = "value")
+  int order();
+
+  @AliasFor(annotation = Bean.class, attribute = "name")
+  String[] name() default {"#{T(java.util.UUID).fromRandom()}"};
 }

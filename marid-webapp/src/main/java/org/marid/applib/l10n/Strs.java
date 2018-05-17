@@ -20,8 +20,20 @@
  */
 package org.marid.applib.l10n;
 
-@FunctionalInterface
-public interface Str {
+import org.jetbrains.annotations.PropertyKey;
+import org.marid.l10n.L10n;
 
-  String s(Object... args);
+import java.util.Locale;
+
+public class Strs {
+
+  private final Locale locale;
+
+  public Strs(Locale locale) {
+    this.locale = locale;
+  }
+
+  public String s(@PropertyKey(resourceBundle = "res.strings") String key, Object... args) {
+    return L10n.s(locale, key, args);
+  }
 }

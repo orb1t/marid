@@ -23,7 +23,6 @@ package org.marid.app.ivy;
 
 import org.apache.ivy.plugins.resolver.FileSystemResolver;
 import org.apache.ivy.plugins.resolver.IBiblioResolver;
-import org.marid.app.spring.M2RepositoryExists;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;

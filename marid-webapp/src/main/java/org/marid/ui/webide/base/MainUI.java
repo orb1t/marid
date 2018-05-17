@@ -30,12 +30,12 @@ import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.communication.PushMode;
 import com.vaadin.shared.ui.ui.Transport;
 import com.vaadin.ui.UI;
-import org.marid.app.spring.ContextUtils;
 import org.marid.app.web.MainServlet;
+import org.marid.applib.spring.ContextUtils;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.SmartFactoryBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -43,7 +43,7 @@ import org.springframework.stereotype.Component;
 @Push(value = PushMode.AUTOMATIC, transport = Transport.LONG_POLLING)
 @Viewport("width=device-width, initial-scale=1")
 @Component
-@Import({UIConfiguration.class})
+@ComponentScan
 public class MainUI extends UI {
 
   public MainUI() {
@@ -53,7 +53,7 @@ public class MainUI extends UI {
   @Override
   protected void init(VaadinRequest request) {
     getPage().setTitle("Menu");
-    setSizeFull();
+    setSizeUndefined();
   }
 
   @Override

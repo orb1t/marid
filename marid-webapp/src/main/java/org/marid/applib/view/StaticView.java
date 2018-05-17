@@ -18,19 +18,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.marid.ui.webide.base;
+package org.marid.applib.view;
 
-import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
-import com.vaadin.ui.VerticalLayout;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
-public class MainView extends VerticalLayout implements View {
+public interface StaticView extends View {
 
-  @Autowired
-  private void initNavigator(Navigator navigator) {
-    navigator.addView("", this);
-  }
 }

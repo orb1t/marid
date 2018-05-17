@@ -42,6 +42,6 @@ public class LogoutServlet extends HttpServlet {
 
   @Override
   protected void doGet(HttpServletRequest q, HttpServletResponse r) {
-    logic.perform(new J2EContext(q, r), config, (code, c) -> null, "/public/unauthorized.html", null, null, true, true);
+    logic.perform(new J2EContext(q, r), config, (code, c) -> null, "/public/unauthorized.html", null, null, true, false);
   }
 }

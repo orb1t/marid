@@ -18,36 +18,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.marid.ui.webide.base;
+package org.marid.applib.l10n;
 
-import com.vaadin.server.VaadinSession;
-import org.marid.app.annotation.PrototypeScoped;
-import org.marid.applib.l10n.Msgs;
-import org.marid.applib.l10n.Strs;
-import org.springframework.beans.factory.ObjectFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
+import org.jetbrains.annotations.PropertyKey;
+import org.marid.l10n.L10n;
 
 import java.util.Locale;
 
-@Component
-public class UIConfiguration {
+public class Msgs {
 
-  @Bean
-  @PrototypeScoped
-  public Locale locale(VaadinSession session) {
-    return session.getLocale();
+  private final Locale locale;
+
+  public Msgs(Locale locale) {
+    this.locale = locale;
   }
 
-  @Bean
-  @PrototypeScoped
-  public Strs strs(ObjectFactory<Locale> locale) {
-    return new Strs(locale.getObject());
-  }
-
-  @Bean
-  @PrototypeScoped
-  public Msgs msgs(ObjectFactory<Locale> locale) {
-    return new Msgs(locale.getObject());
+  public String m(@PropertyKey(resourceBundle = "res.messages") String key, Object... args) {
+    return L10n.m(locale, key, args);
   }
 }

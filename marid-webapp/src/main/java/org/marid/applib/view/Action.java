@@ -18,23 +18,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.marid.applib.view;
 
-package org.marid.app.spring;
+public final class Action {
 
-import org.springframework.context.annotation.Condition;
-import org.springframework.context.annotation.ConditionContext;
-import org.springframework.core.type.AnnotatedTypeMetadata;
-import org.springframework.lang.NonNull;
+  public final String label;
+  public final Runnable action;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
-public class M2RepositoryExists implements Condition {
+  public Action(String label, Runnable action) {
+    this.label = label;
+    this.action = action;
+  }
 
   @Override
-  public boolean matches(@NonNull ConditionContext context, @NonNull AnnotatedTypeMetadata metadata) {
-    final Path path = Paths.get(System.getProperty("user.home"), ".m2", "repository");
-    return Files.isDirectory(path);
+  public String toString() {
+    return label;
   }
 }

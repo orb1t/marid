@@ -22,7 +22,7 @@
 package org.marid.app;
 
 import org.marid.app.annotation.PrototypeScoped;
-import org.marid.app.spring.LoggingPostProcessor;
+import org.marid.applib.spring.LoggingPostProcessor;
 import org.marid.logging.MaridLogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +40,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.InputStream;
+import java.lang.ref.Cleaner;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Scanner;
@@ -71,6 +72,11 @@ public class Context {
   @Bean
   public static ConcurrentTaskScheduler taskScheduler() {
     return new ConcurrentTaskScheduler();
+  }
+
+  @Bean
+  public static Cleaner refCleaner() {
+    return Cleaner.create();
   }
 
   @Bean(initMethod = "start")

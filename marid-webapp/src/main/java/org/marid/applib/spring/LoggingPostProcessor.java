@@ -19,7 +19,7 @@
  * #L%
  */
 
-package org.marid.app.spring;
+package org.marid.applib.spring;
 
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;

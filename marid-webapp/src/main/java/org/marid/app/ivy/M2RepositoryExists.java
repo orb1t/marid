@@ -18,36 +18,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.marid.ui.webide.base;
 
-import com.vaadin.server.VaadinSession;
-import org.marid.app.annotation.PrototypeScoped;
-import org.marid.applib.l10n.Msgs;
-import org.marid.applib.l10n.Strs;
-import org.springframework.beans.factory.ObjectFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
+package org.marid.app.ivy;
 
-import java.util.Locale;
+import org.springframework.context.annotation.Condition;
+import org.springframework.context.annotation.ConditionContext;
+import org.springframework.core.type.AnnotatedTypeMetadata;
+import org.springframework.lang.NonNull;
 
-@Component
-public class UIConfiguration {
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
-  @Bean
-  @PrototypeScoped
-  public Locale locale(VaadinSession session) {
-    return session.getLocale();
-  }
+public class M2RepositoryExists implements Condition {
 
-  @Bean
-  @PrototypeScoped
-  public Strs strs(ObjectFactory<Locale> locale) {
-    return new Strs(locale.getObject());
-  }
-
-  @Bean
-  @PrototypeScoped
-  public Msgs msgs(ObjectFactory<Locale> locale) {
-    return new Msgs(locale.getObject());
+  @Override
+  public boolean matches(@NonNull ConditionContext context, @NonNull AnnotatedTypeMetadata metadata) {
+    final Path path = Paths.get(System.getProperty("user.home"), ".m2", "repository");
+    return Files.isDirectory(path);
   }
 }
