@@ -18,25 +18,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.marid.applib.spring;
+package org.marid.applib.spring.init;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.core.annotation.AliasFor;
-import org.springframework.core.annotation.Order;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-@Bean(initMethod = "run")
-public @interface Initializer {
+@Inherited
+public @interface Init {
 
-  @AliasFor(annotation = Order.class, attribute = "value")
-  int order();
-
-  @AliasFor(annotation = Bean.class, attribute = "name")
-  String[] name() default {"#{T(java.util.UUID).fromRandom()}"};
+  int value();
 }

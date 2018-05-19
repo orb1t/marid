@@ -53,7 +53,7 @@ public class MainUI extends UI {
   @Override
   protected void init(VaadinRequest request) {
     getPage().setTitle("Menu");
-    setSizeUndefined();
+    setSizeFull();
   }
 
   @Override

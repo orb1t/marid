@@ -23,6 +23,7 @@ package org.marid.app.config;
 
 import io.undertow.Undertow;
 import io.undertow.UndertowOptions;
+import io.undertow.security.api.AuthenticationMode;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.RedirectHandler;
 import io.undertow.server.session.SslSessionConfig;
@@ -52,6 +53,7 @@ public class UndertowConfiguration {
     info.setClassLoader(Thread.currentThread().getContextClassLoader());
     info.setDefaultEncoding("UTF-8");
     info.setDisableCachingForSecuredPages(true);
+    info.setAuthenticationMode(AuthenticationMode.PRO_ACTIVE);
     info.setContextPath("/");
     info.setSessionConfigWrapper((sessionConfig, deployment) -> new SslSessionConfig(deployment.getSessionManager()));
     info.setResourceManager(maridResourceManager);
