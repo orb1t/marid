@@ -20,7 +20,6 @@
  */
 package org.marid.applib.spring.init;
 
-import com.google.errorprone.annotations.DoNotCall;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.context.support.GenericApplicationContext;
@@ -29,28 +28,27 @@ import org.springframework.core.MethodParameter;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Comparator;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public interface Initializers {
+public interface Inits {
 
   @Autowired
-  @DoNotCall("Do not call this method directly (it will be called by Spring)")
-  default void initInitializers(GenericApplicationContext context) throws ReflectiveOperationException {
+  default void initialize(GenericApplicationContext context) throws ReflectiveOperationException {
+    final var beanFactory = context.getDefaultListableBeanFactory();
     final var methods = Stream.of(getClass().getMethods())
-        .filter(m -> m.isAnnotationPresent(Init.class))
         .filter(m -> !Modifier.isStatic(m.getModifiers()))
         .filter(m -> m.canAccess(this))
+        .filter(m -> m.isAnnotationPresent(Init.class))
         .sorted(Comparator.comparingInt(m -> m.getAnnotation(Init.class).value()))
         .toArray(Method[]::new);
-    final var beanFactory = context.getDefaultListableBeanFactory();
     for (final var method : methods) {
-      final var params = IntStream.range(0, method.getParameterCount())
-          .mapToObj(i -> new MethodParameter(method, i))
-          .map(mp -> new DependencyDescriptor(mp, true, true))
-          .map(dd -> beanFactory.resolveDependency(dd, null))
-          .toArray();
-      method.invoke(this, params);
+      final var args = new Object[method.getParameterCount()];
+      for (int i = 0; i < args.length; i++) {
+        final var mp = new MethodParameter(method, i);
+        final var dd = new DependencyDescriptor(mp, true, true);
+        args[i] = beanFactory.resolveDependency(dd, null);
+      }
+      method.invoke(this, args);
     }
   }
 }

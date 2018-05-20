@@ -24,10 +24,13 @@ import com.vaadin.server.VaadinSession;
 import org.marid.app.annotation.PrototypeScoped;
 import org.marid.applib.l10n.Msgs;
 import org.marid.applib.l10n.Strs;
+import org.pac4j.core.context.Pac4jConstants;
+import org.pac4j.core.profile.CommonProfile;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
+import java.util.LinkedHashMap;
 import java.util.Locale;
 
 @Component
@@ -37,6 +40,12 @@ public class UIConfiguration {
   @PrototypeScoped
   public Locale locale(VaadinSession session) {
     return session.getLocale();
+  }
+
+  @Bean
+  public CommonProfile userProfile(VaadinSession session) {
+    final LinkedHashMap map = (LinkedHashMap) session.getSession().getAttribute(Pac4jConstants.USER_PROFILES);
+    return (CommonProfile) map.values().iterator().next();
   }
 
   @Bean

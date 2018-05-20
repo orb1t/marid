@@ -41,4 +41,8 @@ public interface IOSupplier<T> extends Supplier<T> {
   }
 
   T ioGet() throws IOException;
+
+  static <T> T supply(IOSupplier<T> supplier) {
+    return supplier.get();
+  }
 }
