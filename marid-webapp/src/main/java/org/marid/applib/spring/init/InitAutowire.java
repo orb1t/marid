@@ -20,13 +20,15 @@
  */
 package org.marid.applib.spring.init;
 
-import java.lang.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
-@Target({ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-@Inherited
-@InitAutowire
-public @interface Init {
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-  int value();
+@Retention(RetentionPolicy.SOURCE)
+@Target({ElementType.ANNOTATION_TYPE})
+@Autowired
+public @interface InitAutowire {
 }
