@@ -20,33 +20,25 @@
  */
 package org.marid.ui.webide.base.views.main;
 
+import com.vaadin.data.ValueProvider;
+import com.vaadin.data.provider.ListDataProvider;
 import com.vaadin.ui.Grid;
+import org.marid.applib.l10n.Strs;
 import org.marid.applib.spring.init.Init;
 import org.marid.applib.spring.init.Inits;
-import org.marid.ui.webide.base.MainUI;
 import org.marid.ui.webide.base.dao.ProjectsDao;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ProjectsList extends Grid<String> implements Inits {
 
+  public ProjectsList(ProjectsDao dao) {
+    super(new ListDataProvider<>(dao.getProjectNames()));
+  }
+
   @Init(1)
-  public void initNameColumn(ProjectsDao dao) {
-    System.out.println(1);
-  }
-
-  @Init(4)
-  public void initV4(MainUI ui) {
-    System.out.println(4);
-  }
-
-  @Init(3)
-  public void initV3(MainUI ui) {
-    System.out.println(3);
-  }
-
-  @Init(2)
-  public void initV2(MainUI ui) {
-    System.out.println(2);
+  public void initNameColumn(Strs strs) {
+    final var column = addColumn(ValueProvider.identity());
+    column.setCaption(strs.s("name"));
   }
 }

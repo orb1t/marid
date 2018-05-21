@@ -20,36 +20,57 @@
  */
 package org.marid.ui.webide.base.views.main;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.MenuBar;
+import com.vaadin.data.ValueProvider;
+import com.vaadin.data.provider.ListDataProvider;
+import com.vaadin.ui.Grid;
 import com.vaadin.ui.VerticalLayout;
 import org.marid.applib.l10n.Strs;
+import org.marid.applib.spring.init.Init;
+import org.marid.applib.spring.init.Inits;
 import org.marid.applib.view.StaticView;
 import org.marid.applib.view.ViewName;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.marid.misc.StringUtils;
+import org.marid.ui.webide.base.dao.ProjectsDao;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Locale;
 
 @ViewName("")
 @Component
-public class MainView extends VerticalLayout implements StaticView {
+public class MainView extends VerticalLayout implements StaticView, Inits {
 
-  private final MenuBar menuBar = new MenuBar();
+  private static final int COLUMN_GROUP = 1;
 
-  public MainView() {
+  private final ProjectsDao dao;
+  private final Grid<String> grid;
+  private final List<String> projects;
+  private final ListDataProvider<String> dataProvider;
+
+  public MainView(ProjectsDao dao, MainMenuBar menuBar) {
+    this.dao = dao;
+
+    grid = new Grid<>(dataProvider = new ListDataProvider<>(projects = dao.getProjectNames()));
+    grid.setWidth(100, Unit.PERCENTAGE);
+
     addComponent(menuBar);
-    setSizeFull();
-    menuBar.setWidth(100, Unit.PERCENTAGE);
+    addComponentsAndExpand(grid);
   }
 
-  @Autowired
-  public void initSession(Strs strs) {
-    final var sessions = menuBar.addItem(strs.s("session"), VaadinIcons.SERVER, null);
+  @Init(group = COLUMN_GROUP, value = 1)
+  public void initNameColumn(Strs strs) {
+    final var col = grid.addColumn(ValueProvider.identity());
+    col.setCaption(strs.s("name"));
+    col.setId("name");
+    col.setExpandRatio(4);
+  }
 
-    {
-      sessions.addItem(strs.s("logout"), VaadinIcons.EXIT, item -> {
-        getSession().close();
-        getUI().getPage().setLocation("/logout");
-      });
-    }
+  @Init(group = COLUMN_GROUP, value = 2)
+  public void initSizeColumn(Strs strs, Locale locale) {
+    final var col = grid.addColumn(name -> StringUtils.sizeBinary(locale, dao.getSize(name), 3));
+    col.setCaption(strs.s("size"));
+    col.setId("size");
+    col.setExpandRatio(1);
+    col.setMinimumWidthFromContent(true);
   }
 }

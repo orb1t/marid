@@ -27,7 +27,6 @@ import org.springframework.core.MethodParameter;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Comparator;
 import java.util.stream.Stream;
 
 public interface Inits {
@@ -39,7 +38,7 @@ public interface Inits {
         .filter(m -> !Modifier.isStatic(m.getModifiers()))
         .filter(m -> m.canAccess(this))
         .filter(m -> m.isAnnotationPresent(Init.class))
-        .sorted(Comparator.comparingInt(m -> m.getAnnotation(Init.class).value()))
+        .sorted(this::compare)
         .toArray(Method[]::new);
     for (final var method : methods) {
       final var args = new Object[method.getParameterCount()];
@@ -50,5 +49,13 @@ public interface Inits {
       }
       method.invoke(this, args);
     }
+  }
+
+  private int compare(Method m1, Method m2) {
+    final var i1 = m1.getAnnotation(Init.class);
+    final var i2 = m2.getAnnotation(Init.class);
+
+    final int c1 = Integer.compare(i1.group(), i2.group());
+    return c1 == 0 ? Integer.compare(i1.value(), i2.value()) : c1;
   }
 }

@@ -20,6 +20,7 @@
  */
 package org.marid.ui.webide.base.dao;
 
+import org.marid.io.IOLongSupplier;
 import org.marid.io.IOSupplier;
 import org.marid.ui.webide.base.UserDirectories;
 import org.springframework.stereotype.Component;
@@ -44,6 +45,14 @@ public class ProjectsDao {
         .map(Path::getFileName)
         .map(Path::toString)
         .collect(Collectors.toList())
+    );
+  }
+
+  public long getSize(String projectName) {
+    return IOSupplier.supply(() -> Files.walk(directory.resolve(projectName))
+        .filter(Files::isRegularFile)
+        .mapToLong(p -> IOLongSupplier.supply(() -> Files.size(p)))
+        .sum()
     );
   }
 }

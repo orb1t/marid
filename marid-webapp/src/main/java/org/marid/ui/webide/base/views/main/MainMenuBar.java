@@ -18,17 +18,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.marid.applib.spring.init;
+package org.marid.ui.webide.base.views.main;
 
-import java.lang.annotation.*;
+import com.vaadin.icons.VaadinIcons;
+import com.vaadin.ui.MenuBar;
+import org.marid.applib.l10n.Strs;
+import org.marid.applib.spring.init.Init;
+import org.marid.applib.spring.init.Inits;
+import org.springframework.stereotype.Component;
 
-@Target({ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-@Inherited
-@InitAutowire
-public @interface Init {
+@Component
+public class MainMenuBar extends MenuBar implements Inits {
 
-  int value();
+  private final MenuItem session;
 
-  int group() default 0;
+  public MainMenuBar(Strs strs) {
+    session = addItem(strs.s("session"), VaadinIcons.USER, null);
+    setWidth(100, Unit.PERCENTAGE);
+    setHeight(-1, Unit.PIXELS);
+  }
+
+  @Init(1)
+  public void logout(Strs strs) {
+    session.addItem(strs.s("logout"), VaadinIcons.EXIT, item -> {
+      getSession().close();
+      getUI().getPage().setLocation("/logout");
+    });
+  }
 }

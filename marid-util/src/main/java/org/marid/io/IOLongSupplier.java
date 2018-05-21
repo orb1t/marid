@@ -1,6 +1,6 @@
 /*-
  * #%L
- * marid-webapp
+ * marid-util
  * %%
  * Copyright (C) 2012 - 2018 MARID software development group
  * %%
@@ -18,17 +18,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.marid.applib.spring.init;
+package org.marid.io;
 
-import java.lang.annotation.*;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.util.function.LongSupplier;
 
-@Target({ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-@Inherited
-@InitAutowire
-public @interface Init {
+@FunctionalInterface
+public interface IOLongSupplier extends LongSupplier {
 
-  int value();
+  long ioGetAsLong() throws IOException;
 
-  int group() default 0;
+  @Override
+  default long getAsLong() {
+    try {
+      return ioGetAsLong();
+    } catch (IOException x) {
+      throw new UncheckedIOException(x);
+    }
+  }
+
+  static long supply(IOLongSupplier supplier) {
+    return supplier.getAsLong();
+  }
 }

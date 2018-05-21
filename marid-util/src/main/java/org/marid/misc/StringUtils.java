@@ -24,6 +24,8 @@ package org.marid.misc;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Path;
+import java.text.NumberFormat;
+import java.util.Locale;
 import java.util.function.Predicate;
 
 /**
@@ -53,5 +55,16 @@ public interface StringUtils {
 
   static String stringOrNull(Object object) {
     return object == null ? null : object.toString();
+  }
+
+  static String sizeBinary(Locale locale, long size, int precision) {
+    final String[] suffices = {"", " KiB", " MiB", " GiB", " TiB", " PiB", " EiB"};
+    final int index = (64 - Long.numberOfLeadingZeros(size)) / 10;
+    final long divider = 1 << (index * 10);
+    final float value = size / (float) divider;
+
+    final var format = NumberFormat.getNumberInstance(locale);
+    format.setMaximumFractionDigits(precision);
+    return format.format(value) + suffices[index];
   }
 }
