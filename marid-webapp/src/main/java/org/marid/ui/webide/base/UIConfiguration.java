@@ -21,12 +21,10 @@
 package org.marid.ui.webide.base;
 
 import com.vaadin.server.VaadinSession;
-import org.marid.app.annotation.PrototypeScoped;
 import org.marid.applib.l10n.Msgs;
 import org.marid.applib.l10n.Strs;
 import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.profile.CommonProfile;
-import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
@@ -37,7 +35,6 @@ import java.util.Locale;
 public class UIConfiguration {
 
   @Bean
-  @PrototypeScoped
   public Locale locale(VaadinSession session) {
     return session.getLocale();
   }
@@ -49,14 +46,12 @@ public class UIConfiguration {
   }
 
   @Bean
-  @PrototypeScoped
-  public Strs strs(ObjectFactory<Locale> locale) {
-    return new Strs(locale.getObject());
+  public Strs strs(Locale locale) {
+    return new Strs(locale);
   }
 
   @Bean
-  @PrototypeScoped
-  public Msgs msgs(ObjectFactory<Locale> locale) {
-    return new Msgs(locale.getObject());
+  public Msgs msgs(Locale locale) {
+    return new Msgs(locale);
   }
 }

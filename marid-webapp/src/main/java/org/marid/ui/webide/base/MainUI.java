@@ -29,11 +29,11 @@ import com.vaadin.server.VaadinServletService;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.communication.PushMode;
 import com.vaadin.shared.ui.ui.Transport;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
+import com.vaadin.ui.VerticalLayout;
 import org.marid.app.web.MainServlet;
 import org.marid.applib.spring.ContextUtils;
-import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.SmartFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.support.GenericApplicationContext;
@@ -46,8 +46,12 @@ import org.springframework.stereotype.Component;
 @ComponentScan
 public class MainUI extends UI {
 
+  private final VerticalLayout layout = new VerticalLayout();
+  private final Panel panel = new Panel();
+
   public MainUI() {
-    setNavigator(new Navigator(this, this));
+    setContent(layout);
+    setNavigator(new Navigator(this, panel));
   }
 
   @Override
@@ -67,39 +71,26 @@ public class MainUI extends UI {
       final var closeListener = ContextUtils.closeListener(c, event -> registration.remove());
       c.addApplicationListener(closeListener);
     });
+
     super.attach();
+
     child.refresh();
     child.start();
+
+    layout.addComponent(child.getBean(MainMenuBar.class));
+    layout.addComponentsAndExpand(panel);
   }
 
-  @Bean
-  public FactoryBean<Navigator> navigator() {
-    return new SmartFactoryBean<>() {
-      @Override
-      public Navigator getObject() {
-        return getNavigator();
-      }
-
-      @Override
-      public Class<?> getObjectType() {
-        return Navigator.class;
-      }
-    };
+  @Bean("navigator")
+  @Override
+  public Navigator getNavigator() {
+    return super.getNavigator();
   }
 
-  @Bean
-  public FactoryBean<VaadinSession> vaadinSession() {
-    return new SmartFactoryBean<>() {
-      @Override
-      public VaadinSession getObject() {
-        return getSession();
-      }
-
-      @Override
-      public Class<?> getObjectType() {
-        return VaadinSession.class;
-      }
-    };
+  @Bean("vaadinSession")
+  @Override
+  public VaadinSession getSession() {
+    return super.getSession();
   }
 
   private GenericApplicationContext getContext() {
